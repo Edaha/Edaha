@@ -1,0 +1,7 @@
+all:
+  kx:
+    db:
+      config:
+        dsn: 'mysql:dbname=kusabax;host=localhost'
+        username: kusabax
+        password: kusabax

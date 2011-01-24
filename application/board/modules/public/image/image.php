@@ -43,6 +43,9 @@ class public_board_image_image extends kxCmd {
    */
   protected $board;
   
+  protected $thread = 0
+  
+  protected $method = ""
   
   /**
    * Run requested method
@@ -51,10 +54,10 @@ class public_board_image_image extends kxCmd {
    * @param	object		Registry object
    * @param	object		Board object
    * @param	int			Thread ID
-    * @param	string		Method to run
+   * @param	string		Method to run
    * @return	void
    */
-  public function run( kxEnv $environment, $board, $thread = 0, $method = "") 
+  public function exec( kxEnv $environment ) 
   {
     //-----------------------------------------
     // Setup...
@@ -62,7 +65,7 @@ class public_board_image_image extends kxCmd {
     
     $this->board = $board;
 
-    require_once( kxLib::getAppDir('board') .'classes/rebuild.php' );
+    require_once( kxFunc::getAppDir('board') .'classes/rebuild.php' );
     $this->environment->set('kx:classes:board:rebuild:id', new rebuild( $this->environment ) );
 
     //-----------------------------------------
@@ -113,7 +116,7 @@ class public_board_image_image extends kxCmd {
                          ->condition("post_deleted", 0)
                          ->execute()
                          ->fetchField();
-    $totalpages = kxLib::pageCount($this->board_type, ($numposts-1));
+    $totalpages = kxFunc::pageCount($this->board_type, ($numposts-1));
     // Saznote: move to rebuild.php
     $results = $this->DB->select("embeds")
                         ->fields("embeds", array('embed_ext'))
@@ -136,7 +139,7 @@ class public_board_image_image extends kxCmd {
       $threads = $this->DB->select("posts")
                           ->condition("post_board", $this->board->board_id)
                           ->condition("post_parent", 0)
-                          ->condition("post_deleted" 0)
+                          ->condition("post_deleted", 0)
                           ->orderBy("post_stickied", "DESC")
                           ->orderBy("post_bumped", "DESC")
                           ->range($postsperpage * $i, $postsperpage)
@@ -170,9 +173,9 @@ class public_board_image_image extends kxCmd {
         if ($thread['stickied'] == 1) {
           $posts = $this->db->select("posts")
                             ->condition("post_board", $this->board->board_id)
-                            ->condition("post_parent" $thread->post_id)
+                            ->condition("post_parent", $thread->post_id)
                             ->condition("post_deleted", 0)
-                            ->orderBy("id" "DESC")
+                            ->orderBy("id", "DESC")
                             ->range(0, kxEnv::Get('kx:display:stickyreplies'))
                             ->execute()
                             ->fetchAll();
@@ -184,10 +187,10 @@ class public_board_image_image extends kxCmd {
         // query is prepared, otherwise, we used the prepared statement already given to us
         //----------------------------------------------------------------------------------------------------
         else {
-          if (empty($results) || !($results instanceof kxDBStatementInterface) { 
+          if (empty($results) || !($results instanceof kxDBStatementInterface)) { 
             $results = $this->db->select("posts")
                     ->where("post_board = ? AND post_parent = ? AND post_deleted = 0")
-                    ->orderBy("id" "DESC")
+                    ->orderBy("id", "DESC")
                     ->range(0, kxEnv::Get('kx:display:replies'))
                     ->build();
           }
@@ -205,7 +208,7 @@ class public_board_image_image extends kxCmd {
         //----------------------------------------------------------------------------------------------------
         $replycount = $this->DB->select("posts", "p");
         $replycount->addExpression('COUNT(DISTINCT(file_post_id))', 'replies');
-        $replycount->addExpression('SUM(CASE WHEN file_md5 = '' THEN 0 ELSE 1 END)', 'files');
+        $replycount->addExpression('SUM(CASE WHEN file_md5 = \'\' THEN 0 ELSE 1 END)', 'files');
         $replycount->innerJoin("post_files", "f", "post_id = file_post_id AND file_board = post_board");
         $replycount->condition("post_board", $this->board->board_id)
                    ->condition("post_parent", $thread->post_id)
@@ -222,7 +225,7 @@ class public_board_image_image extends kxCmd {
         array_unshift($posts, $thread);
       }
       if (!isset($embeds)) {
-        $embeds = $this-DB->select("embeds")
+        $embeds = $this->DB->select("embeds")
                           ->execute()
                           ->fetchAll();
         $this->dwoo_data->assign('embeds', $embeds);

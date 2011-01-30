@@ -80,6 +80,15 @@ class kxCmdResolv {
 		$section   = kxEnv::$current_section;
 		$moduledir  = kxFunc::getAppDir( KX_CURRENT_APP ) . '/modules/' . self::$class_dir . '/' . $module . '/';
 
+    // Ban check ( may as well do it here before we do any further processing)
+    $boardName = "";
+    if (KX_CURRENT_APP == "core" && $module == "post" && $section == "post") {
+      if (isset($environment->$request['board'])) {
+        $boardName = $environment->$request['board'];
+      }
+    }
+    kxBans::banCheck($_SERVER['REMOTE_ADDR'], $boardName);
+    
 		// If no section, load the default
 		if (!$section) {
 			if (file_exists($moduledir . 'defaultSection.php')) {
@@ -144,6 +153,7 @@ abstract class kxCmd
 	public function makeRegistryShortcuts( kxEnv $environment ) {
 		$this->environment   =  $environment;
 		$this->db            =  kxDB::getinstance();
+    $this->request       =  kxEnv::$request;
 	}
 
 	/**

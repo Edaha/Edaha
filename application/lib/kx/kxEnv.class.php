@@ -77,7 +77,7 @@ class kxEnv {
     kxEnv::$current_application  = KX_CURRENT_APP;
     kxEnv::$current_module  = ( self::$request['module'] ) ? self::$request['module'] : '';
 		kxEnv::$current_section = ( self::$request['section'] ) ? self::$request['section'] : '';
-		
+
 		// Cleanup
 		kxEnv::$current_module = kxFunc::alphaNum( kxEnv::$current_module );
 		kxEnv::$current_section = kxFunc::alphaNum( kxEnv::$current_section );

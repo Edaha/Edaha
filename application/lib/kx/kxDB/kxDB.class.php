@@ -313,7 +313,7 @@ abstract class kxDB {
         case self::RETURN_AFFECTED:
           return $stmt->rowCount();
         case self::RETURN_INSERT_ID:
-          return $this->lastInsertId();
+          return $this->getPDO()->lastInsertId();
         case self::RETURN_NULL:
           return;
         default:
@@ -605,7 +605,23 @@ abstract class kxDB {
     return addcslashes($string, '\%_');
   }
 
+  /**
+   * Determines if there is an active transaction open.
+   *
+   * @return
+   *   TRUE if we're currently in a transaction, FALSE otherwise.
+   */
+  public function inTransaction() {
+    return ($this->transactionDepth() > 0);
+  }
 
+  /**
+   * Determines current transaction depth.
+   */
+  public function transactionDepth() {
+    return count($this->transactionLayers);
+  }
+  
   /**
    * Returns a new DatabaseTransaction object on this connection.
    *

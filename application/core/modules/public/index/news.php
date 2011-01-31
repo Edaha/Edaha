@@ -60,25 +60,25 @@ class public_core_index_news extends kxCmd {
 
     // Get recent images
     $images = $this->db->select("post_files");
-    $images->innerJoin("posts", "", "posts.id = post_files.id AND posts.boardid = post_files.boardid");
-    $images = $images->fields("post_files", array("file", "file_type", "boardid", "thumb_w", "thumb_h"))
-                     ->fields("posts", array("id", "parentid"))
-                     ->condition("post_files.file", "", "!=")
-                     ->orderBy("posts.timestamp", "DESC")
+    $images->innerJoin("posts", "", "post_id = file_post AND post_board = file_board");
+    $images = $images->fields("post_files", array("file_name", "file_type", "file_board", "file_thumb_width", "file_thumb_height"))
+                     ->fields("posts", array("post_id", "post_parent"))
+                     ->condition("file_name", "", "!=")
+                     ->orderBy("post_timestamp", "DESC")
                      ->range(0,3)
                      ->execute()
                      ->fetchAll();
     $i = 0;
     if (count($images) > 0) {
       $results =  $this->db->select('boards')
-                    ->fields('boards', array('name'))
-                    ->where('id = ?')
+                    ->fields('boards', array('board_name'))
+                    ->where('board_id = ?')
                     ->range(0,1)
                     ->build();
       while ($i < count($images)) {
-       $results->execute(array($images[$i]->boardid));
+       $results->execute(array($images[$i]->board_id));
        $board= $results->fetchAll();
-       $images[$i]->boardname = $board[0]->name;
+       $images[$i]->boardname = $board[0]->board_name;
        $i++;
       }
     }

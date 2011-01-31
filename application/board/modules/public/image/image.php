@@ -71,7 +71,7 @@ class public_board_image_image extends kxCmd {
     $this->board = $this->board[0];
 
     require_once( kxFunc::getAppDir('board') .'/classes/rebuild.php' );
-    $this->environment->set('kx:classes:board:rebuild:id', new rebuild( $environment, $this ) );
+    $this->environment->set('kx:classes:board:rebuild:id', new rebuild( $environment ) );
     $this->environment->get('kx:classes:board:rebuild:id')->board = $this->board;
     require_once( kxFunc::getAppDir('board') .'/classes/upload.php' );
     $this->environment->set('kx:classes:board:upload:id', new upload( $environment ) );

@@ -313,11 +313,12 @@ CREATE TABLE IF NOT EXISTS `modules` (
 --
 
 INSERT INTO `modules` (`module_id`, `module_name`, `module_application`, `module_file`, `module_description`, `module_position`, `module_manage`) VALUES
+(8, 'Staff', 'core', 'staff', 'Staff Configuration', 1, 1),
 (2, 'Image Board', 'board', 'image', 'Generator for an image-type board', 0, 0),
 (3, 'Oekaki Board', 'board', 'oekaki', 'Generator for an oekaki-type board', 0, 0),
 (4, 'Upload Board', 'board', 'upload', 'Generator for an upload-type board', 0, 0),
 (5, 'Text Board', 'board', 'text', 'Generator for a text board', 0, 0),
-(6, 'Index', 'core', 'index', 'Hanles the manage page index', 0, 1),
+(6, 'Site', 'core', 'site', 'Manage the Site Configuration', 0, 1),
 (7, 'Index', 'core', 'index', 'Handles the front page features (news, faq, etc)', 0, 0);
 
 -- --------------------------------------------------------

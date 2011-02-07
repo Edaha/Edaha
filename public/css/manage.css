@@ -1,7 +1,159 @@
-body {
-  background: #E6E6D1;
-  min-width: 1000px;
+body,html {
+background:#E6E6D1;
+font-family:Verdana, sans-serif;
+margin-left:auto;
+margin-right:auto;
+width:970px;
 }
+
+a {
+color:#656A55;
+text-decoration:none;
+}
+
+.strong {
+font-weight:700;
+}
+
+.warning {
+color:red;
+font-weight:700;
+text-decoration:none;
+}
+
+/* ------------------------- 
+      Header Styles        
+ ------------------------- */
+.login {
+float:right;
+font-size:.70em;
+}
+
+.herp {
+float:right;
+}
+
+.tabs ul {
+list-style:none;
+margin:0;
+padding:0;
+}
+
+.tabs li {
+background:#CFCBA3;
+border-style:solid;
+border-width:1px 1px 0 0;
+float:left;
+font-size:.9em;
+margin:0 0 0 0;
+padding:0px 5px;
+position:relative;
+top: 4px;
+}
+
+.tabs li:first-child {
+border-left: 1px solid;
+}
+
+.tabs li.selected {
+background:#AEB08D;
+border-top-left-radius:5px;
+border-top-right-radius:5px;
+padding:2px 5px;
+position:relative;
+top:1px;
+}
+
+.tabs li.selected a {
+  color:#000;
+}
+
+.tabs li.a {
+display:block;
+}
+
+/* ------------------------- 
+    Main Block Styles      
+ ------------------------- */
+.main {
+background:#AEB08D;
+border:1px solid;
+border-radius: 5px;
+border-top-left-radius: 0px;
+clear:both;
+padding-top:10px;
+}
+
+.menu {
+float:left;
+margin:5px;
+width:20%;
+}
+
+.menu h2 {
+background-color:#6E735E;
+border:1px solid;
+border-bottom:none;
+border-radius:4px 4px 0 0;
+font-size:.75em;
+margin:0;
+padding:2px 0;
+text-align:center;
+}
+
+.menu ul {
+background:#CFCBA3;
+border:1px solid;
+border-radius:0 0 4px 4px;
+list-style:none;
+margin:0;
+padding:5px;
+}
+
+.menu li {
+font-size:.75em;
+}
+
+.menu .section {
+margin-bottom:5px;
+}
+
+.content {
+float:left;
+margin:5px;
+width:76%;
+}
+
+.stats {
+background-color:#6E735E;
+border:1px solid;
+border-radius:4px;
+font-size:.75em;
+width:100%;
+}
+
+.stats .col1 {
+background:#CFCBA3;
+width:25%;
+}
+
+.stats .col2 {
+background:#E6E6D1;
+width:25%;
+}
+
+.stats th {
+background-color:#6E735E;
+}
+
+.stats td {
+border:none;
+padding:2px;
+}
+
+/* ------------------------- 
+    Login
+ ------------------------- */
 
 #login {
   background-image: url(../manage_login.png);

@@ -313,18 +313,18 @@ class public_board_image_image extends kxCmd {
       //kxExec:TrimToPageLimit($board_class->board);
 
       // Regenerate board pages
-      $this->_regeneratePages();
+      $this->regeneratePages();
       if ($postData['thread_info']['parent'] == 0) {
         // Regenerate the thread
-       // $this->RegenerateThreads($post_id);
+       // $this->regenerateThreads($post_id);
       } else {
         // Regenerate the thread
-        //$board_class->RegenerateThreads($postData['thread_info']['parent']);
+        //$board_class->regenerateThreads($postData['thread_info']['parent']);
       }
     }
   }
   
-  public function _regeneratePages() {
+  public function regeneratePages() {
     //-----------------------------------------
     // Setup
     //-----------------------------------------
@@ -333,11 +333,11 @@ class public_board_image_image extends kxCmd {
                         ->fields("embeds", array("embed_ext"))
                         ->execute()
                         ->fetchAll();
-		foreach ($results as $line) {
-			$this->board->embeds[] = $line->embed_ext;
-		}
+    foreach ($results as $line) {
+      $this->board->embeds[] = $line->embed_ext;
+    }
 
-		$this->dwoo_data['filetypes'] = $this->board->embeds;
+    $this->dwoo_data['filetypes'] = $this->board->embeds;
 
     $postsperpage =	$this->environment->get('kx:display:imgthreads');
     $i = 0;
@@ -394,7 +394,7 @@ class public_board_image_image extends kxCmd {
                    ->condition("post_board", $this->board->board_id)
                    ->condition("post_id", $thread->post_id)
                    ->execute();
-          $this->_RegenerateThreads($thread->post_id);
+          $this->RegenerateThreads($thread->post_id);
           // RegenerateThreads overwrites the replythread variable. Reset it here.
           $this->dwoo_data['replythread'] = 0;
         }
@@ -468,11 +468,11 @@ class public_board_image_image extends kxCmd {
         $this->dwoo_data['embeds'] = $embeds;
       }
       if (!isset($header)){
-        $header = $this->_pageHeader();
+        $header = $this->pageHeader();
         $header = str_replace("<!sm_threadid>", 0, $header);
       }
       if (!isset($postbox)) {
-        $postbox = $this->_postBox();
+        $postbox = $this->postBox();
         $postbox = str_replace("<!sm_threadid>", 0, $postbox);
       }
 
@@ -480,7 +480,7 @@ class public_board_image_image extends kxCmd {
       
       $this->dwoo_data['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
       $content = kxTemplate::get('img_board_page', $this->dwoo_data);
-      $footer = $this->_footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
+      $footer = $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
       $content = $header.$postbox.$content.$footer;
 
       $content = str_replace("\t", '',$content);
@@ -497,6 +497,141 @@ class public_board_image_image extends kxCmd {
   }
 
   /**
+   * Regenerate each thread's corresponding html file, starting with the most recently bumped
+   */
+  public function regenerateThreads($id = 0) {
+
+    $numimages = 0;
+    $embeds = $this->db->select("embeds")
+                       ->fields("embeds")
+                       ->execute()
+                       ->fetchAll();
+    $this->dwoo_data['embeds'] = $embeds;
+    // No ID? Get every thread.
+    if ($id == 0) {
+      //-----------------------------------------------------
+      // Cache the page header and post box to save resources
+      //-----------------------------------------------------
+      $this->board->header = $this->pageHeader(1);
+      $this->board->postbox = $this->postbox(1);
+      
+      // Okay let's do this!
+      $threads = $this->db->select("posts")
+                          ->fields("posts")
+                          ->condition("post_board", $this->board->board_id)
+                          ->condition("post_parent", 0)
+                          ->condition("post_deleted", 0)
+                          ->orderBy("post_id", "DESC")
+                          ->execute()
+                          ->fetchAll();
+      if (count($threads) > 0) {
+        foreach($threads as $thread) {
+          $this->regenerateThreads($thread->post_id);
+        }
+      }
+    } 
+    else {
+      for ($i = 0; $i < 3, $i++) {
+        if ((!$i > 0 && kxEnv::Get('kx:extras:firstlast')) || ($i == 1 && $replycount < 50) || ($i == 2 && $replycount < 100)) {
+          break;
+        }
+        if ($i == 0) {
+          $lastBit = "";
+          $executiontime_start_thread = microtime(true);
+          //---------------------------------------------------------------------------------------------------
+          // Okay, this may seem confusing, but we're caching this so we can use it as a prepared statement
+          // intead of executing it every time. This is only really useful if we're regenerating all threads,
+          // but the perfomance impact otherwise is minimal.
+          //----------------------------------------------------------------------------------------------------
+          if (!isset($this->board->preparedThreads)) {
+            $this->board->preparedThreads = $this->db->select("posts")
+                                                     ->fields("posts")
+                                                     ->condition("boardid", $this->board->board_id)
+                                                     ->where("post_id = ? OR post_parent = ?")
+                                                     ->condition("post_deleted", 0)
+                                                     ->orderBy("post_id")
+                                                     ->build();
+          }
+          // Since we prepared the statement earlier, we just need to execute it.
+          $thread = $this->board->preparedThreads->execute(Array($id, $id));
+          foreach ($thread as &$post) {
+            $post = $this->environment->get('kx:classes:board:rebuild:id')->buildPost($post, false);
+            if (!empty($post->file_type)){
+              foreach($post->file_type as $type) {
+                if (($type == 'jpg' || $type == 'gif' || $type == 'png')) {
+                  $numimages++;
+                }
+              }
+            }
+          }
+
+          //-----------------------------------------------------------------------
+          // When using a pointer in a foreach, the $value variable persists 
+          // as the last index of an array, we can use this to our advantage here.
+          //-----------------------------------------------------------------------
+          if (kxEnv::Get('kx:extras:postspy')) {
+            $this->dwoo_data['lastid'] = $post->post_id;
+          }
+          // Now we can get rid of it
+          unset($post);
+          
+          //-----------------------------------------------------------------------
+          // If we're regenerating all threads, we already cached these earlier
+          //-----------------------------------------------------------------------
+          if ( !isset($this->board->header) || !isset($this->board->postbox)) {
+            $this->board->header = $this->pageHeader($id);
+            $this->board->postbox = $this->postBox($id);
+          }
+          
+          //----------------------------------------------------
+          // There's still some placeholders we need to replace 
+          // though, regardless. This is actually significantly
+          // faster than reprocessing the entire template.
+          //----------------------------------------------------
+          $this->board->header  = str_replace("<!sm_threadid>", $id, $this->board->header );
+          $this->board->postbox = str_replace("<!sm_threadid>", $id, $this->board->postbox);
+
+
+          //-----------
+          // Dwoo-hoo
+          //-----------
+          $this->dwoo_data['numimages']   = $numimages;
+          $this->dwoo_data['replythread'] = $id;
+          $this->dwoo_data['threadid']    = $thread[0]->post_id;
+          $this->dwoo_data['posts']       = $thread;
+          //$this->dwoo_data->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
+          $replycount = (count($thread)-1);
+          $this->dwoo_data['replycount']  = $replycount;
+          $replyHeader = kxTemplate::get('img_reply_header', $this->dwoo_data);
+          if (!isset($this->board->footer)) $this->board->footer = $this->footer(false, (microtime(true) - $executiontime_start_thread));
+        }
+        else if ($i == 1) {
+          $lastBit = "+50";
+          $this->dwoo_data->assign('modifier', "last50");
+
+          // Grab the last 50 replies
+          $posts50 = array_slice($thread, -50, 50);
+          // Add the thread to the top of this, since it wont be included in the result
+          array_unshift($posts50, $thread[0]); 
+
+          $this->dwoo_data['posts'] = $posts50;
+          unset($posts50);
+        }
+        elseif ($i == 2) {
+          $lastBit = "-100";
+          $this->dwoo_data->assign('modifier', "first100");
+          
+          // Grab the first 100 posts
+          $this->dwoo_data['posts'] = array_slice($thread, 0, 100);
+        }
+        $content = kxTemplate::get('img_thread', $this->dwoo_data);
+        $content = $this->board->header.$this->board->postbox.$replyHeader.$content.$footer;
+        kxFunc::outputToFile(KX_BOARD . '/' . $this->board['name'] . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
+      }
+    }
+  }
+  
+  /**
    * Build the page header
    *
    * @param integer $replythread The ID of the thread the header is being build for.  0 if it is for a board page
@@ -504,7 +639,7 @@ class public_board_image_image extends kxCmd {
    * @param integer $liststooutput The number of list pages which will be generated (text boards only)
    * @return string The built header
    */
-  public function _pageHeader($replythread = 0) {
+  public function pageHeader($replythread = 0) {
 
     $tpl = Array();
 
@@ -535,44 +670,44 @@ class public_board_image_image extends kxCmd {
     return kxTemplate::get('global_board_header', $this->dwoo_data).kxTemplate::get('img_header', $this->dwoo_data);
   }
   
-	/**
-	 * Generate the postbox area
-	 *
-	 * @param integer $replythread The ID of the thread being replied to.  0 if not replying
-	 * @param string $postboxnotice The postbox notice
-	 * @return string The generated postbox
-	 */
-	public function _postBox($replythread = 0) {
+  /**
+   * Generate the postbox area
+   *
+   * @param integer $replythread The ID of the thread being replied to.  0 if not replying
+   * @param string $postboxnotice The postbox notice
+   * @return string The generated postbox
+   */
+  public function postBox($replythread = 0) {
 
     if (kxEnv::Get('kx:extras:blotter')) {
         $this->dwoo_data['blotter'] = kxFunc::getBlotter();
         $this->dwoo_data['blotter_updated'] = kxFunc::getBlotterLastUpdated();
     }
-		return kxTemplate::get('img_post_box', $this->dwoo_data);
-		
-	}
+    return kxTemplate::get('img_post_box', $this->dwoo_data);
+    
+  }
 
 
-	/**
-	 * Display the page footer
-	 *
-	 * @param boolean $noboardlist Force the board list to not be displayed
-	 * @param string $executiontime The time it took the page to be created
-	 * @param boolean $hide_extra Hide extra footer information, and display the manage link
-	 * @return string The generated footer
-	 */
-	public function _footer($noboardlist = false, $executiontime = 0) {
+  /**
+   * Display the page footer
+   *
+   * @param boolean $noboardlist Force the board list to not be displayed
+   * @param string $executiontime The time it took the page to be created
+   * @param boolean $hide_extra Hide extra footer information, and display the manage link
+   * @return string The generated footer
+   */
+  public function footer($noboardlist = false, $executiontime = 0) {
 
-		if ($noboardlist) $this->dwoo_data['boardlist'] = "";
-		if ($executiontime) $this->dwoo_data['executiontime'] = round($executiontime, 2);
-		
-		$this->dwoo_data['botads'] = $this->db->select("ads")
+    if ($noboardlist) $this->dwoo_data['boardlist'] = "";
+    if ($executiontime) $this->dwoo_data['executiontime'] = round($executiontime, 2);
+    
+    $this->dwoo_data['botads'] = $this->db->select("ads")
                                           ->fields("ads", array("ad_code"))
                                           ->condition("ad_position", "bot")
                                           ->condition("ad_display", 1)
                                           ->execute()
                                           ->fetchField();
 
-		return kxTemplate::get('img_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
-	}
+    return kxTemplate::get('img_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
+  }
 }

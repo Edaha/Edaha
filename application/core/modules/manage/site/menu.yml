@@ -14,16 +14,3 @@ Site Management:
   - title: Rules Entries
     section: front
     url: do=rules
-
-Staff Management:
-  - title: Manage Staff
-    section: staff
-    url: do=show
-
-  - title: Manage Permissions
-    section: staff
-    url: do=groups
-    
-  - title: Moderator Log
-    secition: staff
-    url: do=log

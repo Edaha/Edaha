@@ -11,10 +11,10 @@
     }
   {/literal}
   </script>
-  <link rel="stylesheet" type="text/css" media='screen' href="{kxEnv paths:boards:folder}/public/css/manage.css">
+  <link rel="stylesheet" type="text/css" media='screen' href="{kxEnv paths:boards:path}/public/css/manage.css">
 </head>
 <body onload="sf();">
-<form action='{kxEnv paths:script:path}/{kxEnv paths:script:folder}/manage.php?app=core&amp;module=login&amp;do=login-validate' method='post'>
+<form action='{kxEnv paths:script:path}/manage.php?app=core&amp;module=login&amp;do=login-validate' method='post'>
 <input type='hidden' name='qstring' id='qstring' value='{$query_string}' />
 <div id='login'>{if $message} <div id='login_error'>{$message}</div>{/if}	<div id='login_controls'>
 		<label for='username'>Username</label>

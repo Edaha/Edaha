@@ -367,7 +367,7 @@ class PDO_ extends PDO {
 	public function query() {
 		$args = func_get_args();
 		$stmt = call_user_func_array(array(&$this, 'parent::query'), $args);
-		if (KU_DEBUG) {
+		if (kxEnv::Get('kx:misc:debug')) {
 			$this->queryString = func_get_arg(0);
 			$errorinfo = parent::errorInfo();
 			echo "<pre>(".KU_DBTYPE.") ".$this->queryString;
@@ -380,7 +380,7 @@ class PDO_ extends PDO {
 			$stmt = parent::prepare($sql, $options);
 		else
 			$stmt = parent::prepare($sql);
-		if (KU_DEBUG && !$stmt) {
+		if (kxEnv::Get('kx:misc:debug') && !$stmt) {
 			$errorinfo = parent::errorInfo();
 			echo "<pre>(".KU_DBTYPE.") ".$sql;
 			echo "\nError (".$errorinfo[1].") ".$errorinfo[2]."\n\n</pre>";
@@ -399,7 +399,7 @@ class PDOStatement_ extends PDOStatement {
 	}
 
 	public function bindParam($paramno, &$param, $type = PDO::PARAM_STR, $maxlen = null, $driverdata = null) {
-		if (KU_DEBUG) {
+		if (kxEnv::Get('kx:misc:debug')) {
 			$this->bound_params[$paramno] = array(
 				'value' => &$param,
 				'type' => $type,
@@ -411,7 +411,7 @@ class PDOStatement_ extends PDOStatement {
 	}
 
 	public function bindValue($parameter, $value, $data_type = PDO::PARAM_STR) {
-		if (KU_DEBUG) {
+		if (kxEnv::Get('kx:misc:debug')) {
 			$this->bound_params[$parameter] = array(
 				'value' => $value,
 				'type' => $data_type,
@@ -471,7 +471,7 @@ class PDOStatement_ extends PDOStatement {
 
 	public function execute($params = array()) {
 		return parent::execute($params);
-		if (KU_DEBUG) {
+		if (kxEnv::Get('kx:misc:debug')) {
 			$errorinfo = parent::errorInfo();
 			echo "<pre>(".KU_DBTYPE.") ".self::getSQL($params);
 			echo "\nError (".$errorinfo[0].") ".$errorinfo[2]."\n\n</pre>";

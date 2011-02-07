@@ -55,7 +55,7 @@ class kxTemplate {
           	$data['current_app'] = "board";
           }
         }
-        self::assign('base_url', kxEnv::Get('kx:paths:main:path'). '/' . kxEnv::Get('kx:paths:main:folder').'manage.php?sid=' . kxEnv::$request['sid'] . '&amp;');
+        self::assign('base_url', kxEnv::Get('kx:paths:main:path') . '/manage.php?sid=' . kxEnv::$request['sid'] . '&amp;');
       	self::$manage = self::$instance->get(self::$template_dir . 'manage_wrapper.tpl', array_merge(self::$data,$data));
       }
     }

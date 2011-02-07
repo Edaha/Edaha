@@ -15,14 +15,11 @@ all:
       banreason:
     paths:
       main:
-        folder: 
         path: 
         domain:
       boards:
-        folder: 
         path: 
       script:
-        folder:
         path:
       coral:
         web:

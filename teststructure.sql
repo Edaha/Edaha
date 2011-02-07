@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `ads` (
   `ad_display` smallint(6) NOT NULL,
   `ab_boards` varchar(255) NOT NULL,
   `ad_code` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `announcements` (
   `postedat` int(11) NOT NULL,
   `postedby` varchar(75) NOT NULL,
   `message` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `banlist` (
   `staffnote` text NOT NULL,
   `appeal` text,
   `appealat` int(11) NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `bannedhashes` (
   `md5` varchar(255) NOT NULL,
   `bantime` int(11) DEFAULT NULL,
   `description` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `blotter` (
   `important` smallint(6) NOT NULL,
   `at` int(11) NOT NULL,
   `message` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `boards` (
   `loadbalancepassword` varchar(255) DEFAULT NULL,
   `board_max_files` smallint(6) DEFAULT '1',
   `newsage` smallint(6) DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `boards`
@@ -143,7 +143,7 @@ INSERT INTO `boards` (`board_id`, `order`, `board_name`, `board_type`, `start`, 
 CREATE TABLE IF NOT EXISTS `board_filetypes` (
   `type_board_id` smallint(6) DEFAULT '0',
   `type_id` int(11) NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `board_filetypes`
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS `embeds` (
   `embed_width` smallint(6) NOT NULL,
   `embed_height` smallint(6) NOT NULL,
   `embed_code` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS `embeds` (
 CREATE TABLE IF NOT EXISTS `events` (
   `name` varchar(255) NOT NULL,
   `at` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -193,7 +193,7 @@ CREATE TABLE IF NOT EXISTS `filetypes` (
   `type_image_width` int(11) NOT NULL DEFAULT '0',
   `type_image_height` int(11) NOT NULL DEFAULT '0',
   `type_force_thumb` int(11) NOT NULL DEFAULT '1'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `filetypes`
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `front` (
   `timestamp` int(11) NOT NULL DEFAULT '0',
   `poster` varchar(75) DEFAULT '',
   `email` varchar(255) DEFAULT ''
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `irc` (
   `irc_channels` text,
   `irc_commands` text,
   `irc_nickname` varchar(64) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `loginattempts` (
   `attempt_name` varchar(255) NOT NULL,
   `attempt_ip` varchar(20) NOT NULL,
   `attempt_time` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `manage_sessions` (
   `session_last_action` int(10) NOT NULL DEFAULT '0',
   `session_url` text,
   PRIMARY KEY (`session_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
 -- --------------------------------------------------------
@@ -274,7 +274,7 @@ CREATE TABLE IF NOT EXISTS `maps` (
   `mapname` varchar(255) DEFAULT NULL,
   `mapval` varchar(5) DEFAULT NULL,
   `ip` varchar(32) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -287,7 +287,7 @@ CREATE TABLE IF NOT EXISTS `modlog` (
   `user` varchar(255) NOT NULL,
   `category` smallint(6) DEFAULT '0',
   `timestamp` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -306,7 +306,7 @@ CREATE TABLE IF NOT EXISTS `modules` (
   PRIMARY KEY (`module_id`),
   KEY `module_application` (`module_application`),
   KEY `module_file` (`module_file`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
 
 --
 -- Dumping data for table `modules`
@@ -332,7 +332,7 @@ CREATE TABLE IF NOT EXISTS `module_settings` (
   `key` varchar(255) NOT NULL,
   `value` text NOT NULL,
   `type` varchar(255) DEFAULT 'string'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -362,7 +362,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `post_deleted` smallint(6) DEFAULT '0',
   `post_bumped` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`post_id`,`post_board`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=120 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=120 ;
 
 -- --------------------------------------------------------
 
@@ -383,7 +383,7 @@ CREATE TABLE IF NOT EXISTS `post_files` (
   `file_image_height` smallint(6) DEFAULT '0',
   `file_thumb_width` smallint(6) DEFAULT '0',
   `file_thumb_height` smallint(6) DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -399,7 +399,7 @@ CREATE TABLE IF NOT EXISTS `reports` (
   `when` int(11) NOT NULL,
   `ip` varchar(75) NOT NULL,
   `reason` varchar(255) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `reports`
@@ -418,7 +418,7 @@ CREATE TABLE IF NOT EXISTS `sections` (
   `hidden` smallint(6) DEFAULT '0',
   `name` varchar(255) DEFAULT '0',
   `abbreviation` varchar(10) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `sections`
@@ -440,7 +440,7 @@ CREATE TABLE IF NOT EXISTS `staff` (
   `user_boards` text,
   `user_add_time` int(11) NOT NULL,
   `user_last_active` int(11) NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -454,7 +454,7 @@ CREATE TABLE IF NOT EXISTS `watchedthreads` (
   `board` varchar(255) NOT NULL,
   `ip` varchar(15) NOT NULL,
   `lastsawreplyid` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -469,4 +469,4 @@ CREATE TABLE IF NOT EXISTS `wordfilter` (
   `boards` text NOT NULL,
   `time` int(11) NOT NULL,
   `regex` smallint(6) DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;

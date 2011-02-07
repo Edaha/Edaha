@@ -4,7 +4,7 @@
 <head>
 	<title>{kxEnv site:name}</title>
 {for style $styles}
-	<link rel="{if $styles[$style] neq 'css:menudefault'|kxEnv}alternate {/if}stylesheet" type="text/css" href="{$webpath}/css/site_{$styles[$style]}.css" title="{$styles[$style]|capitalize}" />
+	<link rel="{if $styles[$style] neq 'css:menudefault'|kxEnv}alternate {/if}stylesheet" type="text/css" href="{kxEnv paths:boards:path}/public/css/site_{$styles[$style]}.css" title="{$styles[$style]|capitalize}" />
 {/for}
 </head>
 <body>
@@ -15,9 +15,9 @@
 	
 	<div class="menu" id="topmenu">
 		<ul>
-			{strip}<li class="{if $.get.p eq ''}current {else}tab {/if}first">{if $.get.p neq ''}<a href="{$webpath}/index.php">{/if}{t "News"}{if $.get.p neq ''}</a>{/if}</li>{/strip}
-			{strip}<li class="{if $.get.p eq 'faq'}current{else}tab{/if}">{if $.get.p neq 'faq'}<a href="{$webpath}/index.php?p=faq">{/if}{t "FAQ"}{if $.get.p neq 'faq'}</a>{/if}</li>{/strip}
-			{strip}<li class="{if $.get.p eq 'rules'}current{else}tab{/if}">{if $.get.p neq 'rules'}<a href="{$webpath}/index.php?p=rules">{/if}{t "Rules"}{if $.get.p neq 'rules'}</a>{/if}</li>{/strip}
+			{strip}<li class="{if $.get.p eq ''}current {else}tab {/if}first">{if $.get.p neq ''}<a href="{kxEnv paths:boards:path}/index.php">{/if}{t "News"}{if $.get.p neq ''}</a>{/if}</li>{/strip}
+			{strip}<li class="{if $.get.p eq 'faq'}current{else}tab{/if}">{if $.get.p neq 'faq'}<a href="{kxEnv paths:boards:path}/index.php?p=faq">{/if}{t "FAQ"}{if $.get.p neq 'faq'}</a>{/if}</li>{/strip}
+			{strip}<li class="{if $.get.p eq 'rules'}current{else}tab{/if}">{if $.get.p neq 'rules'}<a href="{kxEnv paths:boards:path}/index.php?p=rules">{/if}{t "Rules"}{if $.get.p neq 'rules'}</a>{/if}</li>{/strip}
 		</ul>
 		<br />
 	</div>
@@ -26,8 +26,8 @@
 		<h2>Recent Images</h2>
 {foreach item=image from=$images}
 			<div class="imagewrap">
-				<a href="{$webpath}/{$image->boardname}/res/{if $image->parentid eq 0}{$image->id}{else}{$image->parentid}{/if}.html#{$image->id}">
-					<img src="{$webpath}/{$image->boardname}/thumb/{$image->file}s.{$image->file_type}" alt="{$image->file}s.{$image->file_type}" width="{$image->thumb_w}" height="{$image->thumb_h}" /><br />
+				<a href="{kxEnv paths:boards:path}/{$image->boardname}/res/{if $image->parentid eq 0}{$image->id}{else}{$image->parentid}{/if}.html#{$image->id}">
+					<img src="{kxEnv paths:boards:path}/{$image->boardname}/thumb/{$image->file}s.{$image->file_type}" alt="{$image->file}s.{$image->file_type}" width="{$image->thumb_w}" height="{$image->thumb_h}" /><br />
 				</a>
 			</div>
 {/foreach}
@@ -38,7 +38,7 @@
 		<h2><span class="newssub">{$entry->subject|stripslashes} by {$entry->poster|stripslashes} - {$entry->timestamp|date_format:"%D @ %I:%M %p %Z"}</span>
 		<span class="permalink"><a href="#{$entry->id}">#</a></span></h2>
 		{$entry->message|stripslashes}
-		{if $.get.view neq 'all' and $.get.p eq ''}<br /><a href="{$webpath}/index.php?view=all">More entries...</a>{/if}
+		{if $.get.view neq 'all' and $.get.p eq ''}<br /><a href="{kxEnv paths:boards:path}/index.php?view=all">More entries...</a>{/if}
 		<br />
 	</div>
 {/foreach}

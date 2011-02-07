@@ -156,6 +156,7 @@ class kxTemplate {
   
   private static function _buildMenu() {
   	$app = KX_CURRENT_APP;
+    $return = "";
     if (KX_CURRENT_APP == 'core' && !kxEnv::$request['module']) {
         $modules = Array(Array('module_file' => 'index'));
     }
@@ -178,9 +179,10 @@ class kxTemplate {
           $menu = spyc_load_file($_file);
         }
         $data['menu'] = $menu;
-        
-        return self::$instance->get(self::$template_dir . 'manage_menu.tpl', array_merge(self::$data,$data));
+        $data['module'] = $module['module_file'];
+        $return .= self::$instance->get(self::$template_dir . 'manage_menu.tpl', array_merge(self::$data,$data));
       }
     }
+    return $return;
   }
 }

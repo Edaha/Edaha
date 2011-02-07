@@ -102,7 +102,7 @@ abstract class kxDB {
       $this->connection->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
     }
   }
-  final private function initialize() {
+  final private static function initialize() {
     $driver_class = 'kxDB' .  substr(kxEnv::get('kx:db:dsn'), 0, strpos(kxEnv::get('kx:db:dsn'), ':'));
     $new_connection = new $driver_class();
     self::$instance = $new_connection;
@@ -819,7 +819,7 @@ abstract class kxDB {
    * Returns the version of the database server.
    */
   public function version() {
-    return $this->getAttribute(PDO::ATTR_SERVER_VERSION);
+    return self::getPDO()->getAttribute(PDO::ATTR_SERVER_VERSION);
   }
 
   /**

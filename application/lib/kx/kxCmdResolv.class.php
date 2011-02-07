@@ -80,6 +80,10 @@ class kxCmdResolv {
 		$section   = kxEnv::$current_section;
     // No module?
     if (!$module) {
+      if (IN_MANAGE && !kxEnv::$request['app']) {
+        $module = 'index';
+      }
+      else {
       // Get the first module in the DB
       $module = kxDB::getInstance()->select("modules")
                                    ->fields("modules", array("module_file"))
@@ -88,6 +92,7 @@ class kxCmdResolv {
                                    ->orderBy("module_position")
                                    ->execute()
                                    ->fetchField();
+      }
     }
 		$moduledir  = kxFunc::getAppDir( KX_CURRENT_APP ) . '/modules/' . self::$class_dir . '/' . $module . '/';
     // No section?
@@ -113,7 +118,7 @@ class kxCmdResolv {
           // Force login if we have an invalid session
 
 					$environment->request['module'] = 'login';
-
+ 					kxEnv::$current_module = 'login';
 					require_once( kxFunc::getAppDir( 'core' ) . "/modules/manage/login/login.php" );
 					$login = new manage_core_login_login( $environment ); 
 					$login->execute( $environment ); 

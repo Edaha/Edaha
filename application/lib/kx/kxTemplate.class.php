@@ -6,6 +6,12 @@ class kxTemplate {
 
   private static $data = array();
   private static $instance;
+  
+  // Manage wrapper
+  private static $manage;
+  
+  // Manage sidebar menu extras
+  public static $menu_extra = '';
 
   private function __construct(){}
 
@@ -31,6 +37,26 @@ class kxTemplate {
       }
       else {
         self::$instance->setCompileDir(KX_ROOT . kxEnv::get("kx:templates:cachedir"));
+      }
+      // Are we in manage? Load up the manage wrapper
+      if (IN_MANAGE) {
+        $data['current_app'] = "";
+      	if (KX_CURRENT_APP == "core") {
+        	// Load up some variables for tabbing/menu purposes
+        	if (kxEnv::$request['app']) {
+          	$data['current_app'] = kxEnv::$request['app'];
+          }
+        }
+        else if (KX_CURRENT_APP == "board") {
+        	if (kxEnv::$current_module == "posts") {
+          	$data['current_app'] = "posts";
+          }
+          else {
+          	$data['current_app'] = "board";
+          }
+        }
+        self::assign('base_url', kxEnv::Get('kx:paths:main:path'). '/' . kxEnv::Get('kx:paths:main:folder').'manage.php?sid=' . kxEnv::$request['sid'] . '&amp;');
+      	self::$manage = self::$instance->get(self::$template_dir . 'manage_wrapper.tpl', array_merge(self::$data,$data));
       }
     }
   }
@@ -82,8 +108,21 @@ class kxTemplate {
       }
     }
     $data = array_merge(self::$data,$data);
-    self::$data = array();
-    self::$instance->output($tpl, array_merge(self::$data,$data));
+    if (IN_MANAGE && kxEnv::$current_module != 'login') {
+    	// Are we in manage? add our wrapper.
+      if($tpl instanceof Dwoo_ITemplate) {
+        $content = str_replace("<%CONTENT%>", $tpl->template, self::$manage);
+      }
+      else {
+        $content = str_replace("<%CONTENT%>", file_get_contents($tpl), self::$manage);
+      }
+      $content = str_replace("<%MENU%>", self::_buildMenu(), $content);
+      $content = str_replace("<%MENUEXTRA%>", self::$menu_extra, $content);
+      self::$instance->output(new Dwoo_Template_String($content), array_merge(self::$data,$data));
+    }
+		else {
+    	self::$instance->output($tpl, array_merge(self::$data,$data));
+    }
   }
 
   // returns a string of the parsed and processed template
@@ -100,6 +139,13 @@ class kxTemplate {
     }
     $data = array_merge(self::$data,$data);
     self::$data = array();
+    if (IN_MANAGE && kxEnv::$current_module != 'login') {
+    	// Are we in manage? add our wrapper.
+    	$return = str_replace("<%CONTENT%>", self::$instance->get($tpl, $data), self::$manage);
+      $return = str_replace("<%MENU%>", self::_buildMenu(), $return);
+      $return = str_replace("<%MENUEXTRA%>", self::$menu_extra, $return);
+      return $return;
+    }
     return self::$instance->get($tpl, $data);
   }
 
@@ -107,5 +153,34 @@ class kxTemplate {
     self::init();
     self::$data[$name] = $value;
   }
-
+  
+  private static function _buildMenu() {
+  	$app = KX_CURRENT_APP;
+    if (KX_CURRENT_APP == 'core' && !kxEnv::$request['module']) {
+        $modules = Array(Array('module_file' => 'index'));
+    }
+    else {
+      $modules = kxDB::getinstance()->select("modules", "", array('fetch' => PDO::FETCH_ASSOC))
+                                    ->fields("modules", array("module_name", "module_file"))
+                                    ->condition("module_application", $app)
+                                    ->condition("module_manage", 1)
+                                    ->orderBy("module_position")
+                                    ->execute()
+                                    ->fetchAll();
+    }
+    foreach ($modules as $module) {
+      $_file = kxFunc::getAppDir( $app ) . "/modules/manage/" . $module['module_file'] . '/menu.yml';
+      if (file_exists($_file)) {
+        if (function_exists("syck_load")) {
+          $menu = syck_load(file_get_contents($_file));
+        }
+        else {
+          $menu = spyc_load_file($_file);
+        }
+        $data['menu'] = $menu;
+        
+        return self::$instance->get(self::$template_dir . 'manage_menu.tpl', array_merge(self::$data,$data));
+      }
+    }
+  }
 }

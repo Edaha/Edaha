@@ -44,19 +44,20 @@ class kxTemplate {
       	if (KX_CURRENT_APP == "core") {
         	// Load up some variables for tabbing/menu purposes
         	if (kxEnv::$request['app']) {
-          	$data['current_app'] = kxEnv::$request['app'];
+          	self::$data['current_app'] = kxEnv::$request['app'];
           }
         }
         else if (KX_CURRENT_APP == "board") {
         	if (kxEnv::$current_module == "posts") {
-          	$data['current_app'] = "posts";
+          	self::$data['current_app'] = "posts";
           }
           else {
-          	$data['current_app'] = "board";
+          	self::$data['current_app'] = "board";
           }
         }
+        
         self::assign('base_url', kxEnv::Get('kx:paths:main:path') . '/manage.php?sid=' . kxEnv::$request['sid'] . '&amp;');
-      	self::$manage = self::$instance->get(self::$template_dir . 'manage_wrapper.tpl', array_merge(self::$data,$data));
+          
       }
     }
   }
@@ -107,15 +108,17 @@ class kxTemplate {
         throw new Exception('No template found ' . $tpl .'.tpl from ' . self::$template_dir, E_USER_ERROR);
       }
     }
+    
     $data = array_merge(self::$data,$data);
     if (IN_MANAGE && kxEnv::$current_module != 'login') {
     	// Are we in manage? add our wrapper.
-      if($tpl instanceof Dwoo_ITemplate) {
+      /*if($tpl instanceof Dwoo_ITemplate) {
         $content = str_replace("<%CONTENT%>", $tpl->template, self::$manage);
       }
       else {
         $content = str_replace("<%CONTENT%>", file_get_contents($tpl), self::$manage);
-      }
+      }*/
+      $content = self::$instance->get($tpl, array_merge(self::$data,$data));
       $content = str_replace("<%MENU%>", self::_buildMenu(), $content);
       $content = str_replace("<%MENUEXTRA%>", self::$menu_extra, $content);
       self::$instance->output(new Dwoo_Template_String($content), array_merge(self::$data,$data));
@@ -141,7 +144,7 @@ class kxTemplate {
     self::$data = array();
     if (IN_MANAGE && kxEnv::$current_module != 'login') {
     	// Are we in manage? add our wrapper.
-    	$return = str_replace("<%CONTENT%>", self::$instance->get($tpl, $data), self::$manage);
+    	/*$return = str_replace("<%CONTENT%>", self::$instance->get($tpl, $data), self::$manage);*/
       $return = str_replace("<%MENU%>", self::_buildMenu(), $return);
       $return = str_replace("<%MENUEXTRA%>", self::$menu_extra, $return);
       return $return;
@@ -180,7 +183,7 @@ class kxTemplate {
         }
         $data['menu'] = $menu;
         $data['module'] = $module['module_file'];
-        $return .= self::$instance->get(self::$template_dir . 'manage_menu.tpl', array_merge(self::$data,$data));
+        $return .= self::$instance->get(self::$template_dir . 'manage/menu.tpl', array_merge(self::$data,$data));
       }
     }
     return $return;

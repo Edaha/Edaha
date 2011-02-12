@@ -26,6 +26,7 @@ class manage_core_index_index extends kxCmd {
     }
     $dwoo_data['dbsize'] = kxFunc::convertBytes($dbsize);
     $dwoo_data['dbversion'] = substr($this->db->version(), 0, strrpos($this->db->version(), '-') !== FALSE ? strrpos($this->db->version(), '-') : strlen($this->db->version()));
+    $dwoo_data['currentversion'] = kxEnv::get('kx:misc:version');
     
     $dwoo_data['stats']['numboards'] = $this->db->select("boards")
     																	 ->countQuery()
@@ -35,6 +36,6 @@ class manage_core_index_index extends kxCmd {
     																	 ->countQuery()
                                        ->execute()
                                        ->fetchField();
-  	kxTemplate::output("manage_index", $dwoo_data);
+  	kxTemplate::output("manage/index", $dwoo_data);
   }
 }

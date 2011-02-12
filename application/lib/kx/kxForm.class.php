@@ -17,13 +17,13 @@
  */
 /*
  * Functions for validating form inputs
- * Last Updated: $Date$
+ * Last Updated: $Date: $
  
- * @author    $Author$
+ * @author    $Author: $
  
  * @package   kusaba
  
- * @version   $Revision$
+ * @version   $Revision: $
  *
  */
 class kxForm {
@@ -120,12 +120,12 @@ class kxForm {
           break;
           
         default:
-          throw new kxException(sprintf(_gettext('Invalid rule for %s'),$input)));
+          throw new kxException(sprintf(_gettext('Invalid rule for %s'),$input));
           break;
       }
       
       if (($check == 'required' && !$result) || (!empty(self::$values[$input]) && $result != $ruleset['expects'])) {
-        throw new kxException(sprintf(_gettext('Invalid form entry - %s - %s'), $input, $check)));
+        throw new kxException(sprintf(_gettext('Invalid form entry - %s - %s'), $input, $check));
       }
     }
   }

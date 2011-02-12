@@ -1,4 +1,9 @@
-<table class="stats" cellspacing="1px">
+{extends "wrapper.tpl"}
+
+{block "heading"}Statistics{/block}
+
+{block "content"}
+<table class="stats">
 
   <col class="col1" /><col class="col2" /><col class="col1" /><col class="col2" />
   <thead>
@@ -37,3 +42,4 @@
     </tr>
   </tbody>
 </table>
+{/block}

@@ -11,6 +11,220 @@ class Rebuild {
     $this->request = kxEnv::$request;
 	}
 
+  /**
+   * Build the page header
+   *
+   * @param integer $replythread The ID of the thread the header is being build for.  0 if it is for a board page
+   * @param integer $liststart The number which the thread list starts on (text boards only)
+   * @param integer $liststooutput The number of list pages which will be generated (text boards only)
+   * @return string The built header
+   */
+  public function pageHeader() {
+
+    $tpl = Array();
+
+    $tpl['htmloptions'] = ((kxEnv::Get('kx:misc:locale') == 'he' && empty($this->board->board_locale)) || $this->board->board_locale == 'he') ? ' dir="rtl"' : '' ;
+
+    $tpl['title'] = '';
+
+    if (kxEnv::Get('kx:pages:dirtitle')) {
+      $tpl['title'] .= '/' .  $this->board->board_name . '/ - ';
+    }
+    $tpl['title'] .= $this->board->board_desc;
+
+    $dwoo_data['title'] = $tpl['title'];
+    $dwoo_data['htmloptions'] = $tpl['htmloptions'];
+    $dwoo_data['locale'] = $this->board->board_locale;
+    $dwoo_data['board'] = $this->board;
+    $dwoo_data['topads'] = $this->db->select("ads")
+                                          ->fields("ads", array("ad_code"))
+                                          ->condition("ad_position", "top")
+                                          ->condition("ad_display", 1)
+                                          ->execute()
+                                          ->fetchField();
+    $dwoo_data['boardlist'] = $this->board->boardlist;
+    return $dwoo_data;
+
+  }
+  public function blotter() {
+    if (kxEnv::Get('kx:extras:blotter')) {
+        $dwoo_data['blotter'] = kxFunc::getBlotter();
+        $dwoo_data['blotter_updated'] = kxFunc::getBlotterLastUpdated();
+        return $dwoo_data;
+    }
+    return array();
+  }
+  /**
+   * Display the page footer
+   *
+   * @param boolean $noboardlist Force the board list to not be displayed
+   * @param string $executiontime The time it took the page to be created
+   * @param boolean $hide_extra Hide extra footer information, and display the manage link
+   * @return string The generated footer
+   */
+  public function footer($noboardlist = false, $executiontime = 0, $hide_extra = false) {
+
+    if ($noboardlist || $hide_extra) $this->dwoo_data['boardlist'] = "";
+    if ($executiontime) $this->dwoo_data['executiontime'] = round($executiontime, 2);
+    
+    $dwoo_data['botads'] = $this->db->select("ads")
+                                          ->fields("ads", array("ad_code"))
+                                          ->condition("ad_position", "bot")
+                                          ->condition("ad_display", 1)
+                                          ->execute()
+                                          ->fetchField();
+
+    return $dwoo_data;
+  }
+  public function getEmbeds() {
+    $this->board->embeds = array();
+    $results = $this->db->select("embeds")
+                        ->fields("embeds", array("embed_ext"))
+                        ->execute()
+                        ->fetchAll();
+    foreach ($results as $line) {
+      $this->board->embeds[] = $line->embed_ext;
+    }
+    return $this->board->embeds;
+  }
+  public function calcTotalPages() {
+    $numposts = $this->db->select("posts")
+                         ->fields("posts")
+                         ->condition("post_board", $this->board->board_id)
+                         ->condition("post_parent", 0)
+                         ->condition("post_deleted", 0)
+                         ->countQuery()
+                         ->execute()
+                         ->fetchField();
+    return kxFunc::pageCount($this->board_type, ($numposts-1));
+  }
+  public function markThread($thread) {
+    if ($thread->post_delete_time == 0 && $this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
+      $this->db->update("posts")
+               ->fields(array(
+                 'post_delete_time' => time() + 7200,
+               ))
+               ->condition("post_board", $this->board->board_id)
+               ->condition("post_id", $thread->post_id)
+               ->execute();
+      return true;
+    }
+    return false;
+  }
+  
+  public function buildPageThread($thread) {
+    $omitids = array();
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------
+    // Process stickies without using prepared statements (because they have a different range than regular threads).
+    // Since there's usually very few to no stickies we can get away with this with minimal performance impact.
+    //-----------------------------------------------------------------------------------------------------------------------------------
+    if ($thread->post_stickied == 1) {
+      $posts = $this->db->select("posts")
+                        ->condition("post_board", $this->board->board_id)
+                        ->condition("post_parent", $thread->post_id)
+                        ->condition("post_deleted", 0)
+                        ->orderBy("id", "DESC")
+                        ->range(0, kxEnv::Get('kx:display:stickyreplies'))
+                        ->execute()
+                        ->fetchAll();
+    }
+    
+    //---------------------------------------------------------------------------------------------------
+    // For non-stickies, we check if the $results object exists, or if it isn't an instance of
+    // kxDBStatementInterface (like if it was overwritten somwehere else). If is isn't, the
+    // query is prepared, otherwise, we used the prepared statement already given to us
+    //----------------------------------------------------------------------------------------------------
+    else {
+      if (empty($this->board->buildPageResults) || !($this->board->buildPageResults instanceof kxDBStatementInterface)) { 
+        $this->board->buildPageResults = $this->db->select("posts")
+                ->fields("posts")
+                ->where("post_board = ? AND post_parent = ? AND post_deleted = 0")
+                ->orderBy("post_id", "DESC")
+                ->range(0, kxEnv::Get('kx:display:replies'))
+                ->build();
+      }
+      $this->board->buildPageResults->execute(array($this->board->board_id, $thread->post_id));
+      $posts = $this->board->buildPageResults->fetchAll();
+    }
+    foreach ($posts as &$post) {
+      $omitids[] = $post['id'];
+      $post = $this->buildPost($post, true);
+    }
+    return array($posts, $omitids);
+  }
+  public function buildThread($id) {
+    $dwoo_data = array();
+    //---------------------------------------------------------------------------------------------------
+    // Okay, this may seem confusing, but we're caching this so we can use it as a prepared statement
+    // intead of executing it every time. This is only really useful if we're regenerating all threads,
+    // but the perfomance impact otherwise is minimal.
+    //----------------------------------------------------------------------------------------------------
+    if (!isset($this->board->preparedThreads)) {
+      $this->board->preparedThreads = $this->db->select("posts")
+                                               ->fields("posts")
+                                               ->where("post_board = " . $this->board->board_id . " AND (post_id = ? OR post_parent = ?) AND post_deleted = 0")
+                                               ->orderBy("post_id")
+                                               ->build();
+    }
+    // Since we prepared the statement earlier, we just need to execute it.
+    $this->board->preparedThreads->execute(Array($id, $id));
+    $thread = $this->board->preparedThreads->fetchAll();
+    foreach ($thread as &$post) {
+      $post = $this->environment->get('kx:classes:board:rebuild:id')->buildPost($post, false);
+      if (!empty($post->file_type)){
+        foreach($post->file_type as $type) {
+          if (($type == 'jpg' || $type == 'gif' || $type == 'png')) {
+            $numimages++;
+          }
+        }
+      }
+    }
+
+    //-----------------------------------------------------------------------
+    // When using a pointer in a foreach, the $value variable persists 
+    // as the last index of an array, we can use this to our advantage here.
+    //-----------------------------------------------------------------------
+    if (kxEnv::Get('kx:extras:postspy')) {
+      $dwoo_data['lastid'] = $post->post_id;
+    }
+    // Now we can get rid of it
+    unset($post);
+    return array($thread, $dwoo_data);
+  }
+  public function getOmittedPosts(&$thread, $omitids = array(), $images = true) {
+    if ($images) {
+        //---------------------------------------------------------------------------------------------------
+        // Get the number of replies and image-replies for this thread, minus the ones that are
+        // already being shown.
+        //----------------------------------------------------------------------------------------------------
+        $replycount = $this->db->select("posts", "p");
+        $replycount->addExpression('COUNT(DISTINCT(file_post))', 'replies');
+        $replycount->addExpression('SUM(CASE WHEN file_md5 = \'\' THEN 0 ELSE 1 END)', 'files');
+        $replycount->innerJoin("post_files", "f", "post_id = file_post AND file_board = post_board");
+        $replycount->condition("post_board", $this->board->board_id)
+                   ->condition("post_parent", $thread->post_id)
+                   ->condition("post_deleted", 0);
+        if (!empty($omitids)) {
+          $replycount->condition("file_post", $omitids, "NOT IN");
+        }
+        $replycount = $replycount->execute()
+                                 ->fetchAll();
+        $thread->images   = $replycount[0]->files;
+    }
+    else {
+      $replycount = $this->db->select("posts", "p");
+      $replycount->addExpression("COUNT(post_id)", "replies");
+      $replycount->condition("post_board", $this->board->board_id)
+                 ->condition("post_parent", $thread->post_id);
+      if ($this->board->board_type != 1) {
+        $replycount->condition("post_deleted", 0);
+      }
+      $replycount = $replycount->execute()
+                               ->fetchAll();
+    }
+    $thread->replies  = $replycount[0]->replies;
+  }
 	public function buildPost($post, $page) {
     $post_files = $this->db->select("post_files")
                            ->fields("post_files")

@@ -160,7 +160,7 @@ class kxTemplate {
   private static function _buildMenu() {
   	$app = KX_CURRENT_APP;
     $return = "";
-    if (KX_CURRENT_APP == 'core' && !kxEnv::$request['module']) {
+    if (KX_CURRENT_APP == 'core' && !kxEnv::$request['module'] && !kxEnv::$request['app']) {
         $modules = Array(Array('module_file' => 'index'));
     }
     else {

@@ -411,6 +411,16 @@ abstract class kxDB {
   }
 
   /**
+   * Returns a new DatabaseCondition.
+   * @param string $conjunction
+   *   The operator to use to combine conditions: 'AND' or 'OR'.
+   * @return DatabaseCondition
+   */
+  public function condition($conjuction = "AND") {
+    return new DatabaseCondition($conjunction);
+  }
+  
+  /**
    * Prepares and returns a SELECT query object.
    *
    * @param $table

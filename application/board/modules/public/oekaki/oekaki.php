@@ -42,7 +42,10 @@ class public_board_image_image extends kxCmd {
    * @var		object	stdClass
    */
   public $board;
-    
+  
+  protected $thread = 0;
+  
+  protected $method = "";
   
   /**
    * Run requested method
@@ -80,20 +83,8 @@ class public_board_image_image extends kxCmd {
       ( /* A message is set, or an image was provided */
         isset($this->request['message']) ||
         isset($_FILES['imagefile'])
-      ) || (
-        ( /* It has embedding allowed */
-            $this->board->board_upload_type == 1 ||
-            $this->board->board_upload_type == 2
-        ) && ( /* An embed ID was provided, or no file was checked and no ID was supplied */
-            isset($this->request['embed']) ||
-            (
-              $this->board->board_upload_type == 2 &&
-              !isset($_FILES['imagefile']) &&
-              isset($this->request['nofile']) &&
-              $this->board->enable_no_file == true
-            )
-        )
-      )
+      ) || /* It is a validated oekaki posting */
+      $this->environment->get('kx:classes:board:posting:id')->checkOekaki();
     ) {
       return true;
     } else {
@@ -108,21 +99,15 @@ class public_board_image_image extends kxCmd {
   
   public function processPost($postData) {
     $postClass = $this->environment->get('kx:classes:board:posting:id');
+    $postData['is_oekaki'] = $postClass->checkOekaki();
     
     if (!$postData['is_reply']) {
-      if (($this->board->board_upload_type == 1 || $this->board->board_upload_type == 2) && !empty($this->board->board_embeds_allowed)) {
-        if ($postClass->checkEmbed($postData)) {
-          kxFunc::showError(_gettext('Please enter an embed ID.'));
-        }
-      }
-      if (empty($postData['files'][0]) && ( ( !isset($this->request['nofile']) && $this->board->board_enable_no_file == 1 ) || $this->board->board_enable_no_file ) ) {
-        if (!empty($this->request['embed']) && $this->board->board_upload_type != 1) {
-          kxFunc::showError(_gettext('A file is required for a new thread. If embedding is allowed, either a file or embed ID is required.'));
-        }
+      if (empty($postData['files'][0]) && !$postData['is_oekaki'] && ( ( !isset($this->request['nofile']) && $this->board->board_enable_no_file == 1 ) || $this->board->board_enable_no_file ) ) {
+        kxFunc::showError(_gettext('A file is required for a new thread.'));
       }
     }
     else {
-      if (!$postClass->checkEmpty($postData)) {
+      if (!$postData['is_oekaki'] && !$postClass->checkEmpty($postData)) {
         kxFunc::showError(_gettext('An image, or message, is required for a reply.'));
       }
     }
@@ -162,8 +147,12 @@ class public_board_image_image extends kxCmd {
 
       //Needs 1.0 equivalent
       // $post = hook_process('posting', $post);
-      
-      $post['post_id'] = $postClass->makePost($postData, $post, $files, $_SERVER['REMOTE_ADDR'], $commands['sticky'], $commands['lock'], $this->board->board_id);
+      if ($postData['is_oekaki']) {
+        if (file_exists(KX_BOARD . '/' . $this->board->board_name . '/src/' . $files[0]['file_name'] . '.pch')) {
+          $post['message'] .= '<br /><small><a href="' . KX_SCRIPT . '/animation.php?board=' . $this->board->board_name . '&amp;id=' . $files[0]['file_name'] . '">' . _gettext('View animation') . '</a></small>';
+        }
+      }      
+      $post['post_id'] = $postClass->makePost($postData, $post, $files, $_SERVER['REMOTE_ADDR'], $sticky, $lock, $this->board->board_id);
 
       $postClass->modPost(array_merge($postData, $post), $this->board);
       $postClass->setCookies($post);
@@ -196,7 +185,7 @@ class public_board_image_image extends kxCmd {
     $i = 0;
     
     $postsperpage =	$this->environment->get('kx:display:imgthreads');
-    $totalpages = $this->environment->get('kx:classes:board:rebuild:id')->calcTotalPages();
+    $totalpages = $this->environment->get('kx:classes:board:rebuild:id')->calcTotalPages()
 
 
     //-----------------------------------------
@@ -224,18 +213,18 @@ class public_board_image_image extends kxCmd {
         //------------------------------------------------------------------------------------------
         // If the thread is on the page set to mark, and hasn't been marked yet, mark it
         //------------------------------------------------------------------------------------------
-        if ($this->environment->get('kx:classes:board:rebuild:id')->markThread($thread)) {
+        if ($this->environment->get('kx:classes:board:rebuild:id')->markThread($thread) {
           $this->RegenerateThreads($thread->post_id);
           // RegenerateThreads overwrites the replythread variable. Reset it here.
           $this->dwoo_data['replythread'] = 0;
         }
         $thread = $this->environment->get('kx:classes:board:rebuild:id')->buildPost($thread, true);
         $tempPosts = $this->environment->get('kx:classes:board:rebuild:id')->buildPageThread($thread, true);
-        $this->environment->get('kx:classes:board:rebuild:id')->getOmittedPosts($thread, $tempPosts[1], true);
+        $this->environment->get('kx:classes:board:rebuild:id')->getOmittedPosts($thread, $tempPosts[1] true);
 
         $posts = array_reverse($tempPosts[0]);
         array_unshift($posts, $thread);
-        $outThread[] = $posts;
+        $outPosts[] = $posts;
 
       }
       if (!isset($embeds)) {
@@ -251,13 +240,12 @@ class public_board_image_image extends kxCmd {
       }
       if (!isset($postbox)) {
         $postbox = $this->postBox();
-        $postbox = str_replace("<!sm_threadid>", 0, $postbox);
       }
 
       $this->dwoo_data['posts'] = $outThread;
       
       $this->dwoo_data['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
-      $content = kxTemplate::get('img_board_page', $this->dwoo_data);
+      $content = kxTemplate::get('oek_board_page', $this->dwoo_data);
       $footer = $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
       $content = $header.$postbox.$content.$footer;
 
@@ -284,11 +272,10 @@ class public_board_image_image extends kxCmd {
     $this->dwoo_data['embeds'] = $embeds;
     // No ID? Get every thread.
     if ($id == 0) {
-      //-----------------------------------------------------
-      // Cache the page header and post box to save resources
-      //-----------------------------------------------------
+      //----------------------------------------
+      // Cache the page header to save resources
+      //----------------------------------------
       $this->board->header = $this->pageHeader(1);
-      $this->board->postbox = $this->postbox(1);
       
       // Okay let's do this!
       $threads = $this->db->select("posts")
@@ -318,22 +305,21 @@ class public_board_image_image extends kxCmd {
           $thread = $temp[0];
           $this->dwoo_data['lastid'] = $temp[1];
           
-          //-----------------------------------------------------------------------
-          // If we're regenerating all threads, we already cached these earlier
-          //-----------------------------------------------------------------------
-          if ( !isset($this->board->header) || !isset($this->board->postbox)) {
+          //---------------------------------------------------------------------
+          // If we're regenerating all threads, we already cached this earlier
+          //---------------------------------------------------------------------
+          if ( !isset($this->board->header) ) {
             $this->board->header = $this->pageHeader($id);
-            $this->board->postbox = $this->postBox($id);
+            
           }
-          
           //----------------------------------------------------
           // There's still some placeholders we need to replace 
           // though, regardless. This is actually significantly
           // faster than reprocessing the entire template.
           //----------------------------------------------------
           $this->board->header  = str_replace("<!sm_threadid>", $id, $this->board->header );
-          $this->board->postbox = str_replace("<!sm_threadid>", $id, $this->board->postbox);
 
+          $this->board->postbox = $this->postBox($id);
           //-----------
           // Dwoo-hoo
           //-----------
@@ -344,7 +330,7 @@ class public_board_image_image extends kxCmd {
           //$this->dwoo_data->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
           $replycount = (count($thread)-1);
           $this->dwoo_data['replycount']  = $replycount;
-          $replyHeader = kxTemplate::get('img_reply_header', $this->dwoo_data);
+          $replyHeader = kxTemplate::get('oek_reply_header', $this->dwoo_data);
           if (!isset($this->board->footer)) $this->board->footer = $this->footer(false, (microtime(true) - $executiontime_start_thread));
         }
         else if ($i == 1) {
@@ -364,7 +350,7 @@ class public_board_image_image extends kxCmd {
           // Grab the first 100 posts
           $this->dwoo_data['posts'] = array_slice($thread, 0, 100);
         }
-        $content = kxTemplate::get('img_thread', $this->dwoo_data);
+        $content = kxTemplate::get('oek_thread', $this->dwoo_data);
         $content = $this->board->header.$this->board->postbox.$replyHeader.$content.$footer;
         kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
       }
@@ -380,13 +366,21 @@ class public_board_image_image extends kxCmd {
    * @return string The built header
    */
   public function pageHeader($replythread = 0) {
-    $this->dwoo_data += $this->environment->get('kx:classes:board:rebuild:id')->pageHeader();
+    $this->dwoo_data .= $this->environment->get('kx:classes:board:rebuild:id')->pageHeader();
     $this->dwoo_data['replythread'] = $replythread;
     $this->dwoo_data['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
     $this->dwoo_data['ku_defaultstyle'] = (!empty($this->board->board_style_default) ? ($this->board->board_style_default) : (kxEnv::Get('kx:css:imgdefault')));
-    return kxTemplate::get('global_board_header', $this->dwoo_data).kxTemplate::get('img_header', $this->dwoo_data);
+    return kxTemplate::get('global_board_header', $this->dwoo_data).kxTemplate::get('oek_header', $this->dwoo_data);
   }
-  
+
+	/**
+	 * Build the page header for an oekaki posting
+	 */  
+  private function _oekakiHeader() {
+    echo "stub";
+    exit();
+  }
+
   /**
    * Generate the postbox area
    *
@@ -396,11 +390,27 @@ class public_board_image_image extends kxCmd {
    */
   public function postBox($replythread = 0) {
 
-    $this->dwoo_data += $this->environment->get('kx:classes:board:rebuild:id')->blotter();
-    return kxTemplate::get('img_post_box', $this->dwoo_data);
+    $this->dwoo_data .= $this->environment->get('kx:classes:board:rebuild:id')->blotter();
+    $oekposts = $this->db->select("posts")
+                         ->fields("posts", array("post_id"))
+                         ->innerJoin("post_files", "", "file_post = post_id AND file_board = post_board");
+    $oekposts = $oekposts->condition("post_board", $this->board->board_id)
+                         ->condition($this->db->condition("OR")
+                                              ->condition("post_id", $replythread)
+                                              ->condition("post_parent", $replythread))
+                         ->condition("file_name", "", "!=")
+                         ->condition("file_type", array("jpg", "gif", "png"), "IN")
+                         ->condition("post_deleted", 0)
+                         ->orderBy("post_parent")
+                         ->orderBy("post_timestamp")
+                         ->execute()
+                         ->fetchAll();
+    $this->dwoo_data['oekposts'] = $oekposts;
+    return kxTemplate::get('oek_post_box', $this->dwoo_data);
     
   }
 
+  
   /**
    * Display the page footer
    *
@@ -409,7 +419,7 @@ class public_board_image_image extends kxCmd {
    * @return string The generated footer
    */
   public function footer($noboardlist = false, $executiontime = 0) {
-    $this->dwoo_data += $this->environment->get('kx:classes:board:rebuild:id')->footer($noboardlist, $executiontime);
-    return kxTemplate::get('img_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
+    $this->dwoo_data .= $this->environment->get('kx:classes:board:rebuild:id')->footer($noboardlist, $executiontime);
+    return kxTemplate::get('oek_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
   }
 }

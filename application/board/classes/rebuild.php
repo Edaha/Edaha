@@ -96,7 +96,7 @@ class Rebuild {
                          ->countQuery()
                          ->execute()
                          ->fetchField();
-    return kxFunc::pageCount($this->board_type, ($numposts-1));
+    return kxFunc::pageCount($this->board->board_type, ($numposts-1));
   }
   public function markThread($thread) {
     if ($thread->post_delete_time == 0 && $this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {

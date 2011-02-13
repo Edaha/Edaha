@@ -130,6 +130,27 @@ class Posting {
       }
     }
   }
+	public function checkOekaki() {
+		// If oekaki seems to be in the url...
+		if (!empty($this->request['oekaki'])) {
+      $oekpath = kxEnv::Get('kx:paths:boards:folder') . $this->request['board'] . '/tmp/' . $this->request['oekaki'] . '.png';
+			/* See if it checks out and is a valid oekaki id */
+			if (is_file($oekpath) ) {
+				/* Set the variable to tell the script it is handling an oekaki posting, and the oekaki file which will be posted */
+				return $oekpath;
+			}
+		}
+
+		return false;
+	}
+	public function getPostTag() {
+		/* Check for and parse tags if one was provided, and they are enabled */
+		$tags = unserialize(kxEnv::Get('kx:tags'));
+		if (!empty($tags) && !empty($this->request['tag']) && in_array($this->request['tag'], $tags) ) {
+			return $this->request['tag'];
+		}
+		return false;
+	}
   public function modPost($post, $board) {
     if ($postData['user_authority'] > 0 && $postData['user_authority'] != 3) {
       $modpost_message = 'Modposted #<a href="' . kxEnv::Get('kx:paths:boards:folder') . $board->board_name . '/res/';

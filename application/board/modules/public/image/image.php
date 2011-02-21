@@ -64,8 +64,7 @@ class public_board_image_image extends kxCmd {
                             ->fields("boards")
                             ->condition("board_name", $this->request['board'])
                             ->execute()
-                            ->fetchAll();
-    $this->board = $this->board[0];
+                            ->fetch();
 
     require_once( kxFunc::getAppDir('board') .'/classes/rebuild.php' );
     $this->environment->set('kx:classes:board:rebuild:id', new rebuild( $environment ) );

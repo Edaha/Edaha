@@ -1,22 +1,24 @@
-<html>
-<head>
-	<title>Manage - Log In</title>
-  <script type='text/javascript'>
-  {literal}
-    if ( top != self ) {
-      top.location.href = window.location.href;
-    }
-    function sf(){
+{% extends "global_wrapper.tpl" %}
+
+{% block title %}Manage - Log In{% endblock %}
+{% block extrajs %}
+  {% raw %}
+    $(document).ready(function() {
+      if ( top != self ) {
+          top.location.href = window.location.href;
+      }
       document.managelogin.username.focus();
-    }
-  {/literal}
-  </script>
-  <link rel="stylesheet" type="text/css" media='screen' href="{kxEnv paths:boards:path}/public/css/manage.css">
-</head>
-<body onload="sf();">
-<form action='{kxEnv paths:script:path}/manage.php?app=core&amp;module=login&amp;do=login-validate' method='post'>
-<input type='hidden' name='qstring' id='qstring' value='{$query_string}' />
-<div id='login'>{if $message} <div id='login_error'>{$message}</div>{/if}	<div id='login_controls'>
+    });
+  {% endraw %}
+{% endblock %}
+{% block css %}
+  {{ parent() }}
+  <link rel="stylesheet" type="text/css" media='screen' href="{% kxEnv "paths:boards:path" %}/public/css/manage.css">
+{% endblock %}
+{% block content %}
+<form name='managelogin' action='{% kxEnv "paths:script:path" %}/manage.php?app=core&amp;module=login&amp;do=login-validate' method='post'>
+<input type='hidden' name='qstring' id='qstring' value='{{query_string}}' />
+<div id='login'>{% if message %} <div id='login_error'>{{ message }}</div>{% endif %}	<div id='login_controls'>
 		<label for='username'>Username</label>
 		<input type='text' size='20' id='username' name='username' value=''>
 
@@ -28,4 +30,4 @@
 	</div>
 </div>
 </form>	
-</body>
+{% endblock %}

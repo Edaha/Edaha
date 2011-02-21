@@ -150,9 +150,9 @@ class Upload {
                                                        ->condition("filetypes.type_ext", substr($this->files[$i]['file_type'], 1))
                                                        ->condition("board_name", $boardData->board_name)
                                                        ->execute()
-                                                       ->fetchCol();
+                                                       ->fetchField();
             if (!empty($filetype_forcethumb)) {
-              if ($filetype_forcethumb[0] == 1) {
+              if ($filetype_forcethumb == 1) {
                 $this->files[$i]['file_name'] = time() . mt_rand(1, 99);
                 $file_names[$i] = $this->files[$i]['file_name'];
 
@@ -222,7 +222,7 @@ class Upload {
                                                    ->fields("filetypes", array("mime"))
                                                    ->condition("type_ext", substr($this->files[$i]['file_type'], 1))
                                                    ->execute()
-                                                   ->fetchCol();
+                                                   ->fetchField();
                 // Filename cleanup.
                 $this->files[$i]['file_name'] = htmlspecialchars_decode($this->files[$i]['file_name'], ENT_QUOTES);
                 $this->files[$i]['file_name'] = stripslashes($this->files[$i]['file_name']);
@@ -361,7 +361,7 @@ class Upload {
                                 ->condition("post_deleted", 0)
                                 ->countQuery()
                                 ->execute()
-                                ->fetchCol();
+                                ->fetch();
             if (!$results) {
               $video_check = kxFunc::check_link($videourl_start . $video_id);
               switch ($video_check[1]) {

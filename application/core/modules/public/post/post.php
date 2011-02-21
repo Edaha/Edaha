@@ -48,13 +48,13 @@ class public_core_post_post extends kxCmd {
                       ->fields("boards", array("board_type"))
                       ->condition("board_name", $this->request['board'])
                       ->execute()
-                      ->fetchCol();
+                      ->fetchField();
     // Uh oh! Someone's being naughty! Silently redirect them to the mainpage if they supply us with a non-existing board.
     if (!$boardType) {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
     //Check against our built-in board types.
-    if (in_array($boardType[0], array(0,1,2,3))){
+    if (in_array($boardType, array(0,1,2,3))){
       $types = array('image', 'text', 'oekaki', 'upload');
 			$module_to_load = $types[$boardType[0]];
     }
@@ -145,7 +145,7 @@ class public_core_post_post extends kxCmd {
                    ->fields("posts", array("post_id"))
                    ->condition("post_board", $this->board->board_id)
                    ->execute()
-                   ->fetchCol();
+                   ->fetchField();
       if ($nextid)
         $this->postData['next_id'] = ($nextid+1);
       else

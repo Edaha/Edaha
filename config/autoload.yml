@@ -5,4 +5,4 @@ all:
     autoload:
       load:
         PDO: { path: PDO, prefix: PDO_ }
-        Dwoo: { path: dwoo, prefix: dwoo }
+        Twig: { path: Twig, prefix: Twig }

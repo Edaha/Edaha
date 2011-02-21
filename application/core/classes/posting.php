@@ -37,7 +37,7 @@ class Posting {
                             ->condition("post_parent", 0)
                             ->condition("post_deleted", 0)
                             ->execute
-                            ->fetchCol();
+                            ->fetchField();
         /* If it does... */
         if ($results > 0) {
           return true;
@@ -198,7 +198,7 @@ class Posting {
                                             ->condition("watch_board", $board->board_name)
                                             ->condition("watch_thread", $postData['thread_info']['parent'] != 0)
                                             ->execute()
-                                            ->fetchCol();
+                                            ->fetchField();
       if ($viewing_thread_is_watched[0] > 0) {
         $newestreplyid = $this->db->select("posts")
                                   ->fields("posts", array("post_id"))
@@ -208,7 +208,7 @@ class Posting {
                                   ->orderBy("post_id", "DESC")
                                   ->range(0, 1)
                                   ->execute()
-                                  ->fetchCol();
+                                  ->fetchField();
 
         $this->db->update("watchedthreads")
                  ->fields(array("watch_last_id_seen" => $newestreplyid))

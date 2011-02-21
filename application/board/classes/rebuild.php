@@ -148,7 +148,7 @@ class Rebuild {
       $posts = $this->board->buildPageResults->fetchAll();
     }
     foreach ($posts as &$post) {
-      $omitids[] = $post['id'];
+      $omitids[] = $post->post_id;
       $post = $this->buildPost($post, true);
     }
     return array($posts, $omitids);
@@ -243,10 +243,7 @@ class Rebuild {
       $post->file_thumb_width[] = $line->file_thumb_width;
       $post->file_thumb_height[] = $line->file_thumb_height;
     }
-		$dateEmail = (empty($this->board->board_default_name)) ? $post->post_email : 0;
-		$post->post_message = stripslashes($this->formatLongMessage($post->post_message, $this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $page));
-		$post->timestamp_formatted = kxFunc::formatDate($post->post_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
-		$post->reflink = $this->formatReflink($this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $post->post_parent, $this->environment->get('kx:language:currentlocale'));
+    $post = $this->formatPost($post, $page);
 		if (!empty($post->file_type)){
 			foreach ($post->file_type as $key=>$type) {
 				if (isset($this->board->embeds) && in_array($type, $this->board->embeds)) {
@@ -289,6 +286,14 @@ class Rebuild {
 		return $post;
 	}
 
+  public function formatPost($post, $page) {
+  	$dateEmail = (empty($this->board->board_default_name)) ? $post->post_email : 0;
+		$post->post_message = stripslashes($this->formatLongMessage($post->post_message, $this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $page));
+		$post->timestamp_formatted = kxFunc::formatDate($post->post_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
+		$post->reflink = $this->formatReflink($this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $post->post_parent, $this->environment->get('kx:language:currentlocale'));
+    return $post;
+  }
+  
   /**
    * Format a long message to be shortened if it exceeds the allowed length on a page
    *

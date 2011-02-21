@@ -1,53 +1,54 @@
-{extends "wrapper.tpl"}
+{% extends "manage/wrapper.tpl" %}
 
-{block "heading"}{t "Moderator Log"}{/block}
+{% block heading %}{%trans "Moderator Log" %}{% endblock %}
 
-{block "content"}
+{% block managecontent %}
+
 <table class="log">
-  <caption>{t "Recent moderator actions"}{if $.get.view} <a href="{$base_url}app=core&amp;module=staff&amp;section=staff&amp;do=log">[Return]</a>{/if}</caption>
+  <caption>{% trans "Recent moderator actions" %}{% if _get.view %} <a href="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=log">[Return]</a>{%endif%}</caption>
   <col class="col1" /><col class="col2" /><col class="col3" />
   <thead>
     <tr>
-      <th>{t User}</th>
-      <th>{t Time}</th>
-      <th>{t Action}</th>
+      <th>{% trans "User" %}</th>
+      <th>{% trans "Time" %}</th>
+      <th>{% trans "Action" %}</th>
     </tr>
   </thead>
   <tbody>
-    {foreach item=action from=$modlog}
+    {% for action in modlog %}
     <tr>
-      <td>{$action->user}</td>
-      <td>{date_format $action->timestamp "%b %d, %Y %H:%M"}</td>
-      <td>{$action->entry}</td>
+      <td>{{ action.user }}</td>
+      <td>{{action.timestamp|date_format("%b %d, %Y %H:%M") }}</td>
+      <td>{{action.entry}}</td>
     </tr>
-    {/foreach}
+    {% endfor %}
   </tbody>
 </table>
 <br />
 
-{if !$.get.view}
+{% if not _get.view %}
 <table class="log">
   <col class="col1" /><col class="col2" /><col class="col3" />
   <thead>
     <tr>
-      <th>{t User}</th>
-      <th>{t "Actions Performed"}</th>
-      <th>{t "View all"}</th>
+      <th>{% trans "User" %}</th>
+      <th>{% trans "Actions Performed" %}</th>
+      <th>{% trans "View all" %}</th>
     </tr>
   </thead>
   <tbody>
-    {foreach item=user from=$staff}
+    {% for user in staff %}
     <tr>
-      <td>{$user->user_name}</td>
-      <td>{$user->total_actions}</td>
+      <td>{{ user.user_name }}</td>
+      <td>{{ user.total_actions }}</td>
       <td>
-        <a href="{$base_url}app=core&amp;module=staff&amp;section=staff&amp;do=log&amp;view={$user->user_id}">
-          {t View}
+        <a href="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=log&amp;view={{ user.user_id }}">
+          {% trans "View" %}
         </a>
       </td>
     </tr>
-    {/foreach}
+    {% endfor %}
   </tbody>
 </table>
-{/if}
-{/block}
+{% endif %}
+{%endblock%}

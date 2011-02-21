@@ -16,7 +16,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 /*
- * Section for building an image-type imageboard
+ * Section for building an oekaki-type imageboard
  * Last Updated: $Date$
  
  * @author 		$Author$
@@ -34,7 +34,7 @@ if (!defined('KUSABA_RUNNING'))
   die();
 }
 
-class public_board_image_image extends kxCmd {
+class public_board_oekaki_oekaki extends kxCmd {
   /**
    * Board data
    *

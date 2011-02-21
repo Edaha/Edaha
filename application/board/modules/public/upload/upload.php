@@ -16,7 +16,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 /*
- * Section for building an image-type imageboard
+ * Section for building an upload-type imageboard
  * Last Updated: $Date$
  
  * @author 		$Author$
@@ -34,7 +34,7 @@ if (!defined('KUSABA_RUNNING'))
   die();
 }
 
-class public_board_image_image extends kxCmd {
+class public_board_upload_upload extends kxCmd {
   /**
    * Board data
    *
@@ -64,8 +64,7 @@ class public_board_image_image extends kxCmd {
                             ->fields("boards")
                             ->condition("board_name", $this->request['board'])
                             ->execute()
-                            ->fetchAll();
-    $this->board = $this->board[0];
+                            ->fetch();
 
     require_once( kxFunc::getAppDir('board') .'/classes/rebuild.php' );
     $this->environment->set('kx:classes:board:rebuild:id', new rebuild( $environment ) );

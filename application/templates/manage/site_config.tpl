@@ -1,1 +1,1 @@
-{extends "wrapper.tpl"}
+{% extends "manage/wrapper.tpl" %}

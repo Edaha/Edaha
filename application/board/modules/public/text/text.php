@@ -16,7 +16,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 /*
- * Section for building an image-type imageboard
+ * Section for building an text-type imageboard
  * Last Updated: $Date$
  
  * @author 		$Author$
@@ -34,7 +34,7 @@ if (!defined('KUSABA_RUNNING'))
   die();
 }
 
-class public_board_image_image extends kxCmd {
+class public_board_text_text extends kxCmd {
   /**
    * Board data
    *
@@ -108,7 +108,7 @@ class public_board_image_image extends kxCmd {
                          ->condition("post_subject", substr($postData['subject'], 0, 74))
                          ->condition("post_parent", 0)
                          ->execute()
-                         ->fetchColumn();
+                         ->fetchField();
       if ($result > 0) {
         kxFunc::showError(_gettext('Duplicate thread subject'), _gettext('Text boards may have only one thread with a unique subject. Please pick another.'));
       }
@@ -206,7 +206,7 @@ class public_board_image_image extends kxCmd {
           // RegenerateThreads overwrites the replythread variable. Reset it here.
           $this->dwoo_data['replythread'] = 0;
         }
-        $thread = $this->environment->get('kx:classes:board:rebuild:id')->buildPost($thread, true);
+        $thread = $this->environment->get('kx:classes:board:rebuild:id')->formatPost($thread, true);
         $omitids = array();
         
         //-----------------------------------------------------------------------------------------------------------------------------------
@@ -241,10 +241,13 @@ class public_board_image_image extends kxCmd {
           $posts = $this->board->buildPageResults->fetchAll();
         }
         foreach ($posts as &$post) {
-          $omitids[] = $post['id'];
-          $post = $this->buildPost($post, true);
+          $post->post_name = '';
+          $post->post_email = '';
+          $post->post_tripcode = _gettext('Deleted');
+          $post->post_message = '<span style="font-color:gray">'._gettext('This post has been deleted.').'</span>';
+          $post = $this->formatPost($post, true);
         }
-        $this->environment->get('kx:classes:board:rebuild:id')->getOmittedPosts($thread, $omitids, true);
+        $this->environment->get('kx:classes:board:rebuild:id')->getOmittedPosts($thread, array(), false);
         $posts = array_reverse($posts);
         array_unshift($posts, $thread);
         $outPosts[] = $posts;
@@ -281,7 +284,7 @@ class public_board_image_image extends kxCmd {
                              ->condition("post_deleted", 0)
                              ->condition("post_parent", 0)
                              ->execute()
-                             ->fetchColumn();
+                             ->fetchField();
     $liststooutput = floor(($numpostsleft-1) / 40);
     $this->dwoo_data['numpages'] = $liststooutput+1;
     $listpage = 0;
@@ -345,8 +348,32 @@ class public_board_image_image extends kxCmd {
           $executiontime_start_thread = microtime(true);
 
           $temp = $this->environment->get('kx:classes:board:rebuild:id')->buildThread($id);
-          $thread = $temp[0];
-          $this->dwoo_data['lastid'] = $temp[1];
+          $dwoo_data = array();
+          //---------------------------------------------------------------------------------------------------
+          // Okay, this may seem confusing, but we're caching this so we can use it as a prepared statement
+          // intead of executing it every time. This is only really useful if we're regenerating all threads,
+          // but the perfomance impact otherwise is minimal.
+          //----------------------------------------------------------------------------------------------------
+          if (!isset($this->board->preparedThreads)) {
+            $this->board->preparedThreads = $this->db->select("posts")
+                                                     ->fields("posts")
+                                                     ->where("post_board = " . $this->board->board_id . " AND (post_id = ? OR post_parent = ?)")
+                                                     ->orderBy("post_id")
+                                                     ->build();
+          }
+          // Since we prepared the statement earlier, we just need to execute it.
+          $this->board->preparedThreads->execute(Array($id, $id));
+          $thread = $this->board->preparedThreads->fetchAll();
+          if ($thread[0]->post_deleted == 1) {
+            return;
+          }
+          foreach ($thread as &$post) {
+            $post->post_name = '';
+            $post->post_email = '';
+            $post->post_tripcode = _gettext('Deleted');
+            $post->post_message = '<span style="font-color:gray">'._gettext('This post has been deleted.').'</span>';
+            $post = $this->environment->get('kx:classes:board:rebuild:id')->formatPost($post, false);
+          }
           
           //--------------------------------------------------------------------
           // If we're regenerating all threads, we already cached this earlier
@@ -438,7 +465,7 @@ class public_board_image_image extends kxCmd {
                           ->build();
       foreach($threads AS &$thread) {
         $results->execute(array($this->board->board_id, $thread->post_id));
-        $replycount = $results->fetchColumn();
+        $replycount = $results->fetchField();
         $thread['replies'] = $replycount;
       }
       unset($thread);

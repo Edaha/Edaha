@@ -1,6 +1,4 @@
 <?php
-require_once(KX_LIB."/../Twig/Autoloader.php");
-Twig_Autoloader::register();
 
 class kxTemplate {
   private static $template_dir;
@@ -39,6 +37,9 @@ class kxTemplate {
       self::$instance->addExtension(new Twig_Extensions_Extension_I18n());
       self::$instance->addExtension(new Twig_Extensions_Extension_kxEnv());
       self::$instance->addExtension(new Twig_Extensions_Extension_DateFormat());
+      self::$instance->addExtension(new Twig_Extensions_Extension_Text());
+      self::$instance->addExtension(new Twig_Extensions_Extension_Round());
+      self::$instance->addExtension(new Twig_Extensions_Extension_Strip());
       // Supply Twig with our GET/POST variables
       self::$data['_get'] = $_GET;
       self::$data['_post'] = $_POST;

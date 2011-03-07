@@ -50,13 +50,13 @@ class public_core_post_post extends kxCmd {
                       ->execute()
                       ->fetchField();
     // Uh oh! Someone's being naughty! Silently redirect them to the mainpage if they supply us with a non-existing board.
-    if (!$boardType) {
+    if ($boardType === false) {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
     //Check against our built-in board types.
     if (in_array($boardType, array(0,1,2,3))){
       $types = array('image', 'text', 'oekaki', 'upload');
-			$module_to_load = $types[$boardType[0]];
+			$module_to_load = $types[$boardType];
     }
     //Okay, so it's a a custom board type. Let's find out which kind...
     else {
@@ -67,7 +67,7 @@ class public_core_post_post extends kxCmd {
                          ->fetchAll();
       foreach ($result as $line) {
         $varibles = unserialize($line->module_variables);
-        if (isset($variables['board_type_id']) && $variables['board_type_id'] == $boardType[0]) {
+        if (isset($variables['board_type_id']) && $variables['board_type_id'] == $boardType) {
           $module_to_load = $line->module_directory;
         }
       }

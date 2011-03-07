@@ -42,10 +42,7 @@ class public_board_oekaki_oekaki extends kxCmd {
    * @var		object	stdClass
    */
   public $board;
-  
-  protected $thread = 0;
-  
-  protected $method = "";
+    
   
   /**
    * Run requested method
@@ -67,15 +64,36 @@ class public_board_oekaki_oekaki extends kxCmd {
                             ->fields("boards")
                             ->condition("board_name", $this->request['board'])
                             ->execute()
-                            ->fetchAll();
-    $this->board = $this->board[0];
+                            ->fetch();
+
+    //-----------------------------------------
+    // Get the unique posts for this board
+    //-----------------------------------------
+    $result = $this->db->select("posts");
+    $result->addExpression("COUNT(DISTINCT post_ip_md5)");
+    $this->board->board_uniqueposts = $result->condition("post_board", $this->board->board_id)
+                                               ->condition("post_deleted", 0)
+                                               ->execute()
+                                               ->fetchField();
+
+    //-----------------------------------------------
+    // Get the the allowed filetypes for this board
+    //-----------------------------------------------
+    $result = $this->db->select("filetypes", "f")
+                       ->fields("f", array("type_ext"));
+    $result->innerJoin("board_filetypes", "bf", "bf.type_id = f.type_id");
+    $result->innerJoin("boards", "b", "b.board_id = bf.type_board_id");
+    $this->board->board_filetypes_allowed = $result->condition("type_board_id", $this->board->board_id)
+                                                     ->orderBy("type_ext")
+                                                     ->execute()
+                                                     ->fetchAssoc();
 
     require_once( kxFunc::getAppDir('board') .'/classes/rebuild.php' );
     $this->environment->set('kx:classes:board:rebuild:id', new rebuild( $environment ) );
-    $this->environment->get('kx:classes:board:rebuild:id')->board = $this->board;
+    $this->rebuild = $this->environment->get('kx:classes:board:rebuild:id');
+    $this->rebuild->board = $this->board;
     require_once( kxFunc::getAppDir('board') .'/classes/upload.php' );
     $this->environment->set('kx:classes:board:upload:id', new upload( $environment ) );
-
   }
   
   public function validPost() {
@@ -152,7 +170,7 @@ class public_board_oekaki_oekaki extends kxCmd {
           $post['message'] .= '<br /><small><a href="' . KX_SCRIPT . '/animation.php?board=' . $this->board->board_name . '&amp;id=' . $files[0]['file_name'] . '">' . _gettext('View animation') . '</a></small>';
         }
       }      
-      $post['post_id'] = $postClass->makePost($postData, $post, $files, $_SERVER['REMOTE_ADDR'], $sticky, $lock, $this->board->board_id);
+      $post['post_id'] = $postClass->makePost($postData, $post, $files, $_SERVER['REMOTE_ADDR'], $commands['sticky'], $commands['lock'], $this->board->board_id);
 
       $postClass->modPost(array_merge($postData, $post), $this->board);
       $postClass->setCookies($post);
@@ -166,7 +184,7 @@ class public_board_oekaki_oekaki extends kxCmd {
       $this->regeneratePages();
       if ($postData['thread_info']['parent'] == 0) {
         // Regenerate the thread
-        $this->regenerateThreads($post['post_id']);
+        //$this->regenerateThreads($post['post_id']);
       } else {
         // Regenerate the thread
         $board_class->regenerateThreads($postData['thread_info']['parent']);
@@ -180,12 +198,14 @@ class public_board_oekaki_oekaki extends kxCmd {
     //-----------------------------------------
 
 
-    $this->dwoo_data['filetypes'] = $this->environment->get('kx:classes:board:rebuild:id')->getEmbeds();
+    $this->dwoo_data['filetypes'] = $this->rebuild->getEmbeds();
     
     $i = 0;
     
     $postsperpage =	$this->environment->get('kx:display:imgthreads');
-    $totalpages = $this->environment->get('kx:classes:board:rebuild:id')->calcTotalPages()
+    $totalpages = $this->rebuild->calcTotalPages()-1;
+    
+    $this->dwoo_data['numpages'] = $totalpages;
 
 
     //-----------------------------------------
@@ -213,18 +233,18 @@ class public_board_oekaki_oekaki extends kxCmd {
         //------------------------------------------------------------------------------------------
         // If the thread is on the page set to mark, and hasn't been marked yet, mark it
         //------------------------------------------------------------------------------------------
-        if ($this->environment->get('kx:classes:board:rebuild:id')->markThread($thread) {
+        if ($this->rebuild->markThread($thread)) {
           $this->RegenerateThreads($thread->post_id);
           // RegenerateThreads overwrites the replythread variable. Reset it here.
           $this->dwoo_data['replythread'] = 0;
         }
-        $thread = $this->environment->get('kx:classes:board:rebuild:id')->buildPost($thread, true);
-        $tempPosts = $this->environment->get('kx:classes:board:rebuild:id')->buildPageThread($thread, true);
-        $this->environment->get('kx:classes:board:rebuild:id')->getOmittedPosts($thread, $tempPosts[1] true);
+        $thread = $this->rebuild->buildPost($thread, true);
+        $tempPosts = $this->rebuild->buildPageThread($thread, true);
+        $this->rebuild->getOmittedPosts($thread, $tempPosts[1], true);
 
         $posts = array_reverse($tempPosts[0]);
         array_unshift($posts, $thread);
-        $outPosts[] = $posts;
+        $outThread[] = $posts;
 
       }
       if (!isset($embeds)) {
@@ -234,20 +254,14 @@ class public_board_oekaki_oekaki extends kxCmd {
                            ->fetchAll();
         $this->dwoo_data['embeds'] = $embeds;
       }
-      if (!isset($header)){
-        $header = $this->pageHeader();
-        $header = str_replace("<!sm_threadid>", 0, $header);
-      }
-      if (!isset($postbox)) {
-        $postbox = $this->postBox();
-      }
 
       $this->dwoo_data['posts'] = $outThread;
       
       $this->dwoo_data['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
-      $content = kxTemplate::get('oek_board_page', $this->dwoo_data);
-      $footer = $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
-      $content = $header.$postbox.$content.$footer;
+      $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
+      $this->pageHeader(0);
+      $this->postBox(0);
+      $content = kxTemplate::get('board/image/board_page', $this->dwoo_data);
 
       if ($i == 0) {
         $page = KX_BOARD . '/'.$this->board->board_name.'/'.kxEnv::Get('kx:pages:first');
@@ -272,10 +286,6 @@ class public_board_oekaki_oekaki extends kxCmd {
     $this->dwoo_data['embeds'] = $embeds;
     // No ID? Get every thread.
     if ($id == 0) {
-      //----------------------------------------
-      // Cache the page header to save resources
-      //----------------------------------------
-      $this->board->header = $this->pageHeader(1);
       
       // Okay let's do this!
       $threads = $this->db->select("posts")
@@ -301,24 +311,12 @@ class public_board_oekaki_oekaki extends kxCmd {
           $lastBit = "";
           $executiontime_start_thread = microtime(true);
 
-          $temp = $this->environment->get('kx:classes:board:rebuild:id')->buildThread($id);
+          $temp = $this->rebuild->buildThread($id);
           $thread = $temp[0];
           $this->dwoo_data['lastid'] = $temp[1];
           
-          //---------------------------------------------------------------------
-          // If we're regenerating all threads, we already cached this earlier
-          //---------------------------------------------------------------------
-          if ( !isset($this->board->header) ) {
-            $this->board->header = $this->pageHeader($id);
-            
-          }
-          //----------------------------------------------------
-          // There's still some placeholders we need to replace 
-          // though, regardless. This is actually significantly
-          // faster than reprocessing the entire template.
-          //----------------------------------------------------
-          $this->board->header  = str_replace("<!sm_threadid>", $id, $this->board->header );
-
+         
+          $this->board->header = $this->pageHeader($id);
           $this->board->postbox = $this->postBox($id);
           //-----------
           // Dwoo-hoo
@@ -330,7 +328,7 @@ class public_board_oekaki_oekaki extends kxCmd {
           //$this->dwoo_data->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
           $replycount = (count($thread)-1);
           $this->dwoo_data['replycount']  = $replycount;
-          $replyHeader = kxTemplate::get('oek_reply_header', $this->dwoo_data);
+          //$replyHeader = kxTemplate::get('img_reply_header', $this->dwoo_data);
           if (!isset($this->board->footer)) $this->board->footer = $this->footer(false, (microtime(true) - $executiontime_start_thread));
         }
         else if ($i == 1) {
@@ -351,7 +349,6 @@ class public_board_oekaki_oekaki extends kxCmd {
           $this->dwoo_data['posts'] = array_slice($thread, 0, 100);
         }
         $content = kxTemplate::get('oek_thread', $this->dwoo_data);
-        $content = $this->board->header.$this->board->postbox.$replyHeader.$content.$footer;
         kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
       }
     }
@@ -366,16 +363,16 @@ class public_board_oekaki_oekaki extends kxCmd {
    * @return string The built header
    */
   public function pageHeader($replythread = 0) {
-    $this->dwoo_data .= $this->environment->get('kx:classes:board:rebuild:id')->pageHeader();
+    $this->dwoo_data += $this->rebuild->pageHeader();
     $this->dwoo_data['replythread'] = $replythread;
     $this->dwoo_data['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
     $this->dwoo_data['ku_defaultstyle'] = (!empty($this->board->board_style_default) ? ($this->board->board_style_default) : (kxEnv::Get('kx:css:imgdefault')));
-    return kxTemplate::get('global_board_header', $this->dwoo_data).kxTemplate::get('oek_header', $this->dwoo_data);
+    //return kxTemplate::get('global_board_header', $this->dwoo_data).kxTemplate::get('img_header', $this->dwoo_data);
   }
 
-	/**
-	 * Build the page header for an oekaki posting
-	 */  
+  /**
+   * Build the page header for an oekaki posting
+   */  
   private function _oekakiHeader() {
     echo "stub";
     exit();
@@ -390,7 +387,7 @@ class public_board_oekaki_oekaki extends kxCmd {
    */
   public function postBox($replythread = 0) {
 
-    $this->dwoo_data .= $this->environment->get('kx:classes:board:rebuild:id')->blotter();
+    $this->dwoo_data += $this->rebuild->blotter();
     $oekposts = $this->db->select("posts")
                          ->fields("posts", array("post_id"))
                          ->innerJoin("post_files", "", "file_post = post_id AND file_board = post_board");
@@ -406,11 +403,10 @@ class public_board_oekaki_oekaki extends kxCmd {
                          ->execute()
                          ->fetchAll();
     $this->dwoo_data['oekposts'] = $oekposts;
-    return kxTemplate::get('oek_post_box', $this->dwoo_data);
+    //return kxTemplate::get('img_post_box', $this->dwoo_data);
     
   }
 
-  
   /**
    * Display the page footer
    *
@@ -419,7 +415,7 @@ class public_board_oekaki_oekaki extends kxCmd {
    * @return string The generated footer
    */
   public function footer($noboardlist = false, $executiontime = 0) {
-    $this->dwoo_data .= $this->environment->get('kx:classes:board:rebuild:id')->footer($noboardlist, $executiontime);
-    return kxTemplate::get('oek_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
+    $this->dwoo_data += $this->rebuild->footer($noboardlist, $executiontime);
+    //return kxTemplate::get('img_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
   }
 }

@@ -64,15 +64,36 @@ class public_board_text_text extends kxCmd {
                             ->fields("boards")
                             ->condition("board_name", $this->request['board'])
                             ->execute()
-                            ->fetchAll();
-    $this->board = $this->board[0];
+                            ->fetch();
+
+    //-----------------------------------------
+    // Get the unique posts for this board
+    //-----------------------------------------
+    $result = $this->db->select("posts");
+    $result->addExpression("COUNT(DISTINCT post_ip_md5)");
+    $this->board->board_uniqueposts = $result->condition("post_board", $this->board->board_id)
+                                               ->condition("post_deleted", 0)
+                                               ->execute()
+                                               ->fetchField();
+
+    //-----------------------------------------------
+    // Get the the allowed filetypes for this board
+    //-----------------------------------------------
+    $result = $this->db->select("filetypes", "f")
+                       ->fields("f", array("type_ext"));
+    $result->innerJoin("board_filetypes", "bf", "bf.type_id = f.type_id");
+    $result->innerJoin("boards", "b", "b.board_id = bf.type_board_id");
+    $this->board->board_filetypes_allowed = $result->condition("type_board_id", $this->board->board_id)
+                                                     ->orderBy("type_ext")
+                                                     ->execute()
+                                                     ->fetchAssoc();
 
     require_once( kxFunc::getAppDir('board') .'/classes/rebuild.php' );
     $this->environment->set('kx:classes:board:rebuild:id', new rebuild( $environment ) );
-    $this->environment->get('kx:classes:board:rebuild:id')->board = $this->board;
+    $this->rebuild = $this->environment->get('kx:classes:board:rebuild:id');
+    $this->rebuild->board = $this->board;
     require_once( kxFunc::getAppDir('board') .'/classes/upload.php' );
     $this->environment->set('kx:classes:board:upload:id', new upload( $environment ) );
-
   }
   
   public function validPost() {
@@ -158,7 +179,7 @@ class public_board_text_text extends kxCmd {
       $this->regeneratePages();
       if ($postData['thread_info']['parent'] == 0) {
         // Regenerate the thread
-        $this->regenerateThreads($post['post_id']);
+        //$this->regenerateThreads($post['post_id']);
       } else {
         // Regenerate the thread
         $board_class->regenerateThreads($postData['thread_info']['parent']);
@@ -173,7 +194,9 @@ class public_board_text_text extends kxCmd {
     $i = 0;
 
     $postsperpage =	$this->environment->get('kx:display:txtthreads');
-    $totalpages = $this->environment->get('kx:classes:board:rebuild:id')->calcTotalPages();
+    $totalpages = $this->rebuild->calcTotalPages()-1;
+    
+    $this->dwoo_data['numpages'] = $totalpages;
 
 
     //-----------------------------------------
@@ -201,12 +224,12 @@ class public_board_text_text extends kxCmd {
         //------------------------------------------------------------------------------------------
         // If the thread is on the page set to mark, and hasn't been marked yet, mark it
         //------------------------------------------------------------------------------------------
-        if ($this->environment->get('kx:classes:board:rebuild:id')->markThread($thread)) {
+        if ($this->rebuild->markThread($thread)) {
           $this->RegenerateThreads($thread->post_id);
           // RegenerateThreads overwrites the replythread variable. Reset it here.
           $this->dwoo_data['replythread'] = 0;
         }
-        $thread = $this->environment->get('kx:classes:board:rebuild:id')->formatPost($thread, true);
+        $thread = $this->rebuild->formatPost($thread, true);
         $omitids = array();
         
         //-----------------------------------------------------------------------------------------------------------------------------------
@@ -247,27 +270,19 @@ class public_board_text_text extends kxCmd {
           $post->post_message = '<span style="font-color:gray">'._gettext('This post has been deleted.').'</span>';
           $post = $this->formatPost($post, true);
         }
-        $this->environment->get('kx:classes:board:rebuild:id')->getOmittedPosts($thread, array(), false);
+        $this->rebuild->getOmittedPosts($thread, array(), false);
         $posts = array_reverse($posts);
         array_unshift($posts, $thread);
         $outPosts[] = $posts;
 
       }
-      if (!isset($header)){
-        $header = $this->pageHeader();
-        $header = str_replace("<!sm_threadid>", 0, $header);
-      }
-      if (!isset($postbox)) {
-        $postbox = $this->postBox();
-        $postbox = str_replace("<!sm_threadid>", 0, $postbox);
-      }
 
       $this->dwoo_data['posts'] = $outThread;
       
       $this->dwoo_data['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
-      $content = kxTemplate::get('txt_board_page', $this->dwoo_data);
-      $footer = $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
-      $content = $header.$postbox.$content.$footer;
+      $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
+      $this->pageHeader(0);
+      $content = kxTemplate::get('board/text/board_page', $this->dwoo_data);
 
       if ($i == 0) {
         $page = KX_BOARD . '/'.$this->board->board_name.'/'.kxEnv::Get('kx:pages:first');
@@ -318,10 +333,6 @@ class public_board_text_text extends kxCmd {
     $this->dwoo_data['embeds'] = $embeds;
     // No ID? Get every thread.
     if ($id == 0) {
-      //-------------------------------------------
-      // Cache the page header to save resources
-      //-------------------------------------------
-      $this->board->header = $this->pageHeader(1);
       
       // Okay let's do this!
       $threads = $this->db->select("posts")
@@ -347,7 +358,7 @@ class public_board_text_text extends kxCmd {
           $lastBit = "";
           $executiontime_start_thread = microtime(true);
 
-          $temp = $this->environment->get('kx:classes:board:rebuild:id')->buildThread($id);
+          $temp = $this->rebuild->buildThread($id);
           $dwoo_data = array();
           //---------------------------------------------------------------------------------------------------
           // Okay, this may seem confusing, but we're caching this so we can use it as a prepared statement
@@ -372,23 +383,12 @@ class public_board_text_text extends kxCmd {
             $post->post_email = '';
             $post->post_tripcode = _gettext('Deleted');
             $post->post_message = '<span style="font-color:gray">'._gettext('This post has been deleted.').'</span>';
-            $post = $this->environment->get('kx:classes:board:rebuild:id')->formatPost($post, false);
+            $post = $this->rebuild->formatPost($post, false);
           }
           
-          //--------------------------------------------------------------------
-          // If we're regenerating all threads, we already cached this earlier
-          //--------------------------------------------------------------------
-          if ( !isset($this->board->header)) {
-            $this->board->header = $this->pageHeader($id);
-          }
-          
-          //----------------------------------------------------
-          // There's still some placeholders we need to replace 
-          // though, regardless. This is actually significantly
-          // faster than reprocessing the entire template.
-          //----------------------------------------------------
-          $this->board->header  = str_replace("<!sm_threadid>", $id, $this->board->header );
-
+         
+          $this->board->header = $this->pageHeader($id);
+          $this->board->postbox = $this->postBox($id);
           //-----------
           // Dwoo-hoo
           //-----------
@@ -399,7 +399,7 @@ class public_board_text_text extends kxCmd {
           //$this->dwoo_data->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
           $replycount = (count($thread)-1);
           $this->dwoo_data['replycount']  = $replycount;
-          $replyHeader = kxTemplate::get('txt_reply_header', $this->dwoo_data);
+          //$replyHeader = kxTemplate::get('img_reply_header', $this->dwoo_data);
           if (!isset($this->board->footer)) $this->board->footer = $this->footer(false, (microtime(true) - $executiontime_start_thread));
         }
         else if ($i == 1) {
@@ -420,7 +420,6 @@ class public_board_text_text extends kxCmd {
           $this->dwoo_data['posts'] = array_slice($thread, 0, 100);
         }
         $content = kxTemplate::get('txt_thread', $this->dwoo_data);
-        $content = $this->board->header.$replyHeader.$content.$footer;
         kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
       }
     }
@@ -435,7 +434,7 @@ class public_board_text_text extends kxCmd {
    * @return string The built header
    */
   public function pageHeader($replythread = 0, $liststart = 0, $liststooutput = -1) {
-    $this->dwoo_data += $this->environment->get('kx:classes:board:rebuild:id')->pageHeader();
+    $this->dwoo_data += $this->rebuild->pageHeader();
     $this->dwoo_data['replythread'] = $replythread;
     $this->dwoo_data['ku_styles'] = explode(':', kxEnv::Get('kx:css:txtstyles'));
     $this->dwoo_data['ku_defaultstyle'] = (!empty($this->board->board_style_default) ? ($this->board->board_style_default) : (kxEnv::Get('kx:css:txtdefault')));
@@ -472,18 +471,7 @@ class public_board_text_text extends kxCmd {
       $this->dwoo_data['threads'] = $threads;
       $header .= kxTemplate::get('txt_threadlist', $this->dwoo_data);
     }
-    return kxTemplate::get('global_board_header', $this->dwoo_data).$header;
-  }
-  
-  /**
-   * Generate the postbox area
-   *
-   * @param integer $replythread The ID of the thread being replied to.  0 if not replying
-   * @param string $postboxnotice The postbox notice
-   * @return string The generated postbox
-   */
-  public function postBox($replythread) {
-    return kxTemplate::get('txt_post_box', $this->dwoo_data);    
+    //return kxTemplate::get('global_board_header', $this->dwoo_data).kxTemplate::get('img_header', $this->dwoo_data);
   }
 
   /**
@@ -494,7 +482,7 @@ class public_board_text_text extends kxCmd {
    * @return string The generated footer
    */
   public function footer($noboardlist = false, $executiontime = 0) {
-    $this->dwoo_data += $this->environment->get('kx:classes:board:rebuild:id')->footer($noboardlist, $executiontime);
-    return kxTemplate::get('txt_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
+    $this->dwoo_data += $this->rebuild->footer($noboardlist, $executiontime);
+    //return kxTemplate::get('img_footer', $this->dwoo_data).kxTemplate::get('global_board_footer', $this->dwoo_data);
   }
 }

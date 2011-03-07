@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-class Twig_Extensions_Extension_DateFormat extends Twig_Extension
+class Twig_Extensions_Extension_Round extends Twig_Extension
 {
     /**
      * Returns the token parser instance to add to the existing list.
@@ -28,14 +28,8 @@ class Twig_Extensions_Extension_DateFormat extends Twig_Extension
     public function getFilters()
     {
         return array(
-            'date_format' => new Twig_Filter_Method($this, 'strftime'),
+            'round' => new Twig_Filter_Function('round'),
         );
-    }
-
-
-    public function strftime($string, $format)
-    {
-        return strftime($format, $string);
     }
     
     /**
@@ -45,6 +39,6 @@ class Twig_Extensions_Extension_DateFormat extends Twig_Extension
      */
     public function getName()
     {
-        return 'DateFormat';
+        return 'Round';
     }
 }

@@ -43,6 +43,7 @@ class Rebuild {
                                           ->execute()
                                           ->fetchField();
     $dwoo_data['boardlist'] = $this->board->boardlist;
+
     return $dwoo_data;
 
   }
@@ -290,7 +291,7 @@ class Rebuild {
   	$dateEmail = (empty($this->board->board_default_name)) ? $post->post_email : 0;
 		$post->post_message = stripslashes($this->formatLongMessage($post->post_message, $this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $page));
 		$post->timestamp_formatted = kxFunc::formatDate($post->post_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
-		$post->reflink = $this->formatReflink($this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $post->post_parent, $this->environment->get('kx:language:currentlocale'));
+		$post->reflink = $this->formatReflink($this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $post->post_id, $this->environment->get('kx:language:currentlocale'));
     return $post;
   }
   

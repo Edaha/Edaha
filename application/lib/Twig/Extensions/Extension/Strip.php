@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-class Twig_Extensions_Extension_DateFormat extends Twig_Extension
+class Twig_Extensions_Extension_Strip extends Twig_Extension
 {
     /**
      * Returns the token parser instance to add to the existing list.
@@ -17,25 +17,9 @@ class Twig_Extensions_Extension_DateFormat extends Twig_Extension
      */
     public function getTokenParsers()
     {
-        return array();
-    }
-
-    /**
-     * Returns a list of filters to add to the existing list.
-     *
-     * @return array An array of filters
-     */
-    public function getFilters()
-    {
         return array(
-            'date_format' => new Twig_Filter_Method($this, 'strftime'),
+            new Twig_Extensions_TokenParser_Strip(),
         );
-    }
-
-
-    public function strftime($string, $format)
-    {
-        return strftime($format, $string);
     }
     
     /**
@@ -45,6 +29,6 @@ class Twig_Extensions_Extension_DateFormat extends Twig_Extension
      */
     public function getName()
     {
-        return 'DateFormat';
+        return 'strip';
     }
 }

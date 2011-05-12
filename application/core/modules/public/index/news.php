@@ -48,13 +48,13 @@ class public_core_index_news extends kxCmd {
                                      ->fetchAll();
     $dwoo_data['sections'] = $this->db->select("sections")
                                       ->fields("sections")
-                                      ->orderBy("\"order\"")
+                                      ->orderBy("section_order")
                                       ->execute()
                                       ->fetchAll();
     $dwoo_data['boards'] = $this->db->select("boards")
                                     ->fields("boards")
-                                    ->orderBy("section")
-                                    ->orderBy("\"order\"")
+                                    ->orderBy("board_section")
+                                    ->orderBy("board_order")
                                     ->execute()
                                     ->fetchAll();
 

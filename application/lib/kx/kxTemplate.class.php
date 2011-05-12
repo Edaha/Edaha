@@ -31,7 +31,8 @@ class kxTemplate {
       }
       self::$instance = new Twig_Environment($loader, array(
   'cache' => $cache_dir,
-  'auto_reload' => true
+  'auto_reload' => true,
+  'debug' => true
 ));
       // Load our extensions
       self::$instance->addExtension(new Twig_Extensions_Extension_I18n());
@@ -40,6 +41,8 @@ class kxTemplate {
       self::$instance->addExtension(new Twig_Extensions_Extension_Text());
       self::$instance->addExtension(new Twig_Extensions_Extension_Round());
       self::$instance->addExtension(new Twig_Extensions_Extension_Strip());
+      self::$instance->addExtension(new Twig_Extensions_Extension_Debug());
+      self::$instance->addExtension(new Twig_Extensions_Extension_PHP());
       // Supply Twig with our GET/POST variables
       self::$data['_get'] = $_GET;
       self::$data['_post'] = $_POST;

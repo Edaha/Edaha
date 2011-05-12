@@ -199,10 +199,10 @@ class public_board_image_image extends kxCmd {
       $this->regeneratePages();
       if ($postData['thread_info']['parent'] == 0) {
         // Regenerate the thread
-        //$this->regenerateThreads($post['post_id']);
+        $this->regenerateThreads($post['post_id']);
       } else {
         // Regenerate the thread
-        $board_class->regenerateThreads($postData['thread_info']['parent']);
+        $this->regenerateThreads($postData['thread_info']['parent']);
       }
     }
   }
@@ -363,7 +363,7 @@ class public_board_image_image extends kxCmd {
           // Grab the first 100 posts
           $this->dwoo_data['posts'] = array_slice($thread, 0, 100);
         }
-        $content = kxTemplate::get('img_thread', $this->dwoo_data);
+        $content = kxTemplate::get('board/image/thread', $this->dwoo_data);
         kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
       }
     }

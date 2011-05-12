@@ -51,7 +51,7 @@ class kxTemplate {
         $data['current_app'] = "";
       	if (KX_CURRENT_APP == "core") {
         	// Load up some variables for tabbing/menu purposes
-        	if (kxEnv::$request['app']) {
+        	if (isset(kxEnv::$request['app'])) {
           	self::$data['current_app'] = kxEnv::$request['app'];
           }
         }
@@ -152,7 +152,7 @@ class kxTemplate {
   
   private static function _buildMenu() {
   	$app = KX_CURRENT_APP;
-    if (KX_CURRENT_APP == 'core' && !kxEnv::$request['module'] && !kxEnv::$request['app']) {
+    if (KX_CURRENT_APP == 'core' && !isset(kxEnv::$request['module']) && !isset(kxEnv::$request['app'])) {
         $modules = Array(Array('module_file' => 'index'));
     }
     else {

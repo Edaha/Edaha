@@ -442,6 +442,7 @@ CREATE TABLE IF NOT EXISTS `staff` (
   `user_last_active` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+INSERT INTO `staff` (`user_id`, `user_name`, `user_password`, `user_salt`, `user_type`, `user_boards`, `user_add_time`, `user_last_active`) VALUES ('1', 'admin', '5f4dcc3b5aa765d61d8327deb882cf99', '', '1', NULL, '0', '0');
 -- --------------------------------------------------------
 
 --

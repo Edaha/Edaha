@@ -80,7 +80,7 @@ class kxCmdResolv {
 		$section   = kxEnv::$current_section;
     // No module?
     if (!$module) {
-      if (IN_MANAGE && !kxEnv::$request['app']) {
+      if (IN_MANAGE && !isset(kxEnv::$request['app'])) {
         $module = 'index';
       }
       else {

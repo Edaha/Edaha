@@ -7,3 +7,4 @@ DEFINE('IN_MANAGE', false);
 kxCmdResolv::run(kxEnv::getInstance());
 
 exit();
+?>

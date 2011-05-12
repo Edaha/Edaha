@@ -2,7 +2,7 @@
 
 class manage_core_site_config extends kxCmd {
   public function exec(kxEnv $environment) {
-    switch ($_GET['do']) {        
+    switch ( (isset($_GET['do'])) ? $_GET['do'] : '' ) {
       case 'edit':
         $this->_show();
         break;

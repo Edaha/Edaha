@@ -87,28 +87,18 @@ function _bind_textdomain_codeset($domain, $codeset) {
  * gettext: Sets the path for domain
  * faketext: Parses and stores the strings from the .po file
  */
-function _bindtextdomain($domain, $directory, $faketext_lang = KU_LOCALE) {
+function _bindtextdomain() {
 	global $faketext;
 	if (!empty($faketext)) {
 		$faketext = Array();
 	}
 	// Path to .po file
-	$po = "{$directory}/{$faketext_lang}/LC_MESSAGES/{$domain}.po";
+	$po = "application/lib/lang/".kxEnv::Get('kx:misc:locale')."/kusaba.po";
 
 	if (file_exists($po)) {
 		$contents = file_get_contents($po);
-	}
-	else {
-		// If the .po wasn't found, try replacing dashes with underscores in locale
-		$formatted_lang = str_replace('-', '_', $faketext_lang);
-		$po = "{$directory}/{$formatted_lang}/LC_MESSAGES/{$domain}.po";
-		if (file_exists($po)) {
-			$contents = file_get_contents($po);
-		}
-		else {
-			// .po not found, return
+	} else {
 			return false;
-		}
 	}
 
 	// Remove header information;
@@ -175,6 +165,11 @@ function _dngettext($domain, $msgid1, $msgid2, $n) {
 function _gettext($message) {
 	global $faketext;
 
+	//Ugly hack, if our locale is english, remove $faketext so strings don't get translated
+	if (kxEnv::Get('kx:misc:locale') == 'en' && !empty($faketext)) {
+		unset($faketext);
+	}
+        
 	return (!empty($faketext[$message]) ? $faketext[$message] : $message);
 }
 

@@ -1,28 +1,25 @@
+{% import "manage/macros.tpl" as macros %}
+
 {% extends "manage/wrapper.tpl" %}
 
 {% block heading %}{% trans "Manage Staff" %}{% endblock %}
 
 {% block managecontent %}
 <form action="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=show&amp;act={% if _get.act == 'edit' %}edit&amp;id={{user.user_id}}{% else %}add{% endif %}" method="post">
-  <fieldset id="staff_add">
-    <legend>{% if _get.act == 'edit' %}{% trans "Edit user" %}{% else %}{% trans "Add new user" %}{% endif %}</legend>
-    
-    <label for="username">{% trans "Username" %}:</label>
-      <input type="text" id="username" name="username" {% if _get.act == 'edit' %}value="{{user.user_name}}" disabled="disabled"{% endif %} /><br />
-    <label for="pwd1">{% trans "Password" %}:</label>
-      <input type="password" id="pwd1" name="pwd1" /><br />
-    <label for="pwd2">{% trans "Reenter Password" %}:</label>
-      <input type="password" id="pwd2" name="pwd2" /><br />
-    <label for="type">{% trans "Type" %}:</label>
-      <select id="type" name="type">
-        <option value="1"{% if _get.act == 'edit' and user.user_type == 1 %} selected="selected"{% endif %}>{% trans "Administrator" %}</option>
-        <option value="2"{% if _get.act == 'edit' and user.user_type == 2 %} selected="selected"{% endif %}>{% trans "Moderator" %}</option>
-        <option value="0"{% if _get.act == 'edit' and user.user_type == 0 %} selected="selected"{% endif %}>{% trans "Janitor" %}</option>
-      </select><br />
-    
-    <label for="submit">&nbsp;</label>
-      <input type="submit" id="submit" value="{% trans "Submit" %}" />
-  </fieldset>
+  {% if _get.act == 'edit' %}{% set formname = "Edit user" %}{% else %}{% set formname = "Add new user" %}{% endif %}
+  {{ macros.manageform("staff_add", formname, true,
+                       { 'Username'            : { 'id' : 'subject', 'type' : 'text',  'value' : user.user_name } ,
+                         'Password'            : { 'id' : 'pwd1', 'type' : 'password' } ,
+                         'Reenter Password'    : { 'id' : 'pwd2', 'type' : 'password' } ,
+                         'Type'                : { 'id' : 'type', 'type' : 'select',  'value' : 
+                          { 
+                            'Administrator' : { 'value' : 1, 'selected' : (_get.act == 'edit' and user.user_type == 1) } ,
+                            'Moderator'     : { 'value' : 2, 'selected' : (_get.act == 'edit' and user.user_type == 2) } ,
+                            'Janitor'       : { 'value' : 3, 'selected' : (_get.act == 'edit' and user.user_type == 3) } ,
+                          } } 
+                       }
+                      ) 
+  }}
 </form>
   
 <br />  

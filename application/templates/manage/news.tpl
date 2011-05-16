@@ -28,7 +28,7 @@
     </tr>
   </thead>
   <tbody>
-  {% for entry in news %}
+  {% for news in entries %}
     <tr>
       <td>{{ news.entry_time|date_format("%b %d, %Y %H:%M") }}</td>
       <td>{{ news.entry_subject }}</td>

@@ -28,13 +28,24 @@ class manage_core_site_front extends kxCmd {
     }    
   }
   private function _news() {
+    $this->twigData['entries'] = $this->db->select("front")
+                                      ->fields("front")
+                                      ->condition("entry_type", 0)
+                                      ->orderBy("entry_time", "DESC")
+                                      ->execute()
+                                      ->fetchAll();
+    kxTemplate::output("manage/news", $this->twigData);
+  }
+  
+  private function _editNews() {
+  
     $this->twigData['news'] = $this->db->select("front")
                                        ->fields("front")
                                        ->condition("entry_type", 0)
+                                       ->condition("entry_id", $this->request['id'])
                                        ->orderBy("entry_time", "DESC")
                                        ->execute()
-                                       ->fetchAll();
-    kxTemplate::output("manage/news");
+                                       ->fetchAssoc();
   }
   
   private function _postNews() {
@@ -46,12 +57,13 @@ class manage_core_site_front extends kxCmd {
                ->fields(array(
                  'entry_subject' => $this->request['subject'],
                  'entry_message' => $this->request['news'],
-                 'entry_type' => 0,
-                 'entry_time' => time()
+                 'entry_email'   => $this->request['email'],
+                 'entry_type'    => 0,
+                 'entry_time'    => time()
                ))
                ->execute();
         $dwoo_data['notice_type'] = 'success';
-        $dwoo_data['notice'] = _gettext('User added successfully');
+        $dwoo_data['notice'] = _gettext('News entry successfully added.');
   }
 
 }

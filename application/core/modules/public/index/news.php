@@ -37,13 +37,24 @@ if (!defined('KUSABA_RUNNING'))
 class public_core_index_news extends kxCmd {
 
   public function exec( kxEnv $environment ) {
-  
+      // i might have mixed up faq with rules, if so, switch the types around..
+  if(isset($_GET['p'])){
+      switch($_GET['p']){
+        case 'faq':
+            $type = 1;
+            break;
+        case 'rules':
+            $type = 2;
+            break;
+      }
+  }else{
+      $type = 0;
+  }
     $dwoo_data['styles'] = explode(':', kxEnv::Get('kx:css:menustyles'));
     $dwoo_data['entries'] = $this->db->select("front")
                                      ->fields("front")
-                                     ->condition("page", 0)
-                                     ->orderBy("timestamp", "DESC")
-                                     ->range(0, 1)
+                                     ->condition("entry_type", $type)
+                                     ->orderBy("entry_time", "DESC")
                                      ->execute()
                                      ->fetchAll();
     $dwoo_data['sections'] = $this->db->select("sections")

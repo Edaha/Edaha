@@ -13,6 +13,7 @@
                          'E-Mail'  : { 'id' : 'email', 'type' : 'text', 'desc' : "Can be left blank",  'value' : news.entry_email } }
                        ) 
   }}
+<input type="hidden" id="edit" name="edit" value="{{ news.id }}" />
 </form>
   
 <br />  
@@ -33,7 +34,7 @@
       <td>{{ news.entry_time|date_format("%b %d, %Y %H:%M") }}</td>
       <td>{{ news.entry_subject }}</td>
       <td>{{ news.entry_message }}</td>
-      <td>[ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=news-edit&amp;id={{ news.entry_id }}">{% trans "Edit" %}</a> ] [ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=news-del&amp;id={{ news.entry_id }}">{% trans "Delete" %}</a> ]</td>
+      <td>[ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=news-edit&amp;id={{ news.id }}">{% trans "Edit" %}</a> ] [ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=news-del&amp;id={{ news.id }}">{% trans "Delete" %}</a> ]</td>
     </tr>
   {% endfor %}
   </tbody>

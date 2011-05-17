@@ -102,7 +102,7 @@ class public_board_oekaki_oekaki extends kxCmd {
         isset($this->request['message']) ||
         isset($_FILES['imagefile'])
       ) || /* It is a validated oekaki posting */
-      $this->environment->get('kx:classes:board:posting:id')->checkOekaki();
+      $this->environment->get('kx:classes:board:posting:id')->checkOekaki()
     ) {
       return true;
     } else {

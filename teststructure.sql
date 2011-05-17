@@ -210,13 +210,13 @@ INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type
 
 CREATE TABLE IF NOT EXISTS `front` (
   `id` int(11) NOT NULL,
-  `page` smallint(6) DEFAULT '0',
+  `entry_type` smallint(6) DEFAULT '0',
   `order` smallint(6) DEFAULT '0',
-  `subject` varchar(255) NOT NULL,
-  `message` text NOT NULL,
-  `timestamp` int(11) NOT NULL DEFAULT '0',
+  `entry_subject` varchar(255) NOT NULL,
+  `entry_message` text NOT NULL,
+  `entry_time` int(11) NOT NULL DEFAULT '0',
   `poster` varchar(75) DEFAULT '',
-  `email` varchar(255) DEFAULT ''
+  `entry_email` varchar(255) DEFAULT ''
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

@@ -236,8 +236,31 @@ padding: 2px;
 margin-bottom: 5px
 }
 
+.content textarea {
+background-color:#C3C5A9;
+border:1px solid #000;
+}
+
 .content input[type="submit"] {
 padding: 3px 4px;
+}
+
+.desc {
+font-size: 8pt;
+font-style: italic;
+}
+
+/* ------------------------- 
+    Notices
+ ------------------------- */
+
+.success {
+background-color: #8CDD81;
+border: 1px solid #3D8B37;
+font-size: 8pt;
+margin: 10px 0px;
+padding: 10px;
+text-align: center;
 }
 
 /* ------------------------- 

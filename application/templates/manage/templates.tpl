@@ -11,17 +11,17 @@ ol.tree
 	padding: 0 0 0 30px;
 	width: 300px;
 }
-	li 
+	ol.tree li 
 	{ 
 		position: relative; 
 		margin-left: -15px;
 		list-style: none;
 	}
-	li.file
+	ol.tree li.file
 	{
 		margin-left: -1px !important;
 	}
-		li.file a
+		ol.tree li.file a
 		{
 			background: url(document.png) 0 0 no-repeat;
 			color: #fff;
@@ -33,7 +33,7 @@ ol.tree
 		li.file a[href *= '.html']	{ background: url(document.png) 0 0 no-repeat; }
 		li.file a[href $= '.css']	{ background: url(document.png) 0 0 no-repeat; }
 		li.file a[href $= '.js']		{ background: url(document.png) 0 0 no-repeat; }
-	li input
+	ol.tree li input
 	{
 		position: absolute;
 		left: 0;
@@ -45,7 +45,7 @@ ol.tree
 		width: 1em;
 		top: 0;
 	}
-		li input + ol
+		ol.tree li input + ol
 		{
 			background: url(toggle-small-expand.png) 40px 0 no-repeat;
 			margin: -0.938em 0 0 -44px; /* 15px */
@@ -53,7 +53,7 @@ ol.tree
 			height: 1em;
 		}
 		li input + ol > li { height: 0; overflow: hidden; margin-left: -14px !important; padding-left: 1px; }
-	li label
+	ol.tree li label
 	{
 		background: url(folder-horizontal.png) 15px 1px no-repeat;
 		cursor: pointer;
@@ -61,7 +61,7 @@ ol.tree
 		padding-left: 37px;
 	}
 
-	li input:checked + ol
+	ol.tree li input:checked + ol
 	{
 		background: url(toggle-small.png) 40px 5px no-repeat;
 		margin: -1.25em 0 0 -44px; /* 20px */

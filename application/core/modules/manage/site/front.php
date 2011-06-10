@@ -2,21 +2,20 @@
 
 class manage_core_site_front extends kxCmd {
   public function exec(kxEnv $environment){
+    switch ($this->request['action']) {
+      case 'post':
+        $this->_post();
+        break;
+      case 'edit':
+        $this->_edit();
+        break;
+      case 'del':
+        $this->_del();
+        break;
+    }
     switch ($this->request['do']) {        
       case 'news':
       default:
-        $this->_news();
-        break;
-      case 'news-edit':
-        $this->_editNews();
-        $this->_news();
-        break;
-      case 'news-del':
-        $this->_delNews();
-        $this->_news();
-        break;
-      case 'news-post':
-        $this->_postNews();
         $this->_news();
         break;
       case 'faq':
@@ -27,6 +26,7 @@ class manage_core_site_front extends kxCmd {
         break;
     }    
   }
+  
   private function _news() {
     $this->twigData['entries'] = $this->db->select("front")
                                       ->fields("front")
@@ -37,52 +37,91 @@ class manage_core_site_front extends kxCmd {
     kxTemplate::output("manage/news", $this->twigData);
   }
   
-  private function _editNews() {
-  
-    $this->twigData['news'] = $this->db->select("front")
-                                       ->fields("front")
-                                       ->condition("entry_type", 0)
-                                       ->condition("id", $this->request['id'])
-                                       ->orderBy("entry_time", "DESC")
-                                       ->execute()
-                                       ->fetchAssoc();
+  private function _faq() {
+    $this->twigData['entries'] = $this->db->select("front")
+                                      ->fields("front")
+                                      ->condition("entry_type", 1)
+                                      ->orderBy("entry_order", "ASC")
+                                      ->execute()
+                                      ->fetchAll();
+    kxTemplate::output("manage/faq", $this->twigData);
   }
   
-  private function _postNews() {
-      kxForm::addRule('subject','required')
-            ->addRule('news','required')
-            ->check();
-      if($this->request['edit'] == ""){
-        $this->db->insert("front")
-               ->fields(array(
-                 'entry_subject' => $this->request['subject'],
-                 'entry_message' => $this->request['news'],
-                 'entry_email'   => $this->request['email'],
-                 'entry_type'    => 0,
-                 'entry_time'    => time()
-               ))
-               ->execute();
-        $dwoo_data['notice'] = _gettext('News entry successfully added.');
-      }else{
-          $fields = array();
-          $fields['entry_subject'] = $this->request['subject'];
-          $fields['entry_message'] = $this->request['news'];
-          $fields['entry_email'] = $this->request['email'];
-        $this->db->update("front")
-                 ->fields($fields)
-                 ->condition("id", $this->request['edit'])
-                 ->execute();
-        $dwoo_data['notice'] = _gettext('News entry successfully editted.');
+  private function _rules() {
+    $this->twigData['entries'] = $this->db->select("front")
+                                      ->fields("front")
+                                      ->condition("entry_type", 2)
+                                      ->orderBy("entry_order", "ASC")
+                                      ->execute()
+                                      ->fetchAll();
+    kxTemplate::output("manage/rules", $this->twigData);
+  }  
+  
+  private function _post() {
+    // Handles posting of front page content
+    kxForm::addRule('subject','required')
+          ->addRule('message','required')
+          ->addRule('type','numeric')
+          ->check();
+    $fields = array(
+              'entry_subject' => $this->request['subject'],
+              'entry_message' => $this->request['message'],
+              'entry_type'    => intval($this->request['type'])
+              );
+    
+    if ($this->request['do'] == 'news') {
+      // News-specific fields
+      $fields['entry_email'] = $this->request['email'];
+      
+      if ($this->request['edit'] == "") {
+        $fields['entry_time'] = time();
+        $fields['entry_name'] = ''; // TODO: Logged in username 
       }
-        $dwoo_data['notice_type'] = 'success';
+    } else {
+      // Other front page fields
+      $fields['entry_order'] = $this->request['order'];
+    }
+    
+    if ($this->request['edit'] == "") {
+      // New post
+      $this->db->insert("front")
+               ->fields($fields)
+               ->execute();
+      $this->twigData['notice'] = _gettext('Entry successfully added.');
+    } else {
+      // Update post
+      $this->db->update("front")
+               ->fields($fields)
+               ->condition("entry_id", $this->request['edit'])
+               ->execute();
+      $this->twigData['notice'] = _gettext('Entry successfully edited.');
+    }
+    $this->twigData['notice_type'] = 'success';
   }
   
-    private function _delNews() {
+  private function _edit() {
+    if ($this->request['do'] == 'news') {
+      $type = 0;
+    } else if ($this->request['do'] == 'faq') {
+      $type = 1;
+    } else if ($this->request['do'] == 'rules') {
+      $type = 2;
+    }
+    $this->twigData['entry'] = $this->db->select("front")
+                                        ->fields("front")
+                                        ->condition("entry_type", $type)
+                                        ->condition("entry_id", $this->request['id'])
+                                        ->orderBy("entry_id", "DESC")
+                                        ->execute()
+                                        ->fetchAssoc();
+  }
+  
+  private function _del() {
     $this->db->delete("front")
-             ->condition("id", $this->request['id'])
+             ->condition("entry_id", $this->request['id'])
              ->execute();
-    $dwoo_data['notice_type'] = 'success';
-    $dwoo_data['notice'] = _gettext('News entry successfully deleted.');
+    $this->twigData['notice_type'] = 'success';
+    $this->twigData['notice'] = _gettext('Entry successfully deleted.');
   }
 
 }

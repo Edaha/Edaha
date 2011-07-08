@@ -1,0 +1,10 @@
+Board Management:
+  - title: Add and Delete Boards
+    section: board 
+    url: do=board
+
+  - title: Edit Boards
+    section: board 
+    url: do=boardopts
+
+

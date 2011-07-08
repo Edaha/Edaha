@@ -1,0 +1,16 @@
+Site Management:
+  - title: Edit Settings
+    section: config 
+    url: do=edit
+
+  - title: Post News
+    section: front
+    url: do=news
+
+  - title: FAQ Entries
+    section: front
+    url: do=faq
+
+  - title: Rules Entries
+    section: front
+    url: do=rules

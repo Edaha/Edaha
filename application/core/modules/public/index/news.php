@@ -37,9 +37,8 @@ if (!defined('KUSABA_RUNNING'))
 class public_core_index_news extends kxCmd {
 
   public function exec( kxEnv $environment ) {
-      // i might have mixed up faq with rules, if so, switch the types around..
-  if(isset($_GET['p'])){
-      switch($_GET['p']){
+    if(isset($this->request['p'])){
+      switch($this->request['p']){
         case 'faq':
             $type = 1;
             break;
@@ -47,22 +46,31 @@ class public_core_index_news extends kxCmd {
             $type = 2;
             break;
       }
-  }else{
+    } else {
+      $this->request['p'] = '';
       $type = 0;
-  }
-    $dwoo_data['styles'] = explode(':', kxEnv::Get('kx:css:menustyles'));
-    $dwoo_data['entries'] = $this->db->select("front")
-                                     ->fields("front")
-                                     ->condition("entry_type", $type)
-                                     ->orderBy("entry_time", "DESC")
-                                     ->execute()
-                                     ->fetchAll();
-    $dwoo_data['sections'] = $this->db->select("sections")
+    }
+    $this->twigData['styles'] = explode(':', kxEnv::Get('kx:css:menustyles'));
+    $entries = $this->db->select("front")
+                    ->fields("front")
+                    ->condition("entry_type", $type);
+                    
+    if ($this->request['p'] != '') {
+      $entries->orderBy("entry_order", "ASC");
+    } else {
+      $entries->orderBy("entry_time", "DESC");
+      if (!isset($this->request['view'])) {
+        $entries->range(0,1);
+      }
+    }
+    $this->twigData['entries'] = $entries->execute()
+                                         ->fetchAll();
+    $this->twigData['sections'] = $this->db->select("sections")
                                       ->fields("sections")
                                       ->orderBy("section_order")
                                       ->execute()
                                       ->fetchAll();
-    $dwoo_data['boards'] = $this->db->select("boards")
+    $this->twigData['boards'] = $this->db->select("boards")
                                     ->fields("boards")
                                     ->orderBy("board_section")
                                     ->orderBy("board_order")
@@ -93,8 +101,8 @@ class public_core_index_news extends kxCmd {
        $i++;
       }
     }
-    $dwoo_data['images'] = $images;
+    $this->twigData['images'] = $images;
 
-    kxTemplate::output("index", $dwoo_data);
+    kxTemplate::output("index", $this->twigData);
   }
 }

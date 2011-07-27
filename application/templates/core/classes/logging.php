@@ -1,3 +1,0 @@
-<?php
-// Stub
-class logging{}

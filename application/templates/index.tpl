@@ -7,11 +7,12 @@
 {% endblock %}
 
 {% block content %}
-  <h1>{% kxEnv "site:name" %}</h1>
-  {% if 'site:slogan'|kxEnv != '' %}
-  <h3>{% kxEnv "site:slogan" %}</h3>
-  {% endif %}
-  
+	<div id="header">
+  		<h1>{% kxEnv "site:name" %}</h1>
+  		{% if 'site:slogan'|kxEnv != '' %}
+  		<h3>{% kxEnv "site:slogan" %}</h3>
+  		{% endif %}
+  	</div>
   <div class="menu" id="topmenu">
     <ul>
 			{% strip %}<li class="{% if _get.p == '' %}current {% else %}tab {% endif %}first">{% if _get.p != '' %}<a href="{% kxEnv "paths:main:path" %}/index.php">{% endif %}{% trans "News" %}{% if _get.p != '' %}</a>{% endif %}</li>{% endstrip %}

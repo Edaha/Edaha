@@ -1,10 +1,12 @@
+#!php 
+#<?php die('NOPE'); ?>
 all:
   kx:
     charset: UTF-8
     db:
-      dsn: 'mysql:dbname=kusaba'
-      username: kusaba
-      password: kusaba
+      dsn: 'mysql:dbname=edaha'
+      username: edaha
+      password: edaha
       prefix: 
       persistent: false
     site:

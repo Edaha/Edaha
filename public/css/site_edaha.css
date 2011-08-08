@@ -101,3 +101,7 @@ div.floatright {
   float:right;
   margin-left:1em;
 }
+
+div.floatcenter {
+  margin:auto;
+}

@@ -1,0 +1,87 @@
+/***********************
+ *     Edaha Theme     *
+ * By N3X15 for Edaha  *
+ *                     *
+ *   I don't give a    *
+ *    shit license     *
+ ***********************/
+
+body,html {
+  background:#eef2ff;
+  font-family:sans-serif;
+  font-size:small;
+  margin:0;
+}
+
+div#header h1 {
+  background:#C6DAF0;
+  margin:0;
+  text-align:center;
+  font-size:24pt;
+  color:navy;
+  text-shadow:#ffffff 0.5px 0.5px 1px;
+}
+
+div#header h3 {
+  background:#C6DAF0;
+  margin:0;
+  color:navy;
+  font-weight:normal;
+  padding:3px;
+  text-align:center;
+}
+
+
+div#topmenu ul {
+  background:navy;
+  margin:0;
+  color:white;
+  padding:4px;
+}
+
+div#topmenu a {
+  color:#ffffff;
+  text-decoration:none;
+}
+
+div#topmenu ul li {
+  display:inline;
+  list-style:none;
+  font-weight:bold;
+}
+
+div#topmenu ul li a {
+  padding:4px;
+  border-left:1px dotted #eff2ff;
+  margin-right:-4px;
+}
+
+div#topmenu ul li.current {
+  color:#ccc !important;
+}
+
+div#topmenu ul li a:HOVER {
+  color:black;
+  background:white;
+}
+
+h2 {
+  background:#C6DAF0;
+  font-size:large;
+  padding-left:1em;
+}
+
+h2 span.permalink { 
+  float:right; 
+  margin-right: 1em; 
+}
+
+div.recentimages {
+  float:left;
+  width: 25%;
+  margin-right:1em;
+}
+
+div.content {
+  margin:1px;
+}

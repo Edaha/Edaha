@@ -22,7 +22,7 @@
     <br />
   </div>
   
-  <div class="recentimages">
+  <div class="floatleft">
     <h2>Recent Images</h2>
 {% for image in images %}
     <div class="imagewrap">
@@ -31,17 +31,18 @@
     </div>
 {% endfor %}
   </div>
-  
+  <div class="floatright">
+  <h2>Board List</h2>
+<!-- TODO: Board list -->
+  </div>
+  <div class="maincolumn">
 {% for item in entries %}
-  <div class="content">
+  <div class=newspost">
 		<h2><span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.poster }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>
 		<span class="permalink"><a href="#{{ item.id }}">#</a></span></h2>
 		{{ item.entry_message }}
     {% if _get.view != 'all' and _get.p == '' %}<br /><a href="{% kxEnv "paths:main:path" %}/index.php?view=all">More entries</a>{% endif %}
-    <br />
-	</div>
+  </div>
 {% endfor %}
-
-<!-- TODO: Board list -->
 
 {% endblock %}

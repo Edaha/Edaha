@@ -39,7 +39,7 @@
       <p>TODO: Board list</p>
     </div>
   </div>
-  <div class="widget">
+  <div class="floatcenter widget">
 {% for item in entries %}
     <div class="newspost">
 	  <h2><span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.poster }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>

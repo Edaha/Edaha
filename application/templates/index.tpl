@@ -24,26 +24,32 @@
   
   <div class="floatleft widget" style="width:20%">
     <h2>Recent Images</h2>
+    <div class="widgetcontent">
 {% for image in images %}
-    <div class="imagewrap">
-      <a href="{% kxEnv "paths:main:path" %}/{{ image.boardname }}/res/{% if image.parentid == 0 %}{{ image.id }}{% else %}{{ image.parentid }}{% endif %}.html#{{ image.id }}">
-      <img src="{% kxEnv "paths:main:path" %}/thumb/{{ image.file }}s.{{ image.file_type }}" alt="{{ image.file }}s.{{ image.file_type }}" width="{{ image.thumb_w }}" height="{{ image.thumb_h }}" /><br />
-    </div>
+      <div class="imagewrap">
+        <a href="{% kxEnv "paths:main:path" %}/{{ image.boardname }}/res/{% if image.parentid == 0 %}{{ image.id }}{% else %}{{ image.parentid }}{% endif %}.html#{{ image.id }}">
+        <img src="{% kxEnv "paths:main:path" %}/thumb/{{ image.file }}s.{{ image.file_type }}" alt="{{ image.file }}s.{{ image.file_type }}" width="{{ image.thumb_w }}" height="{{ image.thumb_h }}" /><br />
+      </div>
 {% endfor %}
+    </div>
   </div>
-  <div class="floatleft widget">
+  <div class="floatright widget" style="width:20%">
+  <h2>Board List</h2>
+    <div class="widgetcontent">
+      <p>TODO: Board list</p>
+    </div>
+  </div>
+  <div class="widget">
 {% for item in entries %}
     <div class="newspost">
 	  <h2><span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.poster }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>
 	  <span class="permalink"><a href="#{{ item.id }}">#</a></span></h2>
-	  {{ item.entry_message }}
-      {% if _get.view != 'all' and _get.p == '' %}<br /><a href="{% kxEnv "paths:main:path" %}/index.php?view=all">More entries</a>{% endif %}
+	  <div class="widgetcontent">
+	    {{ item.entry_message }}
+        {% if _get.view != 'all' and _get.p == '' %}<br /><a href="{% kxEnv "paths:main:path" %}/index.php?view=all">More entries</a>{% endif %}
+      </div>
     </div>
 {% endfor %}
-  </div>
-  <div class="floatright widget" style="width:20%">
-  <h2>Board List</h2>
-    <p>TODO: Board list</p>
   </div>
 
 {% endblock %}

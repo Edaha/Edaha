@@ -22,7 +22,7 @@
     <br />
   </div>
   
-  <div class="floatleft" style="width:20%">
+  <div class="floatleft widget" style="width:20%">
     <h2>Recent Images</h2>
 {% for image in images %}
     <div class="imagewrap">
@@ -31,18 +31,19 @@
     </div>
 {% endfor %}
   </div>
-  <div class="floatright" style="width:20%">
-  <h2>Board List</h2>
-<!-- TODO: Board list -->
-  </div>
-  <div class="maincolumn" style="width:50%">
+  <div class="floatleft widget" style="width:50%">
 {% for item in entries %}
-  <div class=newspost">
-		<h2><span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.poster }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>
-		<span class="permalink"><a href="#{{ item.id }}">#</a></span></h2>
-		{{ item.entry_message }}
-    {% if _get.view != 'all' and _get.p == '' %}<br /><a href="{% kxEnv "paths:main:path" %}/index.php?view=all">More entries</a>{% endif %}
-  </div>
+    <div class=newspost">
+	  <h2><span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.poster }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>
+	  <span class="permalink"><a href="#{{ item.id }}">#</a></span></h2>
+	  {{ item.entry_message }}
+      {% if _get.view != 'all' and _get.p == '' %}<br /><a href="{% kxEnv "paths:main:path" %}/index.php?view=all">More entries</a>{% endif %}
+    </div>
 {% endfor %}
+  </div>
+  <div class="floatright widget" style="width:20%">
+  <h2>Board List</h2>
+    <p>TODO: Board list</p>
+  </div>
 
 {% endblock %}

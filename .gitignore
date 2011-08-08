@@ -1,3 +1,7 @@
+#Eclipse settings
 .settings
 .buildpath
 .project
+
+#Test site's pull script
+pull.php

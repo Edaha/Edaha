@@ -1,3 +1,5 @@
+#!php 
+#<?php die('NOPE'); ?>
 all:
   kx:
     db:

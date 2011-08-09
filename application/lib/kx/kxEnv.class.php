@@ -90,7 +90,7 @@ class kxEnv {
   }
 
   private static function getConfigFiles($configdir) {
-    return glob($configdir . '/*.yml');
+    return glob($configdir . '/*.yml.php');
   }
 
   private static function loadConfigFile($configfile) {

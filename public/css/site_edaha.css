@@ -81,6 +81,9 @@ div.widget {
   background:#eef2ff;
   border:1px solid #C5C9E0;
 }
+div.widgetcontent {
+  padding:1em;
+}
 
 div.widget h2 {
   margin:0;

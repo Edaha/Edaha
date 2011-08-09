@@ -83,8 +83,10 @@ div.widget {
 }
 
 div.widget h2 {
+  margin:0;
+  margin-bottom:1em;
   background:#ffffff;
-  border-bottom:#C5C9E0;
+  border-bottom:1px solid #C5C9E0;
 }
 
 div.floatleft {

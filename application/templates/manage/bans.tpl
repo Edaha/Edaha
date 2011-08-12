@@ -14,10 +14,8 @@
         <select name="boards[]" class="multiple" multiple="multiple">
 {% for section in sections %}
           <optgroup label="{{ section.name }}">
-{% for board in boards %}
-{% if board.board_section == section.id %}
+{% for board in section.boards %}
             <option value="{{ board.board_name }}">{{ board.board_desc }}</option>
-{% endif %}
 {% endfor %}
           </optgroup>
 {% endfor %}

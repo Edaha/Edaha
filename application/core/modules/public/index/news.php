@@ -65,22 +65,25 @@ class public_core_index_news extends kxCmd {
     }
     $this->twigData['entries'] = $entries->execute()
                                          ->fetchAll();
-    $this->twigData['sections'] = $this->db->select("sections")
-                                       ->fields("sections")
-                                       ->orderBy("section_order")
-                                       ->execute()
-                                       ->fetchAll();
-    $this->twigData['boards'] = $this->db->select("boards")
-                                     ->fields("boards")
-                                     ->orderBy("board_section")
-                                     ->orderBy("board_order")
-                                     ->execute()
-                                     ->fetchAll();
-                                     
-    /*echo '<pre>';
-    print_r($this->twigData['sections']);
-    print_r($this->twigData['boards']);
-    echo '</pre>';*/
+    
+    $sections = $this->db->select("sections")
+                     ->fields("sections")
+                     ->orderBy("section_order")
+                     ->execute()
+                     ->fetchAll();
+
+    $boards = $this->db->select("boards")
+                       ->fields("boards", array('board_name', 'board_desc'))
+                       ->where("board_section = ?")
+                       ->orderBy("board_order")
+                       ->build();
+    // Add boards to an array within their section
+    foreach ($sections as $section) {
+      $boards->execute(array($section->id));
+      $section->boards = $boards->fetchAll();
+    }
+    
+    $this->twigData['sections'] = $sections;
 
     // Get recent images
     $images = $this->db->select("post_files");

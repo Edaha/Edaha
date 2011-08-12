@@ -50,10 +50,10 @@
           <h3>{{ section.name }}</h3>
         </header>
         <ul class="{{ section.abbreviation }}">
-{% for board in boards %}
-{% if board.board_section == section.id %}
+{% for board in section.boards %}
           <li><a href="{% kxEnv "paths:board:path" %}/{{ board.board_name }}/" title="{% kxEnv "site:name" %} - {{ board.board_desc }}">{{ board.board_desc }}</a></li>
-{% endif %}
+{% else %}
+          <li>No boards</li>
 {% endfor %}
         </ul>
       </article>

@@ -6,7 +6,100 @@
  *    shit license     *
  ***********************/
 
-/* This is me trying something new.  Don't like it? Use something else. */
+/* HTML5 for older browsers */ 
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+ 
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  font-size: small;
+  background-color: #C6DAF0;
+}
+
+#page_wrap {
+  background-color: inherit;
+  max-width: 1260px;
+  min-width: 775px; 
+  margin: 10px auto;
+} 
+
+#header {
+  padding: 10px;
+  background-color: #C5C9E0;
+}
+
+nav#topmenu {
+  background-color: navy;
+  margin-bottom: 10px;
+}
+
+nav#topmenu li {
+  list-style: none;
+  display: block;
+  float: left;
+  width: 60px;
+  padding: 5px;
+  text-align: center;
+  margin: 1px 0px 1px 1px;
+  background-color: white;
+}
+
+nav#topmenu li.current {
+  background-color: #CCC;
+}
+
+section {
+  border: 1px solid;
+}
+
+section.leftcol, section.rightcol {
+  width: 20%;
+}
+
+section.leftcol {
+  float: left;
+}
+
+section.rightcol {
+  float: right;
+}
+
+section.maincol {
+  margin: auto;
+}
+
+section.news {
+  width: 55%;
+}
+
+section > header {
+  background-color: #C5C9E0;
+  padding: 3px 5px;
+}
+
+section.news article header, section.boardlist article header {
+  background-color: white;
+  padding: 2px 4px;
+}
+
+section.news article p {
+  padding: 2px 4px;
+}
+
+section.boardlist article ul {
+  list-style: none;
+  padding: 2px 4px;
+}
+
+
+
+/* This is me trying something new.  Don't like it? Use something else. 
 body,html {
   background:#C6DAF0;
   font-family:sans-serif;
@@ -15,7 +108,7 @@ body,html {
 }
 
 div#header h1 {
-  background:#C5C9E0;/*#C6DAF0*/
+  background:#C5C9E0;/*#C6DAF0*//*
   margin:0;
   text-align:center;
   font-size:24pt;

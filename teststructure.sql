@@ -155,8 +155,11 @@ CREATE TABLE IF NOT EXISTS `boards` (
 -- Dumping data for table `boards`
 --
 
-INSERT INTO `boards` (`board_id`, `board_order`, `board_name`, `board_type`, `start`, `board_upload_type`, `board_desc`, `image`, `section`, `board_max_upload_size`, `maxpages`, `maxage`, `markpage`, `maxreplies`, `messagelength`, `createdon`, `board_locked`, `includeheader`, `redirecttothread`, `anonymous`, `forcedanon`, `embeds_allowed`, `trial`, `popular`, `defaultstyle`, `locale`, `showid`, `compactlist`, `enablereporting`, `enablecaptcha`, `enablenofile`, `enablearchiving`, `enablecatalog`, `loadbalanceurl`, `loadbalancepassword`, `board_max_files`, `newsage`) VALUES
-(1, 1, 'b', 0, 0, 2, 'what', '', 0, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0);
+INSERT INTO `boards` (`board_id`, `board_order`, `board_name`, `board_type`, `board_start`, `board_upload_type`, `board_desc`, `image`, `board_section`, `board_max_upload_size`, `maxpages`, `maxage`, `markpage`, `maxreplies`, `messagelength`, `createdon`, `board_locked`, `includeheader`, `redirecttothread`, `anonymous`, `forcedanon`, `embeds_allowed`, `trial`, `popular`, `defaultstyle`, `locale`, `showid`, `compactlist`, `enablereporting`, `enablecaptcha`, `enablenofile`, `enablearchiving`, `enablecatalog`, `loadbalanceurl`, `loadbalancepassword`, `board_max_files`, `newsage`) VALUES
+(1, 1, 's1b1', 0, 0, 2, 'Board 1 (S1)', '', 1, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0),
+(2, 2, 's1b2', 0, 0, 2, 'Board 2 (S1)', '', 1, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0),
+(3, 1, 's2b1', 0, 0, 2, 'Board 1 (S2)', '', 2, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0),
+(4, 2, 's2b2', 0, 0, 2, 'Board 2 (S2)', '', 2, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -377,7 +380,7 @@ CREATE TABLE IF NOT EXISTS `modules` (
   PRIMARY KEY (`module_id`),
   KEY `module_application` (`module_application`),
   KEY `module_file` (`module_file`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
 
 --
 -- Dumping data for table `modules`
@@ -390,7 +393,8 @@ INSERT INTO `modules` (`module_id`, `module_name`, `module_application`, `module
 (4, 'Upload Board', 'board', 'upload', 'Generator for an upload-type board', 0, 0),
 (5, 'Text Board', 'board', 'text', 'Generator for a text board', 0, 0),
 (6, 'Site', 'core', 'site', 'Manage the Site Configuration', 0, 1),
-(7, 'Index', 'core', 'index', 'Handles the front page features (news, faq, etc)', 0, 0);
+(7, 'Index', 'core', 'index', 'Handles the front page features (news, faq, etc)', 0, 0),
+(9, 'Bans', 'core', 'bans', 'Provides functionality for adding and editing bans.', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -510,6 +514,9 @@ CREATE TABLE IF NOT EXISTS `sections` (
 -- Dumping data for table `sections`
 --
 
+INSERT INTO `sections` (`id`, `section_order`, `hidden`, `name`, `abbreviation`) VALUES
+(1, 1, 0, 'Section 1', 'sec1'),
+(2, 2, 0, 'Section 2', 'sec2');
 
 -- --------------------------------------------------------
 

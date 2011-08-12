@@ -1,0 +1,8 @@
+Bans:
+  - title: Add Bans
+    section: bans
+    url: do=add
+
+  - title: View and Edit Bans
+    section: bans
+    url: do=view

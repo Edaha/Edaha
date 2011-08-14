@@ -113,11 +113,11 @@ class kxCmdResolv {
             $environment->set('kx:classes:core:logging:id', new logging( $environment ) );
             
             $validSession  = kxFunc::getManageSession();
-            if(($environment->request['module'] != 'login') && (!$validSession))
+            if( (!isset($environment::$request['module']) || (isset($environment::$request['module']) && $environment::$request['module'] != 'login')) && (!$validSession))
             {
                 // Force login if we have an invalid session
                 
-                $environment->request['module'] = 'login';
+                $environment::$request['module'] = 'login';
                 kxEnv::$current_module = 'login';
                 require_once( kxFunc::getAppDir( 'core' ) . "/modules/manage/login/login.php" );
                 $login = new manage_core_login_login( $environment ); 

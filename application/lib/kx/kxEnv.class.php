@@ -6,7 +6,7 @@ class kxEnv {
     public static $current_module      = '';
     public static $current_section     = '';
     
-    static public $request	= array();
+    static public $request	= array('act' => '', 'do' => '', 'action' => '');
     
     private static $instance = null;
     
@@ -62,7 +62,7 @@ class kxEnv {
         $input = kxFunc::parseInput( $_GET, array() );
         
         // Allow $_POST to overwrite $_GET
-        self::$request = kxFunc::parseInput( $_POST, $input );
+        self::$request = kxFunc::parseInput( $_POST, $input ) + self::$request;
         
         // Grab our app
         $_application = preg_replace("/[^a-zA-Z0-9\-\_]/", "" , (isset($_REQUEST['app']) && trim($_REQUEST['app']) ? $_REQUEST['app'] : "core" ) );

@@ -15,7 +15,10 @@ class manage_core_index_index extends kxCmd {
       break;
       case 'pgsql':
       	$dwoo_data['dbtype'] = 'PostgreSQL';
-        $dbsize = $this->db->query("SELECT pg_database_size('".substr(kxEnv::get("kx:db:dsn"), (strpos(kxEnv::get("kx:db:dsn"), "dbname=")+7), strlen(kxEnv::get("kx:db:dsn")))."')")->execute()->fetchColumn();
+        $results = $this->db->query("SELECT pg_database_size('".substr(kxEnv::get("kx:db:dsn"), (strpos(kxEnv::get("kx:db:dsn"), "dbname=")+7), strlen(kxEnv::get("kx:db:dsn")))."')");
+		foreach($results as $line) {
+			$dbsize += $line->pg_database_size;
+		}
       break;
       case 'sqlite':
       	$dwoo_data['dbtype'] = 'SQLite';

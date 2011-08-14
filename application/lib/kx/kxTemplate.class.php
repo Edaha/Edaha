@@ -65,7 +65,7 @@ class kxTemplate {
                     }
                 }
                 
-                self::assign('base_url', kxEnv::Get('kx:paths:main:path') . '/manage.php?sid=' . kxEnv::$request['sid'] . '&');
+                self::assign('base_url', kxEnv::Get('kx:paths:main:path') . '/manage.php?sid=' . ( isset(kxEnv::$request['sid']) ? kxEnv::$request['sid'] : '') . '&');
                 
             }
         }

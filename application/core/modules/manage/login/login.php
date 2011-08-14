@@ -3,9 +3,8 @@
 class manage_core_login_login extends kxCmd{
 
   public function exec( kxEnv $environment ) {
- 
     // Wat do????
-    switch( (isset($this->request['do'])) ? $this->request['do'] : '' )
+    switch( $this->request['do'] )
     {
       case 'login':
       default:

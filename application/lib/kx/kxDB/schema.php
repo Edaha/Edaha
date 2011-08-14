@@ -6,7 +6,7 @@
  * Generic Database schema code.
  */
 
-require_once dirname(__FILE__) . '/query.inc';
+require_once dirname(__FILE__) . '/query.php';
 
 /**
  * @defgroup schemaapi Schema API

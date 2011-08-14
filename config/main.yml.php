@@ -4,9 +4,9 @@ all:
   kx:
     charset: UTF-8
     db:
-      dsn: 'mysql:dbname=edaha'
-      username: edaha
-      password: edaha
+      dsn: 'pgsql:dbname=kusaba'
+      username: kusaba
+      password: kusaba
       prefix: 
       persistent: false
     site:
@@ -30,15 +30,15 @@ all:
       dir: /application/templates/
       cachedir: /application/templates/compiled/
     css:
-      imgstyles: burichan:futaba
-      imgdefault: futaba
+      imgstyles: edaha:burichan:futaba
+      imgdefault: edaha
       txtstyles: futatxt:buritxt
       txtdefault: futatxt
       imgswitcher: true
       imgdropswitcher: false
       txtswitcher: true
-      menustyles: burichan:futaba
-      menudefault: futaba
+      menustyles: edaha:burichan:futaba
+      menudefault: edaha
       menuswitcher: true
     limits:
       threaddelay: 30

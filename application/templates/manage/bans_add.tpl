@@ -1,8 +1,6 @@
-{% import "manage/macros.tpl" as macros %}
-
 {% extends "manage/wrapper.tpl" %}
 
-{% block heading %}{% trans "Bans" %}{% endblock %}
+{% block heading %}{% trans "Bans - Add" %}{% endblock %}
 
 {% block managecontent %}
 

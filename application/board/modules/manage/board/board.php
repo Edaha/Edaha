@@ -36,14 +36,14 @@ class manage_board_board_board extends kxCmd {
     $fields = array(
               'board_name' => $this->request['name'],
               'board_desc' => $this->request['description'],
-              'start'    => intval($this->request['start']),
+              'board_start'    => intval($this->request['start']),
               'createdon' => time(),
               'image' => '',
               'includeheader' => ''
               );
        // If the first post ID is left empty make it 1
-    if ($fields['start'] == "") {
-      $fields['start'] = 1;
+    if ($fields['board_start'] == "") {
+      $fields['board_start'] = 1;
     }
     if ($this->request['edit'] == "") {
       // Add board

@@ -64,7 +64,7 @@ class kxDBpgsql extends kxDB {
         case parent::RETURN_AFFECTED:
           return $stmt->rowCount();
         case parent::RETURN_INSERT_ID:
-          return $this->lastInsertId($options['sequence_name']);
+          return $this->connection->lastInsertId($options['sequence_name']);
         case parent::RETURN_NULL:
           return;
         default:

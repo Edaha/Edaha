@@ -11,10 +11,6 @@
  */
 class Twig_Node_Expression_GetAttr extends Twig_Node_Expression
 {
-    const TYPE_ANY = 'any';
-    const TYPE_ARRAY = 'array';
-    const TYPE_METHOD = 'method';
-
     public function __construct(Twig_Node_Expression $node, Twig_Node_Expression $attribute, Twig_NodeInterface $arguments, $type, $lineno)
     {
         parent::__construct(array('node' => $node, 'attribute' => $attribute, 'arguments' => $arguments), array('type' => $type), $lineno);
@@ -22,9 +18,20 @@ class Twig_Node_Expression_GetAttr extends Twig_Node_Expression
 
     public function compile(Twig_Compiler $compiler)
     {
+        $compiler->raw('$this->getAttribute(');
+
+        if ($this->hasAttribute('is_defined_test') && $compiler->getEnvironment()->isStrictVariables()) {
+            $compiler->subcompile(new Twig_Node_Expression_Filter(
+                $this->getNode('node'),
+                new Twig_Node_Expression_Constant('default', $this->getLine()),
+                new Twig_Node(),
+                $this->getLine()
+            ));
+        } else {
+            $compiler->subcompile($this->getNode('node'));
+        }
+
         $compiler
-            ->raw('$this->getAttribute(')
-            ->subcompile($this->getNode('node'))
             ->raw(', ')
             ->subcompile($this->getNode('attribute'))
             ->raw(', array(')
@@ -41,7 +48,6 @@ class Twig_Node_Expression_GetAttr extends Twig_Node_Expression
             ->raw('), ')
             ->repr($this->getAttribute('type'))
             ->raw($this->hasAttribute('is_defined_test') ? ', true' : ', false')
-            ->raw(sprintf(', %d', $this->lineno))
             ->raw(')');
     }
 }

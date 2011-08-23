@@ -1,0 +1,2 @@
+<?php
+$defaultSection = 'board';

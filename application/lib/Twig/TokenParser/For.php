@@ -9,6 +9,18 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+/**
+ * Loops over each item of a sequence.
+ *
+ * <pre>
+ * <ul>
+ *  {% for user in users %}
+ *    <li>{{ user.username|e }}</li>
+ *  {% endfor %}
+ * </ul>
+ * </pre>
+ */
 class Twig_TokenParser_For extends Twig_TokenParser
 {
     /**
@@ -46,12 +58,12 @@ class Twig_TokenParser_For extends Twig_TokenParser
         return new Twig_Node_For($keyTarget, $valueTarget, $seq, $body, $else, $lineno, $this->getTag());
     }
 
-    public function decideForFork($token)
+    public function decideForFork(Twig_Token $token)
     {
         return $token->test(array('else', 'endfor'));
     }
 
-    public function decideForEnd($token)
+    public function decideForEnd(Twig_Token $token)
     {
         return $token->test('endfor');
     }

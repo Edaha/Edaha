@@ -118,12 +118,12 @@ class manage_core_login_login extends kxCmd{
             $whereto = preg_replace( "/&{1,}/", "&", $whereto );
           }
           $url = kxEnv::Get('kx:paths:script:path') . kxEnv::Get('kx:paths:script:folder').'/manage.php?sid=' . $session_id . '&' . $whereto;
-          if($_COOKIE['use_frames']) {
+          if(!empty($_COOKIE['use_frames'])) {
             $twigData['url'] = $url;
             kxTemplate::output("manage/frames", $twigData);
           }
           else {
-            kxFunc::doRedirect($url);
+            kxFunc::doRedirect($url, true);
           }
           exit();
         } 

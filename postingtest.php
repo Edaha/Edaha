@@ -1,7 +1,7 @@
 <?php
 
 // Enter board name
-$board = "b";
+$board = "test";
 //enter a non zero number to simulate replying
 $parentid = 0;
 ?>
@@ -13,7 +13,7 @@ $parentid = 0;
 	</head>
 	<body>
 		<form
-			action="http://localhost/kxx/index.php?app=core&module=post&section=post"
+			action="/index.php?app=core&module=post&section=post"
 			method="POST" enctype="multipart/form-data">
 			<input type="hidden" name="board" value="<?php echo $board ?>" />
 			<input type="hidden" name="replythread" value="<?php echo $parentid ?>" />

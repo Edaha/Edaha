@@ -125,7 +125,7 @@ class Rebuild {
                         ->condition("post_board", $this->board->board_id)
                         ->condition("post_parent", $thread->post_id)
                         ->condition("post_deleted", 0)
-                        ->orderBy("id", "DESC")
+                        ->orderBy("post_id", "DESC")
                         ->range(0, kxEnv::Get('kx:display:stickyreplies'))
                         ->execute()
                         ->fetchAll();
@@ -317,7 +317,9 @@ class Rebuild {
       if (strlen($message_shortened) > kxEnv::Get('kx:limits:linelength')) {
         $message_shortened = substr($message_shortened, 0, kxEnv::Get('kx:limits:linelength'));
       }
-      $message_shortened = closeOpenTags($message_shortened);
+      
+      //TODO need to add this
+      //$message_shortened = closeOpenTags($message_shortened);
 
       if (strrpos($message_shortened,"<") > strrpos($message_shortened,">")) {
         //We have a partially opened tag we need to get rid of.

@@ -269,44 +269,56 @@ class Posting {
         
         return $user_authority;
     }
-    public function makePost($postData, $post, $files, $ip, $stickied, $locked, $boardid) {
+    public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board) {
         
+        $timeStamp = time();
         $id = $this->db->insert("posts")
             ->fields(array(
                 'post_parent'    => $postData['thread_info']['parent'],
-                'post_board'     => $boardid,
+                'post_board'     => $board->board_id,
                 'post_name'      => $post['name'],
                 'post_tripcode'  => $post['tripcode'],
                 'post_email'     => $post['email'],
                 'post_subject'   => $post['subject'],
                 'post_message'   => $post['message'],
                 'post_password'  => $postData['post_fields']['postpassword'],
-                'post_timestamp' => time(),
-                'post_bumped'    => time(),
+                'post_timestamp' => $timeStamp,
+                'post_bumped'    => $timeStamp,
                 'post_ip'        => kxFunc::encryptMD5($ip, kxEnv::Get('kx:misc:randomseed')),
                 'post_ip_md5'    => md5($ip),
                 'post_authority' => $postData['user_authority_display'],
                 'post_tag'       => isset($post['tag']) ? $post['tag'] : '',
-                        'post_stickied'  => $stickied,
-                        'post_locked'    => $locked
+                'post_stickied'  => $stickied,
+                'post_locked'    => $locked
             ))
             ->execute();
-            /*      if(!$id || kxEnv::Get('kx:db:type') == 'sqlite') {
-             // Non-mysql installs don't return the insert ID after insertion, we need to manually get it.
-              $id = $kx_db->GetOne("SELECT `id` FROM `".kxEnv::Get('kx:db:prefix')."posts` WHERE `boardid` = ".$kx_db->qstr($boardid)." AND timestamp = ".$kx_db->qstr($timestamp)." AND `ipmd5` = '".md5($ip)."' LIMIT 1");
-              }
-              if ($id == 1 && $this->board['start'] > 1) {
-              $kx_db->Execute("UPDATE `".kxEnv::Get('kx:db:prefix')."posts` SET `id` = '".$this->board['start']."' WHERE `boardid` = ".$boardid);
-              $id = $this->board['start'];
-              }
-              */
+
+            if(!$id || kxEnv::Get('kx:db:type') == 'sqlite') {
+              // Non-mysql installs don't return the insert ID after insertion, we need to manually get it.
+              $id = $this->db->select("posts")
+                             ->fields("posts", array("post_id"))
+                             ->condition("post_board", $board->board_id )
+                             ->condition("post_timestamp", $timeStamp)
+                             ->condition("post_ip_md5", md5($ip))
+                             ->range(0,1)
+                             ->execute()
+                             ->fetchField();
+            }
+            
+            if ($id == 1 && $board->board_start > 1) {
+                $this->db->update("posts")
+                ->fields(array("id" => $board->board_start))
+                ->condition("post_board", $board->board_id)
+                ->execute();
+              $id = $board->board_start;
+            }
         
         if (!empty($files)) {
             foreach ($files as $file) {
                 $this->db->insert("post_files")
                 ->fields(array(
                     'file_post'           => $id,
-                    'file_board'          => $boardid,
+                    'file_board'          => $board->board_id,
                     'file_md5'            => $file['file_md5'],
                     'file_name'           => $file['file_name'],
                     'file_type'           => substr($file['file_type'], 1),

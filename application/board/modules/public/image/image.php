@@ -65,8 +65,8 @@ class public_board_image_image extends public_board_base_baseboard {
   }
 
   public function parseData($message, $postData) {
-   // Stub
-   return $message;
+    // Stub
+    return $message;
   }
   
   public function checkFields($postData) {

@@ -116,7 +116,7 @@ class public_board_oekaki_oekaki extends public_board_base_baseboard {
                          ->orderBy("post_timestamp")
                          ->execute()
                          ->fetchAll();
-    $this->dwoo_data['oekposts'] = $oekposts;
+    $this->twigData['oekposts'] = $oekposts;
     
   }
 }

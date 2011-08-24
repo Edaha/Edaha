@@ -51,7 +51,7 @@ class manage_core_staff_staff extends kxCmd {
    * Generates and displayed the moderator log
    */
   private function _viewLog() {
-    $dwoo_data = array();
+    $twigData = array();
     
     if ($this->request['view']) {
       // Get actions of a specific moderator
@@ -93,16 +93,16 @@ class manage_core_staff_staff extends kxCmd {
       $user->total_actions = $results->fetchColumn();
     }
     
-    $dwoo_data['modlog'] = $modlog;
-    $dwoo_data['staff']  = $staff;
-        kxTemplate::output("manage/staff_log", $dwoo_data);
+    $twigData['modlog'] = $modlog;
+    $twigData['staff']  = $staff;
+        kxTemplate::output("manage/staff_log", $twigData);
   }
 
   /**
    * Allows adding, editing, and deleting of staff members
    */
   private function _show() {
-    $dwoo_data = array();
+    $twigData = array();
     if ($_GET['act'] == 'add' && $_POST) {
       // Adds a new staff member
       kxForm::addRule('username','required')
@@ -128,12 +128,12 @@ class manage_core_staff_staff extends kxCmd {
                    'user_add_time' => time()
                  ))
                  ->execute();
-        $dwoo_data['notice_type'] = 'success';
-        $dwoo_data['notice'] = _gettext('User added successfully');
+        $twigData['notice_type'] = 'success';
+        $twigData['notice'] = _gettext('User added successfully');
       } else {
         // User with that username already exists
-        $dwoo_data['notice_type'] = 'error';
-        $dwoo_data['notice'] = _gettext('A user with that username already exists');
+        $twigData['notice_type'] = 'error';
+        $twigData['notice'] = _gettext('A user with that username already exists');
       }
     } elseif ($_GET['act'] == 'edit') {
       // Edits a user's information
@@ -158,10 +158,10 @@ class manage_core_staff_staff extends kxCmd {
                  ->condition("user_id", $this->request['id'])
                  ->execute();
                  
-        $dwoo_data['notice_type'] = 'success';
-        $dwoo_data['notice'] = _gettext('User info updated!');
+        $twigData['notice_type'] = 'success';
+        $twigData['notice'] = _gettext('User info updated!');
       }
-      $dwoo_data['user'] = $user;
+      $twigData['user'] = $user;
     } elseif ($_GET['act'] == 'del') {
       // Deletes a user
       kxForm::addRule('id','numeric')->check();
@@ -175,11 +175,11 @@ class manage_core_staff_staff extends kxCmd {
         $this->db->delete("staff")
                  ->condition("user_id", $this->request['id'])
                  ->execute();
-        $dwoo_data['notice_type'] = 'success';
-        $dwoo_data['notice'] = _gettext('User successfully deleted!');
+        $twigData['notice_type'] = 'success';
+        $twigData['notice'] = _gettext('User successfully deleted!');
       } else {
-        $dwoo_data['notice_type'] = 'error';
-        $dwoo_data['notice'] = _gettext('A user with that ID does not exist');
+        $twigData['notice_type'] = 'error';
+        $twigData['notice'] = _gettext('A user with that ID does not exist');
       }
     }
     
@@ -190,9 +190,9 @@ class manage_core_staff_staff extends kxCmd {
                       ->execute()
                       ->fetchAll();
                       
-    $dwoo_data['staffmembers'] = $staff;
+    $twigData['staffmembers'] = $staff;
 
-        kxTemplate::output("manage/staff_show", $dwoo_data);
+        kxTemplate::output("manage/staff_show", $twigData);
   }
 }
 ?>

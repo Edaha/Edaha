@@ -238,14 +238,14 @@ class kxFunc {
     }
     static public function showError($errormsg, $extended = '') {
         
-        $dwoo_data['styles'] = explode(':', kxEnv::Get('kx:styles:menustyles'));
-        $dwoo_data['errormsg'] = $errormsg;
+        $twigData['styles'] = explode(':', kxEnv::Get('kx:styles:menustyles'));
+        $twigData['errormsg'] = $errormsg;
         
         if ($extended != '') {
-            $dwoo_data['errormsgext'] = '<br /><div style="text-align: center;font-size: 1.25em;">' . $extended . '</div>';
+            $twigData['errormsgext'] = '<br /><div style="text-align: center;font-size: 1.25em;">' . $extended . '</div>';
         }
         
-        kxTemplate::output('error', $dwoo_data);
+        kxTemplate::output('error', $twigData);
         
         die();
     }
@@ -602,9 +602,9 @@ class kxBans {
         
         require_once KX_ROOT . '/lib/dwoo.php';
         
-        $dwoo_data->assign('bans', $bans);
+        kxTemplate::assign('bans', $bans);
         
-        return $dwoo->get(KX_ROOT . kxEnv::Get('kx:templates:dir') .'/banned.tpl', $dwoo_data);
+        return $dwoo->get(KX_ROOT . kxEnv::Get('kx:templates:dir') .'/banned.tpl', $twigData);
     }
     
     static public function UpdateHtaccess() {

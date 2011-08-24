@@ -41,10 +41,10 @@ class manage_core_login_login extends kxCmd{
     // If we were previously in the menu and that for some reason got us here, remove that.
     $query_string_clean = str_replace( 'module=menu', '', $query_string_clean );
     
-    $dwoo_data['query_string'] = $query_string_clean;
-    $dwoo_data['message']      = $message;
+    $twigData['query_string'] = $query_string_clean;
+    $twigData['message']      = $message;
     //Let's get the login form.
-    kxTemplate::output("manage/login", $dwoo_data);
+    kxTemplate::output("manage/login", $twigData);
     // We're done here.
     exit();
   }
@@ -119,8 +119,8 @@ class manage_core_login_login extends kxCmd{
           }
           $url = kxEnv::Get('kx:paths:script:path') . kxEnv::Get('kx:paths:script:folder').'/manage.php?sid=' . $session_id . '&' . $whereto;
           if($_COOKIE['use_frames']) {
-            $dwoo_data['url'] = $url;
-            kxTemplate::output("manage/frames", $dwoo_data);
+            $twigData['url'] = $url;
+            kxTemplate::output("manage/frames", $twigData);
           }
           else {
             kxFunc::doRedirect($url);

@@ -32,26 +32,26 @@ class Rebuild {
     }
     $tpl['title'] .= $this->board->board_desc;
 
-    $dwoo_data['title'] = $tpl['title'];
-    $dwoo_data['htmloptions'] = $tpl['htmloptions'];
-    $dwoo_data['locale'] = $this->board->board_locale;
-    $dwoo_data['board'] = $this->board;
-    $dwoo_data['topads'] = $this->db->select("ads")
+    $twigData['title'] = $tpl['title'];
+    $twigData['htmloptions'] = $tpl['htmloptions'];
+    $twigData['locale'] = $this->board->board_locale;
+    $twigData['board'] = $this->board;
+    $twigData['topads'] = $this->db->select("ads")
                                           ->fields("ads", array("ad_code"))
                                           ->condition("ad_position", "top")
                                           ->condition("ad_display", 1)
                                           ->execute()
                                           ->fetchField();
-    $dwoo_data['boardlist'] = $this->board->boardlist;
+    $twigData['boardlist'] = $this->board->boardlist;
 
-    return $dwoo_data;
+    return $twigData;
 
   }
   public function blotter() {
     if (kxEnv::Get('kx:extras:blotter')) {
-        $dwoo_data['blotter'] = kxFunc::getBlotter();
-        $dwoo_data['blotter_updated'] = kxFunc::getBlotterLastUpdated();
-        return $dwoo_data;
+        $twigData['blotter'] = kxFunc::getBlotter();
+        $twigData['blotter_updated'] = kxFunc::getBlotterLastUpdated();
+        return $twigData;
     }
     return array();
   }
@@ -65,17 +65,17 @@ class Rebuild {
    */
   public function footer($noboardlist = false, $executiontime = 0, $hide_extra = false) {
 
-    if ($noboardlist || $hide_extra) $this->dwoo_data['boardlist'] = "";
-    if ($executiontime) $this->dwoo_data['executiontime'] = round($executiontime, 2);
+    if ($noboardlist || $hide_extra) $this->twigData['boardlist'] = "";
+    if ($executiontime) $this->twigData['executiontime'] = round($executiontime, 2);
     
-    $dwoo_data['botads'] = $this->db->select("ads")
+    $twigData['botads'] = $this->db->select("ads")
                                           ->fields("ads", array("ad_code"))
                                           ->condition("ad_position", "bot")
                                           ->condition("ad_display", 1)
                                           ->execute()
                                           ->fetchField();
 
-    return $dwoo_data;
+    return $twigData;
   }
   public function getEmbeds() {
     $this->board->embeds = array();
@@ -155,7 +155,7 @@ class Rebuild {
     return array($posts, $omitids);
   }
   public function buildThread($id) {
-    $dwoo_data = array();
+    $twigData = array();
     //---------------------------------------------------------------------------------------------------
     // Okay, this may seem confusing, but we're caching this so we can use it as a prepared statement
     // intead of executing it every time. This is only really useful if we're regenerating all threads,
@@ -187,11 +187,11 @@ class Rebuild {
     // as the last index of an array, we can use this to our advantage here.
     //-----------------------------------------------------------------------
     if (kxEnv::Get('kx:extras:postspy')) {
-      $dwoo_data['lastid'] = $post->post_id;
+      $twigData['lastid'] = $post->post_id;
     }
     // Now we can get rid of it
     unset($post);
-    return array($thread, $dwoo_data);
+    return array($thread, $twigData);
   }
   public function getOmittedPosts(&$thread, $omitids = array(), $images = true) {
     if ($images) {

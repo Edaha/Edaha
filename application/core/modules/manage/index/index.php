@@ -6,7 +6,7 @@ class manage_core_index_index extends kxCmd {
     $dbsize = 0;
   	switch ($this->db->driver()) {
     	case 'mysql':
-      	$dwoo_data['dbtype'] = 'MySQL';
+      	$twigData['dbtype'] = 'MySQL';
         $results = $this->db->query("SHOW TABLE STATUS");
         foreach ($results as $line) {
         	$dbsize += ($line->data_length+$line->index_length);
@@ -14,31 +14,31 @@ class manage_core_index_index extends kxCmd {
         
       break;
       case 'pgsql':
-      	$dwoo_data['dbtype'] = 'PostgreSQL';
+      	$twigData['dbtype'] = 'PostgreSQL';
         $results = $this->db->query("SELECT pg_database_size('".substr(kxEnv::get("kx:db:dsn"), (strpos(kxEnv::get("kx:db:dsn"), "dbname=")+7), strlen(kxEnv::get("kx:db:dsn")))."')");
 		foreach($results as $line) {
 			$dbsize += $line->pg_database_size;
 		}
       break;
       case 'sqlite':
-      	$dwoo_data['dbtype'] = 'SQLite';
+      	$twigData['dbtype'] = 'SQLite';
         $dbsize = filesize(substr(kxEnv::get("kx:db:dsn"), (strpos(kxEnv::get("kx:db:dsn"), "sqlite:")+7), strlen(kxEnv::get("kx:db:dsn"))));
       break;
       default:
-      	$dwoo_data['dbtype'] = $this->db->driver();
+      	$twigData['dbtype'] = $this->db->driver();
     }
-    $dwoo_data['dbsize'] = kxFunc::convertBytes($dbsize);
-    $dwoo_data['dbversion'] = substr($this->db->version(), 0, strrpos($this->db->version(), '-') !== FALSE ? strrpos($this->db->version(), '-') : strlen($this->db->version()));
-    $dwoo_data['currentversion'] = kxEnv::get('kx:misc:version');
+    $twigData['dbsize'] = kxFunc::convertBytes($dbsize);
+    $twigData['dbversion'] = substr($this->db->version(), 0, strrpos($this->db->version(), '-') !== FALSE ? strrpos($this->db->version(), '-') : strlen($this->db->version()));
+    $twigData['currentversion'] = kxEnv::get('kx:misc:version');
     
-    $dwoo_data['stats']['numboards'] = $this->db->select("boards")
+    $twigData['stats']['numboards'] = $this->db->select("boards")
     																	 ->countQuery()
                                        ->execute()
                                        ->fetchField();
-    $dwoo_data['stats']['totalposts'] = $this->db->select("posts")
+    $twigData['stats']['totalposts'] = $this->db->select("posts")
     																	 ->countQuery()
                                        ->execute()
                                        ->fetchField();
-  	kxTemplate::output("manage/index", $dwoo_data);
+  	kxTemplate::output("manage/index", $twigData);
   }
 }

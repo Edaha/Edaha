@@ -194,7 +194,7 @@ class public_board_base_baseboard extends kxCmd {
     // Setup
     //-----------------------------------------
 
-    $this->dwoo_data['filetypes'] = $this->rebuild->getEmbeds();
+    $this->twigData['filetypes'] = $this->rebuild->getEmbeds();
     
     $i = 0;
     if (!isset($postsperpage)) {
@@ -202,7 +202,7 @@ class public_board_base_baseboard extends kxCmd {
     }
     $totalpages = $this->rebuild->calcTotalPages()-1;
     
-    $this->dwoo_data['numpages'] = $totalpages;
+    $this->twigData['numpages'] = $totalpages;
 
 
     //-----------------------------------------
@@ -210,7 +210,7 @@ class public_board_base_baseboard extends kxCmd {
     //-----------------------------------------    
 
     while ($i <= $totalpages) {
-      $this->dwoo_data['thispage'] = $i;
+      $this->twigData['thispage'] = $i;
       
       //--------------------------------------------------------------------------------------------------
       // Grab our threads, stickies go first, then follow by bump time, then run through them
@@ -233,7 +233,7 @@ class public_board_base_baseboard extends kxCmd {
         if ($this->rebuild->markThread($thread)) {
           $this->RegenerateThreads($thread->post_id);
           // RegenerateThreads overwrites the replythread variable. Reset it here.
-          $this->dwoo_data['replythread'] = 0;
+          $this->twigData['replythread'] = 0;
         }
         $thread = $this->rebuild->buildPost($thread, true);
         $outThread[] = $this->buildThread($thread);
@@ -244,16 +244,16 @@ class public_board_base_baseboard extends kxCmd {
                            ->fields("embeds")
                            ->execute()
                            ->fetchAll();
-        $this->dwoo_data['embeds'] = $embeds;
+        $this->twigData['embeds'] = $embeds;
       }
 
-      $this->dwoo_data['posts'] = $outThread;
+      $this->twigData['posts'] = $outThread;
       
-      $this->dwoo_data['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
+      $this->twigData['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
       $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
       $this->pageHeader(0);
       $this->postBox(0);
-      $content = kxTemplate::get('board/'.$this->boardType.'/board_page', $this->dwoo_data);
+      $content = kxTemplate::get('board/'.$this->boardType.'/board_page', $this->twigData);
 
       if ($i == 0) {
         $page = KX_BOARD . '/'.$this->board->board_name.'/'.kxEnv::Get('kx:pages:first');
@@ -283,7 +283,7 @@ class public_board_base_baseboard extends kxCmd {
                        ->fields("embeds")
                        ->execute()
                        ->fetchAll();
-    $this->dwoo_data['embeds'] = $embeds;
+    $this->twigData['embeds'] = $embeds;
     // No ID? Get every thread.
     if ($id == 0) {
       
@@ -313,7 +313,7 @@ class public_board_base_baseboard extends kxCmd {
 
           $temp = $this->rebuild->buildThread($id);
           $thread = $temp[0];
-          $this->dwoo_data['lastid'] = $temp[1];
+          $this->twigData['lastid'] = $temp[1];
           
          
           $this->board->header = $this->pageHeader($id);
@@ -321,33 +321,33 @@ class public_board_base_baseboard extends kxCmd {
           //-----------
           // Dwoo-hoo
           //-----------
-          $this->dwoo_data['numimages']   = $numimages;
-          $this->dwoo_data['replythread'] = $id;
-          $this->dwoo_data['threadid']    = $thread[0]->post_id;
-          $this->dwoo_data['posts']       = $thread;
-          //$this->dwoo_data->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
+          $this->twigData['numimages']   = $numimages;
+          $this->twigData['replythread'] = $id;
+          $this->twigData['threadid']    = $thread[0]->post_id;
+          $this->twigData['posts']       = $thread;
+          //$this->twigData->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
           $replycount = (count($thread)-1);
-          $this->dwoo_data['replycount']  = $replycount;
+          $this->twigData['replycount']  = $replycount;
           if (!isset($this->board->footer)) $this->board->footer = $this->footer(false, (microtime(true) - $executiontime_start_thread));
         }
         else if ($i == 1) {
           $lastBit = "+50";
-          $this->dwoo_data['modifier'] = "last50";
+          $this->twigData['modifier'] = "last50";
 
           // Grab the last 50 replies
-          $this->dwoo_data['posts'] = array_slice($thread, -50, 50);
+          $this->twigData['posts'] = array_slice($thread, -50, 50);
           // Add the thread to the top of this, since it wont be included in the result
-          array_unshift($this->dwoo_data['posts'], $thread[0]); 
+          array_unshift($this->twigData['posts'], $thread[0]); 
 
         }
         elseif ($i == 2) {
           $lastBit = "-100";
-          $this->dwoo_data['modifier'] = "first100";
+          $this->twigData['modifier'] = "first100";
           
           // Grab the first 100 posts
-          $this->dwoo_data['posts'] = array_slice($thread, 0, 100);
+          $this->twigData['posts'] = array_slice($thread, 0, 100);
         }
-        $content = kxTemplate::get('board/'.$this->boardType.'/board_page', $this->dwoo_data);
+        $content = kxTemplate::get('board/'.$this->boardType.'/board_page', $this->twigData);
         kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
       }
     }
@@ -362,10 +362,10 @@ class public_board_base_baseboard extends kxCmd {
    * @return string The built header
    */
   public function pageHeader($replythread = 0) {
-    $this->dwoo_data += $this->rebuild->pageHeader();
-    $this->dwoo_data['replythread'] = $replythread;
-    $this->dwoo_data['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
-    $this->dwoo_data['ku_defaultstyle'] = (!empty($this->board->board_style_default) ? ($this->board->board_style_default) : (kxEnv::Get('kx:css:imgdefault')));
+    $this->twigData += $this->rebuild->pageHeader();
+    $this->twigData['replythread'] = $replythread;
+    $this->twigData['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
+    $this->twigData['ku_defaultstyle'] = (!empty($this->board->board_style_default) ? ($this->board->board_style_default) : (kxEnv::Get('kx:css:imgdefault')));
   }
   
   /**
@@ -377,7 +377,7 @@ class public_board_base_baseboard extends kxCmd {
    */
   public function postBox($replythread = 0) {
 
-    $this->dwoo_data += $this->rebuild->blotter();
+    $this->twigData += $this->rebuild->blotter();
     
   }
 
@@ -389,6 +389,6 @@ class public_board_base_baseboard extends kxCmd {
    * @return string The generated footer
    */
   public function footer($noboardlist = false, $executiontime = 0) {
-    $this->dwoo_data += $this->rebuild->footer($noboardlist, $executiontime);
+    $this->twigData += $this->rebuild->footer($noboardlist, $executiontime);
   }
 }

@@ -1,3 +1,5 @@
+{% import "manage/macros.tpl" as macros %}
+
 {% extends "manage/wrapper.tpl" %}
 
 {% block heading %}{% trans "Bans - Add" %}{% endblock %}
@@ -9,15 +11,7 @@
       <legend>{% trans "Bans" %}</legend>
       
       <div class="bans_left">
-        <select name="boards[]" class="multiple" multiple="multiple">
-{% for section in sections %}
-          <optgroup label="{{ section.name }}">
-{% for board in section.boards %}
-            <option value="{{ board.board_name }}">{{ board.board_desc }}</option>
-{% endfor %}
-          </optgroup>
-{% endfor %}
-        </select>
+        {{ macros.boardlist(sections) }}
       </div>
       
       <div class="bans_right">

@@ -11,6 +11,7 @@ class manage_board_statistics_stats extends kxCmd {
                        ->fields("boards")
                        ->execute()
                        ->fetchAll();
+
     foreach ($types as $type) {
       switch ($type) {
         case "posts":
@@ -33,7 +34,7 @@ class manage_board_statistics_stats extends kxCmd {
                        ->where("post_board = ?")
                        ->where("post_timestamp >= ?");
       $results[$type] = $result->countQuery()
-                                        ->build();
+                               ->build();
     }
 
     foreach ($boards as $board) {
@@ -42,6 +43,7 @@ class manage_board_statistics_stats extends kxCmd {
             $twigData['stats'][$board->board_name][$k] = $result->fetchField();
       }
     }
+
     kxTemplate::output("manage/stats", $twigData);
   }
 }

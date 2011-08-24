@@ -68,10 +68,14 @@ class manage_core_bans_bans extends kxCmd {
                        ->orderBy("board_order")
                        ->build();
     // Add boards to an array within their section
-    foreach ($sections as $section) {
+    foreach ($sections as &$section) {
       $boards->execute(array($section->id));
       $section->boards = $boards->fetchAll();
     }
+    
+    // Prepend boards with no section
+    $boards->execute(array(0));
+    $sections = array_merge($boards->fetchAll(), $sections);
     
     $this->twigData['sections'] = $sections;
     

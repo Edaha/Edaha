@@ -15,7 +15,6 @@
 	{% endraw %}
 {% endif %}
 {% endblock %}
-{% block extrahead %}{% endblock %}
 {% if locale != 'en' %}
   <link rel="gettext" type="application/x-po" href="{% kxEnv "paths:main:path" %}/inc/lang/{{locale}}/LC_MESSAGES/kusaba.po" />
 {% endif %}
@@ -28,6 +27,7 @@
     {% block extrajs %}{% endblock %}
   </script>
   <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/lib/javascript/kusaba.js"></script>
+  {% block extrahead %}{% endblock %}
 </head>
 <body>
 {% block content %}{% endblock %}

@@ -26,3 +26,19 @@
       {% endif %}
     </fieldset>
 {% endmacro %}
+
+{% macro boardlist(sections) %}
+  <select name="boards[]" class="multiple" multiple="multiple">
+  {% for section in sections %}
+    {% if section.name is defined %}
+      <optgroup label="{{ section.name }}">
+        {% for board in section.boards %}
+          <option value="{{ board.board_name }}">{{ board.board_desc }}</option>
+        {% endfor %}
+      </optgroup>
+    {% else %}
+      <option value="{{ section.board_name }}">{{ section.board_desc }}</option>
+    {% endif %}
+  {% endfor %}
+  </select>
+{%endmacro%}

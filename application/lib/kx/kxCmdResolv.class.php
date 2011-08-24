@@ -130,7 +130,7 @@ class kxCmdResolv {
         // Ban check ( may as well do it here before we do any further processing)
         $boardName = "";
         if (KX_CURRENT_APP == "core" && $module == "post" && $section == "post") {
-            if (isset($environment->$request['board'])) {
+            if (isset($environment->request) && isset($environment->request['board'])) {
                 $boardName = $environment->$request['board'];
             }
         }

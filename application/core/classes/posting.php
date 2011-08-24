@@ -67,14 +67,14 @@ class Posting {
         }
     }
     public function forcedAnon(&$postData, $board) {
-        if ($board->board_forced_anonynous == 0) {
+        if ($board->board_forced_anonymous == 0) {
             if ($postData['user_authority'] == 0 || $postData['user_authority'] == 3) {
                 $postData['post_fields']['name'] = '';
             }
         }
     }
     public function handleTripcode($postData) {
-        //$nameandtripcode = kxFunc::calculateNameAndTripcode($postData['post_fields']['name']);
+        $nameandtripcode = '';//$nameandtripcode = kxFunc::calculateNameAndTripcode($postData['post_fields']['name']);
         if (is_array($nameandtripcode)) {
             $name = $nameandtripcode[0];
             $tripcode = $nameandtripcode[1];
@@ -152,14 +152,14 @@ class Posting {
         return false;
     }
     public function modPost($post, $board) {
-        if ($postData['user_authority'] > 0 && $postData['user_authority'] != 3) {
+        if ($post['user_authority'] > 0 && $post['user_authority'] != 3) {
             $modpost_message = 'Modposted #<a href="' . kxEnv::Get('kx:paths:boards:folder') . $board->board_name . '/res/';
-            if ($postData['is_reply']) {
-                $modpost_message .= $postData['thread_info']['parent'];
+            if ($post['is_reply']) {
+                $modpost_message .= $post['thread_info']['parent'];
             } else {
                 $modpost_message .= $post['post_id'];
             }
-            $modpost_message .= '.html#' . $post['post_id'] . '">' . $post['post_id'] . '</a> in /'. $this->board->board_name .'/ with flags: ' . $postData['flags'] . '.';
+            $modpost_message .= '.html#' . $post['post_id'] . '">' . $post['post_id'] . '</a> in /'. $this->board->board_name .'/ with flags: ' . $post['flags'] . '.';
             management_addlogentry($modpost_message, 1, md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed')));
         }
     }

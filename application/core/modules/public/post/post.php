@@ -143,7 +143,7 @@ class public_core_post_post extends kxCmd {
 
       $nextid = $this->db->select("posts")
                    ->fields("posts", array("post_id"))
-                   ->condition("post_board", $this->board->board_id)
+                   ->condition("post_board", $this->_boardClass->board->board_id)
                    ->execute()
                    ->fetchField();
       if ($nextid)
@@ -158,6 +158,9 @@ class public_core_post_post extends kxCmd {
       if (isset($this->request['stickyonpost'])) $this->postData['flags'] .= 'S';
       if (isset($this->request['rawhtml'])) $this->postData['flags'] .= 'RH';
       if (isset($this->request['usestaffname'])) $this->postData['flags'] .= 'N';
+      $this->postData['display_status'] = 0;
+      $this->postData['lock_on_post'] = 0;
+      $this->postData['sticky_on_post'] = 0;
       
       // If they are just a normal user, or vip...
       if ($this->postData['user_authority'] == 0 || $this->postData['user_authority'] > 2) {

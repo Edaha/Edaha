@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `announcements` (
 --
 
 CREATE TABLE IF NOT EXISTS `banlist` (
-  `ban_id` int(11) NOT NULL AUTO INCREMENT,
+  `ban_id` int(11) NOT NULL AUTO_INCREMENT,
   `ban_type` smallint(6) DEFAULT 0,
   `ban_expired` smallint(6) DEFAULT 0,
   `ban_allow_read` smallint(6) DEFAULT 1,
@@ -268,7 +268,7 @@ INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type
 
 CREATE TABLE IF NOT EXISTS filter
 (
-  filter_id int(11) NOT NULL AUTO INCREMENT,
+  filter_id int(11) NOT NULL AUTO_INCREMENT,
   filter_word varchar(75) NOT NULL,
   filter_type smallint NOT NULL,
   filter_punishment varchar(255),

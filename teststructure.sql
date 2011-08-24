@@ -46,21 +46,20 @@ CREATE TABLE IF NOT EXISTS `announcements` (
 --
 
 CREATE TABLE IF NOT EXISTS `banlist` (
-  `id` int(11) NOT NULL,
-  `type` smallint(6) DEFAULT '0',
-  `expired` smallint(6) DEFAULT '0',
-  `allowread` smallint(6) DEFAULT '1',
-  `ip` varchar(50) NOT NULL,
-  `ipmd5` varchar(32) NOT NULL,
-  `globalban` smallint(6) DEFAULT '0',
-  `boards` varchar(255) NOT NULL,
-  `by` varchar(75) NOT NULL,
-  `at` int(11) NOT NULL,
-  `until` int(11) NOT NULL,
-  `reason` text NOT NULL,
-  `staffnote` text NOT NULL,
-  `appeal` text,
-  `appealat` int(11) NOT NULL DEFAULT '0'
+  `ban_id` int(11) NOT NULL AUTO INCREMENT,
+  `ban_type` smallint(6) DEFAULT 0,
+  `ban_expired` smallint(6) DEFAULT 0,
+  `ban_allow_read` smallint(6) DEFAULT 1,
+  `ban_ip` varchar(100) NOT NULL,
+  `ban_ip_md5` varchar(32) NOT NULL,
+  `ban_boards` varchar(255) NOT NULL,
+  `ban_by` varchar(75) NOT NULL,
+  `ban_created` int(11) NOT NULL,
+  `ban_expires` int(11) NOT NULL,
+  `ban_reason` text NOT NULL,
+  `ban_staff_note` text NOT NULL,
+  `ban_appeal_message` text,
+  `ban_appeal_status` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -180,6 +179,30 @@ INSERT INTO `board_filetypes` (`type_board_id`, `type_id`) VALUES
 (1, 1);
 
 -- --------------------------------------------------------
+
+
+--
+-- Table structure for table `configuration`
+--
+
+CREATE TABLE IF NOT EXISTS `configuration` (
+  `config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `config_name` varchar(255) NOT NULL,
+  `config_description` text,
+  `config_type` varchar(255) NOT NULL,
+  `config_variable` varchar(255) NOT NULL,
+  PRIMARY KEY (`config_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `configuration`
+--
+
+INSERT INTO `configuration` (`config_id`, `config_name`, `config_description`, `config_type`, `config_variable`) VALUES
+(1, 'Default Ban Message', 'The text to add at the end of a post if a ban is placed and "Add ban message" is checked', 'textarea', 'display:banmsg');
+
+-- --------------------------------------------------------
+
 
 --
 -- Table structure for table `embeds`
@@ -311,7 +334,7 @@ CREATE TABLE IF NOT EXISTS `loginattempts` (
 
 CREATE TABLE IF NOT EXISTS `manage_sessions` (
   `session_id` varchar(32) NOT NULL DEFAULT '',
-  `session_ip` varchar(32) NOT NULL DEFAULT '',
+  `session_ip` varchar(100) NOT NULL DEFAULT '',
   `session_staff_id` mediumint(8) NOT NULL DEFAULT '0',
   `session_location` varchar(64) NOT NULL DEFAULT '',
   `session_name` varchar(64) NOT NULL DEFAULT '',
@@ -430,7 +453,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `post_subject` varchar(255) NOT NULL,
   `post_message` text NOT NULL,
   `post_password` varchar(255) NOT NULL,
-  `post_ip` varchar(75) NOT NULL,
+  `post_ip` varchar(100) NOT NULL,
   `post_ip_md5` varchar(32) NOT NULL,
   `post_tag` varchar(5) NOT NULL,
   `post_timestamp` int(11) NOT NULL,
@@ -564,16 +587,17 @@ CREATE TABLE IF NOT EXISTS `watchedthreads` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `wordfilter`
+-- Table structure for table `filter`
 --
 
-CREATE TABLE IF NOT EXISTS `wordfilter` (
-  `id` int(11) NOT NULL,
-  `word` varchar(75) NOT NULL,
-  `replacedby` varchar(75) NOT NULL,
-  `boards` text NOT NULL,
-  `time` int(11) NOT NULL,
-  `regex` smallint(6) DEFAULT '0'
+CREATE TABLE IF NOT EXISTS `filter` (
+  `filter_id` int(11) NOT NULL,
+  `filter_word` varchar(75) NOT NULL,
+  `filter_type` tinyint(1) NOT NULL,
+  `filter_punishment` varchar(75) NOT NULL
+  `filter_boards` text NOT NULL,
+  `filter_added` int(11) NOT NULL,
+  `filter_regex` boolean DEFAULT 0
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

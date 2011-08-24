@@ -46,7 +46,7 @@ class manage_core_bans_bans extends kxCmd {
     // TODO: Add query,   
     $this->twigData['bans'] = $this->db->select("banlist")
                                        ->fields("banlist")
-                                       ->orderBy("at", "DESC")
+                                       ->orderBy("ban_created", "DESC")
                                        ->range(0,20)
                                        ->execute()
                                        ->fetchAll();

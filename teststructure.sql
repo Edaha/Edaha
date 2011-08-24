@@ -264,6 +264,20 @@ INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type
 
 -- --------------------------------------------------------
 
+-- Table: filter
+
+CREATE TABLE IF NOT EXISTS filter
+(
+  filter_id int(11) NOT NULL AUTO INCREMENT,
+  filter_word varchar(75) NOT NULL,
+  filter_type smallint NOT NULL,
+  filter_punishment varchar(255),
+  filter_boards varchar(255) NOT NULL,
+  filter_added integer NOT NULL,
+  filter_regex int(1) DEFAULT false,
+  PRIMARY KEY (filter_id)
+)
+
 --
 -- Table structure for table `front`
 --

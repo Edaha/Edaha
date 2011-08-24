@@ -141,7 +141,7 @@ class kxFunc {
         "'");
         $replace = array( " ",
             "\n", "\n", "\n",
-            "&amp",
+            "&amp;",
             "&#60;&#33;--",
             "--&#62;",
             "&lt;",
@@ -501,6 +501,30 @@ class kxFunc {
         }
         
         return sprintf("%0.2fGB", $number/1024/1024/1024);						
+    }
+
+    static public function fullBoardList() {
+      $sections = kxDB::getInstance()->select("sections")
+                                     ->fields("sections")
+                                     ->orderBy("section_order")
+                                     ->execute()
+                                     ->fetchAll();
+
+      $boards = kxDB::getInstance()->select("boards")
+                                   ->fields("boards", array('board_name', 'board_desc'))
+                                   ->where("board_section = ?")
+                                   ->orderBy("board_order")
+                                   ->build();
+
+      // Add boards to an array within their section
+      foreach ($sections as &$section) {
+        $boards->execute(array($section->id));
+        $section->boards = $boards->fetchAll();
+      }
+      
+      // Prepend boards with no section
+      $boards->execute(array(0));
+      return(array_merge($boards->fetchAll(), $sections));
     }
 }
 

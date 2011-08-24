@@ -56,28 +56,8 @@ class manage_core_bans_bans extends kxCmd {
   
   private function _addBan() {
     // TODO: Complete this
-    $sections = $this->db->select("sections")
-                     ->fields("sections")
-                     ->orderBy("section_order")
-                     ->execute()
-                     ->fetchAll();
 
-    $boards = $this->db->select("boards")
-                       ->fields("boards", array('board_name', 'board_desc'))
-                       ->where("board_section = ?")
-                       ->orderBy("board_order")
-                       ->build();
-    // Add boards to an array within their section
-    foreach ($sections as &$section) {
-      $boards->execute(array($section->id));
-      $section->boards = $boards->fetchAll();
-    }
-    
-    // Prepend boards with no section
-    $boards->execute(array(0));
-    $sections = array_merge($boards->fetchAll(), $sections);
-    
-    $this->twigData['sections'] = $sections;
+    $this->twigData['sections'] = kxFunc::fullBoardList();
     
     kxTemplate::output('manage/bans_add', $this->twigData);
   }

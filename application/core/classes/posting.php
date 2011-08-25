@@ -8,7 +8,7 @@ class Posting {
         $this->db = kxDB::getInstance();
         $this->request = kxEnv::$request;
     }
-    public function checkUTF8() {
+    public function checkUtf8() {
         if (function_exists('mb_convert_encoding') && function_exists('mb_check_encoding')) {
             if (isset($_POST['name']) && !mb_check_encoding($_POST['name'], 'UTF-8')) {
                 $_POST['name'] = mb_convert_encoding($_POST['name'], 'UTF-8');
@@ -130,6 +130,121 @@ class Posting {
             }
         }
     }
+    public function checkPostingTime($isReply, $boardId) {
+      
+      // Generate the query needed
+      $result = $this->db->select("posts");
+      $result->addExpression("MAX(post_timestamp)");
+      $result = $result->condition("post_board", $boardId)
+                       ->condition("post_parent", 0, $isReply ? "!=" : "=")
+                       ->condition("post_ip_md5", md5($_SERVER['REMOTE_ADDR']))
+                       ->condition("post_timestamp", time() - $this->environment->get("kx:limits:".$isReply ? "replydelay" : "threaddelay"), ">")
+                       ->execute()
+                       ->fetchField();
+      if (!empty($result)) {
+        // Check if they are posting too quickly
+        $check = $this->environment->get("kx:limits:".$isReply ? "replydelay" : "threaddelay");
+        if (time() - $result <= $check) {
+          kxFunc::showError(_gettext('Please wait a moment before posting again.'), _gettext('You are currently posting faster than the configured minimum post delay allows.'));
+        }
+      }
+    }
+    public function checkMessageLength($maxMessageLength) {
+      // If the length of the message is greater than the board's maximum message length...
+      if (strlen($this->request['message']) > $maxMessageLength) {
+        // Kill the script, stopping the posting process
+        kxFunc::showError(sprintf(_gettext('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($this->request['message']), $maxMessageLength));
+      }
+    }
+    public function checkCaptcha($board, $postData) {
+      //TODO: This NEEDS to be looked to see if it can be fit somewhere better
+      // Do we have captcha?
+      if ($board->board_captcha == 1) {
+        // Use the old captcha for text board replies because reCaptcha doesnt like having more than one captcha 
+        // on a page (I don't really like checking board types here, but I can't think of a better way to do this)
+        // TODO: Replace kusaba captcha with something better (like KCaptcha). The Kusaba captcha is incredibly
+        // broken and possibly exploitable!
+        if ($board->board_type == 1 && $postData['is_reply']) {
+          // Check if they entered the correct code. If not... 
+          if ($_SESSION['security_code'] != strtolower($this->request['captcha']) || empty($_SESSION['security_code'])) {
+            // Kill the script, stopping the posting process 
+            kxFunc::showError(_gettext('Incorrect captcha entered.'));
+          }
+          unset($_SESSION['security_code']);
+        }
+        else {
+          require_once(KX_ROOT.'/application/lib/recaptcha/recaptchalib.php');
+          $privatekey = "6LdVg8YSAAAAALayugP2r148EEQAogHPfQOSYow-";
+
+          // was there a reCAPTCHA response?
+          $resp = recaptcha_check_answer ($privatekey,
+                                          $_SERVER["REMOTE_ADDR"],
+                                          $this->request["recaptcha_challenge_field"],
+                                          $this->request["recaptcha_response_field"]
+                                          );
+          if (!$resp->is_valid) {
+            // Show error and give user opportunity to try again.
+            kxFunc::showError(_gettext('Incorrect captcha entered.'));
+          }
+        }
+      }
+    }
+    public function checkBannedHash($board) {
+      // Banned file hash check
+      if (isset($_FILES['imagefile'])) {
+        if ($_FILES['imagefile']['name'][0] != '') {
+          $results = $this->db->select("bannedhashes")
+                              ->fields("bannedhashes", array("hash_ban_duration", "hash_description"))
+                              ->where("hash_md5 = ?")
+                              ->range(0,1)
+                              ->build();
+          for($i=0;$i<$board->board_max_files;$i++){
+            if (isset($_FILES['imagefile']['tmp_name'][$i]) && $_FILES['imagefile']['tmp_name'][$i]){
+              $results->execute(array(md5_file($_FILES['imagefile']['tmp_name'][$i])));
+              if (count($results->fetchAll()) > 0) {
+                  kxBans::banUser($_SERVER['REMOTE_ADDR'], 'SERVER', '1', $results[0]->hash_ban_duration, '', 'Posting a banned file.<br />' . $results[0]->hash_description, '', 0, 0, 1);
+                  kxBans::banCheck($_SERVER['REMOTE_ADDR'], $board->board_name);
+                  exit;
+              }
+            }
+            else {
+              // The file didn't get uploaded, or no file after the previous was uploaded.
+              // Either way, break the loop, if there's a problem, upload class will take care of it.
+              break;
+            }
+          }
+        }
+      }
+    }
+    public function checkBlacklistedText($boardId) {
+      $filters = $this->db->select("filter")
+                          ->fields("filter")
+                          ->condition("filter_type", 2, ">=")
+                          ->orderBy("filter_type", "DESC")
+                          ->execute()
+                          ->fetchAll();
+
+      $reported = 0;
+      foreach ($filters as $filter) {
+          if ( (!$filter->filter_boards || in_array($boardName, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
+            // They included blacklisted text in their post. What do we do?
+            if ( $filter->filter_type & 8 ) {
+              // Ban them if they have the ban flag set on this filter
+              $punishment = unserialize($filter->filter_punishment);
+              kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _gettext('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
+            }
+            if ( $filter->filter_type & 4) {
+              // Stop the post from happening if the delete flag is set
+              kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter));
+            }
+            if ( $filter->filter_type & 2 && !$reported) {
+              // Report flag is set, report the post
+              $reported = 1;
+              // TODO add this later
+            }
+          }
+        }
+      }
     public function checkOekaki() {
         // If oekaki seems to be in the url...
         if (!empty($this->request['oekaki'])) {

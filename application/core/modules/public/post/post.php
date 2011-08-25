@@ -120,15 +120,14 @@ class public_core_post_post extends kxCmd {
         }
         $this->postData['files'] =  Array($_FILES['imagefile']['name'][0]);
       }
-      /* TODO: Look at these functions to check their usefulness and proper place
-        $this->_postingClass->SpamCheck();
-        $this->_postingClass->CheckPostingTime($_POST['replythread']);
-        $this->_postingClass->CheckMessageLength();
-        $this->_postingClass->CheckCaptcha();
-        $this->_postingClass->CheckBannedHash();
-        $this->_postingClass->CheckBlacklistedText();
-        */
+
       $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->board_id);
+
+      $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->board_id);
+      $this->_postingClass->checkMessageLength($this->_boardClass->board->board_max_message_length);
+      $this->_postingClass->checkBlacklistedText($this->_boardClass->board->board_id);
+      $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
+      $this->_postingClass->checkBannedHash($this->_boardClass->board);
       
       //How many replies, is the thread locked, etc
       if ($this->postData['is_reply']) {

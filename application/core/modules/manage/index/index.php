@@ -25,7 +25,7 @@ class manage_core_index_index extends kxCmd {
         $dbsize = filesize(substr(kxEnv::get("kx:db:dsn"), (strpos(kxEnv::get("kx:db:dsn"), "sqlite:")+7), strlen(kxEnv::get("kx:db:dsn"))));
       break;
       default:
-      	$twigData['dbtype'] = $this->db->driver();
+        $twigData['dbtype'] = $this->db->driver();
     }
     $twigData['dbsize'] = kxFunc::convertBytes($dbsize);
     $twigData['dbversion'] = substr($this->db->version(), 0, strrpos($this->db->version(), '-') !== FALSE ? strrpos($this->db->version(), '-') : strlen($this->db->version()));
@@ -40,12 +40,5 @@ class manage_core_index_index extends kxCmd {
                                        ->execute()
                                        ->fetchField();
     kxTemplate::output("manage/index", $twigData);
-    $this->twigData['locale'] = kxEnv::Get('kx:misc:locale');
-    $result = $this->db->select('staff', 'stf')
-               ->fields('stf', array('user_name'));
-    $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = stf.user_id");
-    $this->twigData['name'] = $result->condition('session_id', $this->request['sid'])
-                               ->execute()
-                               ->fetchField();
   }
 }

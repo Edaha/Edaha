@@ -47,6 +47,9 @@ class kxTemplate {
             // Supply Twig with our GET/POST variables
             self::$data['_get'] = $_GET;
             self::$data['_post'] = $_POST;
+            
+            // Supply Twig with the default locale
+            self::$data['locale'] = kxEnv::Get('kx:misc:locale');
             // Are we in manage? Load up the manage wrapper
             if (IN_MANAGE) {
                 $data['current_app'] = "";
@@ -66,6 +69,16 @@ class kxTemplate {
                 }
                 
                 self::assign('base_url', kxEnv::Get('kx:paths:main:path') . '/manage.php?sid=' . ( isset(kxEnv::$request['sid']) ? kxEnv::$request['sid'] : '') . '&');
+ 
+                // Get our manage username
+                if (isset(kxEnv::$request['sid'])) {
+                  $result = kxDB::getinstance()->select('staff', 'stf')
+                                               ->fields('stf', array('user_name'));
+                  $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = stf.user_id");
+                  self::assign('name', $result->condition('session_id', kxEnv::$request['sid'])
+                                               ->execute()
+                                               ->fetchField());                
+                }
                 
             }
         }

@@ -4,24 +4,24 @@ class manage_core_index_index extends kxCmd {
 
   public function exec( kxEnv $environment ) {
     $dbsize = 0;
-  	switch ($this->db->driver()) {
-    	case 'mysql':
-      	$twigData['dbtype'] = 'MySQL';
+    switch ($this->db->driver()) {
+      case 'mysql':
+        $twigData['dbtype'] = 'MySQL';
         $results = $this->db->query("SHOW TABLE STATUS");
         foreach ($results as $line) {
-        	$dbsize += ($line->data_length+$line->index_length);
+          $dbsize += ($line->data_length+$line->index_length);
         }
         
       break;
       case 'pgsql':
-      	$twigData['dbtype'] = 'PostgreSQL';
+        $twigData['dbtype'] = 'PostgreSQL';
         $results = $this->db->query("SELECT pg_database_size('".substr(kxEnv::get("kx:db:dsn"), (strpos(kxEnv::get("kx:db:dsn"), "dbname=")+7), strlen(kxEnv::get("kx:db:dsn")))."')");
-		foreach($results as $line) {
-			$dbsize += $line->pg_database_size;
-		}
+        foreach($results as $line) {
+          $dbsize += $line->pg_database_size;
+        }
       break;
       case 'sqlite':
-      	$twigData['dbtype'] = 'SQLite';
+        $twigData['dbtype'] = 'SQLite';
         $dbsize = filesize(substr(kxEnv::get("kx:db:dsn"), (strpos(kxEnv::get("kx:db:dsn"), "sqlite:")+7), strlen(kxEnv::get("kx:db:dsn"))));
       break;
       default:
@@ -32,13 +32,20 @@ class manage_core_index_index extends kxCmd {
     $twigData['currentversion'] = kxEnv::get('kx:misc:version');
     
     $twigData['stats']['numboards'] = $this->db->select("boards")
-    																	 ->countQuery()
+                                       ->countQuery()
                                        ->execute()
                                        ->fetchField();
     $twigData['stats']['totalposts'] = $this->db->select("posts")
-    																	 ->countQuery()
+                                       ->countQuery()
                                        ->execute()
                                        ->fetchField();
-  	kxTemplate::output("manage/index", $twigData);
+    kxTemplate::output("manage/index", $twigData);
+    $this->twigData['locale'] = kxEnv::Get('kx:misc:locale');
+    $result = $this->db->select('staff', 'stf')
+               ->fields('stf', array('user_name'));
+    $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = stf.user_id");
+    $this->twigData['name'] = $result->condition('session_id', $this->request['sid'])
+                               ->execute()
+                               ->fetchField();
   }
 }

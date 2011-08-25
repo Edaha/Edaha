@@ -29,7 +29,13 @@
 class manage_core_bans_bans extends kxCmd {
   
   public function exec( kxEnv $environment ) {
-    $this->twigData = array();
+    $this->twigData['locale'] = kxEnv::Get('kx:misc:locale');
+    $result = $this->db->select('staff', 'stf')
+               ->fields('stf', array('user_name'));
+    $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = stf.user_id");
+    $this->twigData['name'] = $result->condition('session_id', $this->request['sid'])
+                               ->execute()
+                               ->fetchField();
     switch ( (isset($_GET['do'])) ? $_GET['do'] : '' ) {
       case 'view':
         $this->_viewBans();

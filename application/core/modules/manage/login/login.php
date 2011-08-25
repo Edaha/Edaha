@@ -3,6 +3,13 @@
 class manage_core_login_login extends kxCmd{
 
   public function exec( kxEnv $environment ) {
+    $this->twigData['locale'] = kxEnv::Get('kx:misc:locale');
+    $result = $this->db->select('staff', 'stf')
+               ->fields('stf', array('user_name'));
+    $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = stf.user_id");
+    $this->twigData['name'] = $result->condition('session_id', $this->request['sid'])
+                               ->execute()
+                               ->fetchField();
     // Wat do????
     switch( $this->request['do'] )
     {
@@ -41,10 +48,10 @@ class manage_core_login_login extends kxCmd{
     // If we were previously in the menu and that for some reason got us here, remove that.
     $query_string_clean = str_replace( 'module=menu', '', $query_string_clean );
     
-    $twigData['query_string'] = $query_string_clean;
-    $twigData['message']      = $message;
+    $this->twigData['query_string'] = $query_string_clean;
+    $this->twigData['message']      = $message;
     //Let's get the login form.
-    kxTemplate::output("manage/login", $twigData);
+    kxTemplate::output("manage/login", $this->twigData);
     // We're done here.
     exit();
   }
@@ -119,8 +126,8 @@ class manage_core_login_login extends kxCmd{
           }
           $url = kxEnv::Get('kx:paths:script:path') . kxEnv::Get('kx:paths:script:folder').'/manage.php?sid=' . $session_id . '&' . $whereto;
           if(!empty($_COOKIE['use_frames'])) {
-            $twigData['url'] = $url;
-            kxTemplate::output("manage/frames", $twigData);
+            $this->twigData['url'] = $url;
+            kxTemplate::output("manage/frames", $this->twigData);
           }
           else {
             kxFunc::doRedirect($url, true);

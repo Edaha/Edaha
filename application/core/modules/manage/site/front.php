@@ -2,6 +2,13 @@
 
 class manage_core_site_front extends kxCmd {
   public function exec(kxEnv $environment){
+    $this->twigData['locale'] = kxEnv::Get('kx:misc:locale');
+    $result = $this->db->select('staff', 'stf')
+               ->fields('stf', array('user_name'));
+    $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = stf.user_id");
+    $this->twigData['name'] = $result->condition('session_id', $this->request['sid'])
+                               ->execute()
+                               ->fetchField();
     switch ($this->request['action']) {
       case 'post':
         $this->_post();

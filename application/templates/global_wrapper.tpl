@@ -15,8 +15,10 @@
 	{% endraw %}
 {% endif %}
 {% endblock %}
-{% if locale != 'en' %}
-  <link rel="gettext" type="application/x-po" href="{% kxEnv "paths:main:path" %}/inc/lang/{{locale}}/LC_MESSAGES/kusaba.po" />
+{% if locale is defined and locale is not empty and locale != 'en' %}
+  <link rel="gettext" type="application/x-po" href="{% kxEnv "paths:main:path" %}/application/lib/lang/{{locale}}/LC_MESSAGES/kusaba.po" />
+{% elseif "misc:locale"|kxEnv != 'en' %}
+  <link rel="gettext" type="application/x-po" href="{% kxEnv "paths:main:path" %}/application/lib/lang/{% kxEnv "misc:locale" %}/LC_MESSAGES/kusaba.po" />
 {% endif %}
   <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/lib/javascript/gettext.js"></script>
   <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/lib/javascript/jquery-1.4.2.min.js"></script>

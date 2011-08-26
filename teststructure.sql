@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS `banlist` (
   `ban_reason` text NOT NULL,
   `ban_staff_note` text NOT NULL,
   `ban_appeal_message` text,
-  `ban_appeal_status` int(11) NOT NULL DEFAULT '0'
+  `ban_appeal_status` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY(`ban_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -263,21 +264,6 @@ INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type
 (1, 'png', 'image/png', '', 0, 0, 1);
 
 -- --------------------------------------------------------
-
--- Table: filter
-
-CREATE TABLE IF NOT EXISTS filter
-(
-  filter_id int(11) NOT NULL AUTO_INCREMENT,
-  filter_word varchar(75) NOT NULL,
-  filter_type smallint NOT NULL,
-  filter_punishment varchar(255),
-  filter_boards varchar(255) NOT NULL,
-  filter_added integer NOT NULL,
-  filter_regex int(1) DEFAULT false,
-  PRIMARY KEY (filter_id)
-)
-
 --
 -- Table structure for table `front`
 --
@@ -357,13 +343,6 @@ CREATE TABLE IF NOT EXISTS `manage_sessions` (
   `session_url` text,
   PRIMARY KEY (`session_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `manage_sessions`
---
-
-INSERT INTO `manage_sessions` (`session_id`, `session_ip`, `session_staff_id`, `session_location`, `session_name`, `session_log_in_time`, `session_last_action`, `session_url`) VALUES
-('5b7489b962bac3feecad5e2c1205cd90', '127.0.0.1', 2, 'index', 'grumpy', 1310137564, 1310137564, '');
 
 -- --------------------------------------------------------
 
@@ -608,7 +587,7 @@ CREATE TABLE IF NOT EXISTS `filter` (
   `filter_id` int(11) NOT NULL,
   `filter_word` varchar(75) NOT NULL,
   `filter_type` tinyint(1) NOT NULL,
-  `filter_punishment` varchar(75) NOT NULL
+  `filter_punishment` varchar(75) NOT NULL,
   `filter_boards` text NOT NULL,
   `filter_added` int(11) NOT NULL,
   `filter_regex` boolean DEFAULT 0

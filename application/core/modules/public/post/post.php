@@ -148,7 +148,7 @@ class public_core_post_post extends kxCmd {
       if ($nextid)
         $this->postData['next_id'] = ($nextid+1);
       else
-        $this->postData['next_id'];
+        $this->postData['next_id'] = 1;
       
       // Are we modposting?
       $this->postData['user_authority'] = $this->_postingClass->userAuthority();

@@ -22,7 +22,7 @@
     <tr>
       <td>Edaha Version: </td>
 
-      <td class="strong">{{currentversion}} {% if newversion %}<a href="#" class="warning" title="{trans "A new version of Edaha is available"}">[ ! ]</a>{% endif %}</td>
+      <td class="strong">{{stats.edahaversion}} {% if newversion %}<a href="#" class="warning" title="{trans "A new version of Edaha is available"}">[ ! ]</a>{% endif %}</td>
       <td>Database Version: </td>
       <td class="strong">{{dbversion}}</td>
     </tr>

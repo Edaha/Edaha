@@ -134,6 +134,7 @@ class kxCmdResolv {
                 $boardName = $environment->$request['board'];
             }
         }
+
         kxBans::banCheck($_SERVER['REMOTE_ADDR'], $boardName);
         
         
@@ -198,11 +199,10 @@ abstract class kxCmd
      * @param	object	kxEnv reference
      * @return	void
      */
-    public function execute( kxEnv $environment )
-        {
+    public function execute( kxEnv $environment ) {
         $this->makeRegistryShortcuts( $environment );
         $this->exec( $environment );
-        }
+    }
     
     /**
      * Do execute method (must be overriden)
@@ -227,8 +227,7 @@ class kxCmd_default extends kxCmd {
      * @param	object	kxCmd reference
      * @return	void
      */
-    protected function exec( kxEnv $environment )
-        {
-        @header( "Location: ".kxEnv::Get('kx:paths:main:path').kxEnv::Get('kx:paths:main:folder'));
-        }
+    protected function exec( kxEnv $environment ) {
+      @header( "Location: ".kxEnv::Get('kx:paths:main:path').kxEnv::Get('kx:paths:main:folder'));
+    }
 }

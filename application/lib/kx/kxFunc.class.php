@@ -190,7 +190,7 @@ class kxFunc {
         }
         
         $appFolder       = KX_ROOT . '/application/' . $app;
-        $modulesFolder = (IN_MANAGE) ? 'manage' : 'public';
+        $modulesFolder = (defined("IN_MANAGE") && IN_MANAGE) ? 'manage' : 'public';
         
         if ( $module ) {
             return $appFolder . "/" . $modulesFolder . "/" . $module;

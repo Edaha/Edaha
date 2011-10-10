@@ -29,7 +29,6 @@ class manage_core_index_index extends kxCmd {
     }
     $twigData['dbsize'] = kxFunc::convertBytes($dbsize);
     $twigData['dbversion'] = substr($this->db->version(), 0, strrpos($this->db->version(), '-') !== FALSE ? strrpos($this->db->version(), '-') : strlen($this->db->version()));
-    $twigData['currentversion'] = kxEnv::get('kx:misc:version');
     
     $twigData['stats']['numboards'] = $this->db->select("boards")
                                        ->countQuery()
@@ -39,6 +38,7 @@ class manage_core_index_index extends kxCmd {
                                        ->countQuery()
                                        ->execute()
                                        ->fetchField();
+    $twigData['stats']['edahaversion'] = kxEnv::get("cache:version");
     kxTemplate::output("manage/index", $twigData);
   }
 }

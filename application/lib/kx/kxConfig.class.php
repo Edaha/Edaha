@@ -52,3 +52,69 @@ class kxConfig implements ArrayAccess {
     }
     /* }}} */
 }
+
+class coreConfig {
+
+  /**
+   * Fetch the cache array
+   *
+   * @access	public
+   * @return	array caches and caches to load
+   */
+  public function fetchCaches() {
+
+    /* Apps and modules */
+    $cache = array (  'version' =>         
+                                array(
+                                        'force_load'     => 1,
+                                        'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules/manage/index/index.php',
+                                        'recache_class'    => 'manage_core_index_index',
+                                        'recache_function' => 'recacheEdahaVersion' 
+                                      ),
+                                      
+                      'addons' =>
+                                array(
+                                        'app_cache' => 
+                                                       array(
+                                                              'force_load'     => 1,
+                                                              'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules/manage/addons/addons.php',
+                                                              'recache_class'    => 'manage_core_addons_addons',
+                                                              'recache_function' => 'recacheApplications' 
+                                                            ),
+                                        'app_menu' => 
+                                                       array(
+                                                              'force_load'     => 1,
+                                                              'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules/manage/addons/addons.php',
+                                                              'recache_class'    => 'manage_core_addons_addons',
+                                                              'recache_function' => 'recacheAppMenu' 
+                                                            ),
+                                        'module_cache' => 
+                                                       array(
+                                                              'force_load'     => 1,
+                                                              'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules/manage/addons/addons.php',
+                                                              'recache_class'    => 'manage_core_addons_addons',
+                                                              'recache_function' => 'recacheModules' 
+                                                            ),
+                                       'hooks_cache' => 
+                                                       array(
+                                                              'force_load'     => 1,
+                                                              'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules/manage/addons/hooks.php',
+                                                              'recache_class'    => 'manage_core_addons_hooks',
+                                                              'recache_function' => 'recacheHooks' 
+                                                            )
+                                      ),
+                      'wordfilters' =>         
+                                array(
+                                        'force_load'     => 1,
+                                        'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules_admin/posts/filter.php',
+                                        'recache_class'    => 'manage_core_posts_filter',
+                                        'recache_function' => 'recacheWordFilters' 
+                                      )
+                    );
+
+    $load = array();
+    
+    return array( 'caches'      => $cache,
+                  'cachetoload' => $load );
+  }
+}

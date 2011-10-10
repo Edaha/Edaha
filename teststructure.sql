@@ -181,6 +181,23 @@ INSERT INTO `board_filetypes` (`type_board_id`, `type_id`) VALUES
 
 -- --------------------------------------------------------
 
+--
+-- Table structure for table `cache`
+--
+
+CREATE TABLE cache (
+    cache_path varchar(255) NOT NULL DEFAULT '',
+    cache_value text,
+    cache_array tinyint(1) NOT NULL DEFAULT 0,
+    cache_updated int(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY (cache_path)
+);
+
+--
+-- Dumping data for table `cache`
+--
+INSERT INTO cache VALUES ('version', '1.0', 0, 1317940926);
+INSERT INTO cache VALUES ('addons:app_cache', 'a:0:{}', 1, 1317941331);
 
 --
 -- Table structure for table `configuration`

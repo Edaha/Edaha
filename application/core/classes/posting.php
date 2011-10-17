@@ -217,16 +217,17 @@ class Posting {
     }
   }
   public function checkBlacklistedText($boardId) {
-    $filters = $this->db->select("filter")
+    $filters = kxEnv::Get("cache:filters:spamfilters");
+    /*$filters = $this->db->select("filter")
                         ->fields("filter")
                         ->condition("filter_type", 2, ">=")
                         ->orderBy("filter_type", "DESC")
                         ->execute()
-                        ->fetchAll();
+                        ->fetchAll();*/
 
     $reported = 0;
     foreach ($filters as $filter) {
-        if ( (!$filter->filter_boards || in_array($boardName, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
+        if ( (!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
           // They included blacklisted text in their post. What do we do?
           if ( $filter->filter_type & 8 ) {
             // Ban them if they have the ban flag set on this filter

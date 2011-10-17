@@ -2,7 +2,7 @@
 #<?php die('NOPE'); ?>
 all:
   kx:
-    charset: UTF-8
+    charset: utf-8
     db:
       dsn: 'pgsql:dbname=kusaba'
       username: kusaba

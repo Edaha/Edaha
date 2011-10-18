@@ -7,7 +7,7 @@ class kxConfig implements ArrayAccess {
         $this->container = $data;
     }
     
-    public function set($path, $value) {
+    public function set($path, &$value) {
         $this->container = array_merge_recursive($this->container, self::setRecursive(explode(':', $path), $value));
     }
     

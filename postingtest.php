@@ -1,7 +1,7 @@
 <?php
 
 // Enter board name
-$board = "test";
+$board = "s1b1";
 //enter a non zero number to simulate replying
 $parentid = 0;
 ?>

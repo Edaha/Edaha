@@ -49,11 +49,6 @@ class public_board_upload_upload extends public_board_base_baseboard {
     }
   }
 
-  public function parseData($message, $postData) {
-   // Stub
-   return $message;
-  }
-
   public function processPost($postData) {
     $this->postClass = $this->environment->get('kx:classes:board:posting:id');
     $postData['thread_info']['tag'] = $this->postClass->getPostTag();

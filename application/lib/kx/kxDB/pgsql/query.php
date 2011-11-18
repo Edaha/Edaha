@@ -19,6 +19,7 @@ class InsertQuery_pgsql extends InsertQuery {
       return NULL;
     }
 
+	echo "<br />".$this;
     $stmt = $this->connection->prepareQuery((string) $this);
 
     // Fetch the list of blobs and sequences used on that table.
@@ -153,7 +154,7 @@ class UpdateQuery_pgsql extends UpdateQuery {
     $max_placeholder = 0;
     $blobs = array();
     $blob_count = 0;
-
+echo "<br />".$this;
     // Because we filter $fields the same way here and in __toString(), the
     // placeholders will all match up properly.
     $stmt = $this->connection->prepareQuery((string) $this);

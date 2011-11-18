@@ -194,15 +194,15 @@ class Posting {
     if (isset($_FILES['imagefile'])) {
       if ($_FILES['imagefile']['name'][0] != '') {
         $results = $this->db->select("bannedhashes")
-                            ->fields("bannedhashes", array("hash_ban_duration", "hash_description"))
-                            ->where("hash_md5 = ?")
+                            ->fields("bannedhashes", array("banduration", "description"))
+                            ->where("md5 = ?")
                             ->range(0,1)
                             ->build();
         for($i=0;$i<$board->board_max_files;$i++){
           if (isset($_FILES['imagefile']['tmp_name'][$i]) && $_FILES['imagefile']['tmp_name'][$i]){
             $results->execute(array(md5_file($_FILES['imagefile']['tmp_name'][$i])));
             if (count($results->fetchAll()) > 0) {
-                kxBans::banUser($_SERVER['REMOTE_ADDR'], 'SERVER', '1', $results[0]->hash_ban_duration, '', 'Posting a banned file.<br />' . $results[0]->hash_description, '', 0, 0, 1);
+                kxBans::banUser($_SERVER['REMOTE_ADDR'], 'SERVER', '1', $results[0]->banduration, '', 'Posting a banned file.<br />' . $results[0]->description, '', 0, 0, 1);
                 kxBans::banCheck($_SERVER['REMOTE_ADDR'], $board->board_name);
                 exit;
             }
@@ -437,7 +437,7 @@ class Posting {
                   'file_md5'            => $file['file_md5'],
                   'file_name'           => $file['file_name'],
                   'file_type'           => substr($file['file_type'], 1),
-                  'file_original'       => $file['original_file_name'],
+                  'file_original'       => mb_convert_encoding($file['original_file_name'],'ASCII','UTF-8'),
                   'file_size'           => $file['file_size'],
                   'file_size_formatted' => /*kxFunc::convertBytes($file['file_size'])*/$file['file_size'],
                   'file_image_width'    => $file['image_w'],

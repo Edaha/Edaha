@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `boards` (
   `maxage` int(11) NOT NULL DEFAULT '0',
   `markpage` smallint(6) DEFAULT '9',
   `maxreplies` int(11) NOT NULL DEFAULT '200',
-  `messagelength` int(11) NOT NULL DEFAULT '8192',
+  `max_message_length` int(11) NOT NULL DEFAULT '8192',
   `createdon` int(11) NOT NULL,
   `board_locked` smallint(6) DEFAULT '0',
   `includeheader` text,

@@ -22,28 +22,28 @@
  */
 
 class Upload {
-	public $files			= Array();
-	public $file_location		= '';
-	public $file_thumb_location = '';
-	public $file_thumb_cat_location = '';
-	public $isreply			= false;
-	public $isvideo			= false;
+  public $files      = Array();
+  public $file_location    = '';
+  public $file_thumb_location = '';
+  public $file_thumb_cat_location = '';
+  public $isreply      = false;
+  public $isvideo      = false;
   protected $environment;
   protected $db;
 
   public function __construct( kxEnv $environment )
-	{
-		$this->environment = $environment;
-		$this->db = kxDB::getInstance();
+  {
+    $this->environment = $environment;
+    $this->db = kxDB::getInstance();
     $this->request = kxEnv::$request;
-	}
+  }
   
-	public function HandleUpload($postData, $boardData) {
+  public function HandleUpload($postData, $boardData) {
     
     $file_name = isset($_FILES['imagefile']['name']) ? $_FILES['imagefile']['name'] : '';
-		$file_size = isset($_FILES['imagefile']['size']) ? $_FILES['imagefile']['size'] : '';
-		$file_type = isset($_FILES['imagefile']['type']) ? $_FILES['imagefile']['type'] : '';
-		if (!isset($postData['is_oekaki'])) {
+    $file_size = isset($_FILES['imagefile']['size']) ? $_FILES['imagefile']['size'] : '';
+    $file_type = isset($_FILES['imagefile']['type']) ? $_FILES['imagefile']['type'] : '';
+    if (!isset($postData['is_oekaki'])) {
       if ($file_name[0]) {
         if (count($file_name) > $boardData->board_max_files){
           kxFunc::showError(sprintf(_gettext('Please select only %d file(s) to upload.'), $boardData->board_max_files));
@@ -226,7 +226,7 @@ class Upload {
                 // Filename cleanup.
                 $this->files[$i]['file_name'] = htmlspecialchars_decode($this->files[$i]['file_name'], ENT_QUOTES);
                 $this->files[$i]['file_name'] = stripslashes($this->files[$i]['file_name']);
-                $this->files[$i]['file_name'] = str_replace("\x80", " ", $this->files[$i]['file_name']);					
+                $this->files[$i]['file_name'] = str_replace("\x80", " ", $this->files[$i]['file_name']);          
                 $this->files[$i]['file_name'] = str_replace(' ', '_', $this->files[$i]['file_name']);
                 $this->files[$i]['file_name'] = str_replace('#', '(number)', $this->files[$i]['file_name']);
                 $this->files[$i]['file_name'] = str_replace('@', '(at)', $this->files[$i]['file_name']);
@@ -406,58 +406,58 @@ class Upload {
           }
         }
       }
-		} else {
-			$this->files[0]['file_name'] = time() . mt_rand(1, 99);
-			$this->files[0]['original_file_name'] = $this->files[0]['file_name'];
-			$this->files[0]['file_md5'] = md5_file($postData['oekaki']);
-			$this->files[0]['file_type'] = '.png';
-			$this->files[0]['file_size'] = filesize($postData['oekaki']);
-			$imageDim = getimagesize($postData['oekaki']);
-			$this->files[0]['image_w'] = $imageDim[0];
-			$this->files[0]['image_h'] = $imageDim[1];
+    } else {
+      $this->files[0]['file_name'] = time() . mt_rand(1, 99);
+      $this->files[0]['original_file_name'] = $this->files[0]['file_name'];
+      $this->files[0]['file_md5'] = md5_file($postData['oekaki']);
+      $this->files[0]['file_type'] = '.png';
+      $this->files[0]['file_size'] = filesize($postData['oekaki']);
+      $imageDim = getimagesize($postData['oekaki']);
+      $this->files[0]['image_w'] = $imageDim[0];
+      $this->files[0]['image_h'] = $imageDim[1];
 
-			if (!copy($postData['oekaki'], KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[0]['file_name'] . $this->files[0]['file_type'])) {
-				kxFunc::showError(_gettext('Could not copy uploaded image.'));
-			}
+      if (!copy($postData['oekaki'], KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[0]['file_name'] . $this->files[0]['file_type'])) {
+        kxFunc::showError(_gettext('Could not copy uploaded image.'));
+      }
 
-			$oeakaki_animation = substr($postData['oekaki'], 0, -4) . '.pch';
-			if (file_exists($oeakaki_animation)) {
-				if (!copy($oeakaki_animation, KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[0]['file_name'] . '.pch')) {
-					kxFunc::showError(_gettext('Could not copy animation.'));
-				}
-				unlink($oeakaki_animation);
-			}
+      $oeakaki_animation = substr($postData['oekaki'], 0, -4) . '.pch';
+      if (file_exists($oeakaki_animation)) {
+        if (!copy($oeakaki_animation, KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[0]['file_name'] . '.pch')) {
+          kxFunc::showError(_gettext('Could not copy animation.'));
+        }
+        unlink($oeakaki_animation);
+      }
 
-			$thumbpath = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[0]['file_name'] . 's' . $this->files[0]['file_type'];
-			$thumbpath_cat = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[0]['file_name'] . 'c' . $this->files[0]['file_type'];
-			if (
-				(!$postData['is_reply'] && ($this->files[0]['image_w'] > kxEnv::Get('kx:images:thumbw') || $this->files[0]['image_h'] > kxEnv::Get('kx:images:thumbh'))) ||
-				($postData['is_reply'] && ($this->files[0]['image_w'] > kxEnv::Get('kx:images:replythumbw') || $this->files[0]['image_h'] > kxEnv::Get('kx:images:replythumbh')))
-			) {
-				if (!$postData['is_reply']) {
-					if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
-						kxFunc::showError(_gettext('Could not create thumbnail.'));
-					}
-				} else {
-					if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
-						kxFunc::showError(_gettext('Could not create thumbnail.'));
-					}
-				}
-			} else {
-				if (!$this->createThumbnail($postData['oekaki'], $thumbpath, $this->files[0]['image_w'], $this->files[0]['image_h'])) {
-					kxFunc::showError(_gettext('Could not create thumbnail.'));
-				}
-			}
-			if (!$this->createThumbnail($postData['oekaki'], $thumbpath_cat, kxEnv::Get('kx:images:catthumbw'), kxEnv::Get('kx:images:catthumbh'))) {
-				kxFunc::showError(_gettext('Could not create thumbnail.'));
-			}
+      $thumbpath = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[0]['file_name'] . 's' . $this->files[0]['file_type'];
+      $thumbpath_cat = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[0]['file_name'] . 'c' . $this->files[0]['file_type'];
+      if (
+        (!$postData['is_reply'] && ($this->files[0]['image_w'] > kxEnv::Get('kx:images:thumbw') || $this->files[0]['image_h'] > kxEnv::Get('kx:images:thumbh'))) ||
+        ($postData['is_reply'] && ($this->files[0]['image_w'] > kxEnv::Get('kx:images:replythumbw') || $this->files[0]['image_h'] > kxEnv::Get('kx:images:replythumbh')))
+      ) {
+        if (!$postData['is_reply']) {
+          if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
+            kxFunc::showError(_gettext('Could not create thumbnail.'));
+          }
+        } else {
+          if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
+            kxFunc::showError(_gettext('Could not create thumbnail.'));
+          }
+        }
+      } else {
+        if (!$this->createThumbnail($postData['oekaki'], $thumbpath, $this->files[0]['image_w'], $this->files[0]['image_h'])) {
+          kxFunc::showError(_gettext('Could not create thumbnail.'));
+        }
+      }
+      if (!$this->createThumbnail($postData['oekaki'], $thumbpath_cat, kxEnv::Get('kx:images:catthumbw'), kxEnv::Get('kx:images:catthumbh'))) {
+        kxFunc::showError(_gettext('Could not create thumbnail.'));
+      }
 
-			$imgDim_thumb = getimagesize($thumbpath);
-			$this->files[0]['thumb_w'] = $imgDim_thumb[0];
-			$this->files[0]['thumb_h'] = $imgDim_thumb[1];
-			unlink($postData['oekaki']);
-		}
-	}
+      $imgDim_thumb = getimagesize($thumbpath);
+      $this->files[0]['thumb_w'] = $imgDim_thumb[0];
+      $this->files[0]['thumb_h'] = $imgDim_thumb[1];
+      unlink($postData['oekaki']);
+    }
+  }
   /* Image handling */
   /**
    * Create a thumbnail

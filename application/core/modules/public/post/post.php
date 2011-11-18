@@ -124,7 +124,7 @@ class public_core_post_post extends kxCmd {
       $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->board_id);
 
       $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->board_id);
-      $this->_postingClass->checkMessageLength($this->_boardClass->board->board_max_message_length);
+      $this->_postingClass->checkMessageLength($this->_boardClass->board->max_message_length);
       $this->_postingClass->checkBlacklistedText($this->_boardClass->board->board_id);
       $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
       $this->_postingClass->checkBannedHash($this->_boardClass->board);
@@ -201,6 +201,8 @@ class public_core_post_post extends kxCmd {
       //kxFunc::checkBadUnicode($this->postData['post_fields']);
       
       $this->_boardClass->processPost($this->postData);
+	  
+	  @header('Location: '.kxEnv :: Get("paths:boards:path").'/'.$this->_boardClass->board->board_id.'/');
     }
   }
 }

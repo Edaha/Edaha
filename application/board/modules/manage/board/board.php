@@ -1,6 +1,7 @@
 <?php
 
 class manage_board_board_board extends kxCmd {
+  public $errorMessage='';
   public function exec(kxEnv $environment){
     switch ($this->request['action']) {
       case 'post':
@@ -9,6 +10,16 @@ class manage_board_board_board extends kxCmd {
       case 'del':
         $this->_del();
         break;
+      case 'regen':
+        // Vars $_GET['id']
+        if($this->onRegen()) {
+          $this->twigData['notice_type'] = 'success';
+          $this->twigData['notice'] = _gettext('Board successfully regenerated!');
+        } else {
+          //$this->twigData['notice_type'] = 'failure';
+          $this->twigData['notice'] = _gettext('Board failed to regenerate').": ".$this->errorMessage;
+        }
+        break;
     }
     switch ($this->request['do']) {        
       case 'board':
@@ -16,6 +27,62 @@ class manage_board_board_board extends kxCmd {
         $this->_board();
         break;
     }    
+  }
+  
+  private function onRegen()
+  {
+    // Grabing essential data about the board
+    $boardType = $this->db->select("boards")
+                      ->fields("boards", array("board_type"))
+                      ->condition("board_name", $this->request['id'])
+                      ->execute()
+                      ->fetchField();
+    // Nope
+    if ($boardType === false) {
+      $this->errorMessage=sprintf(_gettext("Couldn't find board /%s/."),$this->request['id']);
+      return false;
+    }
+    //Check against our built-in board types.
+    if (in_array($boardType, array(0,1,2,3))){
+      $types = array('image', 'text', 'oekaki', 'upload');
+      $module_to_load = $types[$boardType];
+    }
+    //Okay, so it's a a custom board type. Let's find out which kind...
+    else {
+      $result = $this->db->select("modules")
+                         ->fields("modules", array("module_variables", "module_directory"))
+                         ->condition("module_application", 1)
+                         ->execute()
+                         ->fetchAll();
+      foreach ($result as $line) {
+        $varibles = unserialize($line->module_variables);
+        if (isset($variables['board_type_id']) && $variables['board_type_id'] == $boardType) {
+          $module_to_load = $line->module_directory;
+        }
+      }
+    }
+    // Module loading time!
+    $moduledir = kxFunc::getAppDir( "board" ) . '/modules/public/' . $module_to_load . '/';
+    if (file_exists($moduledir . $module_to_load . '.php')) {
+      require_once($moduledir . $module_to_load . '.php');
+    }
+	
+    // Some routine checks...
+    $className = "public_board_".$module_to_load."_".$module_to_load;
+    if(class_exists($className)) {
+      $module_class = new ReflectionClass($className);
+      if ( $module_class->isSubClassOf(new ReflectionClass('kxCmd'))) {
+        $this->_boardClass = $module_class->newInstance($this->environment);
+        $this->_boardClass->execute($this->environment);
+      } else {
+	    $this->errorMessage=sprintf("Couldn't find module %s",$className);
+        return false;
+      }
+    }
+	
+	$this->_boardClass->regeneratePages();
+	$this->_boardClass->regenerateThreads();
+	return true;
   }
   
   private function _board() {

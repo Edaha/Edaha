@@ -113,11 +113,11 @@ class kxCmdResolv {
             $environment->set('kx:classes:core:logging:id', new logging( $environment ) );
             
             $validSession  = kxFunc::getManageSession();
-            if(($environment->request['module'] != 'login') && (!$validSession))
+            if( (!isset($environment::$request['module']) || (isset($environment::$request['module']) && $environment::$request['module'] != 'login')) && (!$validSession))
             {
                 // Force login if we have an invalid session
                 
-                $environment->request['module'] = 'login';
+                $environment::$request['module'] = 'login';
                 kxEnv::$current_module = 'login';
                 require_once( kxFunc::getAppDir( 'core' ) . "/modules/manage/login/login.php" );
                 $login = new manage_core_login_login( $environment ); 
@@ -130,10 +130,11 @@ class kxCmdResolv {
         // Ban check ( may as well do it here before we do any further processing)
         $boardName = "";
         if (KX_CURRENT_APP == "core" && $module == "post" && $section == "post") {
-            if (isset($environment->$request['board'])) {
+            if (isset($environment->request) && isset($environment->request['board'])) {
                 $boardName = $environment->$request['board'];
             }
         }
+
         kxBans::banCheck($_SERVER['REMOTE_ADDR'], $boardName);
         
         
@@ -198,11 +199,10 @@ abstract class kxCmd
      * @param	object	kxEnv reference
      * @return	void
      */
-    public function execute( kxEnv $environment )
-        {
+    public function execute( kxEnv $environment ) {
         $this->makeRegistryShortcuts( $environment );
         $this->exec( $environment );
-        }
+    }
     
     /**
      * Do execute method (must be overriden)
@@ -227,8 +227,7 @@ class kxCmd_default extends kxCmd {
      * @param	object	kxCmd reference
      * @return	void
      */
-    protected function exec( kxEnv $environment )
-        {
-        @header( "Location: ".kxEnv::Get('kx:paths:main:path').kxEnv::Get('kx:paths:main:folder'));
-        }
+    protected function exec( kxEnv $environment ) {
+      @header( "Location: ".kxEnv::Get('kx:paths:main:path').kxEnv::Get('kx:paths:main:folder'));
+    }
 }

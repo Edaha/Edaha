@@ -16,7 +16,7 @@
   <link rel="stylesheet" type="text/css" media='screen' href="{% kxEnv "paths:boards:path" %}/public/css/manage.css">
 {% endblock %}
 {% block content %}
-<form name='managelogin' action='{% kxEnv "paths:script:path" %}/manage.php?app=core&amp;module=login&amp;do=login-validate' method='post'>
+<form name='managelogin' action='{% kxEnv "paths:script:path" %}/manage.php?app=core&amp;module=login&amp;section=login&amp;do=login-validate' method='post'>
 <input type='hidden' name='qstring' id='qstring' value='{{query_string}}' />
 <div id='login'>{% if message %} <div id='login_error'>{{ message }}</div>{% endif %}	<div id='login_controls'>
 		<label for='username'>Username</label>

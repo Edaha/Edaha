@@ -18,7 +18,7 @@
  * optimizer mode.
  *
  * @package twig
- * @author  Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author  Fabien Potencier <fabien@symfony.com>
  */
 class Twig_NodeVisitor_Optimizer implements Twig_NodeVisitorInterface
 {
@@ -37,9 +37,7 @@ class Twig_NodeVisitor_Optimizer implements Twig_NodeVisitorInterface
      */
     public function __construct($optimizers = -1)
     {
-        if (null === $optimizers) {
-            $mode = self::OPTIMIZE_ALL;
-        } elseif (!is_int($optimizers) || $optimizers > 2) {
+        if (!is_int($optimizers) || $optimizers > 2) {
             throw new InvalidArgumentException(sprintf('Optimizer mode "%s" is not valid.', $optimizers));
         }
 
@@ -69,6 +67,25 @@ class Twig_NodeVisitor_Optimizer implements Twig_NodeVisitorInterface
 
         if (self::OPTIMIZE_RAW_FILTER === (self::OPTIMIZE_RAW_FILTER & $this->optimizers)) {
             $node = $this->optimizeRawFilter($node, $env);
+        }
+
+        $node = $this->optimizeRenderBlock($node, $env);
+
+        return $node;
+    }
+
+    /**
+     * Replaces "echo $this->renderBlock()" with "$this->displayBlock()".
+     *
+     * @param Twig_NodeInterface $node A Node
+     * @param Twig_Environment   $env  The current Twig environment
+     */
+    protected function optimizeRenderBlock($node, $env)
+    {
+        if ($node instanceof Twig_Node_Print && $node->getNode('expr') instanceof Twig_Node_Expression_BlockReference) {
+            $node->getNode('expr')->setAttribute('output', true);
+
+            return $node->getNode('expr');
         }
 
         return $node;

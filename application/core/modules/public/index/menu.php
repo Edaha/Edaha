@@ -52,9 +52,9 @@ class public_core_index_menu extends kxCmd {
   
 	private function _getMenu($savetofile = false, $option = false) {
 
-		//$dwoo_data['boardpath'] = getCLBoardPath();
+		//$twigData['boardpath'] = getCLBoardPath();
 
-		$dwoo_data['styles'] = explode(':', kxEnv::Get('kx:css:menustyles'));
+		$twigData['styles'] = explode(':', kxEnv::Get('kx:css:menustyles'));
 
 		if ($savetofile) {
 			$file = 'menu.html';
@@ -62,7 +62,7 @@ class public_core_index_menu extends kxCmd {
 			$file = 'menu.php';
 		}
 
-		$dwoo_data['file'] = $file;
+		$twigData['file'] = $file;
 
 		$sections = Array();
     $boardsExist = $this->db->select("boards")
@@ -88,13 +88,13 @@ class public_core_index_menu extends kxCmd {
         $sections[$key]['boards'] = $boards;
 			}
 		}
-		$dwoo_data['boards'] = $sections;
+		$twigData['boards'] = $sections;
 
 			if ($savetofile) {
-        file_put_contents(KX_ROOT . '/menu.html', kxTemplate::get('menu', $dwoo_data));
+        file_put_contents(KX_ROOT . '/menu.html', kxTemplate::get('menu', $twigData));
         return true;
 			} else {
-					return kxTemplate::get('menu', $dwoo_data);
+					return kxTemplate::get('menu', $twigData);
 			}
 
 	}

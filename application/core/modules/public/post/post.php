@@ -120,15 +120,14 @@ class public_core_post_post extends kxCmd {
         }
         $this->postData['files'] =  Array($_FILES['imagefile']['name'][0]);
       }
-      /* TODO: Look at these functions to check their usefulness and proper place
-        $this->_postingClass->SpamCheck();
-        $this->_postingClass->CheckPostingTime($_POST['replythread']);
-        $this->_postingClass->CheckMessageLength();
-        $this->_postingClass->CheckCaptcha();
-        $this->_postingClass->CheckBannedHash();
-        $this->_postingClass->CheckBlacklistedText();
-        */
+
       $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->board_id);
+
+      $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->board_id);
+      $this->_postingClass->checkMessageLength($this->_boardClass->board->board_max_message_length);
+      $this->_postingClass->checkBlacklistedText($this->_boardClass->board->board_id);
+      $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
+      $this->_postingClass->checkBannedHash($this->_boardClass->board);
       
       //How many replies, is the thread locked, etc
       if ($this->postData['is_reply']) {
@@ -143,13 +142,13 @@ class public_core_post_post extends kxCmd {
 
       $nextid = $this->db->select("posts")
                    ->fields("posts", array("post_id"))
-                   ->condition("post_board", $this->board->board_id)
+                   ->condition("post_board", $this->_boardClass->board->board_id)
                    ->execute()
                    ->fetchField();
       if ($nextid)
         $this->postData['next_id'] = ($nextid+1);
       else
-        $this->postData['next_id'];
+        $this->postData['next_id'] = 1;
       
       // Are we modposting?
       $this->postData['user_authority'] = $this->_postingClass->userAuthority();
@@ -158,6 +157,9 @@ class public_core_post_post extends kxCmd {
       if (isset($this->request['stickyonpost'])) $this->postData['flags'] .= 'S';
       if (isset($this->request['rawhtml'])) $this->postData['flags'] .= 'RH';
       if (isset($this->request['usestaffname'])) $this->postData['flags'] .= 'N';
+      $this->postData['display_status'] = 0;
+      $this->postData['lock_on_post'] = 0;
+      $this->postData['sticky_on_post'] = 0;
       
       // If they are just a normal user, or vip...
       if ($this->postData['user_authority'] == 0 || $this->postData['user_authority'] > 2) {

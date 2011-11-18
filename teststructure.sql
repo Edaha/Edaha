@@ -46,21 +46,21 @@ CREATE TABLE IF NOT EXISTS `announcements` (
 --
 
 CREATE TABLE IF NOT EXISTS `banlist` (
-  `id` int(11) NOT NULL,
-  `type` smallint(6) DEFAULT '0',
-  `expired` smallint(6) DEFAULT '0',
-  `allowread` smallint(6) DEFAULT '1',
-  `ip` varchar(50) NOT NULL,
-  `ipmd5` varchar(32) NOT NULL,
-  `globalban` smallint(6) DEFAULT '0',
-  `boards` varchar(255) NOT NULL,
-  `by` varchar(75) NOT NULL,
-  `at` int(11) NOT NULL,
-  `until` int(11) NOT NULL,
-  `reason` text NOT NULL,
-  `staffnote` text NOT NULL,
-  `appeal` text,
-  `appealat` int(11) NOT NULL DEFAULT '0'
+  `ban_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ban_type` smallint(6) DEFAULT 0,
+  `ban_expired` smallint(6) DEFAULT 0,
+  `ban_allow_read` smallint(6) DEFAULT 1,
+  `ban_ip` varchar(100) NOT NULL,
+  `ban_ip_md5` varchar(32) NOT NULL,
+  `ban_boards` varchar(255) NOT NULL,
+  `ban_by` varchar(75) NOT NULL,
+  `ban_created` int(11) NOT NULL,
+  `ban_expires` int(11) NOT NULL,
+  `ban_reason` text NOT NULL,
+  `ban_staff_note` text NOT NULL,
+  `ban_appeal_message` text,
+  `ban_appeal_status` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY(`ban_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -155,8 +155,11 @@ CREATE TABLE IF NOT EXISTS `boards` (
 -- Dumping data for table `boards`
 --
 
-INSERT INTO `boards` (`board_id`, `board_order`, `board_name`, `board_type`, `start`, `board_upload_type`, `board_desc`, `image`, `section`, `board_max_upload_size`, `maxpages`, `maxage`, `markpage`, `maxreplies`, `messagelength`, `createdon`, `board_locked`, `includeheader`, `redirecttothread`, `anonymous`, `forcedanon`, `embeds_allowed`, `trial`, `popular`, `defaultstyle`, `locale`, `showid`, `compactlist`, `enablereporting`, `enablecaptcha`, `enablenofile`, `enablearchiving`, `enablecatalog`, `loadbalanceurl`, `loadbalancepassword`, `board_max_files`, `newsage`) VALUES
-(1, 1, 'b', 0, 0, 2, 'what', '', 0, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0);
+INSERT INTO `boards` (`board_id`, `board_order`, `board_name`, `board_type`, `board_start`, `board_upload_type`, `board_desc`, `image`, `board_section`, `board_max_upload_size`, `maxpages`, `maxage`, `markpage`, `maxreplies`, `messagelength`, `createdon`, `board_locked`, `includeheader`, `redirecttothread`, `anonymous`, `forcedanon`, `embeds_allowed`, `trial`, `popular`, `defaultstyle`, `locale`, `showid`, `compactlist`, `enablereporting`, `enablecaptcha`, `enablenofile`, `enablearchiving`, `enablecatalog`, `loadbalanceurl`, `loadbalancepassword`, `board_max_files`, `newsage`) VALUES
+(1, 1, 's1b1', 0, 0, 2, 'Board 1 (S1)', '', 1, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0),
+(2, 2, 's1b2', 0, 0, 2, 'Board 2 (S1)', '', 1, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0),
+(3, 1, 's2b1', 0, 0, 2, 'Board 1 (S2)', '', 2, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0),
+(4, 2, 's2b2', 0, 0, 2, 'Board 2 (S2)', '', 2, 1024000, 11, 0, 9, 200, 8192, 0, 0, NULL, 0, 'Anonymous', 0, '', 0, 0, '', '', 0, 0, 1, 0, 0, 0, 1, '', '', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -177,6 +180,47 @@ INSERT INTO `board_filetypes` (`type_board_id`, `type_id`) VALUES
 (1, 1);
 
 -- --------------------------------------------------------
+
+--
+-- Table structure for table `cache`
+--
+
+CREATE TABLE cache (
+    cache_path varchar(255) NOT NULL DEFAULT '',
+    cache_value text,
+    cache_array tinyint(1) NOT NULL DEFAULT 0,
+    cache_updated int(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY (cache_path)
+);
+
+--
+-- Dumping data for table `cache`
+--
+INSERT INTO cache VALUES ('version', '1.0', 0, 1317940926);
+INSERT INTO cache VALUES ('addons:app_cache', 'a:0:{}', 1, 1317941331);
+
+--
+-- Table structure for table `configuration`
+--
+
+CREATE TABLE IF NOT EXISTS `configuration` (
+  `config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `config_name` varchar(255) NOT NULL,
+  `config_description` text,
+  `config_type` varchar(255) NOT NULL,
+  `config_variable` varchar(255) NOT NULL,
+  PRIMARY KEY (`config_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `configuration`
+--
+
+INSERT INTO `configuration` (`config_id`, `config_name`, `config_description`, `config_type`, `config_variable`) VALUES
+(1, 'Default Ban Message', 'The text to add at the end of a post if a ban is placed and "Add ban message" is checked', 'textarea', 'display:banmsg');
+
+-- --------------------------------------------------------
+
 
 --
 -- Table structure for table `embeds`
@@ -237,7 +281,6 @@ INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type
 (1, 'png', 'image/png', '', 0, 0, 1);
 
 -- --------------------------------------------------------
-
 --
 -- Table structure for table `front`
 --
@@ -308,7 +351,7 @@ CREATE TABLE IF NOT EXISTS `loginattempts` (
 
 CREATE TABLE IF NOT EXISTS `manage_sessions` (
   `session_id` varchar(32) NOT NULL DEFAULT '',
-  `session_ip` varchar(32) NOT NULL DEFAULT '',
+  `session_ip` varchar(100) NOT NULL DEFAULT '',
   `session_staff_id` mediumint(8) NOT NULL DEFAULT '0',
   `session_location` varchar(64) NOT NULL DEFAULT '',
   `session_name` varchar(64) NOT NULL DEFAULT '',
@@ -317,13 +360,6 @@ CREATE TABLE IF NOT EXISTS `manage_sessions` (
   `session_url` text,
   PRIMARY KEY (`session_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `manage_sessions`
---
-
-INSERT INTO `manage_sessions` (`session_id`, `session_ip`, `session_staff_id`, `session_location`, `session_name`, `session_log_in_time`, `session_last_action`, `session_url`) VALUES
-('5b7489b962bac3feecad5e2c1205cd90', '127.0.0.1', 2, 'index', 'grumpy', 1310137564, 1310137564, '');
 
 -- --------------------------------------------------------
 
@@ -377,7 +413,7 @@ CREATE TABLE IF NOT EXISTS `modules` (
   PRIMARY KEY (`module_id`),
   KEY `module_application` (`module_application`),
   KEY `module_file` (`module_file`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
 
 --
 -- Dumping data for table `modules`
@@ -390,7 +426,8 @@ INSERT INTO `modules` (`module_id`, `module_name`, `module_application`, `module
 (4, 'Upload Board', 'board', 'upload', 'Generator for an upload-type board', 0, 0),
 (5, 'Text Board', 'board', 'text', 'Generator for a text board', 0, 0),
 (6, 'Site', 'core', 'site', 'Manage the Site Configuration', 0, 1),
-(7, 'Index', 'core', 'index', 'Handles the front page features (news, faq, etc)', 0, 0);
+(7, 'Index', 'core', 'index', 'Handles the front page features (news, faq, etc)', 0, 0),
+(9, 'Bans', 'core', 'bans', 'Provides functionality for adding and editing bans.', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -426,7 +463,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `post_subject` varchar(255) NOT NULL,
   `post_message` text NOT NULL,
   `post_password` varchar(255) NOT NULL,
-  `post_ip` varchar(75) NOT NULL,
+  `post_ip` varchar(100) NOT NULL,
   `post_ip_md5` varchar(32) NOT NULL,
   `post_tag` varchar(5) NOT NULL,
   `post_timestamp` int(11) NOT NULL,
@@ -510,6 +547,9 @@ CREATE TABLE IF NOT EXISTS `sections` (
 -- Dumping data for table `sections`
 --
 
+INSERT INTO `sections` (`id`, `section_order`, `hidden`, `name`, `abbreviation`) VALUES
+(1, 1, 0, 'Section 1', 'sec1'),
+(2, 2, 0, 'Section 2', 'sec2');
 
 -- --------------------------------------------------------
 
@@ -557,16 +597,17 @@ CREATE TABLE IF NOT EXISTS `watchedthreads` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `wordfilter`
+-- Table structure for table `filter`
 --
 
-CREATE TABLE IF NOT EXISTS `wordfilter` (
-  `id` int(11) NOT NULL,
-  `word` varchar(75) NOT NULL,
-  `replacedby` varchar(75) NOT NULL,
-  `boards` text NOT NULL,
-  `time` int(11) NOT NULL,
-  `regex` smallint(6) DEFAULT '0'
+CREATE TABLE IF NOT EXISTS `filter` (
+  `filter_id` int(11) NOT NULL,
+  `filter_word` varchar(75) NOT NULL,
+  `filter_type` tinyint(1) NOT NULL,
+  `filter_punishment` varchar(75) NOT NULL,
+  `filter_boards` text NOT NULL,
+  `filter_added` int(11) NOT NULL,
+  `filter_regex` boolean DEFAULT 0
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

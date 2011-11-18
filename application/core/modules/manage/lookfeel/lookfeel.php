@@ -4,8 +4,8 @@ class manage_core_lookfeel_lookfeel extends kxCmd{
 
   public function exec( kxEnv $environment ) {
     
-    $dwoo_data['entries'] = self::fillArrayWithFileNodes( new DirectoryIterator( KX_ROOT.'/application/templates/' ) );
-    kxTemplate::output("manage/templates", $dwoo_data);
+    $twigData['entries'] = self::fillArrayWithFileNodes( new DirectoryIterator( KX_ROOT.'/application/templates/' ) );
+    kxTemplate::output("manage/templates", $twigData);
   }
   
   /* Thanks Peter Bailey - http://stackoverflow.com/questions/952263/deep-recursive-array-of-directory-structure-in-php/952324#952324 */

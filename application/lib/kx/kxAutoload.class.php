@@ -27,7 +27,20 @@ class kxAutoload {
     }
     
     public function autoload($class) {
-        
+        if ((strpos($class, "public") === 0 || strpos($class, "manage") === 0)) {
+          $classPath =  explode("_", $class);
+          if (count($classPath) == 4) {
+            if (file_exists(KX_ROOT . "/application/" . $classPath[1] . "/modules/" . $classPath[0] . "/" . $classPath[2] . "/" . $classPath[3] . ".php")) {
+              require(KX_ROOT . "/application/" . $classPath[1] . "/modules/" . $classPath[0] . "/" . $classPath[2] . "/" . $classPath[3] . ".php");
+            }
+            else {
+              return false;
+            }
+          }
+          else {
+            return false;
+          }
+        }
         if(!preg_match(
             sprintf(
                 '/^%s[a-zA-Z0-9_\x7f-\xff]*$/',

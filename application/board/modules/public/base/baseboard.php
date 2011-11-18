@@ -90,37 +90,60 @@ class public_board_base_baseboard extends kxCmd {
                                                      ->fetchAssoc();
 
     $this->board->boardlist = array();
+    $this->environment->set('kx:classes:board:id', $this->board);
     
     require_once( kxFunc::getAppDir('board') .'/classes/upload.php' );
     $this->environment->set('kx:classes:board:upload:id', new upload( $environment ) );
-  }
-  
-  public function validPost() {
-    if (
-      ( /* A message is set, or an image was provided */
-        isset($this->request['message']) ||
-        isset($_FILES['imagefile'])
-      ) || (
-        ( /* It has embedding allowed */
-            $this->board->board_upload_type == 1 ||
-            $this->board->board_upload_type == 2
-        ) && ( /* An embed ID was provided, or no file was checked and no ID was supplied */
-            isset($this->request['embed']) ||
-            (
-              $this->board->board_upload_type == 2 &&
-              !isset($_FILES['imagefile']) &&
-              isset($this->request['nofile']) &&
-              $this->board->enable_no_file == true
-            )
-        )
-      )
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+    require_once( kxFunc::getAppDir('core') .'/classes/parse.php' );
+    $this->environment->set('kx:classes:board:parse:id', new parse( $environment ) );
   }
 
+  public function parseData(&$message) {
+  
+    $message = trim($message);
+    $this->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
+    var_dump($message);
+    $message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
+    if (kxEnv::Get('kx:posts:makelinks')) {
+      $this->makeClickable($message);
+    }
+    $this->clickableQuote($message);
+    $this->coloredQuote($message);
+    str_replace("\n", '<br />', $message);
+    $this->bbCode($message);
+    $this->wordFilter($message);
+    $this->checkNotEmpty($message);
+    return $message;
+  }
+  
+  public function cutWord(&$message, $where) {
+    $this->environment->get('kx:classes:board:parse:id')->cutWord($message, $where);
+  }
+  
+  public function makeClickable(&$message) {
+    $this->environment->get('kx:classes:board:parse:id')->makeClickable($message);
+  }  
+  
+  public function clickableQuote(&$message) {
+    $this->environment->get('kx:classes:board:parse:id')->clickableQuote($message);
+  }
+  
+  public function coloredQuote(&$message) {
+    $this->environment->get('kx:classes:board:parse:id')->coloredQuote($message);
+  }
+  
+  public function bbCode(&$message) {
+    $this->environment->get('kx:classes:board:parse:id')->bbCode($message);
+  }
+  
+  public function wordFilter(&$message) {
+    $this->environment->get('kx:classes:board:parse:id')->wordFilter($message);
+  }
+  
+  public function checkNotEmpty(&$message) {
+    $this->environment->get('kx:classes:board:parse:id')->checkNotEmpty($message);
+  }
+  
   public function processPost($postData) {
     
     if (empty($this->postClass)) $this->postClass = $this->environment->get('kx:classes:board:posting:id');

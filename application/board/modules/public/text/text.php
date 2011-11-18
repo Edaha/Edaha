@@ -48,9 +48,33 @@ class public_board_text_text extends public_board_base_baseboard {
     }
   }
 
-  public function parseData($message, $postData) {
-   // Stub
-   return $message;
+  public function coloredQuote(&$message) {
+    parent::coloredQuote($message);
+    // Remove the > from the quoted line if it is a text board 
+    if ($boardtype==1) {
+      $message = str_replace('<span class="quote">&gt;', '<span class="quote">', $message);
+    }
+  }
+  
+  public function clickableQuote(&$buffer) {
+
+    // Add html for links to posts in the board the post was made
+    $buffer = preg_replace_callback('/&gt;&gt;([r]?[l]?[f]?[q]?[0-9,\-,\,]+)/', array(&$this, 'interthreadQuoteCheck'), $buffer);
+    
+    // Add html for links to posts made in a different board
+    $buffer = preg_replace_callback('/&gt;&gt;\/([a-z]+)\/([0-9]+)/', array($this->environment->get('kx:classes:board:parse:id'), 'interboardQuoteCheck'), $buffer);
+  }
+
+  public function interthreadQuoteCheck($matches) {
+
+    $lastchar = '';
+    // If the quote ends with a , or -, cut it off.
+    if(substr($matches[0], -1) == "," || substr($matches[0], -1) == "-") {
+      $lastchar = substr($matches[0], -1);
+      $matches[1] = substr($matches[1], 0, -1);
+      $matches[0] = substr($matches[0], 0, -1);
+    }
+    return $this->environment->get('kx:classes:board:parse:id')->doDynamicPostLink($matches);
   }
   
   public function checkFields($postData) {

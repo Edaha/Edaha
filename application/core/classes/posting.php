@@ -217,34 +217,35 @@ class Posting {
     }
   }
   public function checkBlacklistedText($boardId) {
-    $filters = $this->db->select("filter")
+    $filters = kxEnv::Get("cache:filters:spamfilters");
+    /*$filters = $this->db->select("filter")
                         ->fields("filter")
                         ->condition("filter_type", 2, ">=")
                         ->orderBy("filter_type", "DESC")
                         ->execute()
-                        ->fetchAll();
+                        ->fetchAll();*/
 
     $reported = 0;
     foreach ($filters as $filter) {
-        if ( (!$filter->filter_boards || in_array($boardName, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
-          // They included blacklisted text in their post. What do we do?
-          if ( $filter->filter_type & 8 ) {
-            // Ban them if they have the ban flag set on this filter
-            $punishment = unserialize($filter->filter_punishment);
-            kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _gettext('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
-          }
-          if ( $filter->filter_type & 4) {
-            // Stop the post from happening if the delete flag is set
-            kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter));
-          }
-          if ( $filter->filter_type & 2 && !$reported) {
-            // Report flag is set, report the post
-            $reported = 1;
-            // TODO add this later
-          }
+      if ( (!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
+        // They included blacklisted text in their post. What do we do?
+        if ( $filter->filter_type & 8 ) {
+          // Ban them if they have the ban flag set on this filter
+          $punishment = unserialize($filter->filter_punishment);
+          kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _gettext('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
+        }
+        if ( $filter->filter_type & 4) {
+          // Stop the post from happening if the delete flag is set
+          kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter));
+        }
+        if ( $filter->filter_type & 2 && !$reported) {
+          // Report flag is set, report the post
+          $reported = 1;
+          // TODO add this later
         }
       }
     }
+  }
   public function checkOekaki() {
       // If oekaki seems to be in the url...
       if (!empty($this->request['oekaki'])) {
@@ -286,8 +287,9 @@ class Posting {
       if ($post['email_save']) {
           setcookie('email', urldecode($post['email']), time() + 31556926, '/', kxEnv::Get('kx:paths:main:domain'));
       }
-      
-      setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
+      if (isset($this->request['postpassword'])) {
+        setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
+      }
   }
   public function checkSage($postData, $board) {
       // If the user replied to a thread, and they weren't sage-ing it...
@@ -385,7 +387,6 @@ class Posting {
       return $user_authority;
   }
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board) {
-      
       $timeStamp = time();
       $id = $this->db->insert("posts")
           ->fields(array(
@@ -452,9 +453,9 @@ class Posting {
           $this->db->insert("post_files")
           ->fields(array(
               'file_post'           => $id,
-              'file_board'          => $boardid,
+              'file_board'          => $board->board_id,
               'file_md5'            => '',
-              'file_name'           => $file['file_name'],
+              'file_name'           => '',
               'file_type'           => '',
               'file_original'       => '',
               'file_size'           => 0,

@@ -7,7 +7,7 @@ class kxConfig implements ArrayAccess {
         $this->container = $data;
     }
     
-    public function set($path, $value) {
+    public function set($path, &$value) {
         $this->container = array_merge_recursive($this->container, self::setRecursive(explode(':', $path), $value));
     }
     
@@ -95,7 +95,7 @@ class coreConfig {
                                                               'recache_class'    => 'manage_core_addons_addons',
                                                               'recache_function' => 'recacheModules' 
                                                             ),
-                                       'hooks_cache' => 
+                                        'hooks_cache' => 
                                                        array(
                                                               'force_load'     => 1,
                                                               'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules/manage/addons/hooks.php',
@@ -103,12 +103,22 @@ class coreConfig {
                                                               'recache_function' => 'recacheHooks' 
                                                             )
                                       ),
-                      'wordfilters' =>         
+                      'filters' =>         
                                 array(
-                                        'force_load'     => 1,
-                                        'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules_admin/posts/filter.php',
-                                        'recache_class'    => 'manage_core_posts_filter',
-                                        'recache_function' => 'recacheWordFilters' 
+                                        'wordfilters' => 
+                                                       array(
+                                                              'force_load'     => 1,
+                                                              'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules_admin/posts/filter.php',
+                                                              'recache_class'    => 'manage_core_posts_filter',
+                                                              'recache_function' => 'recacheWordFilters'
+                                                            ),
+                                        'spamfilters' => 
+                                                       array(
+                                                              'force_load'     => 1,
+                                                              'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules_admin/posts/filter.php',
+                                                              'recache_class'    => 'manage_core_posts_filter',
+                                                              'recache_function' => 'recacheSpamFilters'
+                                                            )
                                       )
                     );
 

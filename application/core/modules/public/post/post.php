@@ -168,7 +168,7 @@ class public_core_post_post extends kxCmd {
           // Don't let the user post
           kxFunc::showError(_gettext('Sorry, this thread is locked and can not be replied to.'));
         }
-        $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message'], $this->postData);
+        $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
       // Or, if they are a moderator/administrator...
       } else {
         // If they checked the D checkbox, set the variable to tell the script to display their staff status (Admin/Mod) on the post during insertion
@@ -178,10 +178,10 @@ class public_core_post_post extends kxCmd {
 
         // If they checked the RH checkbox, set the variable to tell the script to insert the post as-is...
         if (isset($this->request['rawhtml'])) {
-          $this->postData['thread_info']['message'] = $_POST['message'];
+          $this->postData['thread_info']['message'] = $this->request['message'];
         // Otherwise, parse it as usual...
         } else {
-          $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message'], $this->postData);
+          $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
         }
 
         // If they checked the L checkbox, set the variable to tell the script to lock the post after insertion

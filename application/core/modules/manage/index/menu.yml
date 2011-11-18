@@ -4,8 +4,8 @@ Common Tasks:
     url: '#'
 
   - title: Board Options
-    section: 
-    url: '#'
+    section: board
+    url: 'do=board'
 
   - title: Ban Manager
     section: 

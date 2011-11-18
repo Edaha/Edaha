@@ -17,14 +17,36 @@
 <input type="hidden" id="del" name="del" value="{{ entry.entry_id }}" />
 <input type="hidden" name="directory" id="directory" value="" />
 </form>
-
 <br />
-{{ macros.manageform("boards", "Delete Board", true,
-                       { 'Boards'                : { 'id' : 'boards', 'type' : 'select',  'value' : 
-                          { 
-				
-                          } } 
-                       }
-                      ) 
-  }}
+    <fieldset id="edit-boards">
+      <legend>{% trans 'Edit Boards' %}</legend>
+	  <table class="stats">
+	    <col class="col1" /><col class="col2" /><col class="col2" />
+	    <tr>
+		  <th colspan="2">{% trans 'Board ID' %}</th>
+		  <th>{% trans 'Description' %}</th>
+		</tr>
+        {% for id, name in entries %}
+        <tr>
+		  <td>
+			<a href="{{ base_url }}app=board&amp;module=board&amp;section=boardopts&amp;do=edit&amp;id={{ id }}">
+			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" />
+			</a>
+			<a href="{{ base_url }}app=board&amp;module=board&amp;do=del&amp;id={{ id }}">
+			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" />
+			</a>
+			<a href="{{ base_url }}app=board&amp;module=board&amp;section=rebuild&amp;id={{ id }}">
+			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/rebuild.png" width="16" height="16" />
+			</a>
+		  </td>
+		  <td>
+		    <a href="{% kxEnv "paths:boards:path" %}/{{ id }}/">/{{id}}/</a>
+		  </td>
+		  <td>
+		    {{ name }}
+		  </td>
+		</tr>
+        {% endfor %}
+	  </table>
+    </fieldset>
 {% endblock %}

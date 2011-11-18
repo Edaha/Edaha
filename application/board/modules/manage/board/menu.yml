@@ -4,6 +4,7 @@ Board Management:
     url: do=board
 
   - title: Edit Boards
-    section: boardopts 
+    section: board 
+    url: do=boardopts
 
 

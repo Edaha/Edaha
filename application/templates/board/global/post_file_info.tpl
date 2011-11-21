@@ -1,4 +1,5 @@
 {% macro fileinfo(board, post, id, link) %}
+  <!-- DEBUG: {% debug %} -->
   {% if link and post.file_type.0 != 'jpg' and post.file_type.0 != 'gif' and post.file_type.0 != 'png' and post.videobox == '' %}
     <a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}" {% if 'posts:newwindow'|kxEnv %} target="_blank"{% endif %}>
   {% else %}

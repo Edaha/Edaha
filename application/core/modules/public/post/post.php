@@ -40,7 +40,7 @@ class public_core_post_post extends kxCmd {
   public function exec( kxEnv $environment ) {
     // Before we do anything, let's check if we even have any board info
     if (!$this->request['board']) {
-    die();
+      die();
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
     // Grabing essential data about the board

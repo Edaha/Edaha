@@ -246,6 +246,11 @@ class public_board_base_baseboard extends kxCmd {
                          ->fetchField();
     $totalpages = kxFunc::pageCount($this->board->board_type, ($numposts-1))-1;
     
+    // If no posts, $totalpages==-2, which causes the board to not regen.
+    if($totalpages<0) {
+      $totalpages=0;
+    }
+    
     $this->twigData['numpages'] = $totalpages;
 
 
@@ -294,7 +299,8 @@ class public_board_base_baseboard extends kxCmd {
 
       $this->twigData['posts'] = $outThread;
       
-      $this->twigData['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
+	  //print_r($this->board);
+      $this->twigData['file_path'] = KX_BOARD . '/' . $this->board->board_name;
 	  
       // Make required folders
 	  @mkdir($this->twigData['file_path'],0777,true);

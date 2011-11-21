@@ -34,12 +34,12 @@ class manage_board_board_board extends kxCmd {
     // Grabing essential data about the board
     $boardType = $this->db->select("boards")
                       ->fields("boards", array("board_type"))
-                      ->condition("board_name", $this->request['id'])
+                      ->condition("board_name", $this->request['board'])
                       ->execute()
                       ->fetchField();
     // Nope
     if ($boardType === false) {
-      $this->errorMessage=sprintf(_gettext("Couldn't find board /%s/."),$this->request['id']);
+      $this->errorMessage=sprintf(_gettext("Couldn't find board /%s/."),$this->request['board']);
       return false;
     }
     //Check against our built-in board types.
@@ -138,7 +138,7 @@ class manage_board_board_board extends kxCmd {
   
   private function _del() {
     $this->db->delete("boards")
-             ->condition("board_id", $this->request['id'])
+             ->condition("board_id", $this->request['board'])
              ->execute();
     $this->twigData['notice_type'] = 'success';
     $this->twigData['notice'] = _gettext('Board successfully deleted.');

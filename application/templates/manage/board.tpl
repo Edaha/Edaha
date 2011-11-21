@@ -29,13 +29,13 @@
         {% for id, name in entries %}
         <tr>
 		  <td>
-			<a href="{{ base_url }}app=board&amp;module=board&amp;section=boardopts&amp;do=edit&amp;id={{ id }}">
+			<a href="{{ base_url }}app=board&amp;module=board&amp;section=boardopts&amp;do=edit&amp;board={{ id }}">
 			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" alt="Edit" />
 			</a>
-			<a href="{{ base_url }}app=board&amp;module=board&amp;do=del&amp;id={{ id }}">
+			<a href="{{ base_url }}app=board&amp;module=board&amp;section=board&amp;do=del&amp;board={{ id }}">
 			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" alt="Delete" />
 			</a>
-			<a href="{{ base_url }}app=board&amp;module=board&amp;action=regen&amp;id={{ id }}">
+			<a href="{{ base_url }}app=board&amp;module=board&amp;section=board&amp;action=regen&amp;board={{ id }}">
 			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/rebuild.png" width="16" height="16" alt="Regenerate" />
 			</a>
 		  </td>

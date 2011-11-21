@@ -246,7 +246,7 @@ class kxDBsqlite extends kxDB {
   }
 
   public function prepareQuery($query) {
-	echo "<br />".$query;
+	//echo "<br />".$query;
     return $this->prepare($this->prefixTables($query));
   }
 

@@ -70,7 +70,7 @@ all:
       embedh: 164
     pages:
       first: board.html
-      dirtitle: false
+      dirtitle: true
     tags:
     trips:
     extra:

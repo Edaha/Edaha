@@ -1,7 +1,7 @@
 {% extends "board/image/post_box.tpl" %}
 {% block boardcontent %}
   {{ parent() }}
-  <form id="delform" action="{% kxEnv "paths:script:path" %}/board.board_php" method="post">
+  <form id="delform" action="{% kxEnv "paths:script:path" %}/index.php?app=core&module=post&section=post" method="post">
   <input type="hidden" name="board" value="{{board.board_name}}" />
   {% for thread in posts %}
     {% set iteration = loop.index0 %}
@@ -9,7 +9,7 @@
       {% if post.post_parent == 0 %}
         <div class="thread" id="thread_{{post.post_id}}_{{board.board_name}}">
           <span id="unhidethread{{post.post_id}}{{board.board_name}}" style="display: none;">
-            {% trans "Thread" %} <a href="{%kxEnv "paths:boards:path" %}/{{board.board_name}}/res/{{post.post_id}}.html">{{post.post_id}}</a> {% trans "hidden." %}
+            {% trans "Thread" %} <a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/res/{{post.post_id}}.html">{{post.post_id}}</a> {% trans "hidden." %}
             <a href="#" id="togglethread" onclick="javascript:togglethread('{{post.post_id}}{{board.board_name}}');return false;" title="{% trans "Un-Hide Thread" %}">
               <img src="{% kxEnv "paths:main:path" %}css/icons/blank.gif" border="0" class="unhidethread" alt="{% trans "Un-Hide Thread" %}" />
             </a>

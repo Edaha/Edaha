@@ -308,16 +308,21 @@ class public_board_base_baseboard extends kxCmd {
 	  @mkdir($this->twigData['file_path'].'/thumb/',0777,true);
 	  @mkdir($this->twigData['file_path'].'/res/',0777,true);
 	  
+	  $this->twigData['board']=$this->board;
+	  
       $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
       $this->pageHeader(0);
       $this->postBox(0);
-      $content = kxTemplate::get('board/'.$this->boardType.'/board_page', $this->twigData);
+	  //print_r($this->twigData);
+      $content = kxTemplate::get('board/'.$this->boardType.'/board_page', $this->twigData, true);
 
       if ($i == 0) {
         $page = KX_BOARD . '/'.$this->board->board_name.'/'.kxEnv::Get('kx:pages:first');
       } else {
         $page = KX_BOARD . '/'.$this->board->board_name.'/'.$i.'.html';
       }
+	  //echo "<br />$page";
+	  //die($content);
       kxFunc::outputToFile($page, $content, $this->board->board_name);
       $i++;
     }

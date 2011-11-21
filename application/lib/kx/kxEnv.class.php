@@ -196,6 +196,10 @@ class kxEnv {
         }
         return self::getInstance()->getConfig()->get($path, $default);
     }
+	
+	public static function dumpConfig() {
+		return var_dump(self::getInstance()->getConfig(),true);
+	}
     
     public static function set($path, $value) {
         // Shortcut for setting the cache (without having to use the cache object directly)

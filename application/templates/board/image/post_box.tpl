@@ -8,7 +8,7 @@
   <div id="postarea">
     <a id="postbox"></a>
     <div id="postform">
-      <form name="postform" id="posting_form" action="{% kxEnv "paths:cgi:path" %}/board.board_php" method="post" enctype="multipart/form-data"
+      <form name="postform" id="posting_form" action="{% kxEnv "paths:script:path" %}/index.php?app=core&module=post&section=post" method="post" enctype="multipart/form-data"
       {% spaceless %}
         {%if board.board_enablecaptcha == 1 %}
           onsubmit="return checkcaptcha('postform');"
@@ -56,9 +56,9 @@
           <label for="message" id="message_label">{% trans "Message" %}</label>
           <textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea>
         </li>
-      {% if board.board_upload_type == 0 or board.board_upload_type == 1 %}
-        {% if board.board_maxfiles > 1 and replythread != 0 %}
-          {% for i in range(1,board.board_maxfiles) %}
+      {% if board.board_upload_type == 0 or board.board_upload_type == 1 or board.board_upload_type == 2 %}
+        {% if board.board_max_files > 1 and replythread != 0 %}
+          {% for i in range(1,board.board_max_files) %}
             <li id="file{{ i }}"{% if not loop.first %} style="display:none"{% endif %}>
               <label for="file{{ i }}">{% trans "File" %} {{ i }}</label>
               <input{% if not loop.last %} onchange="$('#file{{ i + 1}}').show()"{% endif %} id="file{{ i }}" type="file" name="imagefile[]" size="35" accesskey="f" />

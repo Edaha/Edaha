@@ -131,7 +131,7 @@ class public_core_post_post extends kxCmd {
       
       //How many replies, is the thread locked, etc
       if ($this->postData['is_reply']) {
-        $this->postData['thread_info'] = $this->_postingClass->threadInfo($this->request['replythread']);
+        $this->postData['thread_info'] = $this->_postingClass->threadInfo($this->_boardClass->board_id,$this->request['replythread']);
       }
       else {
         $this->postData['thread_info'] = Array('replies' => 0, 'locked' => 0, 'parent' => 0);
@@ -201,8 +201,12 @@ class public_core_post_post extends kxCmd {
       //kxFunc::checkBadUnicode($this->postData['post_fields']);
       
       $this->_boardClass->processPost($this->postData);
-	  
-	  @header('Location: '.kxEnv :: Get("paths:boards:path").'/'.$this->_boardClass->board->board_id.'/');
+	  $url = kxEnv :: Get("kx:paths:boards:path").'/'.$this->_boardClass->board->board_name;
+	  if(!$this->postData['is_reply'])
+	    $url .= '/'.kxEnv::Get('kx:pages:first');
+	  else
+	    $url .= '/res/'.intval($this->request['replythread']).'.html';
+	  @header('Location: '.$url);
     }
   }
 }

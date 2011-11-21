@@ -1234,7 +1234,9 @@ class SelectQuery extends Query implements SelectQueryInterface {
         }
         
         $args = $this->getArguments();
-        return $this->connection->query((string) $this, $args, $this->queryOptions);
+		$sql = (string) $this;
+		//echo "<p>$sql</p>";
+        return $this->connection->query($sql, $args, $this->queryOptions);
     }
     
     public function distinct($distinct = TRUE) {

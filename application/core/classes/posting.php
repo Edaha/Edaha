@@ -24,24 +24,37 @@ class Posting {
           }
       }
   }
+  
+  public function threadInfo($boardID,$threadID) { 
+    $threadData = array('replies' => 0, 'locked' => 0, 'parent' => 0);
+	$sql=$this->db->select('posts');
+	$sql->addExpression('COUNT(*)');
+	$threadData['replies']=$sql->condition('post_board',$boardID)
+	                           ->condition('post_parent',$threadID)
+	                           ->condition('post_deleted',0)
+							   ->execute()
+							   ->fetchField();
+	$threadData['parent']=$threadID;
+	return $threadData;
+  }
+  
   public function isReply($boardid) {
       /* If it appears this is a reply to a thread, and not a new thread... */
       if (isset($this->request['replythread'])) {
           if ($this->request['replythread'] != 0) {
               /* Check if the thread id supplied really exists */
-              $results = $this->db->select("posts")
-                  ->fields("posts")
-                  ->countQuery()
-                  ->condition("post_board", $boardid)
-                  ->condition("post_id", $this->request['replythread'])
-                  ->condition("post_parent", 0)
-                  ->condition("post_deleted", 0)
-                  ->execute
-                  ->fetchField();
+              $sql = $this->db->select("posts",'pst');
+              $sql->addExpression("COUNT(*)"); // Because Saz is too dumb to SQL.
+			  $results = $sql->condition("post_board", $boardid)
+                             ->condition("post_id", $this->request['replythread'])
+                             ->condition("post_parent", 0)
+                             ->condition("post_deleted", 0)
+                             ->execute()
+                             ->fetchField();
               /* If it does... */
               if ($results > 0) {
-                  return true;
                   /* If it doesn't... */
+                  return true;
               } else {
                   /* Kill the script, stopping the posting process */
                   kxFunc::showError(_gettext('Invalid thread ID.'), _gettext('That thread may have been recently deleted.'));
@@ -57,9 +70,11 @@ class Posting {
       }
   }
   public function checkEmpty($postData) {
-      if (is_array($postData['files']) && empty($postData['files'][0]) && empty($postData['message'])) {
+      //var_dump($postData['thread_info']['message']);
+      if (is_array($postData['files']) && empty($postData['files'][0]) && empty($postData['thread_info']['message'])) {
           return false;
       }
+	  return true;
   }
   public function checkNoFile($postData) {
       if (empty($postData['message'])) {
@@ -226,25 +241,27 @@ class Posting {
                         ->fetchAll();*/
 
     $reported = 0;
-    foreach ($filters as $filter) {
-      if ( (!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
-        // They included blacklisted text in their post. What do we do?
-        if ( $filter->filter_type & 8 ) {
-          // Ban them if they have the ban flag set on this filter
-          $punishment = unserialize($filter->filter_punishment);
-          kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _gettext('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
-        }
-        if ( $filter->filter_type & 4) {
-          // Stop the post from happening if the delete flag is set
-          kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter));
-        }
-        if ( $filter->filter_type & 2 && !$reported) {
-          // Report flag is set, report the post
-          $reported = 1;
-          // TODO add this later
+	if(isset($filters)) {
+      foreach ($filters as $filter) {
+        if ( (!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
+          // They included blacklisted text in their post. What do we do?
+          if ( $filter->filter_type & 8 ) {
+            // Ban them if they have the ban flag set on this filter
+            $punishment = unserialize($filter->filter_punishment);
+            kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _gettext('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
+          }
+          if ( $filter->filter_type & 4) {
+            // Stop the post from happening if the delete flag is set
+            kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter));
+          }
+          if ( $filter->filter_type & 2 && !$reported) {
+            // Report flag is set, report the post
+            $reported = 1;
+            // TODO add this later
+          }
         }
       }
-    }
+	}
   }
   public function checkOekaki() {
       // If oekaki seems to be in the url...

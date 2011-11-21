@@ -1,7 +1,8 @@
 {% extends "board/image/post_box.tpl" %}
 {% block boardcontent %}
   {{ parent() }}
-  <form id="delform" action="{% kxEnv "paths:script:path" %}/board.board_php" method="post">
+  <!-- DEBUG {% debug %} -->
+  <form id="delform" action="{% kxEnv "paths:script:path" %}/index.php?app=core&module=post&section=post" method="post">
   <input type="hidden" name="board" value="{{board.board_name}}" />
   {% for post in posts %}
     {% if post.post_parent == 0 %}

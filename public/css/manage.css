@@ -15,6 +15,17 @@ a {
   font-weight: bold;
 }
 
+div.login {
+  position:relative;
+  float:right;
+  top:-2em;
+  margin-right:1em;
+  line-height:200%;
+}
+
+div.login span {
+  font-weight:bold;
+}
 .content_wrap {
   width: 95%; /*Goddamnit saz, no 960px;*/
   margin:auto;
@@ -79,7 +90,7 @@ header nav ul li.selected a {
 
 .content {
   background-color: #ffeee2;
-  height: 630px;
+  min-height: 630px; /* Minimum height */
   padding:3px 1em;
 }
 

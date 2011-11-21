@@ -131,14 +131,14 @@ class kxTemplate {
                 throw new Exception('No template found ' . $tpl .'.tpl from ' . self::$template_dir, E_USER_ERROR);
             }
         }
+        if (IN_MANAGE && kxEnv::$current_module != 'login') {
+            self::_buildMenu();
+		}
         //echo "<h2>Pre-merge</h2>";
 		//var_dump(self::$data);
         $data = array_merge(self::$data,$data);
 		//echo "<h2>Post-merge</h2>";
 		//var_dump($data);
-        if (IN_MANAGE && kxEnv::$current_module != 'login') {
-            self::_buildMenu();
-		}
 		$template=self::$instance->loadTemplate($tpl);
         //echo "<pre>";
 		//print_r($template);
@@ -158,13 +158,19 @@ class kxTemplate {
                 throw new Exception('No template found ' . $tpl .'.tpl from ' . self::$template_dir, E_USER_ERROR);
             }
         }
+		
+        if (IN_MANAGE && kxEnv::$current_module != 'login') {
+            self::_buildMenu();
+		}
         $data = array_merge(self::$data,$data);
+		
         //echo "<pre>";
 		//print_r(self::$data);
 		//echo "</pre>";
         if (IN_MANAGE && kxEnv::$current_module != 'login' && !$bypassManageCheck) {
             return "";
         }
+		
 		$template=self::$instance->loadTemplate($tpl);
         //echo "<pre>";
 		//print_r($template);
@@ -191,8 +197,10 @@ class kxTemplate {
                 ->execute()
                 ->fetchAll();
         }
+		//print_r($modules);
         foreach ($modules as $module) {
             $_file = kxFunc::getAppDir( $app ) . "/modules/manage/" . $module['module_file'] . '/menu.yml';
+			//echo "<p>Getting menu from {$_file}</p>";
             if (file_exists($_file)) {
                 if (function_exists("syck_load")) {
                     $menu[$module['module_file']] = syck_load(file_get_contents($_file));

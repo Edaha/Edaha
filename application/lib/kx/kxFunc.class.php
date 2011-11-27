@@ -757,22 +757,23 @@ class kxMb {
    * @return	string	Parsed string
    */
   static public function substr($text, $start, $length=NULL) {
+    if (!$length) {
+      $length = self::mbstrlen($text);
+    }
     if ($start === 0 && $length === null) {
       return $text;
     }
-    
-    if(function_exists('mb_substr')) {
-    
+    if(function_exists('mb_strtolower')) {
       $encodings	= array_map('strtolower', mb_list_encodings());
-      
+
       if (count($encodings) && in_array(strtolower(kxEnv::get("kx:charset")), $encodings)) {
-        return $length ? mb_substr($text, $start, $length) : mb_substr($text, $start);
+        return mb_strtolower($text, strtoupper(kxEnv::get("kx:charset")));
       }
     }
     $convertBack = false;
     if (!self::seemsUtf8($text)) {
       if (strtoupper(kxEnv::get("kx:charset")) == "UTF-8") {
-        return $length ? substr($text, $start, $length) : substr($text, $start);
+        return substr($text, $start, $length);
       }
       else {
         $convertBack = true;
@@ -783,10 +784,6 @@ class kxMb {
     $text = self::utf8($text);
     $stringCount = count($text);
 
-    if ($start < 0) {
-      $start = self::strlen($text) + $start;
-    }
-    
     for ($i = 1; $i <= $start; $i++) {
       unset($text[$i - 1]);
     }
@@ -799,25 +796,13 @@ class kxMb {
         return self::ascii($text);
       }
     }
-    
     $text = array_values($text);
 
     $value = array();
-    if ($length < 0) {
-      $text = array_reverse($text);
-      $legnth = abs($length);
-      for ($i = 0; $i <= $length; $i++) {
-        unset($text[$i-1]);
-      }
-      $text = array_reverse($text);
-      $value = $text;
+    for ($i = 0; $i < $length; $i++) {
+            $value[] = $text[$i];
     }
-    else {
-      for ($i = 0; $i < $length; $i++) {
-              $value[] = $text[$i];
-      }
-    }
-    
+
     if ($convertBack) {
       return self::convertCharset(self::ascii($value), "UTF-8", kxEnv::get("kx:charset"));
     }

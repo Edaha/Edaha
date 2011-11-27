@@ -48,6 +48,10 @@ class Parse {
     }
   
     $buffer = preg_replace('/^(&gt;[^>](.*))\n/m', '<span class="quote">\\1</span>', $buffer);
+    // Remove the > from the quoted line if it is a text board 
+    if ($boardtype==1) {
+      $buffer = str_replace('<span class="quote">&gt;', '<span class="quote">', $buffer);
+    }
   }
   
   public function clickableQuote(&$buffer) {
@@ -68,77 +72,68 @@ class Parse {
       $matches[1] = substr($matches[1], 0, -1);
       $matches[0] = substr($matches[0], 0, -1);
     }
-    if (is_numeric($matches[1])) {
-      return $this->doStaticPostLink($matches);
-    } else {
-      return $this->doDynamicPostLink($matches);
-    }
-  }
-  
-  public function doStaticPostLink($matches) {
-    $result = $this->db->select("posts")
-                       ->fields("posts", array("post_parent"))
-                       ->condition("post_board", $this->board->board_id)
-                       ->condition("post_id", $matches[1])
-                       ->execute()
-                       ->fetchField();
+    if ($this->boardtype != 1 && is_numeric($matches[1])) {
+      
+      $result = $this->db->select("posts")
+                         ->fields("posts", array("post_parent"))
+                         ->condition("post_board", $this->board->board_id)
+                         ->condition("post_id", $matches[1])
+                         ->execute()
+                         ->fetchField();
 
-    if ($result === 0) {
-      $realID = $matches[1];
-    }
-    elseif(empty($result)) {
-      return $matches[0];
-    }
-    else {
-      $realID = $result;
-    }
-    
-    return '<a href="'.kxEnv::get('kx:paths:boards:folder').$this->board->board_name.'/res/'.$realID.'.html#'.$matches[1].'" id="ref">'.$matches[0].'</a>'.$lastchar;
-  }
-  
-  public function doDynamicPostLink($matches) {
-    $return = $matches[0];
-    
-    $postids = kxFunc::getQuoteIds($matches[1]);
-    if (count($postids) > 0) {
-      $realid = $this->parentid;
-      if ($realid === 0) {
-        if ($this->id > 0) {
-          $realid = $this->id;
-        }
+      if ($result === 0) {
+        $realID = $matches[1];
       }
-      if ($realid !== '') {
-        $return = '<a href="' . kxEnv::Get('kx:paths:boards:folder') . 'read.php';
-        if (kxEnv::Get('kx:display:traditionalread')) {
-          $return .= '/' . $thread_board_return . '/' . $realid.'/' . $matches[1];
-        } else {
-          $return .= '?b=' . $thread_board_return . '&t=' . $realid.'&p=' . $matches[1];
+      elseif(empty($result)) {
+        return $matches[0];
+      }
+      else {
+        $realID = $result;
+      }
+      
+      return '<a href="'.kxEnv::get('kx:paths:boards:folder').$this->board->board_name.'/res/'.$realID.'.html#'.$matches[1].'" id="ref">'.$matches[0].'</a>'.$lastchar;
+    } else {
+      $return = $matches[0];
+      
+      $postids = getQuoteIds($matches[1]);
+      if (count($postids) > 0) {
+        $realid = $this->parentid;
+        if ($realid === 0) {
+          if ($this->id > 0) {
+            $realid = $this->id;
+          }
         }
-        $return .= '">' . $matches[0] . '</a>';
+        if ($realid !== '') {
+          $return = '<a href="' . kxEnv::Get('kx:paths:boards:folder') . 'read.php';
+          if (kxEnv::Get('kx:display:traditionalread')) {
+            $return .= '/' . $thread_board_return . '/' . $realid.'/' . $matches[1];
+          } else {
+            $return .= '?b=' . $thread_board_return . '&t=' . $realid.'&p=' . $matches[1];
+          }
+          $return .= '">' . $matches[0] . '</a>';
+        }
       }
     }
     
     return $return;
   }
+  
   public function interboardQuoteCheck($matches) {
-    $board = $this->db->select("boards")
-                      ->fields("boards", array("board_id", "board_type"))
-                      ->condition("board_name", $matches[1])
-                      ->execute()
-                      ->fetch();
-    if ($board->board_type) {
-      $thread = $this->db->select("posts")
-                      ->fields("posts", array("post_parent"))
-                      ->condition("post_board", $board->board_id)
-                      ->condition("post_id", $matches[2])
-                      ->execute()
-                      ->fetchField();
-      if ($thread !== FALSE) {
-        if ($thread == 0) {
+    global $db;
+
+    $result = $db->prepare("SELECT id, type FROM " . kxEnv::Get('kx:db:prefix') . "boards WHERE name = ?");
+    $result->execute(array($matches[1]));
+    $result = $result->fetchAll();
+    if ($result[0]["type"] != '') {
+      $result2 = $db->prepare("SELECT parentid FROM " . kxEnv::Get('kx:db:prefix') . "posts WHERE boardid = ? AND id = ?");
+      $result2->execute(array($result[0]['id'], $matches[2]));
+      $result2 = $result2->fetchColumn();
+      if ($result2 != '') {
+        if ($result2 == 0) {
           $realid = $matches[2];
         } else {
-          if ($board->board_type != 1) {
-            $realid = $thread;
+          if ($result[0]['type'] != 1) {
+            $realid = $result2;
           }
         }
         
@@ -153,17 +148,25 @@ class Parse {
     return $matches[0];
   }
   
-  public function wordFilter(&$buffer) {
-    $filters = kxEnv::Get("cache:filters:wordfilters");
-
-    foreach ($filters as $filter) {
-      if ( (!$filter->filter_boards || in_array($this->environment->get("kx:classes:board:id"), unserialize($filter->filter_boards))) && (!$filter->filter_regex && kxMb::stripos($buffer, $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $buffer))) {
-        $buffer = ($filter->filter_regex == 1) ? preg_replace($filter->filter_word, $filter->filter_replace, $buffer) : str_ireplace($filter->filter_word, $filter->filter_replace, $buffer);
+  public function wordfilter($buffer, $board) {
+    global $db;
+    
+    $results = $db->query("SELECT * FROM " . kxEnv::Get('kx:db:prefix') . "wordfilter");
+    $results = $results->fetchAll();
+    foreach($results AS $line) {
+      $array_boards = explode('|', $line['boards']);
+      if (in_array($board, $array_boards)) {
+        $replace_word = $line['word'];
+        $replace_replacedby = $line['replacedby'];
+        
+        $buffer = ($line['regex'] == 1) ? preg_replace($replace_word, $replace_replacedby, $buffer) : str_ireplace($replace_word, $replace_replacedby, $buffer);
       }
     }
+    
+    return $buffer;
   }
   
-  public function checkNotEmpty(&$buffer) {
+  public function checkNotEmpty($buffer) {
     $buffer_temp = str_replace("\n", "", $buffer);
     $buffer_temp = str_replace("<br>", "", $buffer_temp);
     $buffer_temp = str_replace("<br/>", "", $buffer_temp);
@@ -172,12 +175,14 @@ class Parse {
     $buffer_temp = str_replace(" ", "", $buffer_temp);
     
     if ($buffer_temp=="") {
-      $buffer = "";
+      return "";
+    } else {
+      return $buffer;
     }
   }
   
-  public function cutWord(&$message, $where) {
-    $txt_split_primary = preg_split('/\n/', $message);
+  public function cutWord($txt, $where) {
+    $txt_split_primary = preg_split('/\n/', $txt);
     $txt_processed = '';
    
     foreach ($txt_split_primary as $txt_split) {
@@ -186,17 +191,34 @@ class Parse {
       foreach ($txt_split_secondary as $txt_segment) {
         $segment_length = kxMb::strlen($txt_segment);
         while ($segment_length > $where) {
-          $txt_processed .= kxMb::substr($txt_segment, 0, $where) . "\n";
-          $txt_segment    = kxMb::substr($txt_segment, $where);
+          $txt_processed .= kxMb::strlen($txt_segment, 0, $where) . "\n";
+          $txt_segment    = kxMb::strlen($txt_segment, $where);
           $segment_length = kxMb::strlen($txt_segment);
         }
         $txt_processed .= $txt_segment . ' ';
       }
       
-      $txt_processed = kxMb::substr($txt_processed, 0, -1);
+      $txt_processed = kxMb::strlen($txt_processed, 0, -1);
       $txt_processed .= "\n";
     }
-    $message = $txt_processed;
+    
+    return $txt_processed;
+  }
+  
+  public function ParsePost(&$message) {
+    $message = trim($message);
+    $this->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
+    $message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
+    if (kxEnv::Get('kx:posts:makelinks')) {
+      $this->makeClickable($message);
+    }
+    $this->ClickableQuote($message);
+    $this->ColoredQuote($message);
+    $message = str_replace("\n", '<br />', $message);
+    $this->BBCode($message);
+    $this->Wordfilter($message, $board);
+    $this->CheckNotEmpty($message);
+
   }
 }
 ?>

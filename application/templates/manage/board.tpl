@@ -30,13 +30,13 @@
         <tr>
 		  <td>
 			<a href="{{ base_url }}app=board&amp;module=board&amp;section=boardopts&amp;do=edit&amp;id={{ id }}">
-			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" />
+			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" alt="Edit" />
 			</a>
 			<a href="{{ base_url }}app=board&amp;module=board&amp;do=del&amp;id={{ id }}">
-			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" />
+			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" alt="Delete" />
 			</a>
-			<a href="{{ base_url }}app=board&amp;module=board&amp;section=rebuild&amp;id={{ id }}">
-			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/rebuild.png" width="16" height="16" />
+			<a href="{{ base_url }}app=board&amp;module=board&amp;action=regen&amp;id={{ id }}">
+			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/rebuild.png" width="16" height="16" alt="Regenerate" />
 			</a>
 		  </td>
 		  <td>

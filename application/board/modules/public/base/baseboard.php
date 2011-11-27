@@ -295,6 +295,13 @@ class public_board_base_baseboard extends kxCmd {
       $this->twigData['posts'] = $outThread;
       
       $this->twigData['file_path'] = kxEnv::Get('kx:paths:boards:path') . '/' . $this->board->board_name;
+	  
+      // Make required folders
+	  @mkdir($this->twigData['file_path'],0777,true);
+	  @mkdir($this->twigData['file_path'].'/src/',0777,true);
+	  @mkdir($this->twigData['file_path'].'/thumb/',0777,true);
+	  @mkdir($this->twigData['file_path'].'/res/',0777,true);
+	  
       $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
       $this->pageHeader(0);
       $this->postBox(0);

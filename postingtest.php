@@ -1,12 +1,12 @@
 <?php
 
 // Enter board name
-$board = "s1b1";
+$board = "b";
 //enter a non zero number to simulate replying
 $parentid = 0;
 ?>
 
-<?xml version="1.0" encoding="UTF-8"?>
+<?='<?xml version="1.0" encoding="UTF-8"?>'?>
 <html>
 	<head>
 		<title>Kusaba X 1.0 posting module test</title>

@@ -39,7 +39,15 @@ class Upload {
   }
   
   public function HandleUpload($postData, $boardData) {
-    
+    /*
+	echo "<h1>\$postData</h1><pre>";
+	print_r($postData);
+	echo '</pre><h1>$boardData</h1><pre>';
+	print_r($boardData);
+	echo '</pre><h1>$_FILES</h1><pre>';
+	print_r($_FILES);
+    die('</pre>Upload::HandleUpload() called');
+	*/
     $file_name = isset($_FILES['imagefile']['name']) ? $_FILES['imagefile']['name'] : '';
     $file_size = isset($_FILES['imagefile']['size']) ? $_FILES['imagefile']['size'] : '';
     $file_type = isset($_FILES['imagefile']['type']) ? $_FILES['imagefile']['type'] : '';

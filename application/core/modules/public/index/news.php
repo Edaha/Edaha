@@ -103,7 +103,7 @@ class public_core_index_news extends kxCmd {
                     ->range(0,1)
                     ->build();
       while ($i < count($images)) {
-       $results->execute(array($images[$i]->board_id));
+       $results->execute(array($images[$i]->file_board));
        $board= $results->fetchAll();
        $images[$i]->boardname = $board[0]->board_name;
        $i++;

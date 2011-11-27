@@ -109,14 +109,14 @@ class coreConfig {
                                                        array(
                                                               'force_load'     => 1,
                                                               'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules_admin/posts/filter.php',
-                                                              'recache_class'    => 'manage_core_posts_filter',
+                                                              'recache_class'    => 'manage_board_posts_filter',
                                                               'recache_function' => 'recacheWordFilters'
                                                             ),
                                         'spamfilters' => 
                                                        array(
                                                               'force_load'     => 1,
                                                               'recache_file'     => kxFunc::getAppDir( 'core' ) . '/modules_admin/posts/filter.php',
-                                                              'recache_class'    => 'manage_core_posts_filter',
+                                                              'recache_class'    => 'manage_board_posts_filter',
                                                               'recache_function' => 'recacheSpamFilters'
                                                             )
                                       )

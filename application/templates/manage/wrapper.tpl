@@ -17,31 +17,27 @@
         
         <nav>
           <ul>
-            <li class="{% if not current_app %}selected{% endif %}"><a href="{{ base_url }}">{% trans "Main" %}</a></li>
-            <li class="nav_sep">|</li>
+            <li><a href="{{ base_url }}">{% trans "Main" %}</a></li>
             <li class="{% if current_app == "core" %}selected{% endif %}"><a href="{{ base_url }}app=core&amp;module=site&section=front&do=news">{% trans "Site" %}</a></li>
-            <li class="nav_sep">|</li>
             <li class="{% if current_app == "board" %}selected{% endif %}"><a href="{{ base_url }}app=board&amp;module=board&section=board">{% trans "Board" %}</a></li>
-            <li class="nav_sep">|</li>
             <li class="{% if current_app == "apps" %}selected{% endif %}"><a href="#">{% trans "Addons" %}</a></li>
           </ul>
         </nav>
       </header>
-    </section>
     
-    <section class="content">
-      <section class="col_l">
-        {% include "manage/menu.tpl" %}
-      </section>
+      <section class="content">
+        <section class="sidebar">
+          {% include "manage/menu.tpl" %}
+        </section>
       
-      <section class="col_r">
-        <h1>{% block heading %}{% endblock %}</h1>
+        <section class="col_r">
+          <h1>{% block heading %}{% endblock %}</h1>
+          
+          {% block managecontent %}{% endblock %}
+        </section>
+      </section>
+      <footer>
         
-        {% block managecontent %}{% endblock %}
-      </section>
+      </footer>
     </section>
-
-    <footer>
-      
-    </footer>
 {% endblock %}

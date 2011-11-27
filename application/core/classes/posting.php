@@ -336,6 +336,11 @@ class Posting {
   }
   public function doUpload(&$postData, $board) {
       $uploadClass = $this->environment->get('kx:classes:board:upload:id');
+	  
+	  @mkdir(KX_BOARD . '/' . $board->board_name,0777,true);
+	  @mkdir(KX_BOARD . '/' . $board->board_name.'/src/',0777,true);
+	  @mkdir(KX_BOARD . '/' . $board->board_name.'/thumb/',0777,true);
+	  @mkdir(KX_BOARD . '/' . $board->board_name.'/res/',0777,true);
       
       if ((!isset($this->request['nofile']) && $board->board_enable_no_file == 1) || $board->board_enable_no_file == 0) {
           $uploadClass->HandleUpload($postData, $board);

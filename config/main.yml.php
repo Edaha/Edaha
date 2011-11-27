@@ -4,9 +4,9 @@ all:
   kx:
     charset: utf-8
     db:
-      dsn: 'pgsql:dbname=kusaba'
-      username: kusaba
-      password: kusaba
+      dsn: 'mysql:dbname=edaha'
+      username: edaha
+      password: edaha
       prefix: 
       persistent: false
     site:

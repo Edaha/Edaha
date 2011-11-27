@@ -222,7 +222,7 @@ abstract class kxDB {
      *   A PDO prepared statement ready for its execute() method.
      */
     public function prepareQuery($query) {
-		echo "<br />".$query;
+		//echo "<br />".$query;
         return $this->prepare($query);
     }
     
@@ -1313,7 +1313,7 @@ class kxDBStatementBase extends PDOStatement implements kxDBStatementInterface {
                 $this->setFetchMode($options['fetch']);
             }
         }
-		echo "<br />".$this;     
+		//echo "<br />".$this;     
         $return = parent::execute($args);
         
         return $return;

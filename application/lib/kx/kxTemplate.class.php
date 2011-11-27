@@ -6,7 +6,7 @@ class kxTemplate {
     private static $debug_flag = false;
     
     private static $data = array();
-    private static $instance;
+    private static $instance=null;
     
     // Manage wrapper
     private static $manage;
@@ -17,8 +17,8 @@ class kxTemplate {
     private function __construct(){}
     
     public static function init($template_dir = null, $compiled_dir = null, $cache_dir = null) {
-        if (!self::$instance instanceof Twig_Environment) {
-            
+        if (self::$instance == null) {
+            //echo "<p>init() called!</p>";
             if($template_dir != null){
                 self::$template_dir = $template_dir;
             }
@@ -52,7 +52,7 @@ class kxTemplate {
             self::$data['locale'] = kxEnv::Get('kx:misc:locale');
             // Are we in manage? Load up the manage wrapper
             if (IN_MANAGE) {
-                $data['current_app'] = "";
+                self::$data['current_app'] = "";
                 if (KX_CURRENT_APP == "core") {
                     // Load up some variables for tabbing/menu purposes
                     if (isset(kxEnv::$request['app'])) {
@@ -68,7 +68,8 @@ class kxTemplate {
                     }
                 }
                 
-                self::assign('base_url', kxEnv::Get('kx:paths:main:path') . '/manage.php?sid=' . ( isset(kxEnv::$request['sid']) ? kxEnv::$request['sid'] : '') . '&');
+				$baseurl = kxEnv::Get('kx:paths:main:path') . '/manage.php?sid=' . ( isset(kxEnv::$request['sid']) ? kxEnv::$request['sid'] : '') . '&';
+                self::$data['base_url']=$baseurl;
  
                 // Get our manage username
                 if (isset(kxEnv::$request['sid'])) {
@@ -80,7 +81,9 @@ class kxTemplate {
                                                ->fetchField());                
                 }
                 
-            }
+            }// else {
+			//	die('Not IN_MANAGE!');
+			//}
         }
     }
     
@@ -128,14 +131,17 @@ class kxTemplate {
                 throw new Exception('No template found ' . $tpl .'.tpl from ' . self::$template_dir, E_USER_ERROR);
             }
         }
-        
+        //echo "<h2>Pre-merge</h2>";
+		//var_dump(self::$data);
         $data = array_merge(self::$data,$data);
+		//echo "<h2>Post-merge</h2>";
+		//var_dump($data);
         if (IN_MANAGE && kxEnv::$current_module != 'login') {
             self::_buildMenu();
-            $content = self::$instance->loadTemplate($tpl)->display(array_merge(self::$data,$data));
+            $content = self::$instance->loadTemplate($tpl)->display($data);
         }
         else {
-            self::$instance->loadTemplate($tpl)->display(array_merge(self::$data,$data));
+            self::$instance->loadTemplate($tpl)->display($data);
         }
     }
     
@@ -152,7 +158,6 @@ class kxTemplate {
             }
         }
         $data = array_merge(self::$data,$data);
-        self::$data = array();
         if (IN_MANAGE && kxEnv::$current_module != 'login') {
             return $return;
         }

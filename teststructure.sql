@@ -46,21 +46,21 @@ CREATE TABLE IF NOT EXISTS `announcements` (
 --
 
 CREATE TABLE IF NOT EXISTS `banlist` (
-  `ban_id` int(11) NOT NULL AUTO_INCREMENT,
-  `ban_type` smallint(6) DEFAULT 0,
-  `ban_expired` smallint(6) DEFAULT 0,
-  `ban_allow_read` smallint(6) DEFAULT 1,
-  `ban_ip` varchar(100) NOT NULL,
-  `ban_ip_md5` varchar(32) NOT NULL,
-  `ban_boards` varchar(255) NOT NULL,
-  `ban_by` varchar(75) NOT NULL,
-  `ban_created` int(11) NOT NULL,
-  `ban_expires` int(11) NOT NULL,
-  `ban_reason` text NOT NULL,
-  `ban_staff_note` text NOT NULL,
-  `ban_appeal_message` text,
-  `ban_appeal_status` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY(`ban_id`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` smallint(6) DEFAULT 0,
+  `expired` smallint(6) DEFAULT 0,
+  `allow_read` smallint(6) DEFAULT 1,
+  `ip` varchar(100) NOT NULL,
+  `ipmd5` varchar(32) NOT NULL,
+  `boards` varchar(255) NOT NULL,
+  `by` varchar(75) NOT NULL,
+  `created` int(11) NOT NULL,
+  `expires` int(11) NOT NULL,
+  `reason` text NOT NULL,
+  `staff_note` text NOT NULL,
+  `appeal_message` text,
+  `appeal_status` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY(`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

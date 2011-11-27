@@ -19,11 +19,18 @@ class manage_board_board_board extends kxCmd {
   }
   
   private function _board() {
-    $this->twigData['entries'] = $this->db->select("boards")
-                                      ->fields("boards")
-                                      ->orderBy("board_name")
-                                      ->execute()
-                                      ->fetchAll();
+    // DATABASE DRIVERS, DATABASE DRIVERS NEVER CHANGE
+    // EXCEPT WHEN SAZ FUCKS WITH THEM
+    $array_o_boards = $this->db->select("boards")
+                      ->fields('boards',array('board_name','board_desc'))
+                      ->orderBy("board_name")
+                      ->execute()
+                      ->fetchAll();
+    $this->twigData['entries'] = array();
+    foreach($array_o_boards as $board){
+	  $this->twigData['entries'][$board->board_name]=$board->board_desc;
+    }
+	//print_r($this->twigData['entries']);
     kxTemplate::output("manage/board", $this->twigData);
   }
   

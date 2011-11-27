@@ -34,10 +34,11 @@ class Twig_Extensions_Node_kxEnv extends Twig_Node
       $compiler->addDebugInfo($this);
 
       $val = $this->getNode('expr')->getAttribute('value');
-
-        $compiler
-            ->write("echo kxEnv::Get('kx:$val');\n");
-            
+      if($val=='DUMP_CONFIG') { // For debugging
+		$compiler->write("echo kxEnv::dumpConfig();\n");
+	  } else {
+		$compiler->write("echo kxEnv::Get('kx:$val');\n");
+      }
     }
 
 }

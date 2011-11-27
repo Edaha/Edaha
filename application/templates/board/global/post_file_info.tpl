@@ -1,8 +1,8 @@
-{% macro fileinfo(post, id, link) %}
+{% macro fileinfo(board, post, id, link) %}
   {% if link and post.file_type.0 != 'jpg' and post.file_type.0 != 'gif' and post.file_type.0 != 'png' and post.videobox == '' %}
-    <a {% if 'posts:newwindow'|kxEnv %}target="_blank" {% endif %}href="{{file_path}}/src/{{post.file_name.0}}.{{post.file_type.0}}">
+    <a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}" {% if 'posts:newwindow'|kxEnv %} target="_blank"{% endif %}>
   {% else %}
-    <a href="{{file_path}}/src/{{post.file_name.0}}.{{post.file_type.0}}" id="expands_{{post.post_id}}_{{post.file_image_width.0}}_{{post.file_image_height.0}}_{{post.thumb_w.0}}_{{post.thumb_h.0}}">
+    <a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}" id="expands_{{post.post_id}}_{{post.file_image_width.0}}_{{post.file_image_height.0}}_{{post.thumb_w.0}}_{{post.thumb_h.0}}">
   {% endif %}
   {% if post.post_id3[id].comments_html.artist.0 %}
   {{post.post_id3[id].comments_html.artist.0}} 
@@ -49,7 +49,7 @@
       {% else %}
         {% trans "File" %}
       {% endif %}
-      {{ _self.fileinfo(post, 0, true) }}
+      {{ _self.fileinfo(board, post, 0, true) }}
     </div>
   {% endstrip %}
   {% if 'display:thumbmsg'|kxEnv %}
@@ -65,9 +65,9 @@
 {% if post.file_name|length > 1 %}
   {% for fileskey,file in post.file_name %}
     {% if fileskey % 3 %}<br style="clear:both" />{% endif %}
-    {% set fileurl %}{{file_path}}/src/{{post.file_name[fileskey]}}.{{post.file_type[fileskey]}}{% endset %}
+    {% set fileurl %}{% kxEnv "paths:boards:path" %}/{{board.board_name}}/src/{{post.file_name[fileskey]}}.{{post.file_type[fileskey]}}{% endset %}
     {% if post.file_name[fileskey] and ( post.file_type[fileskey] == 'jpg' or post.file_type[fileskey] == 'gif' or post.file_type[fileskey] == 'png') %}
-      {% set thumburl %}{{file_path}}/thumb/{{post.file_name[fileskey]}}s.{{post.file_type[fileskey]}}{% endset %}
+      {% set thumburl %}{% kxEnv "paths:boards:path" %}/{{board.board_name}}/thumb/{{post.file_name[fileskey]}}s.{{post.file_type[fileskey]}}{% endset %}
     {% elseif post.nonstandard_file[fileskey] %}
       {% set thumburl %}{{ post.nonstandard_file[fileskey] }}{% endset %}
     {% endif %}
@@ -91,7 +91,7 @@
         <br />
         <a {% if 'posts:newwindow'|kxEnv %}target="_blank"{% endif %} href="{{ fileurl }}">
           <span id="thumb_{{post.post_id}}-{{fileskey}}">
-            <img src="{{ thumburl }}" alt="{{post.post_id}}" height="{{post.thumb_h[fileskey]}}" width="{{post.thumb_w[fileskey]}}" title="{{ _self.fileinfo(post, fileskey) }}" />
+            <img src="{{ thumburl }}" alt="{{post.post_id}}" height="{{post.thumb_h[fileskey]}}" width="{{post.thumb_w[fileskey]}}" title="{{ _self.fileinfo(board, post, fileskey) }}" />
           </span>
         </a>
       </div>
@@ -108,11 +108,11 @@
   {% else %}
     {% if post.videobox == '' and post.file_name.0 and ( post.file_type.0 == 'jpg' or post.file_type.0 == 'gif' or post.file_type.0 == 'png') %}
       <div id="thumb_{{post.post_id}}" class="post_thumb">
-        <a {% if 'posts:newwindow'|kxEnv %}target="_blank"{% endif %} href="{{file_path}}/src/{{post.file_name.0}}.{{post.file_type.0}}"><img src="{{file_path}}/thumb/{{post.file_name.0}}s.{{post.file_type.0}}" alt="{{post.post_id}}" class="thumb" height="{{post.thumb_h.0}}" width="{{post.thumb_w.0}}" /></a>
+        <a {% if 'posts:newwindow'|kxEnv %}target="_blank"{% endif %} href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}"><img src="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/thumb/{{post.file_name.0}}s.{{post.file_type.0}}" alt="{{post.post_id}}" class="thumb" height="{{post.thumb_h.0}}" width="{{post.thumb_w.0}}" /></a>
       </div>
     {% elseif post.nonstandard_file %}
       <div id="thumb_{{post.post_id}}" class="post_thumb">
-      <a {% if 'posts:newwindow'|kxEnv %}target="_blank"{% endif %} href="{{file_path}}/src/{{post.file_name.0}}.{{post.file_type.0}}"><img src="{{post.nonstandard_file.0}}" alt="{{post.post_id}}" class="thumb" height="{{post.thumb_h.0}}" width="{{post.thumb_w.0}}" /></a></div>
+      <a {% if 'posts:newwindow'|kxEnv %}target="_blank"{% endif %} href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}"><img src="{{post.nonstandard_file.0}}" alt="{{post.post_id}}" class="thumb" height="{{post.thumb_h.0}}" width="{{post.thumb_w.0}}" /></a></div>
     {% endif %}
   {% endif %}
 {% endif %}

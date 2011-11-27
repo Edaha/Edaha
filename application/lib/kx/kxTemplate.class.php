@@ -138,15 +138,16 @@ class kxTemplate {
 		//var_dump($data);
         if (IN_MANAGE && kxEnv::$current_module != 'login') {
             self::_buildMenu();
-            $content = self::$instance->loadTemplate($tpl)->display($data);
-        }
-        else {
-            self::$instance->loadTemplate($tpl)->display($data);
-        }
+		}
+		$template=self::$instance->loadTemplate($tpl);
+        //echo "<pre>";
+		//print_r($template);
+		//echo "</pre>";
+		$template->display($data);
     }
     
     // returns a string of the parsed and processed template
-    public static function get($tpl, $data = array()){
+    public static function get($tpl, $data = array(), $bypassManageCheck=false){
         self::init();
         if (is_string($tpl)) {
             
@@ -158,10 +159,17 @@ class kxTemplate {
             }
         }
         $data = array_merge(self::$data,$data);
-        if (IN_MANAGE && kxEnv::$current_module != 'login') {
-            return $return;
+        //echo "<pre>";
+		//print_r(self::$data);
+		//echo "</pre>";
+        if (IN_MANAGE && kxEnv::$current_module != 'login' && !$bypassManageCheck) {
+            return "";
         }
-        return self::$instance->loadTemplate($tpl)->render(array_merge(self::$data,$data));
+		$template=self::$instance->loadTemplate($tpl);
+        //echo "<pre>";
+		//print_r($template);
+		//echo "</pre>";
+		return $template->render($data);
     }
     
     public static function assign($name, $value){

@@ -1,11 +1,11 @@
 {% extends "global_wrapper.tpl" %}
 
-{% block title %}{{board.board_name}}{% if board.board.board_description %} - {{board.board.board_description}}{% endif %}{% endblock %}
+{% block title %}{{board.board_name}}{% if board.board_desc %} - {{board.board_desc}}{% endif %}{% endblock %}
 
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/img_global.css" />
+  <link rel="stylesheet" type="text/css" href="{% kxEnv "paths:boards:path" %}/public/css/img_global.css" />
   {% for style in ku_styles %}
-    <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/{{ style }}.css" title="{{ style|capitalize }}" />
+    <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:boards:path" %}/public/css/{{ style }}.css" title="{{ style|capitalize }}" />
   {% endfor %}
   {% if locale == 'he' %}
     {% raw %}
@@ -73,11 +73,13 @@
       {% elseif board.board_image and board.board_image != "none" %}
         <img src="{{board.board_image}}" alt="{% trans "Logo"%}" /><br />
       {% endif %}
+	  <h1>
       {% if 'pages:dirtitle'|kxEnv %}
-        /{{board.board_name}}/ - 
+        /{{board.board_name}}/
       {% endif %}
-
-      {{board.board.board_description}}
+	  {% if board.board_desc and 'pages:dirtitle'|kxEnv %} - {% endif %}
+	  {% if board.board_desc %}{{board.board_desc}}{% endif %}
+	  </h1>
     </div>
     {{board.board_include_header}}
     <hr />

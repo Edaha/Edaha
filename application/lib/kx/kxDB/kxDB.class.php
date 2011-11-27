@@ -302,6 +302,9 @@ abstract class kxDB {
             else {
                 $this->expandArguments($query, $args);
                 $stmt = $this->prepareQuery($query);
+				//echo "<pre>";
+				//print_r($stmt);
+				//echo "</pre>";
                 $stmt->execute($args, $options);
             }
             
@@ -1313,7 +1316,8 @@ class kxDBStatementBase extends PDOStatement implements kxDBStatementInterface {
                 $this->setFetchMode($options['fetch']);
             }
         }
-		//echo "<br />".$this;     
+		//echo "<br />";
+		//print_r($args);     
         $return = parent::execute($args);
         
         return $return;

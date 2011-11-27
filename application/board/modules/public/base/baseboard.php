@@ -102,14 +102,13 @@ class public_board_base_baseboard extends kxCmd {
   
     $message = trim($message);
     $this->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
-    var_dump($message);
+    //var_dump($message);
     $message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
     if (kxEnv::Get('kx:posts:makelinks')) {
       $this->makeClickable($message);
     }
     $this->clickableQuote($message);
     $this->coloredQuote($message);
-    str_replace("\n", '<br />', $message);
     $this->bbCode($message);
     $this->wordFilter($message);
     $this->checkNotEmpty($message);
@@ -624,7 +623,6 @@ class public_board_base_baseboard extends kxCmd {
           $this->twigData['replythread'] = $id;
           $this->twigData['threadid']    = $thread[0]->post_id;
           $this->twigData['posts']       = $thread;
-          //$this->twigData->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
           $replycount = (count($thread)-1);
           $this->twigData['replycount']  = $replycount;
           if (!isset($this->board->footer)) $this->board->footer = $this->footer(false, (microtime(true) - $executiontime_start_thread));
@@ -646,7 +644,9 @@ class public_board_base_baseboard extends kxCmd {
           // Grab the first 100 posts
           $this->twigData['posts'] = array_slice($thread, 0, 100);
         }
-        $content = kxTemplate::get('board/'.$this->boardType.'/board_page', $this->twigData);
+        $this->twigData['board']=$this->board;
+		//print_r($this->twigData);
+        $content = kxTemplate::get('board/'.$this->boardType.'/thread', $this->twigData, true);
         kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
       }
     }

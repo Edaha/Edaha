@@ -12,7 +12,7 @@
         </section>
         
         <div class="login">
-          {% trans %}Logged in as {% endtrans %}<span class='strong'>{{name}}</span> [<a href="{{base_url}}&amp;module=login&amp;do=logout">{%trans "Log Out" %}</a>]
+          {% trans %}Logged in as {% endtrans %} <span class='strong'>{{name}}</span> [<a href="{{base_url}}&amp;module=login&amp;do=logout">{%trans "Log Out" %}</a>]
         </div>
         
         <nav>

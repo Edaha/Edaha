@@ -1,0 +1,109 @@
+body,html {
+background-color:#EEF2FF;
+font-family:sans-serif;
+margin:auto;
+width:960px;
+}
+
+a {
+color:#3A3B3F;
+text-decoration:none;
+}
+
+h1 {
+color:#003298;
+font-family:Verdana;
+font-size:4em;
+letter-spacing:-0.1em;
+margin:.25em 0 0;
+}
+
+h2 {
+margin:.25em 0 .2em;
+}
+
+h4 {
+background-color:#D6DAF0;
+margin:1em 0;
+padding:2px;
+}
+
+h6 {
+color:#003298;
+font-size:1em;
+margin:0 .25em 1em;
+}
+
+span.section_toggle {
+float:right;
+font-weight:400;
+}
+
+ul {
+list-style:none;
+margin:0;
+padding:0;
+}
+
+li {
+padding:0 3px;
+}
+
+ul.list_col1,ul.list_col2 {
+float:left;
+width:49%;
+}
+
+section#recent {
+background-color:EAEFFD;
+border:1px solid #C5C8D2;
+padding:5px;
+width:948px;
+}
+
+section#posts {
+float:left;
+width:50%;
+}
+
+section#images {
+float:right;
+width:50%;
+}
+
+section#news {
+background-color:EAEFFD;
+border:1px solid #C5C8D2;
+float:left;
+margin-top:5px;
+padding:10px;
+width:635px;
+}
+
+section#right_ad {
+border:1px solid #C5C8D2;
+float:right;
+height:98px;
+width:298px;
+}
+
+section#boardlist {
+background-color:EAEFFD;
+border:1px solid #C5C8D2;
+float:right;
+margin-top:5px;
+padding:5px;
+width:288px;
+}
+
+footer {
+background-color:EAEFFD;
+border:1px solid #C5C8D2;
+margin-top:5px;
+padding:5px;
+text-align:center;
+}
+
+br.clear {
+clear:both;
+}

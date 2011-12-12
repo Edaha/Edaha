@@ -1,5 +1,9 @@
 {% extends "global_wrapper.tpl"%}
 
+{% block title %}
+{% kxEnv "site:name" %}{% if _get.view != '' %} - {{ _get.view|capitalize }}{% endif %}{% if _get.page != '' %} - News - Page {{ _get.page }}{% endif %}
+{% endblock %}
+
 {% block css %}
 {% for style in styles %}
   <link rel="{% if style != 'css:menudefault'|kxEnv %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/{{ style }}/site.css" title="{{ style|capitalize }}" />
@@ -27,24 +31,42 @@
     <br class="clear" />
   </section>
   
+  <div class="wrap">
   <section id="news">
-    <h2>News</h2>
+    <header>
+      <ul>
+        <li{% if _get.view == '' %} class="selected"{% endif %}>{% if _get.view != '' %}<a href="{% kxEnv "paths:main:path" %}/">{% endif %}News{% if _get.view != '' %}</a>{% endif %}</li>
+        <li{% if _get.view == 'faq' %} class="selected"{% endif %}>{% if _get.view != 'faq' %}<a href="{% kxEnv "paths:main:path" %}/index.php?view=faq">{% endif %}FAQ{% if _get.view != 'faq' %}</a>{% endif %}</li>
+        <li{% if _get.view == 'rules' %} class="selected"{% endif %}>{% if _get.view != 'rules' %}<a href="{% kxEnv "paths:main:path" %}/index.php?view=rules">{% endif %}Rules{% if _get.view != 'rules' %}</a>{% endif %}</li>
+      </ul>
+      <br class="clear" />
+    </header>
     
-    {% for item in entries %}
+{% for item in entries %}
     <article>
-      <h4>
-        <span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.poster }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>
-        <span class="permalink"><a href="#{{ item.id }}">#</a></span>
+      <h4 id="id{{ item.entry_id }}">
+        <span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.entry_name }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>
+        <a class="permalink" href="#id{{ item.entry_id }}">#</a>
       </h4>
-      </header>
+      
       <p>
         {{ item.entry_message }}
       </p>
     </article>
-    {% endfor %} 
+{% endfor %} 
     
-    {% if _get.view != 'all' and _get.p == '' %}<br /><a href="{% kxEnv "paths:main:path" %}/index.php?view=all">More entries</a>{% endif %}
+{% if _get.view == '' %}
+    <footer>
+  {% for i in 0..pages %}
+      [ {% if _get.page != i %}<a href="{% kxEnv "paths:main:path" %}/index.php?page={{ i }}">{% endif %}{{ i }}{% if _get.page != i %}</a>{% endif %} ]
+  {% endfor %}
+    </footer>
+{% endif %}
   </section>
+  
+  <!--<section id="rbanner">
+    &nbsp;
+  </section>-->
   
   <section id="boardlist">
     <h2>Boards</h2>
@@ -60,17 +82,23 @@
         <li>No boards</li>
 {% endfor %}
       </ul>
+      <br class="clear" />
     </article>
 {% endfor %}
   </section>
+  </div>
   
-  <br class="clear" />
+  <div class="wrap hfix">
+  <div class="lcol"></div>
+  <div class="rcol"></div>
+  </div>
+  
   <footer>
 {% if 'misc:boardlist'|kxEnv %}
 	{% for section in sections %}
 		[
 	{% for board in section.boards %}
-		<a title="{{board.board_desc}}" href="{kxEnv "paths:boards:folder"}{{board.board_name}}/">{{board.board_name}}</a>{% if not loop.last %} / {% endif %}
+		<a title="{{board.board_desc}}" href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/">{{board.board_name}}</a>{% if not loop.last %} / {% endif %}
 	{% endfor %}
 		 ]
 	{% endfor %}

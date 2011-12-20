@@ -216,9 +216,9 @@ class kxCache {
   }
 
   public function set($path, $value) {
-  print_r(self::$data);
+  //print_r(self::$data);
     self::$data = array_merge_recursive(self::$data, self::instance()->_setCache(explode(':', $path), $value));
-	print_r(self::$data);
+	//print_r(self::$data);
   }
   
   public function get($path = null) {

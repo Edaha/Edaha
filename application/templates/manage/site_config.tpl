@@ -8,7 +8,8 @@
       {% if option.config_variable|kxEnv != NULL %}
         {% if option.config_type != prevcat %}
         {% endif %}
-        <label for="{{option.config_variable}}">{{option.config_name}}</label>
+        {% set config_name = option.config_name %}
+        <label for="{{option.config_variable}}">{% trans config_name %}</label>
         {% if option.config_type == "input" %}
           <input type="text" name="{{option.config_variable}}" id="{{option.config_variable}}" value="{{option.config_variable|kxEnv|e}}" />
         {% elseif option.config_type == "text" %}
@@ -24,8 +25,8 @@
         {% elseif option.config_type == "textarea" %}
           <textarea name="{{option.config_variable}}" id="{{option.config_variable}}" rows="3" cols="40">{{option.config_variable|kxEnv|e}}</textarea>
         {% endif %}
-      {% set desc %}{{option.config_description}}{% endset %}
-      <br /><span class="desc">{% trans desc %}</span><br />
+      {% set config_desc = option.config_description %}
+      <br /><span class="desc">{% trans config_desc %}</span><br />
       {% endif %}
     {% endfor %}
     <input type="submit" name="submit" value="Update" />

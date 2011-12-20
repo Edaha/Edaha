@@ -18,35 +18,36 @@
 <input type="hidden" name="directory" id="directory" value="" />
 </form>
 <br />
-    <fieldset id="edit-boards">
-      <legend>{% trans 'Edit Boards' %}</legend>
+  <fieldset id="edit-boards">
+    <legend>{% trans 'Edit Boards' %}</legend>
 	  <table class="stats">
 	    <col class="col1" /><col class="col2" /><col class="col2" />
 	    <tr>
-		  <th colspan="2">{% trans 'Board ID' %}</th>
-		  <th>{% trans 'Description' %}</th>
-		</tr>
-        {% for id, name in entries %}
-        <tr>
-		  <td>
-			<a href="{{ base_url }}app=board&amp;module=board&amp;section=boardopts&amp;do=edit&amp;board={{ id }}">
-			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" alt="Edit" />
-			</a>
-			<a href="{{ base_url }}app=board&amp;module=board&amp;section=board&amp;do=del&amp;board={{ id }}">
-			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" alt="Delete" />
-			</a>
-			<a href="{{ base_url }}app=board&amp;module=board&amp;section=board&amp;action=regen&amp;board={{ id }}">
-			  <img src="{% kxEnv "paths:boards:path" %}/public/manage/rebuild.png" width="16" height="16" alt="Regenerate" />
-			</a>
-		  </td>
-		  <td>
-		    <a href="{% kxEnv "paths:boards:path" %}/{{ id }}/">/{{id}}/</a>
-		  </td>
-		  <td>
-		    {{ name }}
-		  </td>
-		</tr>
-        {% endfor %}
+        <th>{% trans 'Directory' %}</th>
+        <th>{% trans 'Description' %}</th>
+        <th>{% trans 'Actions' %}</th>
+      </tr>
+    {% for id, name in entries %}
+      <tr>
+        <td>
+          <a href="{% kxEnv "paths:boards:path" %}/{{ id }}/">/{{id}}/</a>
+        </td>
+        <td>
+          {{ name }}
+        </td>
+        <td>
+        <a href="{{ base_url }}app=board&amp;module=board&amp;section=boardopts&amp;do=edit&amp;board={{ id }}">
+          <img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" alt="Edit" />
+        </a>
+        <a href="{{ base_url }}app=board&amp;module=board&amp;section=board&amp;do=del&amp;board={{ id }}">
+          <img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" alt="Delete" />
+        </a>
+        <a href="{{ base_url }}app=board&amp;module=board&amp;section=board&amp;action=regen&amp;board={{ id }}">
+          <img src="{% kxEnv "paths:boards:path" %}/public/manage/rebuild.png" width="16" height="16" alt="Regenerate" />
+        </a>
+        </td>
+      </tr>
+      {% endfor %}
 	  </table>
     </fieldset>
 {% endblock %}

@@ -4,7 +4,7 @@
       {% for name, entry in entries %}
         <label for="{{entry.id}}">{% trans name %}:</label>
         {% if entry.type == "text"  or entry.type == "password" %}
-          <input type="{{entry.type}}" id="{{entry.id}}" name="{{entry.id}}" value="{{entry.value}}" />
+          <input type="{{entry.type}}" id="{{entry.id}}" name="{{entry.id}}" value="{{entry.value}}"{% if entry.disabled %} disabled="disabled"{% endif %}/>
         {% elseif entry.type == "textarea" %}
           <textarea id="{{entry.id}}" name="{{entry.id}}" rows="25" cols="65">{{entry.value}}</textarea>
         {% elseif entry.type == "select" %}
@@ -16,7 +16,7 @@
         {% endif %}
         {% if entry.desc %}
           {% set entrydesc = entry.desc %}
-          <span class="desc">{% trans entrydesc %}</span><br />
+          <span class="desc"><a href="#" title="{% trans entrydesc %}">?</a></span><br />
         {% endif %}
         <br />
       {% endfor %}
@@ -41,4 +41,14 @@
     {% endif %}
   {% endfor %}
   </select>
-{%endmacro%}
+{% endmacro %}
+
+{% macro sectionlist(sections, id, selected) %}
+  <label for="{{ id }}">{% trans "Section" %}:</label>
+  <select name="{{ id }}" id="{{ id }}">
+    <option value="">{% trans "Hidden" %}</option>
+  {% for section in sections %}
+    <option value="{{ section.id }}"{% if selected == section.id %} selected="selected"{% endif %}>{{ section.section_name }}</option>
+  {% endfor %}
+  </select>
+{% endmacro %}

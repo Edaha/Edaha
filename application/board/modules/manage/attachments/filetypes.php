@@ -22,12 +22,9 @@ class manage_board_attachments_filetypes extends kxCmd {
   
   private function _filetypes() {
     // Retrieve filetypes from cache
-    $this->recacheFiletypes();
-    /*$this->twigData['filetypes'] = kxEnv::get('cache:attachments:filetypes');
-    echo '<pre>';
-    print_r($this->twigData['filetypes']);
-    echo '</pre>';
-    kxTemplate::output("manage/filetypes", $this->twigData);*/
+    $this->twigData['filetypes'] = kxEnv::get('cache:attachments:filetypes');
+
+    kxTemplate::output("manage/filetypes", $this->twigData);
   }
   
   private function _post() {
@@ -70,7 +67,7 @@ class manage_board_attachments_filetypes extends kxCmd {
     }
     
     // Need to update the cache
-    //$this->recacheFiletypes();
+    $this->recacheFiletypes();
   }
   
   private function _del() {
@@ -122,10 +119,6 @@ class manage_board_attachments_filetypes extends kxCmd {
     echo '</pre>';*/
     // Cache them
     kxEnv::set('cache:attachments:filetypes', $recache_filetypes);
-    
-    echo '<pre>';
-    print_r(kxEnv::get('cache:attachments:filetypes'));
-    echo '</pre>';
     
   }
   

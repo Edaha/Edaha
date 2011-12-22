@@ -165,6 +165,33 @@ INSERT INTO `board_filetypes` (`board_id`, `type_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `board_filters`
+--
+
+CREATE TABLE IF NOT EXISTS `board_filters` (
+  `board_id` int(11) NOT NULL,
+  `filter_id` int(11) NOT NULL,
+  UNIQUE KEY `filter_id_board_id` (`filter_id`,`board_id`),
+  UNIQUE KEY `board_id_filter_id` (`board_id`,`filter_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `board_filters`
+--
+
+INSERT INTO `board_filters` (`board_id`, `filter_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 1),
+(1, 5),
+(2, 5),
+(3, 5),
+(4, 5);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `cache`
 --
 
@@ -184,7 +211,7 @@ INSERT INTO `cache` (`cache_path`, `cache_value`, `cache_array`, `cache_updated`
 ('addons:app_cache', 'a:0:{}', 1, 1317941331),
 ('version', '1.0', 0, 1317940926),
 ('boardopts:s1b1', 'a:1:{i:0;O:8:"stdClass":35:{s:8:"board_id";s:1:"1";s:11:"board_order";s:1:"1";s:10:"board_name";s:4:"s1b1";s:10:"board_type";s:1:"0";s:11:"board_start";s:1:"0";s:17:"board_upload_type";s:1:"0";s:10:"board_desc";s:12:"Board 1 (S1)";s:18:"board_header_image";s:0:"";s:13:"board_section";s:1:"1";s:21:"board_max_upload_size";s:7:"1024000";s:15:"board_max_pages";s:2:"11";s:13:"board_max_age";s:1:"0";s:15:"board_mark_page";s:1:"9";s:17:"board_max_replies";s:3:"200";s:24:"board_max_message_length";s:4:"8192";s:16:"board_created_on";s:1:"0";s:12:"board_locked";s:1:"0";s:20:"board_include_header";s:0:"";s:24:"board_redirect_to_thread";s:1:"0";s:15:"board_anonymous";s:9:"Anonymous";s:17:"board_forced_anon";s:1:"0";s:20:"board_allowed_embeds";s:0:"";s:11:"board_trial";s:1:"0";s:13:"board_popular";s:1:"0";s:19:"board_default_style";s:5:"edaha";s:12:"board_locale";s:0:"";s:13:"board_show_id";s:1:"0";s:18:"board_compact_list";s:1:"0";s:15:"board_reporting";s:1:"1";s:13:"board_captcha";s:1:"0";s:13:"board_no_file";s:1:"0";s:15:"board_archiving";s:1:"0";s:13:"board_catalog";s:1:"1";s:15:"board_max_files";s:1:"1";s:15:"board_filetypes";a:3:{i:0;s:1:"1";i:1;s:1:"2";i:2;s:1:"3";}}}', 1, 1324341088),
-('attachments:filetypes', 'a:4:{i:0;O:8:"stdClass":7:{s:7:"type_id";s:1:"1";s:8:"type_ext";s:3:"jpg";s:9:"type_mime";s:9:"image/jpg";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"0";}i:1;O:8:"stdClass":7:{s:7:"type_id";s:1:"2";s:8:"type_ext";s:3:"png";s:9:"type_mime";s:9:"image/png";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"0";}i:2;O:8:"stdClass":7:{s:7:"type_id";s:1:"3";s:8:"type_ext";s:3:"gif";s:9:"type_mime";s:9:"image/gif";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"0";}i:3;O:8:"stdClass":7:{s:7:"type_id";s:1:"6";s:8:"type_ext";s:4:"test";s:9:"type_mime";s:4:"test";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"1";}}', 1, 1324342567),
+('attachments:filetypes', 'a:4:{i:0;O:8:"stdClass":7:{s:7:"type_id";s:1:"1";s:8:"type_ext";s:3:"jpg";s:9:"type_mime";s:9:"image/jpg";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"0";}i:1;O:8:"stdClass":7:{s:7:"type_id";s:1:"2";s:8:"type_ext";s:3:"png";s:9:"type_mime";s:9:"image/png";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"0";}i:2;O:8:"stdClass":7:{s:7:"type_id";s:1:"3";s:8:"type_ext";s:3:"gif";s:9:"type_mime";s:9:"image/gif";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"0";}i:3;O:8:"stdClass":7:{s:7:"type_id";s:1:"6";s:8:"type_ext";s:4:"test";s:9:"type_mime";s:4:"test";s:10:"type_image";s:0:"";s:16:"type_image_width";s:1:"0";s:17:"type_image_height";s:1:"0";s:16:"type_force_thumb";s:1:"1";}}', 1, 1324507593),
 ('boardopts:s1b2', 'a:1:{i:0;O:8:"stdClass":35:{s:8:"board_id";s:1:"2";s:11:"board_order";s:1:"2";s:10:"board_name";s:4:"s1b2";s:10:"board_type";s:1:"0";s:11:"board_start";s:1:"0";s:17:"board_upload_type";s:1:"2";s:10:"board_desc";s:12:"Board 2 (S1)";s:18:"board_header_image";s:0:"";s:13:"board_section";s:1:"1";s:21:"board_max_upload_size";s:7:"1024000";s:15:"board_max_pages";s:2:"11";s:13:"board_max_age";s:1:"0";s:15:"board_mark_page";s:1:"9";s:17:"board_max_replies";s:3:"200";s:24:"board_max_message_length";s:4:"8192";s:16:"board_created_on";s:1:"0";s:12:"board_locked";s:1:"0";s:20:"board_include_header";s:0:"";s:24:"board_redirect_to_thread";s:1:"0";s:15:"board_anonymous";s:9:"Anonymous";s:17:"board_forced_anon";s:1:"0";s:20:"board_allowed_embeds";s:0:"";s:11:"board_trial";s:1:"0";s:13:"board_popular";s:1:"0";s:19:"board_default_style";s:5:"edaha";s:12:"board_locale";s:0:"";s:13:"board_show_id";s:1:"0";s:18:"board_compact_list";s:1:"0";s:15:"board_reporting";s:1:"1";s:13:"board_captcha";s:1:"0";s:13:"board_no_file";s:1:"0";s:15:"board_archiving";s:1:"0";s:13:"board_catalog";s:1:"1";s:15:"board_max_files";s:1:"1";s:15:"board_filetypes";a:3:{i:0;s:1:"1";i:1;s:1:"2";i:2;s:1:"3";}}}', 1, 1324341075),
 ('boardopts:s2b1', 'a:1:{i:0;O:8:"stdClass":35:{s:8:"board_id";s:1:"3";s:11:"board_order";s:1:"1";s:10:"board_name";s:4:"s2b1";s:10:"board_type";s:1:"0";s:11:"board_start";s:1:"0";s:17:"board_upload_type";s:1:"2";s:10:"board_desc";s:12:"Board 1 (S2)";s:18:"board_header_image";s:0:"";s:13:"board_section";s:1:"2";s:21:"board_max_upload_size";s:7:"1024000";s:15:"board_max_pages";s:2:"11";s:13:"board_max_age";s:1:"0";s:15:"board_mark_page";s:1:"9";s:17:"board_max_replies";s:3:"200";s:24:"board_max_message_length";s:4:"8192";s:16:"board_created_on";s:1:"0";s:12:"board_locked";s:1:"0";s:20:"board_include_header";s:0:"";s:24:"board_redirect_to_thread";s:1:"0";s:15:"board_anonymous";s:9:"Anonymous";s:17:"board_forced_anon";s:1:"0";s:20:"board_allowed_embeds";s:0:"";s:11:"board_trial";s:1:"0";s:13:"board_popular";s:1:"0";s:19:"board_default_style";s:5:"edaha";s:12:"board_locale";s:0:"";s:13:"board_show_id";s:1:"0";s:18:"board_compact_list";s:1:"0";s:15:"board_reporting";s:1:"1";s:13:"board_captcha";s:1:"0";s:13:"board_no_file";s:1:"0";s:15:"board_archiving";s:1:"0";s:13:"board_catalog";s:1:"1";s:15:"board_max_files";s:1:"1";s:15:"board_filetypes";a:3:{i:0;s:1:"1";i:1;s:1:"2";i:2;s:1:"3";}}}', 1, 1324341100),
 ('boardopts:s2b2', 'a:1:{i:0;O:8:"stdClass":35:{s:8:"board_id";s:1:"4";s:11:"board_order";s:1:"2";s:10:"board_name";s:4:"s2b2";s:10:"board_type";s:1:"0";s:11:"board_start";s:1:"0";s:17:"board_upload_type";s:1:"2";s:10:"board_desc";s:12:"Board 2 (S2)";s:18:"board_header_image";s:0:"";s:13:"board_section";s:1:"2";s:21:"board_max_upload_size";s:7:"1024000";s:15:"board_max_pages";s:2:"11";s:13:"board_max_age";s:1:"0";s:15:"board_mark_page";s:1:"9";s:17:"board_max_replies";s:3:"200";s:24:"board_max_message_length";s:4:"8192";s:16:"board_created_on";s:1:"0";s:12:"board_locked";s:1:"0";s:20:"board_include_header";s:0:"";s:24:"board_redirect_to_thread";s:1:"0";s:15:"board_anonymous";s:9:"Anonymous";s:17:"board_forced_anon";s:1:"0";s:20:"board_allowed_embeds";s:0:"";s:11:"board_trial";s:1:"0";s:13:"board_popular";s:1:"0";s:19:"board_default_style";s:5:"edaha";s:12:"board_locale";s:0:"";s:13:"board_show_id";s:1:"0";s:18:"board_compact_list";s:1:"0";s:15:"board_reporting";s:1:"1";s:13:"board_captcha";s:1:"0";s:13:"board_no_file";s:1:"0";s:15:"board_archiving";s:1:"0";s:13:"board_catalog";s:1:"1";s:15:"board_max_files";s:1:"1";s:15:"board_filetypes";a:3:{i:0;s:1:"1";i:1;s:1:"2";i:2;s:1:"3";}}}', 1, 1324341110);
@@ -269,18 +296,27 @@ INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type
 -- --------------------------------------------------------
 
 --
--- Table structure for table `filter`
+-- Table structure for table `filters`
 --
 
-CREATE TABLE IF NOT EXISTS `filter` (
-  `filter_id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `filters` (
+  `filter_id` int(11) NOT NULL AUTO_INCREMENT,
   `filter_word` varchar(75) NOT NULL,
   `filter_type` tinyint(1) NOT NULL,
-  `filter_punishment` varchar(75) NOT NULL,
-  `filter_boards` text NOT NULL,
   `filter_added` int(11) NOT NULL,
-  `filter_regex` tinyint(1) DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `filter_regex` tinyint(1) DEFAULT '0',
+  `filter_replacement` text,
+  `filter_ban_duration` int(11) DEFAULT NULL,
+  PRIMARY KEY (`filter_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+
+--
+-- Dumping data for table `filters`
+--
+
+INSERT INTO `filters` (`filter_id`, `filter_word`, `filter_type`, `filter_added`, `filter_regex`, `filter_replacement`, `filter_ban_duration`) VALUES
+(1, 'test', 3, 1324506346, 0, 'testicle', NULL),
+(5, 'cialis', 12, 1324509219, 0, '', NULL);
 
 -- --------------------------------------------------------
 
@@ -361,7 +397,7 @@ CREATE TABLE IF NOT EXISTS `manage_sessions` (
 --
 
 INSERT INTO `manage_sessions` (`session_id`, `session_ip`, `session_staff_id`, `session_location`, `session_name`, `session_log_in_time`, `session_last_action`, `session_url`) VALUES
-('40eabaa91bd0ae479b4ccac9c069b05b', '127.0.0.1', 1, 'index', '', 1324341667, 1324341667, '');
+('ce26b291bc17b2a5dcc442382589759b', '127.0.0.1', 1, 'index', '', 1324529593, 1324529593, '');
 
 -- --------------------------------------------------------
 

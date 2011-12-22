@@ -240,7 +240,7 @@ class Posting {
                         ->fetchAll();
 
     $reported = 0;
-	if(isset($filters)) {
+    if(isset($filters)) {
       foreach ($filters as $filter) {
         if ( (!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
           // They included blacklisted text in their post. What do we do?
@@ -260,7 +260,7 @@ class Posting {
           }
         }
       }
-	}
+    }
   }
   public function checkOekaki() {
       // If oekaki seems to be in the url...

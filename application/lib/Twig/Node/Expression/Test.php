@@ -25,18 +25,6 @@ class Twig_Node_Expression_Test extends Twig_Node_Expression
         $name = $this->getAttribute('name');
         $node = $this->getNode('node');
 
-        // defined is a special case
-        if ('defined' === $name) {
-            if ($node instanceof Twig_Node_Expression_Name || $node instanceof Twig_Node_Expression_GetAttr) {
-                $node->setAttribute('is_defined_test', true);
-                $compiler->subcompile($node);
-                $node->removeAttribute('is_defined_test');
-            } else {
-                throw new Twig_Error_Syntax('The "defined" test only works with simple variables', $this->getLine());
-            }
-            return;
-        }
-
         $compiler
             ->raw($testMap[$name]->compile().'(')
             ->subcompile($node)

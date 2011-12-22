@@ -490,9 +490,9 @@ text-align: center;
     Bans-specific styles
  ------------------------- */
 
-#bans input {
+/*#bans input {
   float: left;
-}
+}*/
 
 .bans_left {
   float: left;
@@ -506,7 +506,7 @@ text-align: center;
 
 .bans_right {
   width: 75%;
-  float: left;
+  float: right;
 }
 
 /* ------------------------- 

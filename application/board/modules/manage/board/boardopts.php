@@ -67,22 +67,20 @@ class manage_board_board_boardopts extends kxCmd {
               'board_max_pages'   => (int) $this->request['max_pages'],
               'board_max_age'     => (int) $this->request['max_age'],
               'board_mark_page'   => (int) $this->request['mark_page'],
-              'board_max_replies' => (int) $this->request['max_replies']
+              'board_max_replies' => (int) $this->request['max_replies'],
+              'board_locked' => isset($this->request['locked']),
+              'board_show_id' => isset($this->request['show_id']),
+              'board_compact_list' => isset($this->request['compact_list']),
+              'board_reporting' => isset($this->request['reporting']),
+              'board_captcha' => isset($this->request['captcha']),
+              'board_archiving' => isset($this->request['archiving']),
+              'board_catalog' => isset($this->request['catalog']),
+              'board_no_file' => isset($this->request['no_file']),
+              'board_redirect_to_thread' => isset($this->request['redirect_to_thread']),
+              'board_forced_anon' => isset($this->request['forced_anon']),
+              'board_trial' => isset($this->request['trial']),
+              'board_popular' => isset($this->request['popular'])
              );
-    
-    // Is there a better way to do this? I hope to find one.
-    $board_fields['board_locked'] = isset($this->request['locked']) ? 1 : 0;
-    $board_fields['board_show_id'] = isset($this->request['show_id']) ? 1 : 0;
-    $board_fields['board_compact_list'] = isset($this->request['compact_list']) ? 1 : 0;
-    $board_fields['board_reporting'] = isset($this->request['reporting']) ? 1 : 0;
-    $board_fields['board_captcha'] = isset($this->request['captcha']) ? 1 : 0;
-    $board_fields['board_archiving'] = isset($this->request['archiving']) ? 1 : 0;
-    $board_fields['board_catalog'] = isset($this->request['catalog']) ? 1 : 0;
-    $board_fields['board_no_file'] = isset($this->request['no_file']) ? 1 : 0;
-    $board_fields['board_redirect_to_thread'] = isset($this->request['redirect_to_thread']) ? 1 : 0;
-    $board_fields['board_forced_anon'] = isset($this->request['forced_anon']) ? 1 : 0;
-    $board_fields['board_trial'] = isset($this->request['trial']) ? 1 : 0;
-    $board_fields['board_popular'] = isset($this->request['popular']) ? 1 : 0;
     
     $this->db->update("boards")
              ->fields($board_fields)

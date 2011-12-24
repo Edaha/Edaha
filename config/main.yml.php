@@ -12,7 +12,7 @@ all:
     site:
       name: Kusaba X
       slogan: <em>slogan!</em>
-      header:
+      headerimage:
       irc:
       banreason:
     paths:

@@ -134,7 +134,11 @@ class Twig_ExpressionParser
                         break;
 
                     default:
-                        $node = new Twig_Node_Expression_Name($token->getValue(), $token->getLine());
+                        if ('(' === $this->parser->getCurrentToken()->getValue()) {
+                            $node = $this->getFunctionNode($token->getValue(), $token->getLine());
+                        } else {
+                            $node = new Twig_Node_Expression_Name($token->getValue(), $token->getLine());
+                        }
                 }
                 break;
 
@@ -210,7 +214,6 @@ class Twig_ExpressionParser
 
     public function parsePostfixExpression($node)
     {
-        $firstPass = true;
         while (true) {
             $token = $this->parser->getCurrentToken();
             if ($token->getType() == Twig_Token::PUNCTUATION_TYPE) {
@@ -218,46 +221,48 @@ class Twig_ExpressionParser
                     $node = $this->parseSubscriptExpression($node);
                 } elseif ('|' == $token->getValue()) {
                     $node = $this->parseFilterExpression($node);
-                } elseif ($firstPass && $node instanceof Twig_Node_Expression_Name && '(' == $token->getValue()) {
-                    $node = $this->getFunctionNode($node);
                 } else {
                     break;
                 }
             } else {
                 break;
             }
-
-            $firstPass = false;
         }
 
         return $node;
     }
 
-    public function getFunctionNode(Twig_Node_Expression_Name $node)
+    public function getFunctionNode($name, $line)
     {
         $args = $this->parseArguments();
+        switch ($name) {
+            case 'parent':
+                if (!count($this->parser->getBlockStack())) {
+                    throw new Twig_Error_Syntax('Calling "parent" outside a block is forbidden', $line);
+                }
 
-        if ('parent' === $node->getAttribute('name')) {
-            if (!count($this->parser->getBlockStack())) {
-                throw new Twig_Error_Syntax('Calling "parent" outside a block is forbidden', $node->getLine());
-            }
+                if (!$this->parser->getParent() && !$this->parser->hasTraits()) {
+                    throw new Twig_Error_Syntax('Calling "parent" on a template that does not extend nor "use" another template is forbidden', $line);
+                }
 
-            if (!$this->parser->getParent()) {
-                throw new Twig_Error_Syntax('Calling "parent" on a template that does not extend another one is forbidden', $node->getLine());
-            }
+                return new Twig_Node_Expression_Parent($this->parser->peekBlockStack(), $line);
+            case 'block':
+                return new Twig_Node_Expression_BlockReference($args->getNode(0), false, $line);
+            case 'attribute':
+                if (count($args) < 2) {
+                    throw new Twig_Error_Syntax('The "attribute" function takes at least two arguments (the variable and the attribute)', $line);
+                }
 
-            return new Twig_Node_Expression_Parent($this->parser->peekBlockStack(), $node->getLine());
+                return new Twig_Node_Expression_GetAttr($args->getNode(0), $args->getNode(1), count($args) > 2 ? $args->getNode(2) : new Twig_Node_Expression_Array(array(), $line), Twig_TemplateInterface::ANY_CALL, $line);
+            default:
+                if (null !== $alias = $this->parser->getImportedFunction($name)) {
+                    return new Twig_Node_Expression_GetAttr($alias['node'], new Twig_Node_Expression_Constant($alias['name'], $line), $args, Twig_TemplateInterface::METHOD_CALL, $line);
+                }
+
+                $class = $this->getFunctionNodeClass($name);
+
+                return new $class($name, $args, $line);
         }
-
-        if ('block' === $node->getAttribute('name')) {
-            return new Twig_Node_Expression_BlockReference($args->getNode(0), false, $node->getLine());
-        }
-
-        if (null !== $alias = $this->parser->getImportedFunction($node->getAttribute('name'))) {
-            return new Twig_Node_Expression_GetAttr($alias['node'], new Twig_Node_Expression_Constant($alias['name'], $node->getLine()), $args, Twig_TemplateInterface::METHOD_CALL, $node->getLine());
-        }
-
-        return new Twig_Node_Expression_Function($node, $args, $node->getLine());
     }
 
     public function parseSubscriptExpression($node)
@@ -315,7 +320,9 @@ class Twig_ExpressionParser
                 $arguments = $this->parseArguments();
             }
 
-            $node = new Twig_Node_Expression_Filter($node, $name, $arguments, $token->getLine(), $tag);
+            $class = $this->getFilterNodeClass($name->getAttribute('value'));
+
+            $node = new $class($node, $name, $arguments, $token->getLine(), $tag);
 
             if (!$this->parser->getStream()->test(Twig_Token::PUNCTUATION_TYPE, '|')) {
                 break;
@@ -375,5 +382,25 @@ class Twig_ExpressionParser
         }
 
         return new Twig_Node($targets);
+    }
+
+    protected function getFunctionNodeClass($name)
+    {
+        $functionMap = $this->parser->getEnvironment()->getFunctions();
+        if (isset($functionMap[$name]) && $functionMap[$name] instanceof Twig_Filter_Node) {
+            return $functionMap[$name]->getClass();
+        }
+
+        return 'Twig_Node_Expression_Function';
+    }
+
+    protected function getFilterNodeClass($name)
+    {
+        $filterMap = $this->parser->getEnvironment()->getFilters();
+        if (isset($filterMap[$name]) && $filterMap[$name] instanceof Twig_Filter_Node) {
+            return $filterMap[$name]->getClass();
+        }
+
+        return 'Twig_Node_Expression_Filter';
     }
 }

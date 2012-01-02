@@ -511,7 +511,7 @@ class kxFunc {
                                      ->fetchAll();
 
       $boards = kxDB::getInstance()->select("boards")
-                                   ->fields("boards", array('board_name', 'board_desc'))
+                                   ->fields("boards", array('board_id', 'board_desc'))
                                    ->where("board_section = ?")
                                    ->orderBy("board_order")
                                    ->build();

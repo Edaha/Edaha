@@ -164,7 +164,7 @@ class kxEnv {
           require($file);
 
           self::$_appConfig[$app]['cache']     =  $CACHE;
-          self::$_appConfig[$app]['cacheload'] =  $LOAD;
+          self::$_appConfig[$app]['cachetoload'] =  $LOAD;
         }
       }
     }

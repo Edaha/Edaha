@@ -3,8 +3,8 @@ Board Management:
     section: board 
     url: do=board
 
-  - title: Edit Boards
-    section: board 
-    url: do=boardopts
+#  - title: Board Options
+#    section: boardopts
+#    url: do=boardopts
 
 

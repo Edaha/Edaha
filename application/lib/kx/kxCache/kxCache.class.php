@@ -216,7 +216,7 @@ class kxCache {
   }
 
   public function set($path, $value) {
-    $this->data = array_merge_recursive($this->data, self::instance()->_setCache(explode(':', $path), $value));
+    self::instance()->_setCache(explode(':', $path), $value);
   }
   
   public function get($path = null) {
@@ -292,8 +292,10 @@ class kxCache {
    */
   private function _setCache($path, $value) {
     if ($path) {
-      // First, update the already-loaded cache with the new value      
-      $return = kxEnv::getconfig()->setRecursive($path, $value);
+    array_shift($path);
+      // First, update the already-loaded cache with the new value     
+      $return = array(implode(":", $path) => $value);
+      self::$data[implode(":", $path)] = $value;
       
       // Are we using an alt cache engine?
       // Update it if so
@@ -306,16 +308,16 @@ class kxCache {
       
       // Now update the database
       // Merge does an update if the key exists, otherwise, it inserts
-      kxDB::getInstance()->merge("cache")
-                         ->key(array("cache_path" => implode(':', $path)))
-                         ->fields(array(
+    kxDB::getInstance()->merge("cache")
+                       ->key(array("cache_path" => implode(':', $path)))
+                       ->fields(array(
                                    "cache_array"   => intval(is_array($value)),
                                    "cache_value"   => is_array($value) ? serialize($value) : $value,
                                    "cache_updated" => time()
                                   )
                                  )
-                         ->execute();
-      return $return;
+                       ->execute();
+    return $return;
     }
   }
 

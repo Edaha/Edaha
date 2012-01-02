@@ -13,11 +13,11 @@ class manage_board_board_board extends kxCmd {
       case 'regen':
         // Vars $_GET['id']
         if($this->onRegen()) {
-          $this->twigData['notice_type'] = 'success';
-          $this->twigData['notice'] = _gettext('Board successfully regenerated!');
+          $this->twigData['notice']['type'] = 'success';
+          $this->twigData['notice']['message'] = _gettext('Board successfully regenerated!');
         } else {
-          //$this->twigData['notice_type'] = 'failure';
-          $this->twigData['notice'] = _gettext('Board failed to regenerate').": ".$this->errorMessage;
+          $this->twigData['notice']['type'] = 'error';
+          $this->twigData['notice']['message'] = _gettext('Board failed to regenerate').": ".$this->errorMessage;
         }
         break;
     }
@@ -95,9 +95,9 @@ class manage_board_board_board extends kxCmd {
                       ->fetchAll();
     $this->twigData['entries'] = array();
     foreach($array_o_boards as $board){
-	  $this->twigData['entries'][$board->board_name]=$board->board_desc;
+      $this->twigData['entries'][$board->board_name]=$board->board_desc;
     }
-	//print_r($this->twigData['entries']);
+    
     kxTemplate::output("manage/board", $this->twigData);
   }
   
@@ -108,14 +108,14 @@ class manage_board_board_board extends kxCmd {
           ->addRule('start','numeric')
           ->check();
     $fields = array(
-              'board_name' => $this->request['name'],
-              'board_desc' => $this->request['description'],
-              'board_start'    => intval($this->request['start']),
-              'createdon' => time(),
-              'image' => '',
-              'includeheader' => ''
+              'board_name'  => $this->request['name'],
+              'board_desc'  => $this->request['description'],
+              'board_start' => intval($this->request['start']),
+              'board_created_on'   => time(),
+              'board_header_image' => '',
+              'board_include_header' => ''
               );
-       // If the first post ID is left empty make it 1
+    // If the first post ID is left empty make it 1
     if ($fields['board_start'] == "") {
       $fields['board_start'] = 1;
     }
@@ -131,9 +131,9 @@ class manage_board_board_board extends kxCmd {
                ->fields($fields)
                ->condition("board_id", $this->request['edit'])
                ->execute();
-      $this->twigData['notice'] = _gettext('Board successfully edited.');
+      $this->twigData['notice']['message'] = _gettext('Board successfully edited.');
     }
-    $this->twigData['notice_type'] = 'success';
+    $this->twigData['notice']['type'] = 'success';
   }
   
   private function _del() {

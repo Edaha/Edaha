@@ -20,15 +20,15 @@
 {% elseif "misc:locale"|kxEnv != 'en' %}
   <link rel="gettext" type="application/x-po" href="{% kxEnv "paths:main:path" %}/application/lib/lang/{% kxEnv "misc:locale" %}/LC_MESSAGES/kusaba.po" />
 {% endif %}
-  <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/lib/javascript/gettext.js"></script>
-  <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/lib/javascript/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/application/lib/javascript/gettext.js"></script>
+  <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/application/lib/javascript/jquery-1.3.2.min.js"></script>
   <script type="text/javascript">
     kusaba = {% raw %}{}{% endraw %};
     kusaba.cgipath = '{% kxEnv "paths:cgi:path" %}';
     kusaba.webpath = '{% kxEnv "paths:main:path" %}';
     {% block extrajs %}{% endblock %}
   </script>
-  <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/lib/javascript/kusaba.js"></script>
+  <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/application/lib/javascript/kusaba.js"></script>
   {% block extrahead %}{% endblock %}
 </head>
 <body>

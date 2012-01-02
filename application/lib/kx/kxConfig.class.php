@@ -250,9 +250,37 @@ class coreConfig {
                                                               'recache_class'    => 'manage_board_posts_filter',
                                                               'recache_function' => 'recacheSpamFilters'
                                                             )
+                                      ),
+                      'attachments' =>
+                                array(
+                                        'filetypes' =>
+                                                     array(
+                                                              'force_load'     => 0,
+                                                              'recache_file'     => kxFunc::getAppDir( 'board' ) . '/modules/manage/filetypes.php',
+                                                              'recache_class'    => 'manage_board_attachments_filetypes',
+                                                              'recache_function' => 'recacheFiletypes'
+                                                          ),
+                                        'embeds' =>  
+                                                      array(
+                                                              'force_load'     => 0,
+                                                              'recache_file'     => kxFunc::getAppDir( 'board' ) . '/modules/manage/embeds.php',
+                                                              'recache_class'    => 'manage_board_attachments_embeds',
+                                                              'recache_function' => 'recacheEmbeds'
+                                                          )
                                       )
                     );
-
+    if (isset(kxEnv::$request['board'])) {
+      $cache['boardopts'] = array(
+                                kxEnv::$request['board'] =>
+                                                      array(
+                                                            'force_load'       => 1,
+                                                            'recache_file'     => kxFunc::getAppDir( 'board' ) . '/modules/manage/boardopts.php',
+                                                            'recache_class'    => 'manage_board_board_boardopts',
+                                                            'recache_function' => 'recacheBoardOptions'
+                                                            )
+                                );
+    
+    }
     $load = array();
     
     return array( 'caches'      => $cache,

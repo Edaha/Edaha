@@ -37,8 +37,8 @@ if (!defined('KUSABA_RUNNING'))
 class public_core_index_news extends kxCmd {
 
   public function exec( kxEnv $environment ) {
-    if(isset($this->request['p'])){
-      switch($this->request['p']){
+    if(isset($this->request['view'])){
+      switch($this->request['view']){
         case 'faq':
             $type = 1;
             break;
@@ -47,7 +47,7 @@ class public_core_index_news extends kxCmd {
             break;
       }
     } else {
-      $this->request['p'] = '';
+      $this->request['view'] = '';
       $type = 0;
     }
     $this->twigData['styles'] = explode(':', kxEnv::Get('kx:css:menustyles'));
@@ -55,22 +55,35 @@ class public_core_index_news extends kxCmd {
                     ->fields("front")
                     ->condition("entry_type", $type);
                     
-    if ($this->request['p'] != '') {
+    if ($this->request['view'] != '') {
       $entries->orderBy("entry_order", "ASC");
     } else {
       $entries->orderBy("entry_time", "DESC");
-      if (!isset($this->request['view'])) {
-        $entries->range(0,1);
+      if (!isset($this->request['page'])) {
+        $entries->range(0,2);
+      } else {
+        $entries->range($this->request['page'] * 2, 2);
       }
     }
     $this->twigData['entries'] = $entries->execute()
                                          ->fetchAll();
     
+    // Figure out the number of pages total, if news
+    if ($this->request['view'] == '') {
+      $pages = $this->db->select("front")
+                        ->fields("front")
+                        ->condition("entry_type", $type)
+                        ->countQuery()
+                        ->execute()
+                        ->fetchField();
+      $this->twigData['pages'] = (int) $pages/2; //round($pages/2, 0, PHP_ROUND_HALF_UP);
+    }
+    
     $sections = $this->db->select("sections")
-                     ->fields("sections")
-                     ->orderBy("section_order")
-                     ->execute()
-                     ->fetchAll();
+                         ->fields("sections")
+                         ->orderBy("section_order")
+                         ->execute()
+                         ->fetchAll();
 
     $boards = $this->db->select("boards")
                        ->fields("boards", array('board_name', 'board_desc'))

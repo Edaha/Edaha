@@ -232,16 +232,15 @@ class Posting {
     }
   }
   public function checkBlacklistedText($boardId) {
-    $filters = kxEnv::Get("cache:filters:spamfilters");
-    /*$filters = $this->db->select("filter")
+    $filters = $this->db->select("filter")
                         ->fields("filter")
                         ->condition("filter_type", 2, ">=")
                         ->orderBy("filter_type", "DESC")
                         ->execute()
-                        ->fetchAll();*/
+                        ->fetchAll();
 
     $reported = 0;
-	if(isset($filters)) {
+    if(isset($filters)) {
       foreach ($filters as $filter) {
         if ( (!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
           // They included blacklisted text in their post. What do we do?
@@ -261,7 +260,7 @@ class Posting {
           }
         }
       }
-	}
+    }
   }
   public function checkOekaki() {
       // If oekaki seems to be in the url...
@@ -304,9 +303,8 @@ class Posting {
       if ($post['email_save']) {
           setcookie('email', urldecode($post['email']), time() + 31556926, '/', kxEnv::Get('kx:paths:main:domain'));
       }
-      if (isset($this->request['postpassword'])) {
-        setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
-      }
+      
+      setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
   }
   public function checkSage($postData, $board) {
       // If the user replied to a thread, and they weren't sage-ing it...
@@ -409,6 +407,7 @@ class Posting {
       return $user_authority;
   }
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board) {
+      
       $timeStamp = time();
       $id = $this->db->insert("posts")
           ->fields(array(
@@ -475,9 +474,9 @@ class Posting {
           $this->db->insert("post_files")
           ->fields(array(
               'file_post'           => $id,
-              'file_board'          => $board->board_id,
+              'file_board'          => $boardid,
               'file_md5'            => '',
-              'file_name'           => '',
+              'file_name'           => $file['file_name'],
               'file_type'           => '',
               'file_original'       => '',
               'file_size'           => 0,

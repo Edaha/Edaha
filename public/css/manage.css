@@ -27,7 +27,7 @@ div.login span {
   font-weight:bold;
 }
 .content_wrap {
-  width: 95%; /*Goddamnit saz, no 960px;*/
+  width: 1024px;
   margin:auto;
   border-left: 1px solid #c29f8f;
   border-right: 1px solid #c29f8f;
@@ -123,6 +123,14 @@ fieldset legend {
   border-right: 1px solid #c29f8f;
   background: #eccfbd;
 }
+
+label {
+display:inline-block;
+margin:2px;
+text-align:right;
+width:150px;
+}
+
 .sidebar section h2 {
   margin: .5em;
   font-size: 12pt;
@@ -146,8 +154,8 @@ fieldset legend {
 }
 
 .col_r {
-  float: left;
-  /*width: 700px;*/
+  float: right;
+  width: 734px;
 }
 
 .col_r section {
@@ -459,9 +467,18 @@ font-style: italic;
     Notices
  ------------------------- */
 
-.success {
+section.success {
 background-color: #8CDD81;
 border: 1px solid #3D8B37;
+font-size: 8pt;
+margin: 10px 0px;
+padding: 10px;
+text-align: center;
+}
+
+section.error {
+background-color: #F62217;
+border: 1px solid #A62217;
 font-size: 8pt;
 margin: 10px 0px;
 padding: 10px;
@@ -473,9 +490,9 @@ text-align: center;
     Bans-specific styles
  ------------------------- */
 
-#bans input {
+/*#bans input {
   float: left;
-}
+}*/
 
 .bans_left {
   float: left;
@@ -489,7 +506,7 @@ text-align: center;
 
 .bans_right {
   width: 75%;
-  float: left;
+  float: right;
 }
 
 /* ------------------------- 

@@ -4,6 +4,7 @@
   <link href="{% kxEnv "paths:boards:path" %}/public/css/manage.css" rel="stylesheet" type="text/css" />
   {{ parent() }}
 {% endblock %}
+{% block extrahead %}{% endblock %}
 {% block content %}
     <section class="content_wrap">
       <header id="">
@@ -32,9 +33,15 @@
       
         <section class="col_r">
           <h1>{% block heading %}{% endblock %}</h1>
+          {% if notice %}
+          <section class="{{ notice.type }}">
+            {{ notice.message }}
+          </section>
+          {% endif %}
           
           {% block managecontent %}{% endblock %}
         </section>
+      <br style="clear: both;" />
       </section>
       <footer>
         

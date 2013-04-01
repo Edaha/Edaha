@@ -202,12 +202,7 @@ class kxTemplate {
             $_file = kxFunc::getAppDir( $app ) . "/modules/manage/" . $module['module_file'] . '/menu.yml';
 			//echo "<p>Getting menu from {$_file}</p>";
             if (file_exists($_file)) {
-                if (function_exists("syck_load")) {
-                    $menu[$module['module_file']] = syck_load(file_get_contents($_file));
-                }
-                else {
-                    $menu[$module['module_file']] = spyc_load_file($_file);
-                }
+                $menu[$module['module_file']] = kxYml::loadFile($_file);
                 self::assign('menu', $menu);
                 self::assign('module', $module['module_file']);
             }

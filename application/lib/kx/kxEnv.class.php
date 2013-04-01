@@ -117,13 +117,7 @@ class kxEnv {
             return self::loadCached($configfile); 
         }
         else {
-            if (function_exists("syck_load")) {
-                return syck_load(file_get_contents($configfile));
-            }
-            else {
-                require_once(KX_ROOT."/application/lib/spyc/spyc.php");
-                return spyc_load_file($configfile);
-            }
+            return kxYml::loadFile($configfile);
         }
     }
 
@@ -198,7 +192,7 @@ class kxEnv {
     }
 	
 	public static function dumpConfig() {
-		return var_dump(self::getInstance()->getConfig(),true);
+		return self::getInstance()->getConfig();
 	}
     
     public static function set($path, $value) {

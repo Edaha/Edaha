@@ -152,13 +152,14 @@ class Upload {
             $this->files[$i]['file_size'] = $file_size[$i];
 
             $filetype_forcethumb = $this->db->select("filetypes");
-            $filetype_forcethumb->innerJoin("board_filetypes","","filetypes.type_id = board_filetypes.type_id");
-            $filetype_forcethumb->innerJoin("boards","","board_id = type_board_id");
+            $filetype_forcethumb->innerJoin("board_filetypes","bf","filetypes.type_id = bf.type_id");
+            $filetype_forcethumb->innerJoin("boards","b","b.board_id = bf.board_id");
             $filetype_forcethumb = $filetype_forcethumb->fields("filetypes", array("type_force_thumb"))
                                                        ->condition("filetypes.type_ext", substr($this->files[$i]['file_type'], 1))
                                                        ->condition("board_name", $boardData->board_name)
                                                        ->execute()
                                                        ->fetchField();
+													   
             if (!empty($filetype_forcethumb)) {
               if ($filetype_forcethumb == 1) {
                 $this->files[$i]['file_name'] = time() . mt_rand(1, 99);

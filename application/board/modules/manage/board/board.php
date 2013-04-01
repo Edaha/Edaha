@@ -14,7 +14,7 @@ class manage_board_board_board extends kxCmd {
         // Vars $_GET['id']
         if($this->onRegen()) {
           $this->twigData['notice']['type'] = 'success';
-          $this->twigData['notice']['message'] = _gettext('Board successfully regenerated!');
+          $this->twigData['notice']['message'] = sprintf(_gettext('Board %s successfully regenerated!'), $this->request['board']);
         } else {
           $this->twigData['notice']['type'] = 'error';
           $this->twigData['notice']['message'] = _gettext('Board failed to regenerate').": ".$this->errorMessage;

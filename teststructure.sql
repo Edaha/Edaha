@@ -196,61 +196,58 @@ CREATE TABLE IF NOT EXISTS `configuration` (
 --
 
 INSERT INTO `configuration` (`config_id`, `config_name`, `config_description`, `config_type`, `config_variable`, `config_default`, `config_group`) VALUES
-(1, 'Name', 'The name of the site.', 'input', 'site:name', 'Edaha', 0),
-(2, 'Slogan', 'Site slogan. If empty, no slogan will be displayed.', 'input', 'site:slogan', '<em>slogan!</em>', 0),
-(3, 'Header Image', 'URL of the header image to be displayed. Can be left blank.', 'input', 'site:headerimage', '', 0),
-(4, 'IRC', 'The site''s IRC info. Can be left blank.', 'input', 'site:irc', '', 0),
-(5, 'Default Ban Reason', 'This is the default ban reason that will automatically fill in the ban reason box', 'input', 'site:banreason', '', 0),
-(6, 'Board Styles', 'Styles which are available to be used for the boards, separated by colons, in lower case.  These will be displayed next to [Home] [Manage] if STYLESWIKUHER is set to true', 'input', 'css:imgstyles', 'edaha:burichan:futaba', 0),
-(7, 'Default Board Style', 'If Default is selected in the style list in board options, it will use this style.  Should be lower case', 'input', 'css:imgdefault', 'edaha', 0),
-(8, 'Display Style Switcher', 'Whether or not to display the different styles in a clickable switcher at the top of the board', 'true_false', 'css:imgswitcher', 'true', 0),
-(9, 'Display Drop Switcher', 'Whether or not to use a dropdown style switcher. False is use plaintext switcher, true is dropdown.', 'true_false', 'css:imgdropswitcher', 'false', 0),
-(10, 'Textboard Styles', 'Styles which are available to be used for the boards, separated by colons, in lower case', 'input', 'css:txtstyles', 'futatxt:buritxt', 0),
-(11, 'Default Textboard Style', 'If Default is selected in the style list in board options, it will use this style.  Should be lower case', 'input', 'css:txtdefault', 'futatxt', 0),
-(12, 'Display Textboard Styleswitcher', 'Whether or not to display the different styles in a clickable switcher at the top of the board', 'true_false', 'css:txtswitcher', 'true', 0),
-(13, 'Site Styles', 'Site Styles', 'input', 'css:sitestyles', 'edaha:futaba:burichan', 0),
-(14, 'Default Site Style', 'Default Site Style', 'input', 'css:sitedefault', 'edaha', 0),
-(15, 'Display Site Style Switcher', 'Whether or not to display the different styles in a clickable switcher on the main page of the site', 'true_false', 'css:siteswitcher', 'true', 0),
-(16, 'New Thread Posting Delay', 'Minimum time in seconds a user must wait before posting a new thread again', 'numeric', 'limits:threaddelay', '30', 0),
-(17, 'Reply Posting Delay', 'Minimum time in seconds a user must wait before posting a reply again', 'numeric', 'limits:replydelay', '7', 0),
-(19, 'Thumbnail Width', 'Maxiumum Thumbnail Width', 'numeric', 'images:thumbw', '200', 0),
-(20, 'Thumbnail Height', 'Maximum Thumbnail Height', 'numeric', 'images:thumbh', '200', 0),
-(21, 'Reply Thumbnail width', 'Maximum Reply Thumbnail width', 'numeric', 'images:replythumbw', '125', 0),
-(22, 'Reply Thumbnail Height', 'Maximum Reply Thumbnail Height', 'numeric', 'images:replythumbh', '125', 0),
-(23, 'Catalog Thumbnail Width', 'Maximum Catalog Thumbnail Width', 'numeric', 'images:catthumbw', '50', 0),
-(24, 'Catalog Thumbnail Height', 'Maximum Catalog Thumbnail Height', 'numeric', 'images:catthumbh', '50', 0),
-(25, 'Thumbnail Method', 'Method to use when thumbnailing images in jpg, gif, or png format.  Options available: gd, imagemagick', 'input', 'images:method', 'gd', 0),
-(26, 'Animated Thumbnails', 'Whether or not to allow animated thumbnails (only applies if using imagemagick)', 'true_false', 'images:animated', 'false', 0),
-(27, 'New Window', 'When a user clicks a thumbnail, whether to open the link in a new window or not', 'true_false', 'posts:newwindow', 'true', 0),
-(28, 'Make Links', 'Whether or not to turn http:// links into clickable links', 'true_false', 'posts:makelinks', 'true', 0),
-(29, 'Empty Thread Message', 'Text to set a message to if a thread is made with no text', 'input', 'posts:emptythread', '', 0),
-(30, 'Empty Reply Message', 'Text to set a message to if a reply is made with no text', 'input', 'posts:emptyreply', '', 0),
-(31, 'Threads Per Page', 'Number of threads to display on a board page', 'numeric', 'display:imgthreads', '10', 0),
-(32, 'Text Threads Per Page', 'Number of threads to display on a text board front page', 'numeric', 'display:txtthreads', '15', 0),
-(33, 'Replies Displayed', 'Number of replies to display on a board page', 'numeric', 'display:replies', '3', 0),
-(34, 'Replies Displayed (Sticky)', 'Number of replies to display on a board page when a thread is stickied', 'numeric', 'display:stickyreplies', '1', 0),
-(36, 'Ban Message', 'The text to add at the end of a post if a ban is placed and "Add ban message" is checked', 'textarea', 'display:banmsg', '<br /><span style="color:#FF0000; font-weight: bold;">(USER WAS BANNED FOR THIS POST)</span>', 0),
-(38, 'Default Embed Width', 'Default width to display embeds at. Ignored if a width is set in that embeds options.', 'numeric', 'display:embedw', '200', 0),
-(39, 'Default Embed Height', 'Default height to display embeds at. Ignored if a width is set in that embeds options.', 'numeric', 'display:embedh', '164', 0),
-(40, 'First Page', 'Filename of the first page of a board.  Only change this if you are willing to maintain the .htaccess files for each board directory (they are created with a DirectoryIndex board.html, change them if you change this)', 'input', 'pages:first', 'board.html', 0),
-(41, 'Directory Title', 'Whether or not to place the board directory in the board''s title and at the top of the page.  true would render as "/b/ - Random", false would render as "Random"', 'true_false', 'pages:dirtitle', 'false', 0),
-(42, 'Special Tripcodes', 'Special tripcodes which can have a predefined output.  Do not include the initial ! in the output.  Maximum length for the output is 30 characters.  Leave blank to disable. Example: #input:result', 'textarea', 'trips', '#changeme:changeme\r\n#changeme2:changeme2', 0),
-(43, 'RSS', 'Whether or not to enable the generation of rss for each board and modlog', 'true_false', 'extra:rss', 'true', 0),
-(44, 'Expand', 'Whether or not to add the expand button to threads viewed on board pages', 'true_false', 'extra:expand', 'true', 0),
-(45, 'Quick Reply', 'Whether or not to add quick reply links on posts', 'true_false', 'extra:quickreply', 'true', 0),
-(46, 'Watched Threads', 'Whether or not to add thread watching capabilities', 'true_false', 'extra:watchthreads', 'true', 0),
-(47, 'Post Spy', 'Whether or not to allow users to enable the Post Spy feature', 'true_false', 'extra:postspy', 'false', 0),
-(48, 'First 100/Last 50', 'Whether or not to generate extra files for the first 100 posts/last 50 posts', 'true_false', 'extra:firstlast', 'true', 0),
-(49, 'Blotter', 'Whether or not to enable the blotter feature', 'true_false', 'extra:blotter', 'true', 0),
-(50, 'Sitemap', 'Whether or not to enable automatic sitemap generation (you will still need to link the search engine sites to the sitemap.xml file)', 'true_false', 'extra:sitemap', 'false', 0),
-(51, 'Appeals', 'Whether or not to enable the appeals system', 'true_false', 'extra:appeal', 'false', 0),
-(52, 'Mod Log Days', 'Days to keep modlog entries before removing them', 'numeric', 'misc:modlogdays', '7', 0),
-(53, 'Static Menu', 'Whether or not to generate the menu files as static files, instead of linking to menu.php.  Enabling this will reduce load, however some users have had trouble with getting the files to generate', 'true_false', 'misc:staticmenu', 'false', 0),
-(54, 'Generate Boards List', 'Set to true to automatically make the board list which is displayed ad the top and bottom of the board pages, or false to use the boards.html file ', 'true_false', 'misc:boardlist', 'true', 0),
-(55, 'Locale', 'The locale of kusaba you would like to use.  Locales available: en, de, et, es, fi, pl, nl, nb, ru, it, ja', 'input', 'misc:locale', 'en', 0),
-(56, 'Character Set', 'The character encoding to mark the pages as.  This must be the same in the .htaccess file (AddCharset charsethere .html and AddCharset charsethere .php) to function properly.  Only UTF-8 and Shift_JIS have been tested', 'input', 'misc:charset', 'UTF-8', 0),
-(57, 'Date Format', 'The format of dates that appear on posts.', 'input', 'mirc:dateformat', 'd/m/y(D)H:i', 0),
-(58, 'Debug', 'When enabled, debug information will be printed (Warning: all queries will be shown publicly)', 'true_false', 'mirc:debug', 'false', 0);
+(1, 'Name', 'The name of the site.', 'input', 'site:name', 'Edaha', 1),
+(2, 'Slogan', 'Site slogan. If empty, no slogan will be displayed.', 'input', 'site:slogan', '<em>slogan!</em>', 1),
+(3, 'Header Image', 'URL of the header image to be displayed. Can be left blank.', 'input', 'site:headerimage', '', 1),
+(4, 'IRC', 'The site''s IRC info. Can be left blank.', 'input', 'site:irc', '', 1),
+(5, 'Default Ban Reason', 'This is the default ban reason that will automatically fill in the ban reason box', 'input', 'site:banreason', '', 1),
+(6, 'Board Styles', 'Styles which are available to be used for the boards, separated by colons, in lower case.  These will be displayed next to [Home] [Manage] if STYLESWIKUHER is set to true', 'input', 'css:imgstyles', 'edaha:burichan:futaba', 2),
+(7, 'Default Board Style', 'If Default is selected in the style list in board options, it will use this style.  Should be lower case', 'input', 'css:imgdefault', 'edaha', 2),
+(8, 'Display Style Switcher', 'Whether or not to display the different styles in a clickable switcher at the top of the board', 'true_false', 'css:imgswitcher', 'true', 2),
+(9, 'Display Drop Switcher', 'Whether or not to use a dropdown style switcher. False is use plaintext switcher, true is dropdown.', 'true_false', 'css:imgdropswitcher', 'false', 2),
+(10, 'Textboard Styles', 'Styles which are available to be used for the boards, separated by colons, in lower case', 'input', 'css:txtstyles', 'futatxt:buritxt', 2),
+(11, 'Default Textboard Style', 'If Default is selected in the style list in board options, it will use this style.  Should be lower case', 'input', 'css:txtdefault', 'futatxt', 2),
+(12, 'Display Textboard Styleswitcher', 'Whether or not to display the different styles in a clickable switcher at the top of the board', 'true_false', 'css:txtswitcher', 'true', 2),
+(13, 'Site Styles', 'Site Styles', 'input', 'css:sitestyles', 'edaha:futaba:burichan', 2),
+(14, 'Default Site Style', 'Default Site Style', 'input', 'css:sitedefault', 'edaha', 2),
+(15, 'Display Site Style Switcher', 'Whether or not to display the different styles in a clickable switcher on the main page of the site', 'true_false', 'css:siteswitcher', 'true', 2),
+(16, 'New Thread Posting Delay', 'Minimum time in seconds a user must wait before posting a new thread again', 'numeric', 'limits:threaddelay', '30', 4),
+(17, 'Reply Posting Delay', 'Minimum time in seconds a user must wait before posting a reply again', 'numeric', 'limits:replydelay', '7', 4),
+(19, 'Thumbnail Width', 'Maxiumum Thumbnail Width', 'numeric', 'images:thumbw', '200', 3),
+(20, 'Thumbnail Height', 'Maximum Thumbnail Height', 'numeric', 'images:thumbh', '200', 3),
+(21, 'Reply Thumbnail width', 'Maximum Reply Thumbnail width', 'numeric', 'images:replythumbw', '125', 3),
+(22, 'Reply Thumbnail Height', 'Maximum Reply Thumbnail Height', 'numeric', 'images:replythumbh', '125', 3),
+(23, 'Catalog Thumbnail Width', 'Maximum Catalog Thumbnail Width', 'numeric', 'images:catthumbw', '50', 3),
+(24, 'Catalog Thumbnail Height', 'Maximum Catalog Thumbnail Height', 'numeric', 'images:catthumbh', '50', 3),
+(25, 'Thumbnail Method', 'Method to use when thumbnailing images in jpg, gif, or png format.  Options available: gd, imagemagick', 'input', 'images:method', 'gd', 3),
+(26, 'Animated Thumbnails', 'Whether or not to allow animated thumbnails (only applies if using imagemagick)', 'true_false', 'images:animated', 'false', 3),
+(27, 'New Window', 'When a user clicks a thumbnail, whether to open the link in a new window or not', 'true_false', 'posts:newwindow', 'true', 4),
+(28, 'Make Links', 'Whether or not to turn http:// links into clickable links', 'true_false', 'posts:makelinks', 'true', 3),
+(29, 'Empty Thread Message', 'Text to set a message to if a thread is made with no text', 'input', 'posts:emptythread', '', 4),
+(30, 'Empty Reply Message', 'Text to set a message to if a reply is made with no text', 'input', 'posts:emptyreply', '', 4),
+(31, 'Threads Per Page', 'Number of threads to display on a board page', 'numeric', 'display:imgthreads', '10', 3),
+(32, 'Text Threads Per Page', 'Number of threads to display on a text board front page', 'numeric', 'display:txtthreads', '15', 3),
+(33, 'Replies Displayed', 'Number of replies to display on a board page', 'numeric', 'display:replies', '3', 3),
+(34, 'Replies Displayed (Sticky)', 'Number of replies to display on a board page when a thread is stickied', 'numeric', 'display:stickyreplies', '1', 3),
+(36, 'Ban Message', 'The text to add at the end of a post if a ban is placed and "Add ban message" is checked', 'textarea', 'display:banmsg', '<br /><span style="color:#FF0000; font-weight: bold;">(USER WAS BANNED FOR THIS POST)</span>', 4),
+(40, 'First Page', 'Filename of the first page of a board.  Only change this if you are willing to maintain the .htaccess files for each board directory (they are created with a DirectoryIndex board.html, change them if you change this)', 'input', 'pages:first', 'board.html', 4),
+(41, 'Directory Title', 'Whether or not to place the board directory in the board''s title and at the top of the page.  true would render as "/b/ - Random", false would render as "Random"', 'true_false', 'pages:dirtitle', 'false', 3),
+(42, 'Special Tripcodes', 'Special tripcodes which can have a predefined output.  Do not include the initial ! in the output.  Maximum length for the output is 30 characters.  Leave blank to disable. Example: #input:result', 'textarea', 'trips', '#changeme:changeme\r\n#changeme2:changeme2', 5),
+(43, 'RSS', 'Whether or not to enable the generation of rss for each board and modlog', 'true_false', 'extra:rss', 'true', 5),
+(44, 'Expand', 'Whether or not to add the expand button to threads viewed on board pages', 'true_false', 'extra:expand', 'true', 5),
+(45, 'Quick Reply', 'Whether or not to add quick reply links on posts', 'true_false', 'extra:quickreply', 'true', 5),
+(46, 'Watched Threads', 'Whether or not to add thread watching capabilities', 'true_false', 'extra:watchthreads', 'true', 5),
+(47, 'Post Spy', 'Whether or not to allow users to enable the Post Spy feature', 'true_false', 'extra:postspy', 'false', 5),
+(48, 'First 100/Last 50', 'Whether or not to generate extra files for the first 100 posts/last 50 posts', 'true_false', 'extra:firstlast', 'true', 4),
+(49, 'Blotter', 'Whether or not to enable the blotter feature', 'true_false', 'extra:blotter', 'true', 5),
+(50, 'Sitemap', 'Whether or not to enable automatic sitemap generation (you will still need to link the search engine sites to the sitemap.xml file)', 'true_false', 'extra:sitemap', 'false', 5),
+(51, 'Appeals', 'Whether or not to enable the appeals system', 'true_false', 'extra:appeal', 'false', 5),
+(52, 'Mod Log Days', 'Days to keep modlog entries before removing them', 'numeric', 'misc:modlogdays', '7', 5),
+(54, 'Generate Boards List', 'Set to true to automatically make the board list which is displayed ad the top and bottom of the board pages, or false to use the boards.html file ', 'true_false', 'misc:boardlist', 'true', 4),
+(55, 'Locale', 'The locale of kusaba you would like to use.  Locales available: en, de, et, es, fi, pl, nl, nb, ru, it, ja', 'input', 'misc:locale', 'en', 1),
+(56, 'Character Set', 'The character encoding to mark the pages as.  This must be the same in the .htaccess file (AddCharset charsethere .html and AddCharset charsethere .php) to function properly.  Only UTF-8 and Shift_JIS have been tested', 'input', 'misc:charset', 'UTF-8', 1),
+(57, 'Date Format', 'The format of dates that appear on posts.', 'input', 'misc:dateformat', 'd/m/y(D)H:i', 1),
+(58, 'Debug', 'When enabled, debug information will be printed (Warning: all queries will be shown publicly)', 'true_false', 'misc:debug', 'false', 1);
 
 -- --------------------------------------------------------
 
@@ -264,7 +261,18 @@ CREATE TABLE IF NOT EXISTS `config_groups` (
   `group_description` text NOT NULL,
   `group_short_name` varchar(255) NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
+
+--
+-- Dumping data for table `config_groups`
+--
+
+INSERT INTO `config_groups` (`group_id`, `group_name`, `group_description`, `group_short_name`) VALUES
+(1, 'Main Site', 'Options related to the site as a whole', 'main_site'),
+(2, 'CSS Styles', 'Settings related to CSS stylesheets', 'css'),
+(3, 'Board Display', 'Settings related to how boards are displayed', 'board_display'),
+(4, 'General Board', 'General settings for boards', 'board_general'),
+(5, 'Extras', 'Extra settings', 'extra');
 
 -- --------------------------------------------------------
 
@@ -309,17 +317,16 @@ CREATE TABLE IF NOT EXISTS `filetypes` (
   `type_force_thumb` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`type_id`),
   UNIQUE KEY `type_ext` (`type_ext`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
 --
 -- Dumping data for table `filetypes`
 --
 
 INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type_image_width`, `type_image_height`, `type_force_thumb`) VALUES
-(1, 'jpg', 'image/jpg', '', 0, 0, 0),
-(2, 'png', 'image/png', '', 0, 0, 0),
-(3, 'gif', 'image/gif', '', 0, 0, 0),
-(6, 'test', 'test', '', 0, 0, 1);
+(1, 'jpg', 'image/jpg', '', 0, 0, 1),
+(2, 'png', 'image/png', '', 0, 0, 1),
+(3, 'gif', 'image/gif', '', 0, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -336,7 +343,7 @@ CREATE TABLE IF NOT EXISTS `filters` (
   `filter_replacement` text,
   `filter_ban_duration` int(11) DEFAULT NULL,
   PRIMARY KEY (`filter_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `filters`
@@ -344,7 +351,7 @@ CREATE TABLE IF NOT EXISTS `filters` (
 
 INSERT INTO `filters` (`filter_id`, `filter_word`, `filter_type`, `filter_added`, `filter_regex`, `filter_replacement`, `filter_ban_duration`) VALUES
 (1, 'test', 3, 1324506346, 0, 'testicle', NULL),
-(5, 'cialis', 12, 1324509219, 0, '', NULL);
+(2, 'cialis', 12, 1324509219, 0, '', NULL);
 
 -- --------------------------------------------------------
 
@@ -410,7 +417,7 @@ CREATE TABLE IF NOT EXISTS `manage_sessions` (
 --
 
 INSERT INTO `manage_sessions` (`session_id`, `session_ip`, `session_staff_id`, `session_location`, `session_name`, `session_log_in_time`, `session_last_action`, `session_url`) VALUES
-('15eb379b32e0a9c5b721a9436b390b0d', '127.0.0.1', 1, 'index', '', 1324698334, 1324698334, '');
+('1fef0d3ad768941fd85d59901b56f6dc', '127.0.0.1', 1, 'index', '', 1325707712, 1325707712, '');
 
 -- --------------------------------------------------------
 

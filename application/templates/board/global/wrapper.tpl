@@ -5,7 +5,7 @@
 {% block css %}
   <link rel="stylesheet" type="text/css" href="{% kxEnv "paths:boards:path" %}/public/css/img_global.css" />
   {% for style in ku_styles %}
-    <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:boards:path" %}/public/css/{{ style }}.css" title="{{ style|capitalize }}" />
+    <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:boards:path" %}/public/css/{{ style }}/board.css" title="{{ style|capitalize }}" />
   {% endfor %}
   {% if locale == 'he' %}
     {% raw %}

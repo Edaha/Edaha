@@ -50,7 +50,7 @@ class public_core_index_news extends kxCmd {
       $this->request['view'] = '';
       $type = 0;
     }
-    $this->twigData['styles'] = explode(':', kxEnv::Get('kx:css:menustyles'));
+    $this->twigData['styles'] = explode(':', kxEnv::Get('kx:css:sitestyles'));
     $entries = $this->db->select("front")
                     ->fields("front")
                     ->condition("entry_type", $type);
@@ -71,7 +71,6 @@ class public_core_index_news extends kxCmd {
     // Figure out the number of pages total, if news
     if ($this->request['view'] == '') {
       $pages = $this->db->select("front")
-                        ->fields("front")
                         ->condition("entry_type", $type)
                         ->countQuery()
                         ->execute()
@@ -98,31 +97,31 @@ class public_core_index_news extends kxCmd {
     
     $this->twigData['sections'] = $sections;
 
+    // Get recent posts
+    $recentposts = $this->db->select("posts");
+    $recentposts->innerJoin("boards", "", "post_board = board_id");
+    $recentposts = $recentposts->fields("posts")
+                               ->fields("boards", array("board_name"))
+                               ->orderBy("post_timestamp", "DESC")
+                               ->range(0,6)
+                               ->execute()
+                               ->fetchAll();
+    $this->twigData['recentposts'] = $recentposts;
+    
+    
     // Get recent images
     $images = $this->db->select("post_files");
     $images->innerJoin("posts", "", "post_id = file_post AND post_board = file_board");
+    $images->innerJoin("boards", "", "post_board = board_id");
     $images = $images->fields("post_files", array("file_name", "file_type", "file_board", "file_thumb_width", "file_thumb_height"))
                      ->fields("posts", array("post_id", "post_parent"))
+                     ->fields("boards", array("board_name"))
                      ->condition("file_name", "", "!=")
                      ->orderBy("post_timestamp", "DESC")
                      ->range(0,3)
                      ->execute()
                      ->fetchAll();
-    $i = 0;
-    if (count($images) > 0) {
-      $results =  $this->db->select('boards')
-                    ->fields('boards', array('board_name'))
-                    ->where('board_id = ?')
-                    ->range(0,1)
-                    ->build();
-      while ($i < count($images)) {
-       $results->execute(array($images[$i]->file_board));
-       $board= $results->fetchAll();
-       $images[$i]->boardname = $board[0]->board_name;
-       $i++;
-      }
-    }
-    $this->twigData['images'] = $images;
+    $this->twigData['recentimages'] = $images;
 
     kxTemplate::output("index", $this->twigData);
   }

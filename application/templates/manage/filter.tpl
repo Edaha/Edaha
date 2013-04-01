@@ -62,7 +62,7 @@
       <td>{% if filter.filter_replacement %}{{ filter.filter_replacement }}{% else %}N/A{% endif %}</td>
       <td>{% if filter.filter_ban_duration is not null %}{% if filter.filter_ban_duration == 0 %}{% trans "Forever" %}{% else %}{{ filter.filter_ban_duration }}{% endif %}{% else %}N/A{% endif %}</td>
       <td>
-      {% for board in filter.boards %}
+      {% for board in filter.filter_boards %}
         /{{ board }}/, 
       {% else %}
         {% trans "No boards" %}

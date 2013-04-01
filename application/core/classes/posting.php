@@ -232,8 +232,8 @@ class Posting {
     }
   }
   public function checkBlacklistedText($boardId) {
-    $filters = $this->db->select("filter")
-                        ->fields("filter")
+    $filters = $this->db->select("filters")
+                        ->fields("filters")
                         ->condition("filter_type", 2, ">=")
                         ->orderBy("filter_type", "DESC")
                         ->execute()
@@ -407,7 +407,7 @@ class Posting {
       return $user_authority;
   }
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board) {
-      
+  
       $timeStamp = time();
       $id = $this->db->insert("posts")
           ->fields(array(
@@ -469,24 +469,6 @@ class Posting {
               ))
               ->execute();
           }
-      }
-      else {
-          $this->db->insert("post_files")
-          ->fields(array(
-              'file_post'           => $id,
-              'file_board'          => $boardid,
-              'file_md5'            => '',
-              'file_name'           => $file['file_name'],
-              'file_type'           => '',
-              'file_original'       => '',
-              'file_size'           => 0,
-              'file_size_formatted' => '',
-              'file_image_width'    => 0,
-              'file_image_height'   => 0,
-              'file_thumb_width'    => 0,
-              'file_thumb_height'   => 0
-          ))
-          ->execute();
       }
       return $id;
   }

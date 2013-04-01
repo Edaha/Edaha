@@ -2,7 +2,13 @@
 class Parse {
   protected $environment;
   protected $db;
-    
+  
+  public function __construct( kxEnv $environment ) {
+    $this->environment = $environment;
+    $this->db = kxDB::getInstance();
+    $this->request = kxEnv::$request;
+  }
+  
   public function makeClickable(&$txt) {
     $txt = preg_replace('#(script|about|applet|activex|chrome):#is', "\\1:", $txt);
     $txt = ' ' . $txt;
@@ -26,7 +32,7 @@ class Parse {
       '<em>\\1</em>', 
       '<span style="text-decoration: underline;">\\1</span>', 
       '<del>\\1</del>', 
-      '<div style="font-family: "MS PGothic", Osaka, "MS Gothic", Gothic, sans-serif !important;">\\1</div>', 
+      '<span style="font-family: "MS PGothic", Osaka, "MS Gothic", Gothic, sans-serif !important;">\\1</span>', 
       '<span class="spoiler">\\1</span>', 
       );
     $string = preg_replace($patterns, $replaces , $string);
@@ -34,9 +40,9 @@ class Parse {
   }
   
   public function codeCallback($matches) {
-    $return = '<div style="white-space: pre !important;font-family: monospace !important;">'
+    $return = '<span style="white-space: pre !important;font-family: monospace !important;">'
     . str_replace('<br />', '', $matches[1]) .
-    '</div>';
+    '</span>';
     
     return $return;
   }
@@ -56,11 +62,10 @@ class Parse {
     $buffer = preg_replace_callback('/&gt;&gt;([r]?[l]?[f]?[q]?[0-9,\-,\,]+)/', array(&$this, 'interthreadQuoteCheck'), $buffer);
     
     // Add html for links to posts made in a different board
-    $buffer = preg_replace_callback('/&gt;&gt;\/([a-z]+)\/([0-9]+)/', array(&$this, 'interboardQuoteCheck'), $buffer);
+    $buffer = preg_replace_callback('/&gt;&gt;&gt;\/([a-zA-Z0-9]+)\/([0-9]+)/', array(&$this, 'interboardQuoteCheck'), $buffer);
   }
   
   public function interthreadQuoteCheck($matches) {
-
     $lastchar = '';
     // If the quote ends with a , or -, cut it off.
     if(substr($matches[0], -1) == "," || substr($matches[0], -1) == "-") {
@@ -78,12 +83,12 @@ class Parse {
   public function doStaticPostLink($matches) {
     $result = $this->db->select("posts")
                        ->fields("posts", array("post_parent"))
-                       ->condition("post_board", $this->board->board_id)
+                       ->condition("post_board", $this->environment->get('kx:classes:board:id')->board_id)
                        ->condition("post_id", $matches[1])
                        ->execute()
                        ->fetchField();
 
-    if ($result === 0) {
+    if ($result === '0') {
       $realID = $matches[1];
     }
     elseif(empty($result)) {
@@ -93,7 +98,7 @@ class Parse {
       $realID = $result;
     }
     
-    return '<a href="'.kxEnv::get('kx:paths:boards:folder').$this->board->board_name.'/res/'.$realID.'.html#'.$matches[1].'" id="ref">'.$matches[0].'</a>'.$lastchar;
+    return '<a href="'.kxEnv::get('kx:paths:boards:path').'/'.$this->environment->get('kx:classes:board:id')->board_name.'/res/'.$realID.'.html#'.$matches[1].'" id="ref">'.$matches[0].'</a>'.$lastchar;
   }
   
   public function doDynamicPostLink($matches) {
@@ -126,13 +131,15 @@ class Parse {
                       ->condition("board_name", $matches[1])
                       ->execute()
                       ->fetch();
-    if ($board->board_type) {
+                      
+    if ($board !== FALSE) {
       $thread = $this->db->select("posts")
                       ->fields("posts", array("post_parent"))
                       ->condition("post_board", $board->board_id)
                       ->condition("post_id", $matches[2])
                       ->execute()
                       ->fetchField();
+      
       if ($thread !== FALSE) {
         if ($thread == 0) {
           $realid = $matches[2];
@@ -143,9 +150,9 @@ class Parse {
         }
         
         if ($result[0]["type"] != 1) {
-          return '<a href="'.kxEnv::Get('kx:paths:boards:folder').$matches[1].'/res/'.$realid.'.html#'.$matches[2].'" class="ref|' . $matches[1] . '|' . $realid . '|' . $matches[2] . '">'.$matches[0].'</a>';
+          return '<a href="'.kxEnv::Get('kx:paths:boards:path').'/'.$matches[1].'/res/'.$realid.'.html#'.$matches[2].'" class="ref|' . $matches[1] . '|' . $realid . '|' . $matches[2] . '">'.$matches[0].'</a>';
         } else {
-          return '<a href="'.kxEnv::Get('kx:paths:boards:folder').$matches[1].'/res/'.$realid.'.html" class="ref|' . $matches[1] . '|' . $realid . '|' . $realid . '">'.$matches[0].'</a>';
+          return '<a href="'.kxEnv::Get('kx:paths:boards:path').'/'.$matches[1].'/res/'.$realid.'.html" class="ref|' . $matches[1] . '|' . $realid . '|' . $realid . '">'.$matches[0].'</a>';
         }
       }
     }
@@ -157,8 +164,8 @@ class Parse {
     $filters = kxEnv::Get("cache:filters:wordfilters");
 
     foreach ($filters as $filter) {
-      if ( (!$filter->filter_boards || in_array($this->environment->get("kx:classes:board:id"), unserialize($filter->filter_boards))) && (!$filter->filter_regex && kxMb::stripos($buffer, $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $buffer))) {
-        $buffer = ($filter->filter_regex == 1) ? preg_replace($filter->filter_word, $filter->filter_replace, $buffer) : str_ireplace($filter->filter_word, $filter->filter_replace, $buffer);
+      if ( (!$filter->filter_boards || in_array($this->environment->get("kx:classes:board:id")->board_name, $filter->filter_boards)) && (!$filter->filter_regex && kxMb::stripos($buffer, $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $buffer))) {
+        $buffer = ($filter->filter_regex == 1) ? preg_replace($filter->filter_word, $filter->filter_replacement, $buffer) : str_ireplace($filter->filter_word, $filter->filter_replacement, $buffer);
       }
     }
   }

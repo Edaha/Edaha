@@ -1,5 +1,6 @@
 #!php 
-#<?php die('NOPE'); ?>
+#<?php header('HTTP/1.1 404 Not Found'); die(); ?>
+---
 all:
   kx:
     charset: utf-8
@@ -10,8 +11,8 @@ all:
       prefix: 
       persistent: false
     site:
-      name: Kusaba X
-      slogan: <em>slogan!</em>
+      name: Edaha
+      slogan: '<em>slogan!</em>'
       headerimage:
       irc:
       banreason:
@@ -37,9 +38,9 @@ all:
       imgswitcher: true
       imgdropswitcher: false
       txtswitcher: true
-      menustyles: edaha:burichan:futaba
-      menudefault: edaha
-      menuswitcher: true
+      sitestyles: edaha:burichan:futaba
+      sitedefault: edaha
+      siteswitcher: false
     limits:
       threaddelay: 30
       replydelay: 7
@@ -64,7 +65,7 @@ all:
       replies: 3
       stickyreplies: 1
       thumbmsg: false
-      banmsg: <br /><span class="banmsg">(USER WAS BANNED FOR THIS POST)</span>
+      banmsg: '<br /><span class="banmsg">(USER WAS BANNED FOR THIS POST)</span>'
       traditionalread: false
       embedw: 200
       embedh: 164

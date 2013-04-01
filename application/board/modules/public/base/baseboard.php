@@ -83,11 +83,11 @@ class public_board_base_baseboard extends kxCmd {
     $result = $this->db->select("filetypes", "f")
                        ->fields("f", array("type_ext"));
     $result->innerJoin("board_filetypes", "bf", "bf.type_id = f.type_id");
-    $result->innerJoin("boards", "b", "b.board_id = bf.type_board_id");
-    $this->board->board_filetypes_allowed = $result->condition("type_board_id", $this->board->board_id)
+    $result->innerJoin("boards", "b", "b.board_id = bf.board_id");
+    $this->board->board_filetypes_allowed = $result->condition("bf.board_id", $this->board->board_id)
                                                      ->orderBy("type_ext")
                                                      ->execute()
-                                                     ->fetchAssoc();
+                                                     ->fetchCol();
 
     $this->board->boardlist = array();
     $this->environment->set('kx:classes:board:id', $this->board);
@@ -101,9 +101,9 @@ class public_board_base_baseboard extends kxCmd {
   public function parseData(&$message) {
   
     $message = trim($message);
-    $this->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
+    //$this->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
     //var_dump($message);
-    $message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
+    //$message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
     if (kxEnv::Get('kx:posts:makelinks')) {
       $this->makeClickable($message);
     }
@@ -676,12 +676,13 @@ class public_board_base_baseboard extends kxCmd {
     $twigData['htmloptions'] = $tpl['htmloptions'];
     $twigData['locale'] = $this->board->board_locale;
     $twigData['board'] = $this->board;
-    $twigData['topads'] = $this->db->select("ads")
+    // TODO: Fix ads
+    /*$twigData['topads'] = $this->db->select("ads")
                                           ->fields("ads", array("ad_code"))
                                           ->condition("ad_position", "top")
                                           ->condition("ad_display", 1)
                                           ->execute()
-                                          ->fetchField();
+                                          ->fetchField();*/
     $twigData['boardlist'] = $this->board->boardlist;
     $this->twigData['replythread'] = $replythread;
     $this->twigData['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
@@ -714,12 +715,13 @@ class public_board_base_baseboard extends kxCmd {
     if ($noboardlist || $hide_extra) $this->twigData['boardlist'] = "";
     if ($executiontime) $this->twigData['executiontime'] = round($executiontime, 2);
     
-    $this->twigData['botads'] = $this->db->select("ads")
+    // TODO: Fix ads
+    /*$this->twigData['botads'] = $this->db->select("ads")
                                           ->fields("ads", array("ad_code"))
                                           ->condition("ad_position", "bot")
                                           ->condition("ad_display", 1)
                                           ->execute()
-                                          ->fetchField();
+                                          ->fetchField();*/
   }
 
   public function markThread($thread, $i) {

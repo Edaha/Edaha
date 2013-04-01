@@ -21,7 +21,7 @@
   <link rel="gettext" type="application/x-po" href="{% kxEnv "paths:main:path" %}/application/lib/lang/{% kxEnv "misc:locale" %}/LC_MESSAGES/kusaba.po" />
 {% endif %}
   <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/application/lib/javascript/gettext.js"></script>
-  <script type="text/javascript" src="{% kxEnv "paths:main:path" %}/application/lib/javascript/jquery-1.3.2.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script type="text/javascript">
     kusaba = {% raw %}{}{% endraw %};
     kusaba.cgipath = '{% kxEnv "paths:cgi:path" %}';

@@ -53,7 +53,9 @@
       {% if post.videobox %}
         {{post.videobox}}
       {% endif %}
+      {% autoescape false %}
       {{post.post_message}}
+      {% endautoescape %}
     </p>
     {% if not post.post_stickied and post.post_parent == 0 and ((board.board_name > 0 and (post.post_timestamp + (board.board_name * 3600)) < ("now"|date("U") + 7200 ) ) or (post.post_delete_time > 0 and post.post_delete_time <= ("now"|date("U") + 7200))) %}
       <span class="oldpost">

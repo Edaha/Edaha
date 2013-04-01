@@ -21,21 +21,7 @@ class manage_board_filter_filter extends kxCmd {
   }
   
   private function _showFilters() {
-    $filters = $this->db->select("filters")
-                        ->fields("filters")
-                        ->orderBy("filter_id")
-                        ->execute()
-                        ->fetchAll();
-   
-    $fetch_boards = $this->db->select("board_filters");
-    $fetch_boards->innerJoin("boards", "", "board_filters.board_id = boards.board_id");
-    $fetch_boards = $fetch_boards->fields("boards", array('board_name'))
-                             ->where("filter_id = ?")
-                             ->build();
-    foreach ($filters as $filter) {
-      $fetch_boards->execute(array($filter->filter_id));
-      $filter->boards = $fetch_boards->fetchCol();
-    }
+    $filters = kxEnv::Get('cache:filters:wordfilters');
     
     $this->twigData['filters'] = $filters;
     $this->twigData['sections'] = kxFunc::fullBoardList();
@@ -48,9 +34,9 @@ class manage_board_filter_filter extends kxCmd {
           ->check();
           
     $fields = array(
-                    'filter_word' => $this->request['filter_word'],
+                    'filter_word' => $_POST['filter_word'],
                     'filter_type' => array_sum($this->request['filter_actions']),
-                    'filter_replacement' => $this->request['filter_replacement'],
+                    'filter_replacement' => $_POST['filter_replacement'],
                     'filter_added' => time(),
                     'filter_regex' => (int) isset($this->request['filter_regex'])
                     );
@@ -110,6 +96,8 @@ class manage_board_filter_filter extends kxCmd {
       $this->twigData['notice']['message'] = ($this->request['do'] == 'add') ? _gettext('Filter successfully added!') : _gettext('Filter successfully edited!');
       $this->twigData['notice']['type'] = 'success';
     }
+    
+    $this->_recacheFilters();
   }
   
   private function _editFilter() {
@@ -117,24 +105,16 @@ class manage_board_filter_filter extends kxCmd {
     kxForm::addRule('id', 'numeric')
           ->check();
     
-    // TODO: Caching
+    $filters = kxEnv::get('cache:filters:wordfilters');
     
-    $edit_filter = $this->db->select("filters")
-                            ->fields("filters")
-                            ->condition("filter_id", $this->request['id'])
-                            ->execute()
-                            ->fetch();
-    $edit_filter->filter_boards = $this->db->select("board_filters")
-                                           ->fields("board_filters", array('board_id'))
-                                           ->condition("filter_id", $edit_filter->filter_id)
-                                           ->execute()
-                                           ->fetchCol();
+    // Have to remove the unnecessary filters (aka the ones that aren't what we're editing) from the filters array
+    for ($i=0; $i<count($filters); $i++) {
+      if ($filters[$i]->filter_id !== $this->request['id']) {
+        unset($filters[$i]);
+      }
+    }
     
-    $this->twigData['edit_filter'] = $edit_filter;
-    /*echo '<pre>';
-    print_r($edit_filter);
-    echo '</pre>';
-    die();*/
+    $this->twigData['edit_filter'] = current($filters);
   }
   
   private function _delFilter() {
@@ -158,5 +138,26 @@ class manage_board_filter_filter extends kxCmd {
       $this->twigData['notice']['message'] = _gettext('Filter deleted successfully!');
     }
     
+    $this->_recacheFilters();
+  }
+  
+  private function _recacheFilters() {
+    $filters = $this->db->select("filters")
+                    ->fields("filters")
+                    ->orderBy("filter_id")
+                    ->execute()
+                    ->fetchAll();
+   
+    $fetch_boards = $this->db->select("board_filters");
+    $fetch_boards->innerJoin("boards", "", "board_filters.board_id = boards.board_id");
+    $fetch_boards = $fetch_boards->fields("boards", array('board_name'))
+                                 ->where("filter_id = ?")
+                                 ->build();
+    foreach ($filters as $filter) {
+      $fetch_boards->execute(array($filter->filter_id));
+      $filter->filter_boards = $fetch_boards->fetchCol();
+    }
+    
+    kxEnv::set('cache:filters:wordfilters', $filters);
   }
 }

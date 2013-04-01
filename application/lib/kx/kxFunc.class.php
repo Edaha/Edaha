@@ -146,7 +146,7 @@ class kxFunc {
             "--&#62;",
             "&lt;",
             "&gt;",
-            "<br />",
+            "<br />\n",
             "&quot;",
             "&#60;script",
             "&#036;",
@@ -490,17 +490,17 @@ class kxFunc {
         }
     }
     
-    static public function convertBytes($number) {
-        $len = strlen($number);
-        if($len < 4) {
-            return sprintf("%dB", $number);
-        } elseif($len <= 6) {
-            return sprintf("%0.2fKB", $number/1024);
-        } elseif($len <= 9) {
-            return sprintf("%0.2fMB", $number/1024/1024);
-        }
+    static public function ConvertBytes($bytes) {
+      // Thanks to an anonymous user for this
+      $units = array('B', 'KB', 'MB', 'GB', 'TB');
+
+      $bytes = max($bytes, 0); // cleanup to make sure the value is an integer
+      $exponent = floor(($bytes ? log($bytes) : 0) / log(1024)); // determine the offset (in powers of 1024) that is required to fit the given byte value
+      $exponent = min($exponent, count($units) - 1); // clamp it so it doesn't exceed the maximum identifier in our unit array
+
+      $bytes /= pow(1024, $exponent); // divide our number of bytes by the power granted by our exponent (since our number was >= our power, this gives a value with fractions such as 145.49572, of that unit)
         
-        return sprintf("%0.2fGB", $number/1024/1024/1024);						
+      return round($bytes, 2) . $units[$exponent]; // return the rounded fraction (with 2 decimals) and what unit it relates to
     }
 
     static public function fullBoardList() {

@@ -124,14 +124,14 @@ class public_core_post_post extends kxCmd {
       $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->board_id);
 
       $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->board_id);
-      $this->_postingClass->checkMessageLength($this->_boardClass->board->max_message_length);
+      $this->_postingClass->checkMessageLength($this->_boardClass->board->board_max_message_length);
       $this->_postingClass->checkBlacklistedText($this->_boardClass->board->board_id);
       $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
       $this->_postingClass->checkBannedHash($this->_boardClass->board);
       
       //How many replies, is the thread locked, etc
       if ($this->postData['is_reply']) {
-        $this->postData['thread_info'] = $this->_postingClass->threadInfo($this->_boardClass->board_id,$this->request['replythread']);
+        $this->postData['thread_info'] = $this->_postingClass->threadInfo($this->environment->get('kx:classes:board:id')->board_id,$this->request['replythread']);
       }
       else {
         $this->postData['thread_info'] = Array('replies' => 0, 'locked' => 0, 'parent' => 0);
@@ -168,6 +168,7 @@ class public_core_post_post extends kxCmd {
           // Don't let the user post
           kxFunc::showError(_gettext('Sorry, this thread is locked and can not be replied to.'));
         }
+        
         $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
       // Or, if they are a moderator/administrator...
       } else {

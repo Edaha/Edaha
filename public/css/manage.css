@@ -510,6 +510,26 @@ text-align: center;
 }
 
 /* ------------------------- 
+    Config-specific Styles
+ ------------------------- */
+ul#config_tabs {
+  
+} 
+
+ul#config_tabs li {
+  display: inline-block;
+  line-height: 2em;
+  padding: 2px;
+  border: 1px solid #c29f8f;
+  background-color: #eccfbd;
+}
+
+ul#config_tabs li a {
+  display: block;
+}
+
+
+/* ------------------------- 
     Login
  ------------------------- */
 

@@ -5,8 +5,8 @@
 {% block css %}
   <link rel="stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/menu_global.css" />
   {% for style in styles %}
-    <link rel="{% if style != 'css:menudefault'|kxEnv %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/site_{{ style }}.css" title="{{ style|capitalize }}" />
-    <link rel="{% if style != 'css:menudefault'|kxEnv %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/sitemenu_{{ style }}.css" title="{{ style|capitalize }}" />
+    <link rel="{% if style != 'css:sitedefault'|kxEnv %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/site_{{ style }}.css" title="{{ style|capitalize }}" />
+    <link rel="{% if style != 'css:sitedefault'|kxEnv %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/sitemenu_{{ style }}.css" title="{{ style|capitalize }}" />
   {% endfor %}
 
   {% raw %}

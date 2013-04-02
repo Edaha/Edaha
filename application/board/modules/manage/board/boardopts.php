@@ -68,18 +68,18 @@ class manage_board_board_boardopts extends kxCmd {
               'board_max_age'     => (int) $this->request['max_age'],
               'board_mark_page'   => (int) $this->request['mark_page'],
               'board_max_replies' => (int) $this->request['max_replies'],
-              'board_locked' => isset($this->request['locked']),
-              'board_show_id' => isset($this->request['show_id']),
-              'board_compact_list' => isset($this->request['compact_list']),
-              'board_reporting' => isset($this->request['reporting']),
-              'board_captcha' => isset($this->request['captcha']),
-              'board_archiving' => isset($this->request['archiving']),
-              'board_catalog' => isset($this->request['catalog']),
-              'board_no_file' => isset($this->request['no_file']),
-              'board_redirect_to_thread' => isset($this->request['redirect_to_thread']),
-              'board_forced_anon' => isset($this->request['forced_anon']),
-              'board_trial' => isset($this->request['trial']),
-              'board_popular' => isset($this->request['popular'])
+              'board_locked' => (int) isset($this->request['locked']),
+              'board_show_id' => (int) isset($this->request['show_id']),
+              'board_compact_list' => (int) isset($this->request['compact_list']),
+              'board_reporting' => (int) isset($this->request['reporting']),
+              'board_captcha' => (int) isset($this->request['captcha']),
+              'board_archiving' => (int) isset($this->request['archiving']),
+              'board_catalog' => (int) isset($this->request['catalog']),
+              'board_no_file' => (int) isset($this->request['no_file']),
+              'board_redirect_to_thread' => (int) isset($this->request['redirect_to_thread']),
+              'board_forced_anon' => (int) isset($this->request['forced_anon']),
+              'board_trial' => (int) isset($this->request['trial']),
+              'board_popular' => (int) isset($this->request['popular'])
              );
     
     $this->db->update("boards")

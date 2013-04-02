@@ -1,18 +1,30 @@
+{% import "manage/macros.tpl" as macros %}
+
 {% extends "manage/wrapper.tpl" %}
 
 {% block heading %}{% trans "Embeds" %}{% endblock %}
 
 {% block managecontent %}
-  <style type="text/css">
-    #embeds_form input {float:left;}
-    #embed_url {width:375px;}
-  </style>
   {% if embed_error %}
     <p>A field was invalid or empty!</p>
   {% elseif embed_success %}
     <p>Successfully {{embed_success}}!</p>
   {% endif %}
+  
   <form action="{{ base_url }}app=core&amp;module=site&amp;section=embeds&amp;do=edit&amp;action=add" method="post">
+    {{ macros.manageform("embeds_form", "Embed", true,
+                          { 'Name' : { 'id' : 'embed_name', 'type' : 'text', 'desc' : "Can not be left blank",  'value' : edit_embed.embed_name } ,
+                            'Extension'    : { 'id' : 'embed_ext', 'type' : 'text', 'desc' : "Description of the embed", 'value' : edit_embed.embed_ext } ,
+                            'Height'   : { 'id' : 'embed_height', 'type' : 'text', 'desc' : "Can not be left blank",  'value' : edit_embed.embed_height } ,
+                            'Width'   : { 'id' : 'embed_width', 'type' : 'text', 'desc' : "Can not be left blank",  'value' : edit_embed.embed_width } ,
+                            'URL'   : { 'id' : 'embed_url', 'type' : 'text', 'desc' : "Can not be left blank",  'value' : edit_embed.embed_url } ,
+                            'Code'   : { 'id' : 'embed_code', 'type' : 'textarea', 'desc' : "Can not be left blank",  'value' : edit_embed.embed_code } ,
+                          }
+                        )
+    }}
+  </form>
+  
+  <!--<form action="{{ base_url }}app=core&amp;module=site&amp;section=embeds&amp;do=edit&amp;action=add" method="post">
     <fieldset name="embeds_form" id="embeds_form">
       <legend>{% trans "Embed" %}</legend>
       <label for="embed_name">Name:</label>
@@ -35,7 +47,7 @@
       <input id="embed_id" name="embed_id" type="hidden" value="{% if edit_embed %}{{edit_embed.embed_id}}{% endif %}" />
       <input type="submit" value="Go!" />
     </fieldset>                
-  </form>
+  </form>-->
   <p>
     <table class="users" cellspacing="1px">
       <col class="col1" /><col class="col2" />
@@ -46,7 +58,7 @@
       <thead>
         <tr>
           <th>{% trans "Name" %}</th>
-          <th>{% trans "Extention" %}</th>
+          <th>{% trans "Extension" %}</th>
           <th>{% trans "URL" %}</th>
           <th>{% trans "Width" %}</th>
           <th>{% trans "Height" %}</th>
@@ -76,7 +88,7 @@
           </td>
         </tr>
         {% else %}
-          <td>You haven't added any yet!</td>
+          <td colspan="7">You haven't added any yet!</td>
         {% endfor %}
       </tbody>
     </table>

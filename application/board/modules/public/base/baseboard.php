@@ -436,7 +436,8 @@ class public_board_base_baseboard extends kxCmd {
           $post->videobox = $this->embeddedVideoBox($post);
         }
 
-        if ($type == 'mp3' /*&& $this->board['loadbalanceurl'] == ''*/) {
+        /*if ($type == 'mp3') {
+          // TODO: Special MP3 handling should be done through a module at some point
           //Grab the ID3 info. TODO: Make this work for load-balanced boards.
           // include getID3() library
           require_once(KX_ROOT . '/lib/getid3/getid3.php');
@@ -446,7 +447,7 @@ class public_board_base_baseboard extends kxCmd {
 
           $post->id3[$key] = $getID3->analyze(KX_BOARD . '/'.$this->board->board_name.'/src/'.$post->file_name[$key].'.mp3');
           getid3_lib::CopyTagsToComments($post->id3[$key]);
-        }
+        }*/
         if ($type!='jpg'&&$type!='gif'&&$type!='png'&&$type!=''&&!in_array($type, $this->board->embeds)) {
           if(!isset($filetype_info[$type])) $filetype_info[$type] = kxFunc::getFileTypeInfo($type);
           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/public/filetypes/' . $filetype_info[$type][0];

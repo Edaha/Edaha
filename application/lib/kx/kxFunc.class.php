@@ -348,6 +348,23 @@ class kxFunc {
         }
     }
     
+    /**
+     * Gets the MIME type of the input file
+     * Thanks PHP for killing mime_content_type
+     * 
+     * @param string $file Path to file
+     * @return string MIME type from magic database
+     */
+    static public function getMime($file) {
+      if (function_exists('finfo_open')) {
+        // Newer (>= 5.3.0) versions of PHP
+        $mime = new finfo(FILEINFO_MIME_TYPE);
+        
+        return $mime->file($file);
+      }
+      return mime_content_type($file);
+    }
+    
     static public function formatDate($timestamp, $type = 'post', $locale = 'en', $email = '') {
         $output = '';
         if ($email != '') {
@@ -404,11 +421,11 @@ class kxFunc {
                 return $output.$fulldate.(($email != '') ? ('</a>') : (""));
             } else {
                 /* Format the timestamp english style */
-                return $output.date('y/m/d(D)H:i', $timestamp).(($email != '') ? ('</a>') : (""));
+                return $output.date(kxEnv::get('kx:misc:dateformat'), $timestamp).(($email != '') ? ('</a>') : (""));
             }
         }
         
-        return $output.date('y/m/d(D)H:i', $timestamp).(($email != '') ? ('</a>') : (""));
+        return $output.date(kxEnv::get('kx:misc:dateformat'), $timestamp).(($email != '') ? ('</a>') : (""));
     }
     static public function formatJapaneseNumbers($input) {
         $patterns = array('/1/', '/2/', '/3/', '/4/', '/5/', '/6/', '/7/', '/8/', '/9/', '/0/');
@@ -499,7 +516,7 @@ class kxFunc {
       $exponent = min($exponent, count($units) - 1); // clamp it so it doesn't exceed the maximum identifier in our unit array
 
       $bytes /= pow(1024, $exponent); // divide our number of bytes by the power granted by our exponent (since our number was >= our power, this gives a value with fractions such as 145.49572, of that unit)
-        
+
       return round($bytes, 2) . $units[$exponent]; // return the rounded fraction (with 2 decimals) and what unit it relates to
     }
 

@@ -314,7 +314,7 @@ CREATE TABLE IF NOT EXISTS `filetypes` (
   `type_image` varchar(255) DEFAULT NULL,
   `type_image_width` int(11) NOT NULL DEFAULT '0',
   `type_image_height` int(11) NOT NULL DEFAULT '0',
-  `type_force_thumb` tinyint(1) NOT NULL DEFAULT '1',
+  `type_force_thumb` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`type_id`),
   UNIQUE KEY `type_ext` (`type_ext`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;

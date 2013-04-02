@@ -160,7 +160,7 @@ class Upload {
                                                        ->execute()
                                                        ->fetchField();
 													   
-            if (!empty($filetype_forcethumb)) {
+            if ($filetype_forcethumb != '') {
               if ($filetype_forcethumb == 1) {
                 $this->files[$i]['file_name'] = time() . mt_rand(1, 99);
                 $file_names[$i] = $this->files[$i]['file_name'];
@@ -228,7 +228,7 @@ class Upload {
               } else {
                 /* Fetch the mime requirement for this special filetype */
                 $filetype_required_mime = $this->db->select("filetypes")
-                                                   ->fields("filetypes", array("mime"))
+                                                   ->fields("filetypes", array("type_mime"))
                                                    ->condition("type_ext", substr($this->files[$i]['file_type'], 1))
                                                    ->execute()
                                                    ->fetchField();
@@ -265,8 +265,9 @@ class Upload {
                     die;
                   }
                   // MP3 files get special processing to grab their embedded image should they have one
-                  if($this->files[$i]['file_type'] == '.mp3') {
-                    require_once(KX_ROOT . '/' . 'lib/getid3/getid3.php');
+                  // TODO: MP3 upload and special processing should be its own module. After hooks.
+                  /*if($this->files[$i]['file_type'] == '.mp3') {
+                    require_once(KX_ROOT . '/' . 'application/lib/getid3/getid3.php');
 
                     $getID3 = new getID3;
                     $getID3->analyze($_FILES['imagefile']['tmp_name'][$i]);
@@ -306,7 +307,7 @@ class Upload {
                       $this->files[$i]['thumb_h'] = $imageDim_thumb[1];
                       unlink($this->file_location[$i].".tmp");
                     }
-                  }
+                  }*/
 
                   // Move the file from the post data to the server
                   if (!move_uploaded_file($_FILES['imagefile']['tmp_name'][$i], $this->file_location[$i])) {
@@ -316,7 +317,7 @@ class Upload {
                   /* Check if the filetype provided comes with a MIME restriction */
                   if ($filetype_required_mime != '') {
                     /* Check if the MIMEs don't match up */
-                    if (mime_content_type($this->file_location[$i]) != $filetype_required_mime) {
+                    if (kxFunc::getMime($this->file_location[$i]) != $filetype_required_mime) {
                       /* Delete the file we just uploaded and kill the script */
                       foreach($this->file_location as $location) unlink($location);
                       kxFunc::showError(_gettext('Invalid MIME type for this filetype.'));
@@ -337,7 +338,9 @@ class Upload {
             }
           }
         }
-      } elseif (isset($this->request['embed'])) {
+      }/* elseif (isset($this->request['embed'])) {
+        TODO: When hooks are implemented, this should be moved into a module
+        
         if ($this->request['embed'] != '') {
           $this->request['embed'] = strip_tags(substr($this->request['embed'], 0, 30));
           $video_id = $this->request['embed'];
@@ -414,7 +417,7 @@ class Upload {
             kxFunc::showError(_gettext('Invalid ID'));
           }
         }
-      }
+      }*/
     } else {
       $this->files[0]['file_name'] = time() . mt_rand(1, 99);
       $this->files[0]['original_file_name'] = $this->files[0]['file_name'];

@@ -251,7 +251,7 @@ class Posting {
           }
           if ( $filter->filter_type & 4) {
             // Stop the post from happening if the delete flag is set
-            kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter));
+            kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter->filter_word));
           }
           if ( $filter->filter_type & 2 && !$reported) {
             // Report flag is set, report the post

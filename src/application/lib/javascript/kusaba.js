@@ -641,7 +641,7 @@ kusaba.addevents = function (context) {
             });
         });
     }
-    $("img.thumb", context).parent('a[href$=".gif"], a[href$=".jpg"], a[href$=".png"], a[href$=".webm"]').single_double_click(
+    $("img.thumb", context).parent('a[href$=".gif"], a[href$=".jpg"], a[href$=".png"], a[href$=".webp"]').single_double_click(
         function (e) {
             var link = $("a[id^=expandimg_" + $(this).children("img").attr("alt") + "]");
             if (link.length) {
@@ -652,7 +652,7 @@ kusaba.addevents = function (context) {
         }, function () {
             window.open(this.href);
         });
-    $("img.multithumb, img.multithumbfirst", context).parents('a[href$=".gif"], a[href$=".jpg"], a[href$=".png"], a[href$=".webm"]').single_double_click(
+    $("img.multithumb, img.multithumbfirst", context).parents('a[href$=".gif"], a[href$=".jpg"], a[href$=".png"], a[href$=".webp"]').single_double_click(
         function (e) {
             var link = $("span[class^=multithumb] a[id^=expandimg_" + $(this).children("span").attr("id").replace("thumb_", "") + "]");
             if (link.length) {

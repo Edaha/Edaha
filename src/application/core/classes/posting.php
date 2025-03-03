@@ -92,7 +92,7 @@ class Posting
   }
   public function forcedAnon(&$postData, $board)
   {
-    if ($board->board_forced_anonymous == 0) {
+    if ($board->board_forced_anon == 0) {
       if ($postData['user_authority'] == 0 || $postData['user_authority'] == 3) {
         $postData['post_fields']['name'] = '';
       }
@@ -389,7 +389,7 @@ class Posting
     if (!$uploadClass->isvideo) {
       foreach ($uploadClass->files as $key => $file) {
         if (!file_exists(KX_BOARD . '/' . $board->board_name . '/src/' . $file['file_name'] . $file['file_type']) || !$file['file_is_special'] && !file_exists(KX_BOARD . '/' . $board->board_name . '/thumb/' . $file['file_name'] . 's' . $file['file_type'])) {
-          exitWithErrorPage(_gettext('Could not copy uploaded image.'));
+          kxFunc::showError(_gettext('Could not copy uploaded image.'));
         }
       }
     }

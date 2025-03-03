@@ -79,7 +79,8 @@ RUN apt-get update \
         libfreetype-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+        libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_mysql gettext gd
 COPY ./src /var/www/html
 RUN chown -R www-data:www-data /var/www

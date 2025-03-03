@@ -476,7 +476,7 @@ class public_board_base_baseboard extends kxCmd
           $post->id3[$key] = $getID3->analyze(KX_BOARD . '/' . $this->board->board_name . '/src/' . $post->file_name[$key] . '.mp3');
           getid3_lib::CopyTagsToComments($post->id3[$key]);
         }
-        if ($type != 'jpg' && $type != 'gif' && $type != 'png' && $type != '' && !in_array($type, $this->board->embeds)) {
+        if (!in_array($type, ['jpg', 'gif', 'png', 'webp', '']) && !in_array($type, $this->board->embeds)) {
           if (!isset($filetype_info[$type])) {
             $filetype_info[$type] = kxFunc::getFileTypeInfo($type);
           }
@@ -631,7 +631,7 @@ class public_board_base_baseboard extends kxCmd
             $post = $this->buildPost($post, false);
             if (!empty($post->file_type)) {
               foreach ($post->file_type as $type) {
-                if (($type == 'jpg' || $type == 'gif' || $type == 'png')) {
+                if (in_array($type, ['jpg', 'gif', 'png', '.webp', '.webp'])) {
                   $numimages++;
                 }
               }

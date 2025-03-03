@@ -117,3 +117,13 @@ alter table `banlist`
         smallint unsigned not null,
     add foreign key (created_by_staff_id)
         references staff(user_id);
+
+-- Webp functionality
+insert into
+  `filetypes` (
+    `type_ext`,
+    `type_mime`,
+    `type_force_thumb`
+  )
+values
+  ('webp', 'image/webp', 1);

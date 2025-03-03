@@ -107,7 +107,7 @@ class Upload
         if (!is_file($_FILES['imagefile']['tmp_name'][$i]) || !is_readable($_FILES['imagefile']['tmp_name'][$i])) {
           $pass = false;
         } else {
-          if ($this->files[$i]['file_type'] == '.jpg' || $this->files[$i]['file_type'] == '.gif' || $this->files[$i]['file_type'] == '.png') {
+          if (in_array($this->files[$i]['file_type'], ['.jpg', '.gif', '.png', '.webp'])) {
             // Possible XSS attack with fake image
             if (!@getimagesize($_FILES['imagefile']['tmp_name'][$i])) {
               $pass = false;
@@ -449,48 +449,40 @@ class Upload
   /**
    * Create a thumbnail
    *
-   * @param string $name File to be thumbnailed
-   * @param string $filename Path to place the thumbnail
+   * @param string $source File to be thumbnailed
+   * @param string $destination Path to place the thumbnail
    * @param integer $new_w Maximum width
    * @param integer $new_h Maximum height
    * @return boolean Success/fail
    */
-  public function createThumbnail($name, $filename, $new_w, $new_h)
+  public function createThumbnail($source, $destination, $new_w, $new_h)
   {
     if (kxEnv::Get('kx:images:method') == 'imagemagick') {
-      $convert = 'convert ' . escapeshellarg($name);
+      $convert = 'convert ' . escapeshellarg($source);
       if (!kxEnv::Get('kx:images:animated')) {
         $convert .= '[0] ';
       }
       $convert .= ' -resize ' . $new_w . 'x' . $new_h . ' -quality ';
-      if (substr($filename, 0, -3) != 'gif') {
+      if (substr($destination, 0, -3) != 'gif') {
         $convert .= '70';
       } else {
         $convert .= '90';
       }
-      $convert .= ' ' . escapeshellarg($filename);
+      $convert .= ' ' . escapeshellarg($destination);
       exec($convert);
 
-      if (is_file($filename)) {
+      if (is_file($destination)) {
         return true;
       } else {
         return false;
       }
     } elseif (kxEnv::Get('kx:images:method') == 'gd') {
-      $system = explode(".", $filename);
+      $system = explode(".", $destination);
       $system = array_reverse($system);
-      if (preg_match("/jpg|jpeg/", $system[0])) {
-        $src_img = imagecreatefromjpeg($name);
-      } else if (preg_match("/png/", $system[0])) {
-        $src_img = imagecreatefrompng($name);
-      } else if (preg_match("/gif/", $system[0])) {
-        $src_img = imagecreatefromgif($name);
-      } else {
-        return false;
-      }
-
+      
+      $src_img = imagecreatefromstring(file_get_contents($source));
       if (!$src_img) {
-        exitWithErrorPage(_gettext('Unable to read uploaded file during thumbnailing.'), _gettext('A common cause for this is an incorrect extension when the file is actually of a different type.'));
+        kxFunc::showError(_gettext('Unable to read uploaded file during thumbnailing.'), _gettext('A common cause for this is an incorrect extension when the file is actually of a different type.'));
       }
       $old_x = imageSX($src_img);
       $old_y = imageSY($src_img);
@@ -505,20 +497,28 @@ class Upload
       $dst_img = ImageCreateTrueColor($thumb_w, $thumb_h);
       $this->fastImageCopyResampled($dst_img, $src_img, 0, 0, 0, 0, $thumb_w, $thumb_h, $old_x, $old_y, $system);
 
-      if (preg_match("/png/", $system[0])) {
-        if (!imagepng($dst_img, $filename, 0, PNG_ALL_FILTERS)) {
-          echo 'unable to imagepng.';
+      if (function_exists('imagewebp')) {
+        // If we have webp support, let's thumbnail as .webp to save bandwidth
+        if (!imagewebp($dst_img, $destination)) {
+          echo 'unable to imagewebp.';
           return false;
         }
-      } else if (preg_match("/jpg|jpeg/", $system[0])) {
-        if (!imagejpeg($dst_img, $filename, 70)) {
-          echo 'unable to imagejpg.';
-          return false;
-        }
-      } else if (preg_match("/gif/", $system[0])) {
-        if (!imagegif($dst_img, $filename)) {
-          echo 'unable to imagegif.';
-          return false;
+      } else {
+        if (preg_match("/png/", $system[0])) {
+          if (!imagepng($dst_img, $destination, 0, PNG_ALL_FILTERS)) {
+            echo 'unable to imagepng.';
+            return false;
+          }
+        } else if (preg_match("/jpg|jpeg/", $system[0])) {
+          if (!imagejpeg($dst_img, $destination, 70)) {
+            echo 'unable to imagejpg.';
+            return false;
+          }
+        } else if (preg_match("/gif/", $system[0])) {
+          if (!imagegif($dst_img, $destination)) {
+            echo 'unable to imagegif.';
+            return false;
+          }
         }
       }
 

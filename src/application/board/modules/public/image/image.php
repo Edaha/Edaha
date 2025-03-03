@@ -71,7 +71,7 @@ class public_board_image_image extends public_board_base_baseboard {
           kxFunc::showError(_gettext('Please enter an embed ID.'));
         }
       }
-      if (empty($postData['files'][0]) && ( ( !isset($this->request['nofile']) && $this->board->board_enable_no_file == 1 ) || $this->board->board_enable_no_file == 0 ) ) {
+      if (empty($postData['files'][0]) && ( ( !isset($this->request['nofile']) && $this->board->board_no_file == 1 ) || $this->board->board_no_file == 0 ) ) {
         if (($this->board->board_upload_type != 0 && empty($this->request['embed'])) || $this->board->board_upload_type == 0) {
           kxFunc::showError(_gettext('A file is required for a new thread. If embedding is allowed, either a file or embed ID is required.'));
         }

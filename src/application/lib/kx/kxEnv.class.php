@@ -59,17 +59,7 @@ class kxEnv {
                 'prefix' => $opts['prefix']
             )));
         }
-        
-        // Set up our input, remove any magic quotes
-        if(is_array($_POST) and !empty($_POST)) {
-            foreach( $_POST as $BUTTER => $TOAST ) {
-                // Skip arrays
-                if ( ! is_array( $TOAST ) ) {
-                    $_POST[ $BUTTER ] = kxFunc::strip_magic( $TOAST );
-                }
-            }
-        }
-        
+                
         // Clean up all of our input (cookies, get/post requests, etc)
         kxFunc::cleanInput( $_GET );  
         kxFunc::cleanInput( $_POST );

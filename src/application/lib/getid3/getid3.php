@@ -176,20 +176,6 @@ class getID3
 			return $this->error($errormessage);
 		}
 
-		// Disable magic_quotes_runtime, if neccesary
-		$old_magic_quotes_runtime = get_magic_quotes_runtime(); // store current setting of magic_quotes_runtime
-		if ($old_magic_quotes_runtime) {
-			if (version_compare(phpversion(), "5.3") === -1) {
-				set_magic_quotes_runtime(0);	// turn off magic_quotes_runtime
-				if (get_magic_quotes_runtime()) {
-					return $this->error('Could not disable magic_quotes_runtime - getID3() cannot work properly with this setting enabled');
-				}
-			}
-			else {
-				return $this->error('Magic quotes are depricated in PHP 5.3 - getID3() will not operate with PHP 5.3 installed and magic quotes enabled.');
-			}
-		}
-
 		// remote files not supported
 		if (preg_match('/^(ht|f)tp:\/\//', $filename)) {
 			return $this->error('Remote files are not supported in this version of getID3() - please copy the file locally first');

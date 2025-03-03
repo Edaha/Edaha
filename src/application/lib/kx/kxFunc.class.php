@@ -124,7 +124,6 @@ class kxFunc {
         if (empty($txt)){
             return "";
         }
-        $txt = kxFunc::strip_magic($txt);
         
         $search = array("&#032;",
             "\r\n", "\n\r", "\r",
@@ -198,21 +197,6 @@ class kxFunc {
         else{
             return $appFolder;
         }
-    }
-    
-    /**
-     * Remove slashes if magic_quotes enabled
-     *
-     * @access	public
-     * @param	string		Input String
-     * @return	string		Parsed string
-     */
-    static public function strip_magic($t) {
-        if (get_magic_quotes_gpc()){
-            $t = stripslashes($t);
-            $t = preg_replace( "/\\\(?!&amp;#|\?#)/", "&#092;", $t );
-        }
-        return $t;
     }
     
     /* Depending on the configuration, use either a meta refresh or a direct header */

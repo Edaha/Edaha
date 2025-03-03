@@ -9,3 +9,4 @@ pull.php
 
 vendor/
 
+.DS_Store

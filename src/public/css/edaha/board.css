@@ -76,12 +76,6 @@ hr {
  */
 
 
-.replymode {
-	background: #0010E0;
-	color: #FFFFFF;
-	width: 100%;
-}
-
 .catalogmode {
 	background: #0040E0;
 	color: #FFFFFF;
@@ -233,10 +227,6 @@ table.uploads th {
 	float: right;
 }
 
-.extrabtns {
-	/*	margin-right: 10px;*/
-}
-
 .file_size {
 	text-decoration: none;
 	color: #4F5260;
@@ -292,22 +282,11 @@ table.uploads th {
 	padding-bottom: 15px;
 }
 
-.replymode {
-	background: #D6DFF0;
-	color: #4F5260;
-	width: 100%;
-	border: 1px solid #C5C8D2;
-	padding: 5px;
-	margin-bottom: 5px;
-}
-
-.catalogmode {
-	background: #D6DEF0;
-	color: #4F5260;
-	width: 100%;
-	padding: 5px;
-	border: 1px solid #C5C8D2;
-	margin-bottom: 5px;
+.replymode, .catalogmode {
+	background: var(--color3);
+	color: var(--color4);
+	border: 1px solid var(--color4);
+	margin-top: 5px;
 }
 
 .reflinkpreview {

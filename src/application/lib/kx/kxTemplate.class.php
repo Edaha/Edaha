@@ -61,6 +61,8 @@ class kxTemplate {
                 ['needs_context' => true]
             );
             self::$instance->addFilter($filter);
+            // TODO Only include when set to debug
+            self::$instance->addExtension(new Twig\Extension\DebugExtension());
             self::$instance->addExtension(new Twig\Extra\String\StringExtension());
             self::$instance->addExtension(new jblond\TwigTrans\Translation());
 

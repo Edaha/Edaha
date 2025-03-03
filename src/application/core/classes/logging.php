@@ -15,16 +15,26 @@ class logging
 
   public static function addLogEntry($user_name, $log_entry, $source)
   {
-    // Wrap in a try/finally so that if the module doesn't exist, we don't have an error
-    try {
-        $fields['user'] = $user_name;
-        $fields['entry'] = $log_entry;
-        $fields['source_module'] = $source;
-        $fields['timestamp'] = time();
-        $modlog = kxDB::getInstance()->insert("modlog")
-                ->fields($fields)
-                ->execute();
-    } finally {
+    $fields['user'] = $user_name;
+    $fields['entry'] = $log_entry;
+    $fields['source_module'] = $source;
+    $fields['timestamp'] = time();
+    $modlog = kxDB::getInstance()->insert("modlog")
+      ->fields($fields)
+      ->execute();
+  }
+  public static function addReport($board_id, $post_ids, $reason)
+  {
+    foreach ($post_ids as $post_id) {
+      kxDb::getInstance()->insert("reports")
+        ->fields([
+          'board_id' => (int) $board_id,
+          'post_id' => (int) $post_id,
+          'timestamp' => time(),
+          'ip' => $_SERVER['REMOTE_ADDR'],
+          'reason' => $reason,
+        ])
+        ->execute();
     }
   }
 }

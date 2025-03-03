@@ -1,8 +1,12 @@
-Recent Posts:
+Content Moderation:
   - title: Recent Posts
     section: posts
     url:
 
   - title: Recent Images
     section: images
+    url:
+  
+  - title: Reports
+    section: reports
     url:

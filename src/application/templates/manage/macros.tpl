@@ -13,6 +13,8 @@
               <option value="{{option.value}}" {% if option.selected %}selected=selected{% endif %}>{% trans key %}</option>
             {% endfor %}
           </select>
+        {% elseif entry.type == "checkbox_single" %}
+          <input type="checkbox" name="{{entry.id}}" value="{{entry.id}}" {% if entry.selected %}checked=checked{% endif %}>
         {% endif %}
         {% if entry.desc %}
           {% set entrydesc = entry.desc %}

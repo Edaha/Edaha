@@ -69,6 +69,36 @@ add
     column `id` int unsigned primary key auto_increment;
 
 alter table
-    modlog
+    `modlog`
 add
     column `source_module` varchar(255);
+
+-- Get reports working
+alter table `reports`
+    add primary key id,
+    rename column `postid` to `post_id`;
+    add column `board_id` smallint,
+    add foreign key (board_id)
+        references boards(board_id)
+        on delete cascade
+    drop column `board`
+    rename column `when` to `timestamp`;
+
+insert into
+    `modules` (
+        `module_name`,
+        `module_application`,
+        `module_file`,
+        `module_description`,
+        `module_position`,
+        `module_manage`
+    )
+values
+    (
+        'Reports',
+        'board',
+        'reports',
+        'Reports',
+        0,
+        1
+    );

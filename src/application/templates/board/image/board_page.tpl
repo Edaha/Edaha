@@ -3,6 +3,7 @@
   {{ parent() }}
   <form id="delform" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post">
   <input type="hidden" name="board" value="{{board.board_name}}" />
+  <input type="hidden" name="board_id" value="{{board.board_id}}" />
   {% for thread in posts %}
     {% set iteration = loop.index0 %}
     {% for post in thread %}

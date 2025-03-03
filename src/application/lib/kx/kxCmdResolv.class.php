@@ -106,12 +106,12 @@ class kxCmdResolv {
             }
         }
         
+        // Load the logging class here because we'll probably need it anyway in pretty much any manage function
+        require_once( kxFunc::getAppDir('core') .'/classes/logging.php' );
+        $environment->set('kx:classes:core:logging:id', new logging( $environment ) );
+        
         // Are we in manage?
-        if (IN_MANAGE) {
-            // Load the logging class here because we'll probably need it anyway in pretty much any manage function
-            require_once( kxFunc::getAppDir('core') .'/classes/logging.php' );
-            $environment->set('kx:classes:core:logging:id', new logging( $environment ) );
-            
+        if (IN_MANAGE) {           
             $validSession  = kxFunc::getManageSession();
             if( (!isset($environment::$request['module']) || (isset($environment::$request['module']) && $environment::$request['module'] != 'login')) && (!$validSession))
             {

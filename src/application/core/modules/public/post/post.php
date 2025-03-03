@@ -81,6 +81,7 @@ class public_core_post_post extends kxCmd
     }
     // Some routine checks...
     $className = "public_board_" . $module_to_load . "_" . $module_to_load;
+
     if (class_exists($className)) {
       $module_class = new ReflectionClass($className);
       if ($module_class->isSubClassOf(new ReflectionClass('kxCmd'))) {
@@ -213,6 +214,7 @@ class public_core_post_post extends kxCmd
 
       $this->_boardClass->processPost($this->postData);
       $url = kxEnv::Get("kx:paths:boards:path") . '/' . $this->_boardClass->board->board_name;
+
       if (!$this->postData['is_reply']) {
         $url .= '/' . kxEnv::Get('kx:pages:first');
       } else {
@@ -220,6 +222,12 @@ class public_core_post_post extends kxCmd
       }
 
       @header('Location: ' . $url);
+    } elseif (isset($this->request['reportpost'])) {
+      logging::addReport(
+        $this->request['board_id'],
+        $this->request['post'],
+        $this->request['reportreason'],
+      );
     }
   }
 }

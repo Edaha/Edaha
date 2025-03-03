@@ -1,6 +1,6 @@
 <?php
 
-class manage_board_recents_images extends kxCmd
+class manage_board_contentmoderation_images extends kxCmd
 {
   /**
    * Arguments eventually being sent to twig
@@ -48,7 +48,6 @@ class manage_board_recents_images extends kxCmd
     
     $reviewed_count = 0;
     if ($this->request['action'] == 'approve') {
-      // TODO Get the images, delete from saved location, then delete from db
       $fields['file_reviewed'] = 1;
 
       foreach ($this->request['files'] as $file) {
@@ -64,47 +63,17 @@ class manage_board_recents_images extends kxCmd
         $reviewed_count = $reviewed_count + $process_query;
       }
 
-      $log_message = "Approved %d posts";
+      $log_message = "Approved %d files";
     } else if ($this->request['action'] == 'delete') {
-      // TODO Get the images, delete from saved location, then delete from db
-      $files_query = $this->db->select("post_files")
-        ->fields("post_files", ["file_board", "file_post", "file_name", "file_type"])
-        ->fields("boards", ["board_name"]);
-      $files_query->innerJoin("boards", "", "board_id = file_board");
-      $files_query = $files_query->where("file_board = ?")
-        ->where("file_post = ?")
-        ->where("file_name = ?")
-        ->build();
-
       foreach ($this->request['files'] as $file) {
         $file_board = explode('|', $file)[0];
         $file_post = explode('|', $file)[1];
         $file_name = explode('|', $file)[2];
+        $deleted_image = kxFunc::deleteFile($file_board, $file_name); 
         
-        $files_query->execute([$file_board, $file_post, $file_name]);
-        $file_details = $files_query->fetch();
-        
-        $file_paths['main']    = KX_BOARD . '/' . $file_details->board_name . '/src/' . $file_details->file_name . '.' . $file_details->file_type;
-        $file_paths['thumb']   = KX_BOARD . '/' . $file_details->board_name . '/thumb/' . $file_details->file_name . 's.' . $file_details->file_type;
-        $file_paths['catalog'] = KX_BOARD . '/' . $file_details->board_name . '/src/' . $file_details->file_name . 'c.' . $file_details->file_type;
-        
-        foreach ($file_paths as $path) {
-          try {
-            unlink($path);
-          } catch (Exception $e) {
-            print('Error: ' . $e->getMessage() . '\n');
-          }
-        }
-
-        $process_query = $this->db->delete("post_files")
-          ->condition("file_board", $file_board)
-          ->condition("file_post", $file_post)
-          ->condition("file_name", $file_name)
-          ->execute();
-        
-        $reviewed_count = $reviewed_count + $process_query;
+        $reviewed_count = $reviewed_count + $deleted_image;
           
-        $log_message = "Deleted %d posts";
+        $log_message = "Deleted %d files";
       }
     }
 

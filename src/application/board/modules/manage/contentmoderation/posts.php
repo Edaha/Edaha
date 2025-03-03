@@ -1,6 +1,6 @@
 <?php
 
-class manage_board_recents_posts extends kxCmd
+class manage_board_contentmoderation_posts extends kxCmd
 {
   /**
    * Arguments eventually being sent to twig
@@ -45,33 +45,37 @@ class manage_board_recents_posts extends kxCmd
 
     $fields['post_reviewed'] = 1;
     if ($this->request['action'] == 'delete') {
-      $fields['post_deleted'] = 1;
-      $fields['post_delete_time'] = time();
+      foreach ($this->request['posts'] as $post) {
+        $board_id = (int) explode('|', $post)[0];
+        $post_id = (int) explode('|', $post)[1];
+        kxFunc::deletePost($board_id, $post_id);
+      }
+    } else {
+      foreach ($this->request['posts'] as $post) {
+        $board_id = (int) explode('|', $post)[0];
+        $post_id = (int) explode('|', $post)[1];
+        $board_posts[$board_id][] = $post_id;
+      }
+
+      foreach ($board_posts as $board_id => $posts) {
+        $where_clauses[] = '(post_board = ' . $board_id . ' and post_id in (' . implode(',', $posts) . '))';
+      }
+
+      $process_query = $this->db->update("posts")
+        ->fields($fields)
+        ->where(implode(" or ", $where_clauses))
+        ->execute();
     }
 
-    foreach ($this->request['posts'] as $post) {
-      $board_id = (int) explode('|', $post)[0];
-      $post_id = (int) explode('|', $post)[1];
-      $board_posts[$board_id][] = $post_id;
-    }
-
-    foreach ($board_posts as $board_id => $posts) {
-      $where_clauses[] = '(post_board = ' . $board_id . ' and post_id in (' . implode(',', $posts) . '))';
-    }
-
-    $process_query = $this->db->update("posts")
-      ->fields($fields)
-      ->where(implode(" or ", $where_clauses))
-      ->execute();
-    
     if ($this->request['action'] == 'delete') {
       $log_message = "Deleted %d posts";
     } else {
       $log_message = "Approved %d posts";
     }
+
     logging::addLogEntry(
       kxFunc::getManageUser()['user_name'],
-      sprintf($log_message, $process_query),
+      sprintf($log_message, count($this->request['posts'])),
       __CLASS__
     );
   }

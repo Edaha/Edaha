@@ -97,7 +97,7 @@
           [<input type="checkbox" name="fileonly" id="fileonly" value="on" /><label for="fileonly">{% trans "File Only" %}</label>]<br />{% trans "Password" %}
           <input type="password" name="postpassword" size="8" />&nbsp;<input name="deletepost" value="{% trans "Delete" %}" type="submit" />
         </div>
-        {% if board.board_enablereporting == 1 %}
+        {% if board.board_reporting == 1 %}
           <div id="posts_report">
             {% trans "Report post" %}<br />
             {% trans "Reason" %}

@@ -24,7 +24,7 @@
       <h3>Recent Posts</h3>
       <ul>
       {% for post in recentposts %}
-        <li><a class="ref|{{ post.board_name }}|{% if post.post_parent == 0 %}{{ post.post_id }}{% else %}{{ post.post_parent }}{% endif %}|{{ post.post_id }}" href="{{ kxEnv("paths:main:path") }}/{{ post.board_name }}/res/{% if post.post_parent == 0 %}{{ post.post_id }}.html{% else %}{{ post.post_parent }}.html#{{ post.post_id }}{% endif %}">&gt;&gt;&gt;/{{ post.board_name }}/{{ post.id }}</a> - {{ post.post_message|striptags }}{#% if strlen(post.post_message) > 60 %}...{% endif %#}<br /></li>
+        <li><a class="ref|{{ post.board_name }}|{% if post.post_parent == 0 %}{{ post.post_id }}{% else %}{{ post.post_parent }}{% endif %}|{{ post.post_id }}" href="{{ kxEnv("paths:main:path") }}/{{ post.board_name }}/res/{% if post.post_parent == 0 %}{{ post.post_id }}.html{% else %}{{ post.post_parent }}.html#{{ post.post_id }}{% endif %}">&gt;&gt;&gt;/{{ post.board_name }}/{{ post.id }}</a> - {{ post.post_message|striptags|u.truncate(60, '...', false) }}<br /></li>
       {% endfor %}
       </ul>
     </section>

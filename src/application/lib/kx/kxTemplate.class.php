@@ -61,6 +61,7 @@ class kxTemplate {
                 ['needs_context' => true]
             );
             self::$instance->addFilter($filter);
+            self::$instance->addExtension(new Twig\Extra\String\StringExtension());
             self::$instance->addExtension(new jblond\TwigTrans\Translation());
 
             // Supply Twig with our GET/POST variables

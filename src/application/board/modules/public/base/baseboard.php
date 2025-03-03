@@ -466,9 +466,6 @@ class public_board_base_baseboard extends kxCmd
         }
 
         if ($type == 'mp3' /*&& $this->board['loadbalanceurl'] == ''*/) {
-          //Grab the ID3 info. TODO: Make this work for load-balanced boards.
-          // include getID3() library
-          require_once KX_ROOT . '/lib/getid3/getid3.php';
 
           // Initialize getID3 engine
           $getID3 = new getID3;

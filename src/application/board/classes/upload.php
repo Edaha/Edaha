@@ -165,7 +165,7 @@ class Upload
           ->execute()
           ->fetchField();
 
-        if (!empty($filetype_forcethumb)) {
+        if (isset($filetype_forcethumb)) {
           if ($filetype_forcethumb == 1) {
             $this->files[$i]['file_name'] = time() . mt_rand(1, 99);
             $file_names[$i] = $this->files[$i]['file_name'];
@@ -214,7 +214,7 @@ class Upload
           } else {
             /* Fetch the mime requirement for this special filetype */
             $filetype_required_mime = $this->db->select("filetypes")
-              ->fields("filetypes", array("mime"))
+              ->fields("filetypes", ["type_mime"])
               ->condition("type_ext", substr($this->files[$i]['file_type'], 1))
               ->execute()
               ->fetchField();
@@ -236,8 +236,6 @@ class Upload
               }
               // MP3 files get special processing to grab their embedded image should they have one
               if ($this->files[$i]['file_type'] == '.mp3') {
-                require_once KX_ROOT . '/' . 'lib/getid3/getid3.php';
-
                 $getID3 = new getID3;
                 $getID3->analyze($_FILES['imagefile']['tmp_name'][$i]);
                 if (isset($getID3->info['id3v2']['APIC'][0]['data']) && isset($getID3->info['id3v2']['APIC'][0]['image_mime'])) {

@@ -12,7 +12,13 @@
                           'MIME Type' : { 'id' : 'mime', 'type' : 'text', 'desc' : "The MIME type of the uploaded file.", 'value' : filetype.type_mime } ,
                           'Image' : { 'id' : 'image', 'type' : 'text', 'desc' : "The image to be displayed. Needs to be placed in /public/images/",  'value' : filetype.type_image } ,
                           'Image Width' : { 'id' : 'image_width', 'type' : 'text', 'desc' : "The width of the above image.", 'value' : filetype.type_image_width } ,
-                          'Image Height' : { 'id' : 'image_height', 'type' : 'text', 'desc' : "The height of the above image.", 'value' : filetype.type_image_height } 
+                          'Image Height' : { 'id' : 'image_height', 'type' : 'text', 'desc' : "The height of the above image.", 'value' : filetype.type_image_height } ,
+                          'Create Thumbnail' : {
+                            'id': 'create_thumbnail',
+                            'type': 'checkbox_single',
+                            'desc': 'If this is an image file, create and display a thumbnail from the uploaded file',
+                            'selected': filetype.type_force_thumb,
+                          }
                         }
                       ) 
   }}

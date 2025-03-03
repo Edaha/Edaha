@@ -47,7 +47,8 @@ class manage_board_attachments_filetypes extends kxCmd {
                 'type_mime' => $this->request['mime'],
                 'type_image' => $this->request['image'],
                 'type_image_width' => (int) $this->request['image_width'],
-                'type_image_height' => (int) $this->request['image_height']
+                'type_image_height' => (int) $this->request['image_height'],
+                'type_force_thumb' => (int) $this->request['create_thumbnail']
               );
           
     try {

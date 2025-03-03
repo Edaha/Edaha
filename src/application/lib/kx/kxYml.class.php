@@ -8,8 +8,6 @@ class kxYml {
     if (!self::$init) {
       if (function_exists("syck_load")) {
         self::$useSpyc = false;
-      } else {
-        require_once(KX_ROOT . "/application/lib/spyc/spyc.php");
       }
     }
     

@@ -23,9 +23,9 @@
 
 class Upload {
   public $files      = Array();
-  public $file_location    = '';
-  public $file_thumb_location = '';
-  public $file_thumb_cat_location = '';
+  public $file_location    = Array();
+  public $file_thumb_location = Array();
+  public $file_thumb_cat_location = Array();
   public $isreply      = false;
   public $isvideo      = false;
   protected $environment;
@@ -136,7 +136,7 @@ class Upload {
             if (is_array($exists_thread)) {
               //kxFunc::showError(_gettext('Duplicate file entry detected.'), sprintf(_gettext('Already posted %shere%s.'),'<a href="' . kxEnv::Get('kx:paths:boards:path') . '/' . $boardData->board_name . '/res/' . $exists_thread[0] . '.html#' . $exists_thread[1] . '">','</a>'));
             }
-/* removed for now
+            /* removed for now
             if (strtolower($this->files[$i]['file_type']) == 'svg') {
               require_once 'svg.class.php';
               $svg = new Svg($_FILES['imagefile']['tmp_name'][$i]);
@@ -193,7 +193,7 @@ class Upload {
                   $this->file_location[$i] = KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[$i]['file_name'] . $this->files[$i]['file_type'];
                   $this->file_thumb_location[$i] = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[$i]['file_name'] . 's' . $this->files[$i]['file_type'];
                   $this->file_thumb_cat_location[$i] = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[$i]['file_name'] . 'c' . $this->files[$i]['file_type'];
-
+                  
                   if (!move_uploaded_file($_FILES['imagefile']['tmp_name'][$i], $this->file_location[$i])) {
                     kxFunc::showError(_gettext('Could not copy uploaded image.'));
                   }

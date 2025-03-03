@@ -74,7 +74,13 @@ FROM php:8.2-apache as base
 # RUN pecl install redis-5.3.7 \
 #    && pecl install xdebug-3.2.1 \
 #    && docker-php-ext-enable redis xdebug
-RUN docker-php-ext-install pdo pdo_mysql gettext
+RUN apt-get update \
+    && apt-get install -y \
+        libfreetype-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql gettext gd
 COPY ./src /var/www/html
 RUN chown -R www-data:www-data /var/www
 

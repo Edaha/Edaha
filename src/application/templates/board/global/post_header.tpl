@@ -3,7 +3,7 @@
 {% if post.post_subject != '' %}
   <span class="subject">{{ post.post_subject }}</span>
 {% endif %}
-{% spaceless %}
+{% apply spaceless %}
   {% if post.post_authority == 1 %}
     <span class="capcode_admin">
   {% elseif post.post_authority == 2 %}
@@ -27,7 +27,7 @@
   {% if post.post_tripcode != '' %}
     <span class="postertrip">!{{post.post_tripcode}}</span>
   {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% if post.post_authority == 1 %}
   <span title="{{ kxEnv("site:name") }} {% trans "administrator" %}" class="capcode">
     &#35;&#35;&nbsp;{% trans "Admin" %}&nbsp;&#35;&#35;
@@ -45,5 +45,5 @@
   {{post.reflink|raw}}
 </span>
 {% if board.board_show_id %}
-  ID: {{post.ipmd5|truncate(6)}}
+  ID: {{post.ipmd5|slice(0,5)}}
 {% endif %}

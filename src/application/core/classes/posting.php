@@ -41,7 +41,7 @@ class Posting {
   public function isReply($boardid) {
       /* If it appears this is a reply to a thread, and not a new thread... */
       if (isset($this->request['replythread'])) {
-          if ($this->request['replythread'] != 0) {
+          if ((int)$this->request['replythread'] != 0) {
               /* Check if the thread id supplied really exists */
               $sql = $this->db->select("posts",'pst');
               $sql->addExpression("COUNT(*)"); // Because Saz is too dumb to SQL.
@@ -364,8 +364,8 @@ class Posting {
       }
       if (!$uploadClass->isvideo) {
           foreach ($uploadClass->files as $key=>$file){
-              if (!file_exists(KX_BOARD . '/' . $board->board_name . '/src/' . $file['file_name'] . $file['file_type']) || !$file['file_is_special'] && !file_exists(KX_BOARD . '/' . $board->board_name . '/thumb/' . $file['file_name'] . 's' . $file['file_type'])) {
-                  exitWithErrorPage(_gettext('Could not copy uploaded image.'));
+            if (!file_exists(KX_BOARD . '/' . $board->board_name . '/src/' . $file['file_name'] . $file['file_type']) || !$file['file_is_special'] && !file_exists(KX_BOARD . '/' . $board->board_name . '/thumb/' . $file['file_name'] . 's' . $file['file_type'])) {
+                exitWithErrorPage(_gettext('Could not copy uploaded image.'));
               }
           }
       }

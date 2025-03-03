@@ -1,5 +1,4 @@
 {% macro fileinfo(board, post, id, link) %}
-  <!-- DEBUG: {% debug %} -->
   {% if link and post.file_type.0 != 'jpg' and post.file_type.0 != 'gif' and post.file_type.0 != 'png' and post.videobox == '' %}
     <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}" {% if kxEnv("posts:newwindow") %} target="_blank"{% endif %}>
   {% else %}
@@ -43,7 +42,7 @@
   {% endif %}
 {% endmacro %}
 {% if post.file_name|length == 1 and (post.file_name.0 != '' or post.file_type.0 != '' ) and ((post.videobox == '' and post.file_name.0 != '') and post.file_name.0 != 'removed') %}
-  {% strip %}
+  {# strip #}
     <div class="file_size">
       {% if post.file_type.0 == 'mp3' %}
         {% trans "Audio" %}
@@ -52,7 +51,7 @@
       {% endif %}
       {{ _self.fileinfo(board, post, 0, true) }}
     </div>
-  {% endstrip %}
+  {# endstrip #}
   {% if kxEnv("display:thumbmsg") %}
     <span class="thumbnailmsg"> 
     {% if post.file_type.0 != 'jpg' and post.file_type.0 != 'gif' and post.file_type.0 != 'png' and post.videobox == '' %}
@@ -72,7 +71,7 @@
     {% elseif post.nonstandard_file[fileskey] %}
       {% set thumburl %}{{ post.nonstandard_file[fileskey] }}{% endset %}
     {% endif %}
-    {% spaceless %}
+    {% apply spaceless %}
       <div style="float:left">
         <span>
           <a href="{{ fileurl }}"
@@ -96,7 +95,7 @@
           </span>
         </a>
       </div>
-    {% endspaceless %}
+    {% endapply %}
     {% if loop.last %}
       <br style="clear:both" />
     {% endif %}

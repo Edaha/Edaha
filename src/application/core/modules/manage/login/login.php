@@ -99,8 +99,12 @@ class manage_core_login_login extends kxCmd{
           // Set the cookies so ajax functions will load    
           $this->SetModerationCookies();
 
-          //$this->environment->get('kx:classes:core:logging:id')->manageLog(_gettext('Logged in'), 1);
-          
+          logging::addLogEntry(
+            $this->request['username'],
+            'Logged in',
+            __CLASS__
+          );          
+
           // Let's figure out where we need to go
           $whereto = "";
 

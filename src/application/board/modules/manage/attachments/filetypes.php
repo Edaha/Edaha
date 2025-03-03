@@ -71,6 +71,12 @@ class manage_board_attachments_filetypes extends kxCmd {
     if (!isset($this->twigData['notice'])) {
       $this->twigData['notice']['type'] = 'success';
       $this->twigData['notice']['message'] = ($this->request['do'] == 'add') ? _gettext('Filetype added successfully!') : _gettext('Filetype edited successfully!');
+      $log_message = ($this->request['do'] == 'add') ? _gettext('Added filetype %s') : _gettext('Edited filetype %s');
+      logging::addLogEntry(
+        kxFunc::getManageUser()['user_name'],
+        sprintf($log_message, $this->request['ext']),
+        __CLASS__
+      );
     }
     
     // Need to update the cache

@@ -64,6 +64,12 @@ class manage_core_bans_bans extends kxCmd {
     // TODO: Complete this
 
     $this->twigData['sections'] = kxFunc::fullBoardList();
+
+    // logging::addLogEntry(
+    //   kxFunc::getManageUser()['user_name'],
+    //   sprintf('Banned IP %s', ip_address),
+    //   __CLASS__
+    // );
     
     kxTemplate::output('manage/bans_add', $this->twigData);
   }

@@ -45,7 +45,8 @@ class manage_board_recents_images extends kxCmd
     if (!isset($this->request['files']) or $this->request['action'] == '') {
       return;
     }
-
+    
+    $reviewed_count = 0;
     if ($this->request['action'] == 'approve') {
       // TODO Get the images, delete from saved location, then delete from db
       $fields['file_reviewed'] = 1;
@@ -60,7 +61,10 @@ class manage_board_recents_images extends kxCmd
           ->condition("file_post", $file_post)
           ->condition("file_name", $file_name)
           ->execute();
+        $reviewed_count = $reviewed_count + $process_query;
       }
+
+      $log_message = "Approved %d posts";
     } else if ($this->request['action'] == 'delete') {
       // TODO Get the images, delete from saved location, then delete from db
       $files_query = $this->db->select("post_files")
@@ -92,12 +96,22 @@ class manage_board_recents_images extends kxCmd
           }
         }
 
-        $this->db->delete("post_files")
+        $process_query = $this->db->delete("post_files")
           ->condition("file_board", $file_board)
           ->condition("file_post", $file_post)
           ->condition("file_name", $file_name)
           ->execute();
+        
+        $reviewed_count = $reviewed_count + $process_query;
+          
+        $log_message = "Deleted %d posts";
       }
     }
+
+    logging::addLogEntry(
+      kxFunc::getManageUser()['user_name'],
+      sprintf($log_message, $reviewed_count),
+      __CLASS__
+    );
   }
 }

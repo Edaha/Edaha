@@ -105,6 +105,20 @@ class manage_board_board_board extends kxCmd
       $this->twigData['entries'][$board->board_name] = $board->board_desc;
     }
 
+    $board_types_query = $this->db->select("modules")
+      ->fields("modules", ["module_file", "module_name"])
+      ->condition("module_application", "board")
+      ->condition("module_manage", 0)
+      ->execute()
+      ->fetchAll();
+    foreach ($board_types_query as $type) {
+      $this->twigData['board_types'][$type->module_name] = [
+        'value' => $type->module_file,
+      ];
+    }
+    $this->twigData['board_types'];
+    print_r($this->twigData['board_types']);
+
     kxTemplate::output("manage/board", $this->twigData);
   }
 
@@ -122,6 +136,7 @@ class manage_board_board_board extends kxCmd
       'board_created_on' => time(),
       'board_header_image' => '',
       'board_include_header' => '',
+      'board_type' => $this->request['board_type'],
     );
     // If the first post ID is left empty make it 1
     if ($fields['board_start'] == "") {
@@ -133,6 +148,11 @@ class manage_board_board_board extends kxCmd
         ->fields($fields)
         ->execute();
       $this->twigData['notice']['message'] = _gettext('Board successfully added.');
+      logging::addLogEntry(
+        kxFunc::getManageUser()['user_name'],
+        sprintf('Created board /%s/', $fields['board_name']),
+        __CLASS__
+      );
     } else {
       // Edit board
       $this->db->update("boards")
@@ -140,6 +160,11 @@ class manage_board_board_board extends kxCmd
         ->condition("board_id", $this->request['edit'])
         ->execute();
       $this->twigData['notice']['message'] = _gettext('Board successfully edited.');
+      logging::addLogEntry(
+        kxFunc::getManageUser()['user_name'],
+        sprintf('Edited board /%s/', $fields['board_name']),
+        __CLASS__
+      );
     }
     $this->twigData['notice']['type'] = 'success';
   }
@@ -151,5 +176,10 @@ class manage_board_board_board extends kxCmd
       ->execute();
     $this->twigData['notice']['type'] = 'success';
     $this->twigData['notice']['message'] = _gettext('Board successfully deleted.');
+    logging::addLogEntry(
+      kxFunc::getManageUser()['user_name'],
+      sprintf('Deleted board /%s/', $this->request['board']),
+      __CLASS__
+    );
   }
 }

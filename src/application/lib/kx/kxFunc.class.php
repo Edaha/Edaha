@@ -488,6 +488,26 @@ class kxFunc
     }
   }
 
+  /**
+   * Get the current manage user's ID and username
+   *
+   */
+  public static function getManageUser(): ?array
+  {
+    if (kxFunc::getManageSession()) {
+      $_session = kxEnv::$request['sid'];
+
+      $session_data = kxDB::getInstance()->select("manage_sessions");
+      $session_data->innerJoin("staff", "", "session_staff_id = user_id");
+      $session_data = $session_data->fields("staff", ["user_id", "user_name"])
+        ->condition("session_id", $_session)
+        ->execute()
+        ->fetchAssoc();
+
+      return $session_data;
+    }
+  }
+
   public static function ConvertBytes($bytes)
   {
     // Thanks to an anonymous user for this

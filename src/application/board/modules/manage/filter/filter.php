@@ -143,6 +143,12 @@ class manage_board_filter_filter extends kxCmd {
     if (!isset($this->twigData['notice'])) {
       $this->twigData['notice']['type'] = 'success';
       $this->twigData['notice']['message'] = _gettext('Filter deleted successfully!');
+      
+      logging::addLogEntry(
+        kxFunc::getManageUser()['user_name'],
+        sprintf('Deleted wordfilter ', $this->request['id']),
+        __CLASS__
+      );
     }
     
     $this->_recacheFilters();

@@ -11,7 +11,7 @@ class manage_board_recents_posts extends kxCmd
 
   public function exec(kxEnv $environment)
   {
-    switch ($this->request['action']) {
+    switch ($this->request['do']) {
       case 'process':
         $this->_process();
         break;
@@ -63,5 +63,16 @@ class manage_board_recents_posts extends kxCmd
       ->fields($fields)
       ->where(implode(" or ", $where_clauses))
       ->execute();
+    
+    if ($this->request['action'] == 'delete') {
+      $log_message = "Deleted %d posts";
+    } else {
+      $log_message = "Approved %d posts";
+    }
+    logging::addLogEntry(
+      kxFunc::getManageUser()['user_name'],
+      sprintf($log_message, $process_query),
+      __CLASS__
+    );
   }
 }

@@ -83,7 +83,6 @@ RUN apt-get update \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_mysql gettext gd
 COPY ./src /var/www/html
-# COPY ./docker/apache/dir.conf /etc/apache2/mods-enabled/dir.conf
 COPY ./docker/apache/httpd.conf /etc/apache2/apache2.conf
 RUN chown -R www-data:www-data /var/www
 

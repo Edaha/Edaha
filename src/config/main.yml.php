@@ -5,7 +5,7 @@ all:
   kx:
     charset: utf-8
     db:
-      dsn: 'mysql:dbname=edaha'
+      dsn: 'mysql:host=db;dbname=edaha;charset=utf8mb4'
       username: edaha
       password: edaha
       prefix: 

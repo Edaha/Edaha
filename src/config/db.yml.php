@@ -4,6 +4,6 @@ all:
   kx:
     db:
       config:
-        dsn: 'mysql:dbname=edaha;host=localhost'
+        dsn: "mysql:host=db\;dbname=edaha\;charset=utf8mb4"
         username: edaha
         password: edaha

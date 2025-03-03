@@ -75,6 +75,7 @@ FROM php:8.2-apache as base
 #    && docker-php-ext-enable redis xdebug
 RUN docker-php-ext-install pdo pdo_mysql
 COPY ./src /var/www/html
+RUN chown -R www-data:www-data /var/www
 
 FROM base as development
 # COPY ./tests /var/www/html/tests

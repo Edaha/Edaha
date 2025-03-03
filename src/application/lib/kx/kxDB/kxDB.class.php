@@ -110,10 +110,10 @@ abstract class kxDB {
     final public static function openConnection($driver_options) {
         $driver_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
         try {
-            $pdo = new PDO_(
-                kxEnv::get('kx:db:dsn', 'mysql:dbname=kusabax;host=localhost'),
-                kxEnv::get('kx:db:username', 'kusabax'),
-                kxEnv::get('kx:db:password', 'kusabax'),
+            $pdo = new PDO(
+                kxEnv::get('kx:db:dsn', 'mysql:host=db;dbname=edaha;charset=utf8mb4'),
+                kxEnv::get('kx:db:username', 'edaha'),
+                kxEnv::get('kx:db:password', 'edaha'),
                 $driver_options
             );
         } catch(PDOException $e) {

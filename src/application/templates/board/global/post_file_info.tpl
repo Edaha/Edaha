@@ -63,6 +63,7 @@
   {% endif %}
 {% endif %}
 {% if post.file_name|length > 1 %}
+  {{ dump(post.file_name) }}
   {% for fileskey,file in post.file_name %}
     {% if fileskey % 3 %}<br style="clear:both" />{% endif %}
     {% set fileurl %}{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/src/{{post.file_name[fileskey]}}.{{post.file_type[fileskey]}}{% endset %}

@@ -103,6 +103,7 @@ class manage_board_board_boardopts extends kxCmd
       'board_forced_anon' => (int) isset($this->request['forced_anon']),
       'board_trial' => (int) isset($this->request['trial']),
       'board_popular' => (int) isset($this->request['popular']),
+      'board_max_files' => (int) $this->request['max_files'],
     );
 
     $this->db->update("boards")

@@ -129,6 +129,11 @@
     <span class="desc"><a href="#" title="{% trans "The number of replies a thread can have before automatically saging to the back of the board." %}">?</a></span>
     <br>
     
+    <label for="max_files">{% trans "Maximum File Attachments" %}:</label>
+    <input type="text" name="max_files" id="max_files" value="{{ board_options.board_max_files }}">
+    <span class="desc"><a href="#" title="{% trans "The number of replies a thread can have before automatically saging to the back of the board." %}">?</a></span>
+    <br>
+    
   </fieldset>
 
   <fieldset id="general_options">

@@ -59,10 +59,6 @@ iframe {
 	border: 0;
 }
 
-ol, li {
-	list-style-position:inside;
-}
-
 hr {
     clear: both;
     float: none;
@@ -84,13 +80,8 @@ hr {
 }
 
 .logo {
-	margin-top: 10px;
-	margin-bottom: 10px;
-	clear:both;
 	text-align:center;
 	font-size:24pt;
-	width:100%;
-  display:block;
 }
 
 .logo+hr {
@@ -119,12 +110,11 @@ hr {
 
 #disclaimer {
  text-align: center;
- font-size: 7pt;
- padding: 17px 0 14px;
+ font-size: .7rem;
+ padding: 1em;
 }
 
 #disclaimer a {
- padding: 0;
  text-decoration: underline;
 }
 
@@ -152,84 +142,66 @@ hr {
  * Posting form.
  */
 
-#postarea {
-  text-align: center;
-  padding: 0;
-  display: block;
-  overflow: hidden;
-  min-width: 980px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#posting_form {
-  display: inline-table;
-  border-spacing: 2px;
-  overflow: hidden;
-}
-
-#posting_form ol, #posting_form ol li {
- list-style: none;
-}
-
 #posting_form ol li {
- clear: left;
- display: table-row; 
- text-align: left;
+ display: table-row;
 }
 
 #posting_form label {
- display: table-cell;  
- padding: 3px 0 3px 1px;
- width:auto;
-} 
+ width: 100px;
+ display: table-cell;
+}
 
-#posting_form label + * {
+#posting_form input[type="text"],
+#posting_form input[type="password"],
+#posting_form textarea {
+  display: table-cell;
+}
+
+/* #posting_form label + * {
     margin-left: 2px;
-}
+} */
 
-#message_label {
+/* #message_label {
  vertical-align: middle;
-}
+} */
 
-#posting_form input {
+/* #posting_form input {
     margin-top: 0;
     margin-bottom: 0;
-}
+} */
 
-#posting_form input[type="text"], 
+/* #posting_form input[type="text"], 
 #posting_form input[type="password"], 
 #posting_form input[type="file"],
 #posting_form select,
 #posting_form textarea {
  padding: 3px 4px 3px 1px;
  margin: 0px;
-}
+} */
 
-#posting_form input[type="text"],
+/* #posting_form input[type="text"],
 #posting_form input[type="password"],
 #posting_form textarea {
 	width: 100%;
-}
+} */
 
-#posting_form .fixer {
+/* #posting_form .fixer {
 	margin: 0;
   float: left;
   padding-right: 10px;
-}
+} */
 
-#posting_form input[type="submit"] {
+/* #posting_form input[type="submit"] {
  margin-bottom: 1px;
  margin-left: 3px;
  margin-bottom: 2px;
  margin-left: 2px;
-} 
+}  */
 
-#posting_form textarea {
- resize:none;
+/* #posting_form textarea {
  width: 100%;
  min-height: 83px;
-}
+} */
 
 /* IE 6 Hacks */
 
@@ -385,7 +357,7 @@ text-align: center;
   margin-left: 0;
 }
 */
-#posting_form > ol, #rules {
+/* #posting_form > ol, #rules {
 display: block;
 float: left;
 margin-right: 5px;
@@ -397,19 +369,15 @@ padding-top: 0;
 padding-bottom: 9000px;
 margin-bottom: -9000px;
 text-align:left;
-}
-#rules {
+} */
+/* #rules {
 width: 400px;
 font-size: 10px;
 font-family: sans-serif;
 }
 #rules a {
   text-decoration: none;
-}
-
-#rules li {
-	margin-left: 1em;
-}
+} */
 
 #rules .title {
     display: block;
@@ -418,11 +386,6 @@ font-family: sans-serif;
     font-weight: bold;
 		margin-bottom: 15px;
 		margin-top: 10px;
-}
-
-#rules ul {
-    display: block;
-    margin-left: 60px;
 }
 
 #recaptcha_logo, #recaptcha_tagline {
@@ -436,18 +399,6 @@ font-family: sans-serif;
 .recaptcha_image_cell {
     background-color: transparent !important;
 }
-
-.ui-resizable { position: relative;}
-.ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block;}
-.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
-.ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0px; }
-.ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0px; }
-.ui-resizable-e { cursor: e-resize; width: 7px; right: -5px; top: 0px; height: 100%; }
-.ui-resizable-w { cursor: w-resize; width: 7px; left: -5px; top: 0px; height: 100%; }
-.ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }
-.ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
-.ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
-.ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}
 
 /**
  * Threads and posts
@@ -486,11 +437,6 @@ table.uploads th {
   margin: 0;
 }
 
-.op .post .message,
-.post:first-child .message {
-  margin-left: 20px;
-}
-
 .reflink a {
  color: inherit;
  text-decoration: none;
@@ -501,7 +447,6 @@ table.uploads th {
 }
 
 .reply {
- display: block;
  margin-bottom: 4px;
  clear: right;
  width: auto;
@@ -509,7 +454,6 @@ table.uploads th {
 
 .reply .post {
   display: inline-block;
-  clear: none;
   max-width: 95%;
   padding: 2px;
   padding-right: 10px;
@@ -564,7 +508,6 @@ table.uploads th {
 }
 
 .postername {
-  font-size:12px;
   font-weight: 800;
 }
 
@@ -771,19 +714,36 @@ ol li label {
     text-align: center;
     border-style: solid;
     border-width: 1px;
-    padding: 2px;
-    padding-top: 2px;
-    padding-left: 2px;
-    padding-bottom: 2px;
-    padding-right: 2px;
-    font-size: 12px;
 }
 
 ol li * {
     vertical-align: middle;
 }
- 
-ol li small {
-		float:left;
-		margin-top: .5em;
+
+#postbox {
+  display: table;
+  border-spacing: 0px 2px;
+}
+
+#postform {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+#thread_controls > div {
+  border: 1px solid;
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+.tc_header {
+  border-bottom: 1px solid;
+}
+
+.tc_body {
+  padding: 2px;
+  text-align: right;
+  line-height: 1.2em;
 }

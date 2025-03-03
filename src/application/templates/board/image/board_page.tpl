@@ -32,6 +32,7 @@
           <div class="post">
             <div class="doubledash">&gt;&gt;</div>
             {% include "board/global/post_header.tpl" %}
+            {% include "board/global/post_file_info.tpl" %}
             <span id="dnb_{{board.board_name}}_{{post.post_id}}_n"></span>
           
       {% endif %}

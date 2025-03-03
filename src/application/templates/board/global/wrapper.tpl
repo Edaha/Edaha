@@ -4,8 +4,8 @@
 
 {% block css %}
   <link rel="stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/img_global.css" />
-  {% for style in ku_styles %}
-    <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/{{ style }}/board.css" title="{{ style|capitalize }}" />
+  {% for style in kxEnv("css:imgstyles") | split(":") %}
+    <link rel="{% if style != kxEnv("css:imgdefault") %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/{{ style }}/board.css" title="{{ style|capitalize }}" />
   {% endfor %}
   {% if locale == 'he' %}
     {% verbatim %}
@@ -30,23 +30,6 @@
 {% block content %}
   {% block boardheader %}
     <div id="adminbar" class="adminbar">
-    {% if kxEnv("css:imgswitcher") %}
-      {% if kxEnv("css:imgdropswitcher") %}
-        <select id="dropswitch">
-          <option>{% trans "Styles" %}</option>
-          {% for style in ku_styles %}
-           <option value="{{ style|capitalize }}">{{ style|capitalize }}</option>
-          {% endfor %}
-        </select>
-      {% else %}
-        {% for style in ku_styles %}
-          [<a href="#" id="style_{{ style|capitalize }}">{{ style|capitalize }}</a>]&nbsp;
-        {% endfor %}
-      {% endif %}
-      {% if ku_styles|length > 0 %}
-        -&nbsp;
-      {% endif %}
-    {% endif %}
     {% if kxEnv("extra:watchthreads") %}
       [<a href="#" id="showwatchedthreads" title="{% trans "Watched Threads" %}">WT</a>]&nbsp;
     {% endif %}
@@ -60,7 +43,25 @@
       {%if kxEnv("misc:boardlist") %}
         {{ include("board/global/boardlist.tpl") }}
       {% endif %}
-      [<a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{{ kxEnv("paths:cgi:path") }}/manage.php" target="_top">{% trans "Manage" %}</a>]
+      <span id="sitelinks">
+        [<a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{{ kxEnv("paths:cgi:path") }}/manage.php" target="_top">{% trans "Manage" %}</a>]
+      </span>
+      {% if kxEnv("css:imgswitcher") %}
+        <span id="styleswitcher">
+        {% if kxEnv("css:imgdropswitcher") %}
+          <select id="dropswitch">
+            <option>{% trans "Styles" %}</option>
+            {% for style in kxEnv("css:imgstyles") | split(":") %}
+            <option value="{{ style|capitalize }}">{{ style|capitalize }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          {% for style in kxEnv("css:imgstyles") | split(":") %}
+            [<a href="#" id="style_{{ style|capitalize }}">{{ style|capitalize }}</a>]
+          {% endfor %}
+        {% endif %}
+        </span>
+      {% endif %}
     </div>
     {% if kxEnv("extra:watchthreads") %}
       <div id="watchedthreads"></div>
@@ -80,8 +81,12 @@
       {% if board.board_desc %}{{board.board_desc}}{% endif %}
       </h1>
     </div>
-
-    {{board.board_include_header}}
+    
+    {% if board.board_include_header %}
+      <div id="includeheader">
+        {{board.board_include_header}}
+      </div>
+    {% endif %}
     <hr />
 {% if replythread != 0%}
     [ <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/">{{ "Return"|trans }}</a> ]
@@ -93,15 +98,24 @@
     {% if not isread %}
       <div id="thread_controls">
         <div id="posts_delete">
-          {% trans "Delete post"%}
-          [<input type="checkbox" name="fileonly" id="fileonly" value="on" /><label for="fileonly">{% trans "File Only" %}</label>]<br />{% trans "Password" %}
-          <input type="password" name="postpassword" size="8" />&nbsp;<input name="deletepost" value="{% trans "Delete" %}" type="submit" />
+          <div class="tc_header">{% trans "Delete post"%}</div>
+          <div class="tc_body">
+            <label for="fileonly">{% trans "File Only" %}</label>
+            <input type="checkbox" name="fileonly" id="fileonly" value="on" />
+            <br />
+            <label for="password">{% trans "Password" %}</label>
+            <input type="password" name="postpassword" size="12" />&nbsp;
+            <input name="deletepost" value="{% trans "Delete" %}" type="submit" />
+          </div>
         </div>
         {% if board.board_reporting == 1 %}
           <div id="posts_report">
-            {% trans "Report post" %}<br />
-            {% trans "Reason" %}
-            <input type="text" name="reportreason" size="10" />&nbsp;<input name="reportpost" value="{% trans "Report" %}" type="submit" />	
+            <div class="tc_header">{% trans "Report post" %}</div>
+            <div class="tc_body">
+              <label for="reportreason">{% trans "Reason" %}</label>
+              <input type="text" name="reportreason" size="12" />&nbsp;
+              <input name="reportpost" value="{% trans "Report" %}" type="submit" />	
+            </div>
           </div>
         {% endif %}
       </div>

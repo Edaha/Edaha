@@ -1,4 +1,5 @@
 {% if kxEnv("misc:boardlist") %}
+	<span id="boardlist">
 	{% for sect in boardlist %}
 		[
 	{% for brd in sect.boards %}
@@ -6,6 +7,7 @@
 	{% endfor %}
 		 ]
 	{% endfor %}
+	</span>
 {# {else}
 	{if is_file($boardlist)}
 		{include $boardlist}

@@ -958,11 +958,11 @@ $(document).ready(function () {
 
     kusaba.addevents();
     kusaba.checkhighlight();
-    $("#adminbar #dropswitch").change(
+    $("#styleswitcher #dropswitch").change(
         function (e) {
             if ($(this).children('option:selected').attr('value')) kusaba.set_stylesheet($(this).children('option:selected').attr('value'));
         });
-    $("#adminbar a[id^=style_]").click(
+    $("#styleswitcher a[id^=style_]").click(
         function (e) {
             kusaba.set_stylesheet($(this).attr("id").substr(6));
             return false;
@@ -1052,7 +1052,6 @@ $(document).ready(function () {
             $("#rulesbottom").css("top", $("#rules").height() > $("#posting_form ol").height() ? $("#rules").height() + 2 : $("#posting_form ol").height());
             return false;
         });
-        $("#adminbar a").not(":first").each(function () { $(".navbar").append("[", $(this), "] ") });
     } else {
         if ($.cookie('showwatchedthreads') && $.cookie('showwatchedthreads') != 0) {
             $('#watchedthreads').css({ "top": Math.max(185, $.cookie('watchedthreadstop')) + "px", "left": Math.max(25, $.cookie('watchedthreadsleft')) + "px", "width": Math.max(250, $.cookie('watchedthreadswidth')) + 'px', "height": Math.max(75, $.cookie('watchedthreadsheight')) + 'px' }).attr("class", "watchedthreads").html('<div class="postblock" id="watchedthreadsdraghandle" style="width: 100%;">' + _("Watched Threads") + '<\/div><span id="watchedthreadlist"><\/span><div id="watchedthreadsbuttons"><a href="#" id="hidewt" title="' + _("Hide the watched threads box") + '"><img src="' + kusaba.webpath + 'css/icons/blank.gif" border="0" class="hidewatchedthreads" alt="hide" /><\/a>&nbsp;<a href="#" id="refreshwt" title="' + _("Refresh watched threads") + '"><img src="' + kusaba.webpath + 'css/icons/blank.gif" border="0" class="refreshwatchedthreads" alt="refresh" /><\/a><\/div><\/div>');
@@ -1083,16 +1082,7 @@ $(document).ready(function () {
                 });
         }
     }
-    $('textarea').css({ "background-image": "url('/css/images/resize.png')", "background-repeat": "no-repeat", "background-position": "bottom right", "resize": "none", "margin-top": "0", "height": "" }).resizable({
-        resize: function (event, ui) {
-            //          $("#postform .ui-wrapper").css("padding" , 0);
-            //          $("#message_label").css({"padding-top" : (($('#postform textarea').height()-9)/2) , "padding-bottom" : (($('#postform textarea').height()-9)/2)});
-            $("#rulesbottom").css("top", $("#rules").height() > $("#posting_form ol").height() ? $("#rules").height() + 2 : $("#posting_form ol").height());
-        }
-    });
-    $("#postform .ui-wrapper").css("padding", 0);
-    //$("#postform .ui-wrapper").css("margin-top" , "4px");
-    $("#rules").prepend("<div id=\"rulesbottom\" style=\"height: 1px;width: 400px;background-color: " + $("#rules").css("border-top-color") + ";position: relative;top: " + ($("#rules").height() > $("#posting_form ol").height() ? $("#rules").height() + 3 : $("#posting_form ol").height()) + "px;right: 10px;padding-right: 20px;\"</div>");
+    // $("#rules").prepend("<div id=\"rulesbottom\" style=\"height: 1px;width: 400px;background-color: " + $("#rules").css("border-top-color") + ";position: relative;top: " + ($("#rules").height() > $("#posting_form ol").height() ? $("#rules").height() + 3 : $("#posting_form ol").height()) + "px;right: 10px;padding-right: 20px;\"</div>");
     $(this).keydown(function (e) {
         if (e.altKey && !$("input, textarea").is(":focus")) {
             var docloc = document.location.toString();

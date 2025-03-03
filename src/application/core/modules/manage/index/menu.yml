@@ -4,24 +4,35 @@ Common Tasks:
     url:
     
   - title: Edit Settings
-    section: 
+    module: site
+    section: config
     url: '#'
 
   - title: Board Options
+    app: board
+    module: board
     section: board
     url: 'do=board'
 
   - title: Ban Manager
-    section: 
+    module: bans
+    section: bans 
     url: '#'
 
   - title: Staff Log
-    section: 
-    url: '#'
+    module: staff
+    section: staff
+    url: '&do=log'
 
   - title: Recent Posts
-    section: 
-    url: '#'
+    app: board
+    module: recents
+    section: posts
+
+  - title: Recent Images
+    app: board
+    module: recents
+    section: images
 
   - title: Installed Addons
     section: 

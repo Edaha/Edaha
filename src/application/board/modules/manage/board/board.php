@@ -117,7 +117,6 @@ class manage_board_board_board extends kxCmd
       ];
     }
     $this->twigData['board_types'];
-    print_r($this->twigData['board_types']);
 
     kxTemplate::output("manage/board", $this->twigData);
   }

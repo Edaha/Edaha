@@ -1,4 +1,4 @@
-{% if 'misc:boardlist'|kxEnv %}
+{% if kxEnv("misc:boardlist") %}
 	{% for sect in boardlist %}
 		[
 	{% for brd in sect %}

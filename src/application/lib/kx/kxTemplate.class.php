@@ -25,25 +25,44 @@ class kxTemplate {
             else{
                 self::$template_dir = KX_ROOT . kxEnv::get("kx:templates:dir");
             }
-            $loader = new Twig_Loader_Filesystem(self::$template_dir);
+            // $loader = new Twig_Loader_Filesystem(self::$template_dir);
+            $loader = new \Twig\Loader\FilesystemLoader(self::$template_dir);
             
             if($cache_dir == null){
                 $cache_dir = KX_ROOT . kxEnv::get("kx:templates:cachedir");
             }
-            self::$instance = new Twig_Environment($loader, array(
+            self::$instance = new \Twig\Environment($loader, array(
                 'cache' => $cache_dir,
                 'auto_reload' => true,
                 'debug' => true
             ));
             // Load our extensions
-            self::$instance->addExtension(new Twig_Extensions_Extension_I18n());
-            self::$instance->addExtension(new Twig_Extensions_Extension_kxEnv());
-            self::$instance->addExtension(new Twig_Extensions_Extension_DateFormat());
-            self::$instance->addExtension(new Twig_Extensions_Extension_Text());
-            self::$instance->addExtension(new Twig_Extensions_Extension_Round());
-            self::$instance->addExtension(new Twig_Extensions_Extension_Strip());
-            self::$instance->addExtension(new Twig_Extensions_Extension_Debug());
-            self::$instance->addExtension(new Twig_Extensions_Extension_PHP());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_I18n());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_kxEnv());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_DateFormat());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_Text());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_Round());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_Strip());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_Debug());
+            // self::$instance->addExtension(new Twig_Extensions_Extension_PHP());
+
+            // Add twig functions
+            $function = new \Twig\TwigFunction('kxEnv', function ($string) {
+                return kxEnv::get('kx:'.$string);
+            });
+
+            self::$instance->addFunction($function);
+
+            $filter = new \Twig\TwigFilter(
+                'trans', 
+                function ($context, $string) {
+                    return jblond\TwigTrans\Translation::transGetText($string, $context);
+                }, 
+                ['needs_context' => true]
+            );
+            self::$instance->addFilter($filter);
+            self::$instance->addExtension(new jblond\TwigTrans\Translation());
+
             // Supply Twig with our GET/POST variables
             self::$data['_get'] = $_GET;
             self::$data['_post'] = $_POST;
@@ -139,7 +158,8 @@ class kxTemplate {
         $data = array_merge(self::$data,$data);
 		//echo "<h2>Post-merge</h2>";
 		//var_dump($data);
-		$template=self::$instance->loadTemplate($tpl);
+		// $template=self::$instance->loadTemplate($tpl);
+		$template=self::$instance->load($tpl);
         //echo "<pre>";
 		//print_r($template);
 		//echo "</pre>";

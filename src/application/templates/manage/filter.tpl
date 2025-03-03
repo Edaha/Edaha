@@ -71,10 +71,10 @@
       <td>{{ filter.filter_added }}</td>
       <td>
         <a href="{{ base_url }}app=board&amp;module=filter&amp;section=filter&amp;do=edit&amp;id={{ filter.filter_id }}">
-          <img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" alt="Edit" />
+          <img src="{{ kxEnv("paths:boards:path") }}/public/manage/edit.png" width="16" height="16" alt="Edit" />
         </a>
         <a href="{{ base_url }}app=board&amp;module=filter&amp;section=filter&amp;do=del&amp;id={{ filter.filter_id }}">
-          <img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" alt="Delete" />
+          <img src="{{ kxEnv("paths:boards:path") }}/public/manage/delete.png" width="16" height="16" alt="Delete" />
         </a>
       </td>
     </tr>

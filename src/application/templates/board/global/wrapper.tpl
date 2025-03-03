@@ -3,9 +3,9 @@
 {% block title %}{{board.board_name}}{% if board.board_desc %} - {{board.board_desc}}{% endif %}{% endblock %}
 
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="{% kxEnv "paths:boards:path" %}/public/css/img_global.css" />
+  <link rel="stylesheet" type="text/css" href="{{ kxEnv("paths:boards:path") }}/public/css/img_global.css" />
   {% for style in ku_styles %}
-    <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:boards:path" %}/public/css/{{ style }}/board.css" title="{{ style|capitalize }}" />
+    <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:boards:path") }}/public/css/{{ style }}/board.css" title="{{ style|capitalize }}" />
   {% endfor %}
   {% if locale == 'he' %}
     {% raw %}
@@ -23,16 +23,16 @@
 	kusaba.kumod_set = false;
 	kusaba.quick_reply = false;
 	kusaba.lastid;
-	kusaba.cgipath = '{% kxEnv "paths:cgi:path" %}';
-	kusaba.webpath = '{% kxEnv "paths:main:path" %}';
+	kusaba.cgipath = '{{ kxEnv("paths:cgi:path") }}';
+	kusaba.webpath = '{{ kxEnv("paths:main:path") }}';
   kusaba.hiddenthreads = $.cookie('hiddenthreads') ? $.cookie('hiddenthreads').split('!') : [];
 {% endblock %}
 
 {% block content %}
   {% block boardheader %}
     <div id="adminbar" class="adminbar">
-    {% if "css:imgswitcher"|kxEnv %}
-      {% if "css:imgdropswitcher"|kxEnv %}
+    {% if kxEnv("css:imgswitcher") %}
+      {% if kxEnv("css:imgdropswitcher") %}
         <select id="dropswitch">
           <option>{% trans "Styles" %}</option>
           {% for style in ku_styles %}
@@ -48,36 +48,36 @@
         -&nbsp;
       {% endif %}
     {% endif %}
-    {% if "extra:watchthreads"|kxEnv %}
+    {% if kxEnv("extra:watchthreads") %}
       [<a href="#" id="showwatchedthreads" title="{% trans "Watched Threads" %}">WT</a>]&nbsp;
     {% endif %}
 
-    {% if "extra:postspy"|kxEnv %}
+    {% if kxEnv("extra:postspy") %}
       [<a href="#" id="togglepostspy" title="{% trans "Post Spy" %}">PS</a>]&nbsp;
     {% endif %}
 
-    [<a href="{% kxEnv "paths:main:path" %}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{% kxEnv "paths:cgi:path" %}/manage.php" target="_top">{% trans "Manage" %}</a>]
+    [<a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{{ kxEnv("paths:cgi:path") }}/manage.php" target="_top">{% trans "Manage" %}</a>]
     </div>
     <div class="navbar">
-      {%if "misc:boardlist"|kxEnv %}
+      {%ifkxEnv("misc:boardlist") %}
         {% include "board/global/boardlist.tpl" %}
       {% endif %}
     </div>
-    {% if "extra:watchthreads"|kxEnv %}
+    {% if kxEnv("extra:watchthreads") %}
       <div id="watchedthreads"></div>
     {% endif %}
 
     <div class="logo">
-      {% if 'site:header'|kxEnv and not board.board_image %}
-        <img src="{% kxEnv 'site:header' %}" alt="{% trans "Logo" %}" /><br />
+      {% if kxEnv("site:header") and not board.board_image %}
+        <img src="{{ kxEnv("site:header") }}" alt="{% trans "Logo" %}" /><br />
       {% elseif board.board_image and board.board_image != "none" %}
         <img src="{{board.board_image}}" alt="{% trans "Logo"%}" /><br />
       {% endif %}
 	  <h1>
-      {% if 'pages:dirtitle'|kxEnv %}
+      {% if kxEnv("pages:dirtitle") %}
         /{{board.board_name}}/
       {% endif %}
-	  {% if board.board_desc and 'pages:dirtitle'|kxEnv %} - {% endif %}
+	  {% if board.board_desc and kxEnv("pages:dirtitle") %} - {% endif %}
 	  {% if board.board_desc %}{{board.board_desc}}{% endif %}
 	  </h1>
     </div>
@@ -115,7 +115,7 @@
               {% if thispage == 0 %}
                 {% trans "Previous" %}
               {% else %}
-                <form method="get" action="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/{% if (thispage-1) != 0 %}{{thispage-1}}.html{% endif %}">
+                <form method="get" action="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/{% if (thispage-1) != 0 %}{{thispage-1}}.html{% endif %}">
                   <input value="{% trans "Previous" %}" type="submit" /></form>
               {% endif %}
             </li>
@@ -125,7 +125,7 @@
               {% spaceless %}
                 <li>&#91;
                   {% if page != thispage %}
-                    <a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/{{page}}.html">
+                    <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/{{page}}.html">
                   {% endif %}
                 
                   {{ page }}
@@ -142,7 +142,7 @@
               {% if thispage == numpages %}
                 {% trans "Next" %}
               {% else %}
-                <form method="get" action="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/{{thispage+1}}.html"><input value="{% trans "Next" %}" type="submit" /></form>
+                <form method="get" action="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/{{thispage+1}}.html"><input value="{% trans "Next" %}" type="submit" /></form>
               {% endif %}
             </li>
           {% endspaceless %}
@@ -152,7 +152,7 @@
     <div id="footer">
       {% if boardlist %}
         <div class="navbar">
-          {%if "misc:boardlist"|kxEnv %}
+          {%ifkxEnv("misc:boardlist") %}
             {% include "board/global/boardlist.tpl" %}
           {% endif %}
         </div>

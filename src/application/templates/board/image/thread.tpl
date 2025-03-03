@@ -2,7 +2,7 @@
 {% block boardcontent %}
   {{ parent() }}
   <!-- DEBUG {% debug %} -->
-  <form id="delform" action="{% kxEnv "paths:script:path" %}/index.php?app=core&module=post&section=post" method="post">
+  <form id="delform" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post">
   <input type="hidden" name="board" value="{{board.board_name}}" />
   {% for post in posts %}
     {% if post.post_parent == 0 %}
@@ -30,12 +30,12 @@
         {% endif %}
         {% if post.file_type[fkey] == 'mp3' %}
           <!--[if !IE]> -->
-          <object type="application/x-shockwave-flash" data="{% kxEnv "paths:main:path" %}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,22,87" width="290" height="24">
+          <object type="application/x-shockwave-flash" data="{{ kxEnv("paths:main:path") }}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,22,87" width="290" height="24">
           <param name="wmode" value="transparent" />
           <!-- <![endif]-->
           <!--[if IE]>
           <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,22,87" width="290" height="24">
-            <param name="movie" value="{% kxEnv "paths:main:path" %}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" />
+            <param name="movie" value="{{ kxEnv("paths:main:path") }}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" />
             <param name="wmode" value="transparent" />
           <!-->
           </object>

@@ -32,7 +32,7 @@
   <tbody>
   {% for news in entries %}
     <tr>
-      <td>{{ news.entry_time|date_format("%b %d, %Y %H:%M") }}</td>
+      <td>{{ news.entry_time|date("d/m/y @ h:i a T") }}</td>
       <td>{{ news.entry_subject }}</td>
       <td>{{ news.entry_message }}</td>
       <td>[ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=news&amp;action=edit&amp;id={{ news.entry_id }}">{% trans "Edit" %}</a> ] [ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=news&amp;action=del&amp;id={{ news.entry_id }}">{% trans "Delete" %}</a> ]</td>

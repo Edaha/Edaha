@@ -1,7 +1,7 @@
 {% extends "board/image/post_box.tpl" %}
 {% block boardcontent %}
   {{ parent() }}
-  <form id="delform" action="{% kxEnv "paths:script:path" %}/index.php?app=core&module=post&section=post" method="post">
+  <form id="delform" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post">
   <input type="hidden" name="board" value="{{board.board_name}}" />
   {% for thread in posts %}
     {% set iteration = loop.index0 %}
@@ -9,9 +9,9 @@
       {% if post.post_parent == 0 %}
         <div class="thread" id="thread_{{post.post_id}}_{{board.board_name}}">
           <span id="unhidethread{{post.post_id}}{{board.board_name}}" style="display: none;">
-            {% trans "Thread" %} <a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/res/{{post.post_id}}.html">{{post.post_id}}</a> {% trans "hidden." %}
+            {% trans "Thread" %} <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}.html">{{post.post_id}}</a> {% trans "hidden." %}
             <a href="#" id="togglethread" onclick="javascript:togglethread('{{post.post_id}}{{board.board_name}}');return false;" title="{% trans "Un-Hide Thread" %}">
-              <img src="{% kxEnv "paths:main:path" %}css/icons/blank.gif" border="0" class="unhidethread" alt="{% trans "Un-Hide Thread" %}" />
+              <img src="{{ kxEnv("paths:main:path") }}css/icons/blank.gif" border="0" class="unhidethread" alt="{% trans "Un-Hide Thread" %}" />
             </a>
           </span>
           <script type="text/javascript"><!--
@@ -33,32 +33,32 @@
                 <img style="border: 0;" src="{{boardpath}}css/sticky.gif" alt="{% trans "Stickied" %}" />
               {% endif %}
               <span id="hide_{{post.post_id}}"></span>
-              {% if 'extra:watchthreads'|kxEnv %}
+              {% if kxEnv("extra:watchthreads") %}
                 <span id="watch_{{post.post_id}}"></span>
               {% endif %}
-              {% if 'extra:expand'|kxEnv and post.replies and (post.replies + 'display:replies'|kxEnv) < 300 %}
+              {% if kxEnv("extra:expand") and post.replies and (post.replies + kxEnv("display:replies")) < 300 %}
                 <span id="expand_{{post.post_id}}"></span>
               {% endif %}
-              {% if 'extra:quickreply'|kxEnv %}
+              {% if kxEnv("extra:quickreply") %}
                 <span id="quickreply_{{post.post_id}}"></span>
               {% endif %}
               </span>
               <span id="dnb_{{board.board_name}}_{{post.post_id}}_y"></span>
               {% if post.replies > 1000 %}
-                {% if 'display:traditionalread'|kxEnv %}
-                  &#91;<a href="{% kxEnv "paths:main:path" %}/read.php/{{board.board_name}}/{{post.post_id}}/p1-100">{% trans "Reply" %}</a>&#93;
-                  &#91;<a href="{% kxEnv "paths:main:path" %}/read.php/{{board.board_name}}/{{post.post_id}}/l50">{% trans "Last 50 posts" %}</a>&#93;
+                {% if kxEnv("display:traditionalread") %}
+                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php/{{board.board_name}}/{{post.post_id}}/p1-100">{% trans "Reply" %}</a>&#93;
+                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php/{{board.board_name}}/{{post.post_id}}/l50">{% trans "Last 50 posts" %}</a>&#93;
                 {% else %}
-                  &#91;<a href="{% kxEnv "paths:main:path" %}/read.php?b={{board.board_name}}&t={{post.post_id}}&p=p1-100">{% trans "Reply" %}</a>&#93;
-                  &#91;<a href="{% kxEnv "paths:main:path" %}/read.php?b={{board.board_name}}&t={{post.post_id}}&p=l50">{% trans "Last 50 posts" %}</a>&#93;
+                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php?b={{board.board_name}}&t={{post.post_id}}&p=p1-100">{% trans "Reply" %}</a>&#93;
+                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php?b={{board.board_name}}&t={{post.post_id}}&p=l50">{% trans "Last 50 posts" %}</a>&#93;
                 {% endif %}
               {% else %}
-                [<a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/res/{{post.post_id}}.html">{% trans "Reply" %}</a>]
-                {% if 'extra:firstlast'|kxEnv and ((post.post_stickied == 1 and post.replies + 'display:stickyreplies'|kxEnv > 50) or (post.post_stickied == 0 and post.replies + 'display:replies'|kxEnv > 50)) %}
-                  {% if ((post.post_stickied == 1 and post.replies + 'display:stickyreplies'|kxEnv > 100) or (post.post_stickied == 0 and post.replies + 'display:replies'|kxEnv > 100)) %}
-                    [<a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/res/{% if post.post_parent == 0 %}{{post.post_id}}{% else %}{{post.post_parent}}{% endif %}-100.html">{% trans "First 100 posts" %}</a>]
+                [<a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}.html">{% trans "Reply" %}</a>]
+                {% if kxEnv("extra:firstlast") and ((post.post_stickied == 1 and post.replies + kxEnv("display:stickyreplies") > 50) or (post.post_stickied == 0 and post.replies + kxEnv("display:replies") > 50)) %}
+                  {% if ((post.post_stickied == 1 and post.replies + kxEnv("display:stickyreplies") > 100) or (post.post_stickied == 0 and post.replies + kxEnv("display:replies") > 100)) %}
+                    [<a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{% if post.post_parent == 0 %}{{post.post_id}}{% else %}{{post.post_parent}}{% endif %}-100.html">{% trans "First 100 posts" %}</a>]
                   {% endif %}
-                  [<a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/res/{{post.post_id}}+50.html">{% trans "Last 50 posts" %}</a>]
+                  [<a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}+50.html">{% trans "Last 50 posts" %}</a>]
                 {% endif %}
               {% endif %}
       {% else %}
@@ -76,12 +76,12 @@
           {% endif %}
           {% if post.file_type[fkey] == 'mp3' %}
             <!--[if !IE]> -->
-            <object type="application/x-shockwave-flash" data="{% kxEnv "paths:main:path" %}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,22,87" width="290" height="24">
+            <object type="application/x-shockwave-flash" data="{{ kxEnv("paths:main:path") }}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,22,87" width="290" height="24">
             <param name="wmode" value="transparent" />
             <!-- <![endif]-->
             <!--[if IE]>
             <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,22,87" width="290" height="24">
-              <param name="movie" value="{% kxEnv "paths:main:path" %}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" />
+              <param name="movie" value="{{ kxEnv("paths:main:path") }}/inc/player/player.swf?playerID={{post.post_id}}&amp;soundFile={{file_path}}/src/{{post.file_name[fkey]|url_encode|e}}.mp3{% if post.post_id3[fkey].comments_html.artist.0 %}&amp;artists={{post.post_id3[fkey].comments_html.artist.0}}{% endif %}{% if post.post_id3[fkey].comments_html.title.0 %}&amp;titles={{post.post_id3[fkey].comments_html.title.0}}{% endif %}&amp;wmode=transparent" />
               <param name="wmode" value="transparent" />
             <!-->
             </object>

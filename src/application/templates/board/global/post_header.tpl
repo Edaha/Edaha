@@ -29,11 +29,11 @@
   {% endif %}
 {% endspaceless %}
 {% if post.post_authority == 1 %}
-  <span title="{% kxEnv "site:name" %} {% trans "administrator" %}" class="capcode">
+  <span title="{{ kxEnv("site:name") }} {% trans "administrator" %}" class="capcode">
     &#35;&#35;&nbsp;{% trans "Admin" %}&nbsp;&#35;&#35;
   </span>
 {% elseif post.post_authority == 2 %}
-  <span title="{% kxEnv "site:name" %} {% trans "moderator" %}" class="capcode">
+  <span title="{{ kxEnv("site:name") }} {% trans "moderator" %}" class="capcode">
     &#35;&#35;&nbsp;{% trans "Mod" %}&nbsp;&#35;&#35;
   </span>
 {% endif %}

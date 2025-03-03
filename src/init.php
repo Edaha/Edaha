@@ -5,8 +5,9 @@ DEFINE('KX_SCRIPT', KX_ROOT);
 DEFINE('KX_LIB', KX_ROOT . '/application/lib/kx'); // Full path to kx's library files
 DEFINE('KUSABA_RUNNING', true);
 
-require_once (KX_LIB . "/../Twig/Autoloader.php");
-Twig_Autoloader :: register();
+// require_once (KX_LIB . "/../Twig/Autoloader.php");
+require_once (KX_ROOT . "/vendor/autoload.php");
+// Twig_Autoloader :: register();
 require_once (KX_LIB . '/kxAutoload.class.php');
 require_once (KX_ROOT . '/application/lib/gettext/gettext.inc.php');
 

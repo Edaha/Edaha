@@ -1,12 +1,12 @@
 {% extends "global_wrapper.tpl" %}
 
-{% block title %}{% kxEnv 'site:name' %} Navigation{% endblock %}
+{% block title %}{{ kxEnv("site:name") }} Navigation{% endblock %}
 
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/menu_global.css" />
+  <link rel="stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/menu_global.css" />
   {% for style in styles %}
-    <link rel="{% if style != 'css:sitedefault'|kxEnv %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/site_{{ style }}.css" title="{{ style|capitalize }}" />
-    <link rel="{% if style != 'css:sitedefault'|kxEnv %}alternate {% endif %}stylesheet" type="text/css" href="{% kxEnv "paths:main:path" %}/public/css/sitemenu_{{ style }}.css" title="{{ style|capitalize }}" />
+    <link rel="{% if style != kxEnv("css:sitedefault") %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/site_{{ style }}.css" title="{{ style|capitalize }}" />
+    <link rel="{% if style != kxEnv("css:sitedefault") %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/sitemenu_{{ style }}.css" title="{{ style|capitalize }}" />
   {% endfor %}
 
   {% raw %}
@@ -22,10 +22,10 @@
 {% endblock %}
 
 {% block content %}
-  <h1>{% kxEnv 'site:name' %}</h1>
+  <h1>{{ kxEnv("site:name") }}</h1>
   <ul>
-  <li><a href="{% kxEnv "paths:main:path" %}" target="_top">{% trans "Front Page" %}</a></li>
-  {% if 'css:menuswitcher'|kxEnv %} 
+  <li><a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Front Page" %}</a></li>
+  {% if kxEnv("css:menuswitcher") %} 
     <li id="sitestyles"><a onclick="javascript:showstyleswitcher();" href="#" target="_self">[{t "Site Styles"}]</a></li>
   {% endif %}
 
@@ -37,7 +37,7 @@
     <div id="{{sect.section_abbrev}}"{% if sect.hidden == 1 %} style="display: none;"{% endif %}>
     <ul>
       {% for brd in sect.boards %}
-        <li><a href="{% kxEnv "paths:boards:path" %}/{{brd.board_name}}/" class="boardlink{% if brd.board_trial == 1 %} trial{% endif %}{% if brd.board_popular == 1 %} pop{% endif %}">
+        <li><a href="{{ kxEnv("paths:boards:path") }}/{{brd.board_name}}/" class="boardlink{% if brd.board_trial == 1 %} trial{% endif %}{% if brd.board_popular == 1 %} pop{% endif %}">
         /{{brd.board_name}}/ - 
         {{brd.board_desc}}
         {% if brd.board_locked == 1 %}
@@ -54,7 +54,7 @@
       <li>{% trans "No visible boards" %}</li>
     </ul>
   {% endfor %}
-  {% if 'site:irc'|kxEnv %}
+  {% if kxEnv("site:irc") %}
       <h2>
       &nbsp;IRC</h2>
     <ul>

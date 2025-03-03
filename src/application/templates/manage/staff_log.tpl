@@ -18,7 +18,7 @@
     {% for action in modlog %}
     <tr>
       <td>{{ action.user }}</td>
-      <td>{{action.timestamp|date_format("%b %d, %Y %H:%M") }}</td>
+      <td>{{action.timestamp|date("d/m/y @ h:i a T") }}</td>
       <td>{{action.entry}}</td>
     </tr>
     {% endfor %}

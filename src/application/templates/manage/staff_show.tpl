@@ -40,8 +40,8 @@
   {% for member in staffmembers %}
     <tr>
       <td>{{ member.user_name }}</td>
-      <td>{{ member.user_add_time|date_format("%b %d, %Y %H:%M") }}</td>
-      <td>{{ member.user_last_active|date_format("%b %d, %Y %H:%M") }}</td>
+      <td>{{ member.user_add_time|date("d/m/y @ h:i a T") }}</td>
+      <td>{{ member.user_last_active|date("d/m/y @ h:i a T") }}</td>
       <td>{{ member.user_type }}</td>
       <td>[ <a href="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=show&amp;act=edit&amp;id={{ member.user_id }}">{% trans "Edit" %}</a> ] [ <a href="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=show&amp;act=del&amp;id={{ member.user_id }}">{% trans "Delete" %}</a> ]</td>
     </tr>

@@ -8,7 +8,7 @@
   <div id="postarea">
     <a id="postbox"></a>
     <div id="postform">
-      <form name="postform" id="posting_form" action="{% kxEnv "paths:script:path" %}/index.php?app=core&module=post&section=post" method="post" enctype="multipart/form-data"
+      <form name="postform" id="posting_form" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post" enctype="multipart/form-data"
       {% spaceless %}
         {%if board.board_enablecaptcha == 1 %}
           onsubmit="return checkcaptcha('postform');"
@@ -34,7 +34,7 @@
         </li>
       {% if board.board_enablecaptcha == 1 %}
         <li>
-          <a href="#" onclick="javascript:document.getElementById('captchaimage').src = '{% kxEnv "paths:cgi:path" %}/captcha.php?' + Math.random();return false;"><img id="captchaimage" src="{% kxEnv "paths:cgi:path" %}/captcha.php" border="0" width="90" height="25" alt="Captcha image"></a>
+          <a href="#" onclick="javascript:document.getElementById('captchaimage').src = '{{ kxEnv("paths:cgi:path") }}/captcha.php?' + Math.random();return false;"><img id="captchaimage" src="{{ kxEnv("paths:cgi:path") }}/captcha.php" border="0" width="90" height="25" alt="Captcha image"></a>
           <input type="text" name="captcha" size="28" maxlength="10" accesskey="c" />
         </li>
       {% endif %}
@@ -42,10 +42,10 @@
           <label for="subject">{% trans "Subject" %}</label>
           {% strip %}<input type="text" id="subject" name="subject" size="35" maxlength="75" accesskey="s" />&nbsp;
             <input type="submit" value="
-            {% if "extra:quickreply"|kxEnv and replythread == 0 %}
+            {% if kxEnv("extra:quickreply") and replythread == 0 %}
               {% trans "Submit" %}" accesskey="z" />
               <span id="posttypeindicator">&nbsp;({% trans "new thread" %})</span>
-            {% elseif "extra:quickreply"|kxEnv and replythread != 0 %}
+            {% elseif kxEnv("extra:quickreply") and replythread != 0 %}
               {% trans "Reply" %}" accesskey="z" />
               <span id="posttypeindicator">&nbsp;({% trans %}reply to {{replythread}}{% endtrans %})</span>
             {% else %}
@@ -87,7 +87,7 @@
             {% endif %}
           {% endfor %}
           </select>&nbsp;
-          <a id="embedhelp" href="#postbox" onclick="window.open('{% kxEnv "paths:main:path" %}/embedhelp.php','embedhelp','toolbar=0,location=0,status=0,menubar=0,scrollbars=0,resizable=0,width=300,height=210');return false;">Help</a>
+          <a id="embedhelp" href="#postbox" onclick="window.open('{{ kxEnv("paths:main:path") }}/embedhelp.php','embedhelp','toolbar=0,location=0,status=0,menubar=0,scrollbars=0,resizable=0,width=300,height=210');return false;">Help</a>
         </li>
       {% endif %}
         <li>
@@ -107,25 +107,25 @@
           {% endif %}
           </li>
           <li>{% trans "Maximum file size allowed is" %} {{(board.board.board_max_upload_size/1024)|round}} KB.</li>
-          {% set thumbw %}{{"images:thumbw"|kxEnv}}{% endset %}
-          {% set thumbh %}{{"images:thumbh"|kxEnv}}{% endset %}
+          {% set thumbw %}{{kxEnv("images:thumbw")}}{% endset %}
+          {% set thumbh %}{{kxEnv("images:thumbh")}}{% endset %}
           {% set uniqueposts %}{{board.board_uniqueposts}}{% endset %}
           <li>{% trans %}Images greater than {{thumbw}}x{{thumbh}} pixels will be thumbnailed.{% endtrans %}</li>
           <li>{% trans %}Currently {{uniqueposts}} unique user posts.{% endtrans %}
           {% if board.board_enablecatalog == 1 %} 
-            <a href="{% kxEnv "paths:boards:path" %}/{{board.board_name}}/catalog.html">{% trans "View catalog" %}</a>
+            <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/catalog.html">{% trans "View catalog" %}</a>
           {% endif %}
           </li>
         </ul>
-        {% if "extra:blotter"|kxEnv and blotter %}
+        {% if kxEnv("extra:blotter") and blotter %}
           <br />
           <ul style="margin-left: 0; margin-top: 0; margin-bottom: 0; padding-left: 0;">
           <li style="position: relative;">
             <span style="color: red;">
-          {% trans "Blotter updated" %}: {{blotter_updated|date_format("%Y-%m-%d")}}
+          {% trans "Blotter updated" %}: {{blotter_updated|date("d/m/y")}}
           </span>
             <span style="color: red;text-align: right;position: absolute;right: 0px;">
-              <a href="#" onclick="javascript:toggleblotter(true);return false;">{% trans "Show/Hide" %}</a> <a href="{% kxEnv "paths:main:path" %}/blotter.php">{% trans "Show All" %}</a>
+              <a href="#" onclick="javascript:toggleblotter(true);return false;">{% trans "Show/Hide" %}</a> <a href="{{ kxEnv("paths:main:path") }}/blotter.php">{% trans "Show All" %}</a>
             </span>
           </li>
           {{blotter}}

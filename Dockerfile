@@ -11,6 +11,7 @@
 # Create a stage for installing app dependencies defined in Composer.
 FROM composer:lts as prod-deps
 WORKDIR /app
+RUN composer update
 
 # If your composer.json file defines scripts that run during dependency installation and
 # reference your application source files, uncomment the line below to copy all the files
@@ -24,7 +25,7 @@ WORKDIR /app
 RUN --mount=type=bind,source=composer.json,target=composer.json \
     --mount=type=bind,source=composer.lock,target=composer.lock \
     --mount=type=cache,target=/tmp/cache \
-    composer install --no-dev --no-interaction
+    composer install --no-dev --no-interaction --ignore-platform-req=ext-gettext
 
 # Dev dependencies
 FROM composer:lts as dev-deps
@@ -32,7 +33,7 @@ WORKDIR /app
 RUN --mount=type=bind,source=./composer.json,target=composer.json \
     --mount=type=bind,source=./composer.lock,target=composer.lock \
     --mount=type=cache,target=/tmp/cache \
-    composer install --no-interaction
+    composer install --no-interaction --ignore-platform-req=ext-gettext
     
 
 ################################################################################
@@ -73,7 +74,7 @@ FROM php:8.2-apache as base
 # RUN pecl install redis-5.3.7 \
 #    && pecl install xdebug-3.2.1 \
 #    && docker-php-ext-enable redis xdebug
-RUN docker-php-ext-install pdo pdo_mysql
+RUN docker-php-ext-install pdo pdo_mysql gettext
 COPY ./src /var/www/html
 RUN chown -R www-data:www-data /var/www
 

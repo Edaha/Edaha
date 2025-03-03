@@ -18,22 +18,22 @@
         {% set config_name = option.config_name %}
         <label for="{{option.config_variable}}">{% trans config_name %}</label>
         {% if option.config_type == "input" or option.config_type == "numeric" %}
-        <input type="text" name="config[{{option.config_variable}}]" id="{{option.config_variable}}" value="{{option.config_variable|kxEnv|e}}" />
+        <input type="text" name="config[{{option.config_variable}}]" id="{{option.config_variable}}" value="{{kxEnv(option.config_variable)|e}}" />
         {% elseif option.config_type == "text" %}
-        <input type="text" name="config[{{option.config_variable}}]" id="{{option.config_variable}}" value="{{option.config_variable|kxEnv|e}}" />
+        <input type="text" name="config[{{option.config_variable}}]" id="{{option.config_variable}}" value="{{kxEnv(option.config_variable)|e}}" />
         {% elseif option.config_type == "true_false" %}
-        <input type="radio" name="config[{{option.config_variable}}]" value="1"{% if option.config_variable|kxEnv == true %} checked="checked"{%endif %} /> {% trans "Enabled" %}
-        <input type="radio" name="config[{{option.config_variable}}]" value="0"{% if option.config_variable|kxEnv == false %} checked="checked"{%endif %} /> {% trans "Disabled" %}
+        <input type="radio" name="config[{{option.config_variable}}]" value="1"{% if kxEnv(option.config_variable) == true %} checked="checked"{%endif %} /> {% trans "Enabled" %}
+        <input type="radio" name="config[{{option.config_variable}}]" value="0"{% if kxEnv(option.config_variable) == false %} checked="checked"{%endif %} /> {% trans "Disabled" %}
         {#<select name="config[{{option.config_variable}}]" id="{{option.config_variable}}">
-          <option value="true" {% if option.config_variable|kxEnv == true %} selected="selected"{%endif %} >
+          <option value="true" {% if kxEnv(option.config_variable) == true %} selected="selected"{%endif %} >
             {% trans "True" %}
           </option>
-          <option value="false" {% if option.config_variable|kxEnv == false %} selected="selected"{%endif %} >
+          <option value="false" {% if kxEnv(option.config_variable) == false %} selected="selected"{%endif %} >
             {% trans "False" %}
           </option>
         </select>#}
         {% elseif option.config_type == "textarea" %}
-        <textarea name="config[{{option.config_variable}}]" id="{{option.config_variable}}" rows="3" cols="40">{{option.config_variable|kxEnv|e}}</textarea>
+        <textarea name="config[{{option.config_variable}}]" id="{{option.config_variable}}" rows="3" cols="40">{{kxEnv(option.config_variable)|e}}</textarea>
         {% endif %}
         {% set config_desc = option.config_description %}
         <span class="desc"><a href="#" title="{% trans config_desc %}">?</a></span><br />

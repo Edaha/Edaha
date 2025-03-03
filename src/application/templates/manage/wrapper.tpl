@@ -1,7 +1,7 @@
 {% extends "global_wrapper.tpl" %}
-{% block title %}{% trans "Edaha Management" %}{% endblock %}
+{% block title %}{{ "Edaha Management" }}{% endblock %}
 {% block css %}
-  <link href="{% kxEnv "paths:boards:path" %}/public/css/manage.css" rel="stylesheet" type="text/css" />
+  <link href="{{ kxEnv("paths:boards:path") }}/public/css/manage.css" rel="stylesheet" type="text/css" />
   {{ parent() }}
 {% endblock %}
 {% block extrahead %}{% endblock %}
@@ -9,7 +9,7 @@
     <section class="content_wrap">
       <header id="">
         <section id="top">
-          {% trans "Edaha Management" %}
+          {{ "Edaha Management"|trans }}
         </section>
         
         <div class="login">

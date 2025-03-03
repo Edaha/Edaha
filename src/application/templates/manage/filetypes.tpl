@@ -31,7 +31,7 @@
     <td>{{ type.type_image }}</td>
     <td>{{ type.type_ext }}</td>
     <td>{{ type.type_mime }}</td>
-    <td><a href="{{ base_url }}app=board&amp;module=attachments&amp;section=filetypes&amp;do=edit&amp;id={{ type.type_id }}"><img src="{% kxEnv "paths:boards:path" %}/public/manage/edit.png" width="16" height="16" alt="Edit" /></a>&nbsp;<a href="{{ base_url }}app=board&amp;module=attachments&amp;section=filetypes&amp;do=del&amp;id={{ type.type_id }}"><img src="{% kxEnv "paths:boards:path" %}/public/manage/delete.png" width="16" height="16" alt="Delete" /></a></td>
+    <td><a href="{{ base_url }}app=board&amp;module=attachments&amp;section=filetypes&amp;do=edit&amp;id={{ type.type_id }}"><img src="{{ kxEnv("paths:boards:path") }}/public/manage/edit.png" width="16" height="16" alt="Edit" /></a>&nbsp;<a href="{{ base_url }}app=board&amp;module=attachments&amp;section=filetypes&amp;do=del&amp;id={{ type.type_id }}"><img src="{{ kxEnv("paths:boards:path") }}/public/manage/delete.png" width="16" height="16" alt="Delete" /></a></td>
   </tr>
 {% endfor %}
 </table>

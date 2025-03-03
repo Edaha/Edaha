@@ -1,6 +1,10 @@
 {
     "require-dev": {
         "phpunit/phpunit": "^9.6"
+    },
+    "require": {
+        "ext-gettext": "*",
+        "twig/twig": "^3.0",
+        "jblond/twig-trans": "^1.1"
     }
- }
- 
+}

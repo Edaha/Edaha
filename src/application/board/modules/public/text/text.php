@@ -35,6 +35,7 @@ if (!defined('KUSABA_RUNNING'))
 }
 
 class public_board_text_text extends public_board_base_baseboard {
+  public $boardType = 'text';
   
   public function validPost() {
     if (

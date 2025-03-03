@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `bannedhashes` (
 --
 -- Table structure for table `boards`
 --
-
+-- TODO Remove the unnecessary prefix, adjust naming
 CREATE TABLE IF NOT EXISTS `boards` (
   `board_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `board_order` smallint(6) DEFAULT NULL,
@@ -326,7 +326,9 @@ CREATE TABLE IF NOT EXISTS `filetypes` (
 INSERT INTO `filetypes` (`type_id`, `type_ext`, `type_mime`, `type_image`, `type_image_width`, `type_image_height`, `type_force_thumb`) VALUES
 (1, 'jpg', 'image/jpg', '', 0, 0, 1),
 (2, 'png', 'image/png', '', 0, 0, 1),
-(3, 'gif', 'image/gif', '', 0, 0, 1);
+(3, 'gif', 'image/gif', '', 0, 0, 1),
+(4, 'webp', 'image/webp', '', 0, 0, 1),
+(5, 'heic', 'image/heic', '', 0, 0, 1);
 
 -- --------------------------------------------------------
 

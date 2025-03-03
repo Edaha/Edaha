@@ -2284,21 +2284,28 @@ class kxBans
   }
 
   /* Add a ip/ip range ban */
-  public static function BanUser($ip, $modname, $globalban, $duration, $boards, $reason, $staffnote, $appealat = 0, $type = 0, $allowread = 1, $proxyban = false)
+  public static function BanUser($ip, $board_ids, $duration, $reason, $allow_read, $allow_appeal, $notes, $staff_id, $delete_all = false)
   {
+    $boards = kxDb::getInstance()->select("boards")
+      ->fields("boards", ["board_id", "board_name"])
+      ->where("board_id in ( " . implode(", ", $board_ids) . " )")
+      ->execute()
+      ->fetchAllAssoc("board_id",PDO::FETCH_ASSOC);
+    $fields= [
+      'ip' => $ip,
+      'ipmd5' => md5($ip),
+      'boards' => json_encode($boards),
+      'created' => time(),
+      'expires' => time() + $duration,
+      'reason' => $reason,
+      'allow_read' => (int) $allow_read,
+      'staff_note' => $notes,
+      'created_by_staff_id' => (int) $staff_id,
+    ];
 
-    if ($duration > 0) {
-      $ban_globalban = '0';
-    } else {
-      $ban_globalban = '1';
-    }
-    if ($duration > 0) {
-      $ban_until = time() + $duration;
-    } else {
-      $ban_until = '0';
-    }
-
-    kxDB::getinstance()->exec("INSERT INTO `" . kxEnv::Get('kx:db:prefix') . "banlist` ( `ip` , `ipmd5` , `type` , `allowread` , `globalban` , `boards` , `by` , `at` , `until` , `reason`, `staffnote`, `appealat` ) VALUES ( " . $kx_db->qstr(md5_encrypt($ip, kxEnv::Get('kx:misc:randomseed'))) . " , " . $kx_db->qstr(md5($ip)) . " , " . intval($type) . " , " . intval($allowread) . " , " . intval($globalban) . " , " . $kx_db->qstr($boards) . " , " . $kx_db->qstr($modname) . " , " . time() . " , " . intval($ban_until) . " , " . $kx_db->qstr($reason) . " , " . $kx_db->qstr($staffnote) . ", " . intval($appealat) . " ) ");
+    $ban_query = kxDb::getInstance()->insert("banlist")
+      ->fields($fields)
+      ->execute();
 
     if (!$proxyban && $type == 1) {
       $this->UpdateHtaccess();

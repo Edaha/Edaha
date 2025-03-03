@@ -7,32 +7,7 @@
 {% block managecontent %}
 
   <form action="{{ base_url }}app=core&amp;module=site&amp;section=bans&amp;do=view&amp;action=filter" method="post">
-    <fieldset name="bans_filter">
-      <legend>{% trans "Filter" %}</legend>
-      <label for="filter1input">Filter 1:</label>  
-      <input type="text" name="filter1input" id="filter1input" /> &nbsp;
-      <select name="filter1select" id="filter1select">
-        <option value="opt1">Option 1</option>
-        <option value="opt2">Option 2</option>
-      </select>
-      <br />
-      
-      <label for="filter2input">Filter 2:</label>  
-      <input type="text" name="filter2input" id="filter2input" /> &nbsp;
-      <select name="filter2select" id="filter2select">
-        <option value="opt1">Option 1</option>
-        <option value="opt2">Option 2</option>
-      </select>
-      <br />
-      
-      <label for="filter_submit">&nbsp;</label>
-      <input type="submit" name="filter_submit" id="filter_submit" />
-      
-    </fieldset>
-    {# macros.manageform("bans_filter", "Filter", true, 
-                         { 'Filter 1' : { 'id' : 'filter1', 'type' : 'text' } }
-                        )
-    #}                         
+       
   </form>
   
   <p>
@@ -58,16 +33,18 @@
         
         {# Need to finalize banlist table and then finish this. For now, fake data #}
         <tbody>
+          {% for ban in bans %}
           <tr>
-            <td>192.168.2.105</td>
-            <td>All Boards</td>
-            <td>Spamming</td>
-            <td>Constant Spammer</td>
-            <td>August 14, 2011, 8:30PM</td>
-            <td>December 21, 2012, 12:00AM</td>
-            <td>admin</td>
-            <td><input type="checkbox" name="delete_bans[]" id="delete_bans[]" /></td>
+            <td>{{ ban.ip }}</td>
+            <td>{% for board in ban.boards %}{{ board.board_name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+            <td>{{ ban.reason }}</td>
+            <td>{{ ban.staff_note }}</td>
+            <td>{{ ban.created|date }}</td>
+            <td>{{ ban.expires|date }}</td>
+            <td>{{ ban.user_name }}</td>
+            <td><input type="checkbox" name="delete_bans[]" id="{{ ban.id }}" /></td>
           </tr>
+          {% endfor %}
         </tbody>
       </table>
     </form>

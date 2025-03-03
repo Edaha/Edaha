@@ -49,18 +49,38 @@ class manage_core_bans_bans extends kxCmd {
   }
   
   private function _viewBans() {
-    // TODO: Add query,   
-    $this->twigData['bans'] = $this->db->select("banlist")
-                                       ->fields("banlist")
-                                       ->orderBy("created", "DESC")
-                                       ->range(0,20)
-                                       ->execute()
-                                       ->fetchAll();
-                                       
-   kxTemplate::output('manage/bans_view', $this->twigData);
+    $bans_query = $this->db->select("banlist")
+      ->fields("banlist")
+      ->fields("staff", ['user_name']);
+    $bans_query->innerJoin("staff", "", "created_by_staff_id = user_id");
+    $bans_query = $bans_query->orderBy("created", "DESC")
+      ->execute()
+      ->fetchAll();
+    
+    foreach ($bans_query as $ban) {
+      $ban->boards = json_decode($ban->boards, true);
+    }
+    $this->twigData['bans'] = $bans_query;
+    kxTemplate::output('manage/bans_view', $this->twigData);
   }
   
   private function _addBan() {
+    if ($this->request['action'] == 'post') {
+      // Ban the user
+      // TODO Form validation
+      kxBans::BanUser(
+        $this->request['ban_ip'],
+        $this->request['ban_boards'],
+        (int) $this->request['ban_duration'],
+        $this->request['ban_reason'],
+        (int) isset($this->request['ban_allowread']),
+        (int) isset($this->request['ban_allow_appeal']),
+        $this->request['ban_notes'],
+        kxFunc::getManageUser()['user_id'],
+        (int) isset($this->request['ban_deleteall']),
+      );
+
+    }
     // TODO: Complete this
 
     $this->twigData['sections'] = kxFunc::fullBoardList();

@@ -1,5 +1,5 @@
-{% macro manageform(id, name, submit, entries) %}
-    <fieldset id="{{id}}">
+{% macro manageform(id, name, submit, entries, fieldset_class = '') %}
+    <fieldset id="{{id}}"{% if fieldset_class != '' %} class="{{fieldset_class}}"{% endif %}>
       <legend>{% trans name %}</legend>
       {% for name, entry in entries %}
         <label for="{{entry.id}}">{% trans name %}:</label>
@@ -15,6 +15,8 @@
           </select>
         {% elseif entry.type == "checkbox_single" %}
           <input type="checkbox" name="{{entry.id}}" value="{{entry.id}}" {% if entry.selected %}checked=checked{% endif %}>
+        {% elseif entry.type == "kx_boardlist" %}
+          {{ _self.boardlist(entry.sections, entry.id) }}
         {% endif %}
         {% if entry.desc %}
           {% set entrydesc = entry.desc %}
@@ -30,7 +32,14 @@
 {% endmacro %}
 
 {% macro boardlist(sections, name, selected) %}
-  <select name="{{ name }}[]" class="multiple" multiple="multiple">
+  {% set item_count = 0 %}
+  {% for section in sections %}
+    {% set item_count = item_count + 1 %}
+    {% for board in section.boards %}
+      {% set item_count = item_count + 1 %}
+    {% endfor %}
+  {% endfor %}
+  <select name="{{ name }}[]" class="multiple" multiple="multiple" size="{{ item_count }}">
   {% for section in sections %}
     {% if section.section_name is defined %}
       <optgroup label="{{ section.section_name }}">

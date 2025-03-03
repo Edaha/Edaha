@@ -102,3 +102,18 @@ values
         0,
         1
     );
+
+-- Improve bans functionality
+alter table `banlist`
+    drop column `type`,
+    modify column `expired` 
+        boolean default false,
+    modify column `allow_read` 
+        boolean default true,
+    modify column `boards`
+        json,
+    drop column `by`,
+    add column `created_by_staff_id` 
+        smallint unsigned not null,
+    add foreign key (created_by_staff_id)
+        references staff(user_id);

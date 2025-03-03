@@ -1,28 +1,31 @@
 <?php
 
-class manage_board_recents_recents extends kxCmd {
+class manage_board_recents_posts extends kxCmd
+{
   /**
    * Arguments eventually being sent to twig
-   * 
+   *
    * @var Array()
    */
   protected $twigData;
-  
-  
-  public function exec( kxEnv $environment ) {
-    switch ($this->request['do']) {
+
+  public function exec(kxEnv $environment)
+  {
+    switch ($this->request['action']) {
       case 'process':
         $this->_process();
         break;
       default:
         break;
     }
+    $this->twigData['section'] = $this->request['section'];
     $this->_show();
   }
-  
-  private function _show() {
+
+  private function _show()
+  {
     $this->twigData['recent_posts'] = $this->db->select("posts")
-      ->fields("posts", ["post_id", "post_message"])
+      ->fields("posts", ["post_id", "post_message", "post_parent"])
       ->fields("boards", ["board_id", "board_name"]);
     $this->twigData['recent_posts']->innerJoin("boards", "", "post_board = board_id");
     $this->twigData['recent_posts'] = $this->twigData['recent_posts']->condition("post_deleted", 0)
@@ -31,12 +34,16 @@ class manage_board_recents_recents extends kxCmd {
       ->range(0, 100)
       ->execute()
       ->fetchAll();
-    
+      print_r($this->twigData['recent_posts']);
     kxTemplate::output('manage/recents', $this->twigData);
   }
-  
-  private function _process() {
-    if (! isset($this->request['posts']) or $this->request['action'] == '') return;
+
+  private function _process()
+  {
+    if (!isset($this->request['posts']) or $this->request['action'] == '') {
+      return;
+    }
+
     $fields['post_reviewed'] = 1;
     if ($this->request['action'] == 'delete') {
       $fields['post_deleted'] = 1;

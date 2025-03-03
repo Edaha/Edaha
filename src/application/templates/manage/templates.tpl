@@ -72,7 +72,7 @@ ol.tree
 		li input:checked + ol > li:last-child { margin: 0 0 0.063em; /* 1px */ }</style>
 {% macro list(folder) %}
     {% for key, entry in folder %}
-      {% if entry|is_array %}
+      {% if entry is iterable %}
         <li>
           <label for="{{ key }}">{{ key }}</label> <input type="checkbox" id="{{ key }}" />
           <ol>

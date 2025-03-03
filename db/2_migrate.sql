@@ -41,3 +41,23 @@ add
     constraint FK_post_files_posts 
     foreign key (file_post) 
     references posts (post_id) on delete cascade;
+
+
+insert into
+    `modules` (
+        `module_name`,
+        `module_application`,
+        `module_file`,
+        `module_description`,
+        `module_position`,
+        `module_manage`
+    )
+values
+    (
+        'Look & Feel',
+        'core',
+        'lookfeel',
+        'Look & Feel',
+        0,
+        1
+    );

@@ -19,12 +19,10 @@
   {{parent()}}
 {% endblock %}
 {% block extrajs %}
-	kusaba.board   = '{{board.board_name}}';
-	kusaba.kumod_set = false;
-	kusaba.quick_reply = false;
-	kusaba.lastid;
-	kusaba.cgipath = '{{ kxEnv("paths:cgi:path") }}';
-	kusaba.webpath = '{{ kxEnv("paths:main:path") }}';
+  kusaba.board   = '{{board.board_name}}';
+  kusaba.kumod_set = false;
+  kusaba.quick_reply = false;
+  kusaba.lastid;
   kusaba.hiddenthreads = $.cookie('hiddenthreads') ? $.cookie('hiddenthreads').split('!') : [];
 {% endblock %}
 
@@ -160,7 +158,7 @@
       <div id="disclaimer">
         {# I'd really appreciate it if you left the link to edaha.org in the footer, if you decide to modify this. That being said, you are not bound by license or any other terms to keep it there #}
         - <a href="http://edaha.org/" target="_top">Edaha 1.0</a>
-        {% if executiontime %} + {% trans "Took" %} {{executiontime}}s -{% endif %}
+        {% if executiontime %} + {% trans "Took" %} {{executiontime}}s{% endif %} -
         {% if botads %}
           <div class="content ads">
             <center> 

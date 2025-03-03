@@ -233,7 +233,7 @@ class public_board_base_baseboard extends kxCmd {
     //-----------------------------------------
     // Setup
     //-----------------------------------------
-
+    $executiontime_start_page = microtime(true);
     $this->twigData['filetypes'] = $this->getEmbeds();
     
     $i = 0;
@@ -316,7 +316,7 @@ class public_board_base_baseboard extends kxCmd {
 	  
 	  $this->twigData['board']=$this->board;
 	  
-      $this->footer(false, (microtime(true) - kxEnv::Get('kx:executiontime:start')));
+      $this->footer(false, (microtime(true) - $executiontime_start_page));
       $this->pageHeader(0);
       $this->postBox(0);
 	  //print_r($this->twigData);

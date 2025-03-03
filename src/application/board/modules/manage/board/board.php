@@ -134,7 +134,7 @@ class manage_board_board_board extends kxCmd {
       $this->db->insert("boards")
                ->fields($fields)
                ->execute();
-      $this->twigData['notice'] = _gettext('Board successfully added.');
+      $this->twigData['notice']['message'] = _gettext('Board successfully added.');
     } else {
       // Edit board
       $this->db->update("boards")

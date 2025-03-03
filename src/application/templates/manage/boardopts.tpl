@@ -191,7 +191,7 @@
     <br>
     
     <label for="popular">{% trans "Popular" %}:</label>
-    <input type="checkbox" name="popular" id="popular"{% if board_options.board_no_file %} checked="checked"{% endif %}>
+    <input type="checkbox" name="popular" id="popular"{% if board_options.board_popular %} checked="checked"{% endif %}>
     <span class="desc"><a href="#" title="{% trans "If checked, this board will appear in bold in the menu." %}">?</a></span>
     <br>
 

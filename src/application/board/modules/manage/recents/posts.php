@@ -34,7 +34,6 @@ class manage_board_recents_posts extends kxCmd
       ->range(0, 100)
       ->execute()
       ->fetchAll();
-      print_r($this->twigData['recent_posts']);
     kxTemplate::output('manage/recents', $this->twigData);
   }
 

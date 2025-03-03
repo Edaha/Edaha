@@ -1,20 +1,20 @@
-{% import "manage/macros.tpl" as macros %}
+{% import "manage/macros.html.twig" as macros %}
 
-{% extends "manage/wrapper.tpl" %}
+{% extends "manage/wrapper.html.twig" %}
 
-{% block heading %}{% trans "FAQ Management" %}{% endblock %}
+{% block heading %}{% trans "Rule Management" %}{% endblock %}
 
 {% block managecontent %}
 
-<form action="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=faq&amp;action=post" method="post">
-  {{ macros.manageform("faq_post", "Add FAQ Entry", true,
+<form action="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=rules&amp;action=post" method="post">
+  {{ macros.manageform("rules_post", "Add Rule Entry", true,
                        { 'Heading' : { 'id' : 'subject', 'type' : 'text', 'desc' : "Can not be left blank",  'value' : entry.entry_subject } ,
                          'Post'    : { 'id' : 'message', 'type' : 'textarea', 'value' : entry.entry_message } ,
                          'Order'   : { 'id' : 'order', 'type' : 'text', 'desc' : "Can be left blank, however it will appear at the top of the list",  'value' : entry.entry_order } }
                        ) 
   }}
 <input type="hidden" id="edit" name="edit" value="{{ entry.entry_id }}" />
-<input type="hidden" id="type" name="type" value="1" />
+<input type="hidden" id="type" name="type" value="2" />
 </form>
   
 <br />  
@@ -30,12 +30,12 @@
     </tr>
   </thead>
   <tbody>
-  {% for faq in entries %}
+  {% for rules in entries %}
     <tr>
-      <td>{{ faq.entry_order }}</td>
-      <td>{{ faq.entry_subject }}</td>
-      <td>{{ faq.entry_message }}</td>
-      <td>[ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=faq&amp;action=edit&amp;id={{ faq.entry_id }}">{% trans "Edit" %}</a> ] [ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=faq&amp;action=del&amp;id={{ faq.entry_id }}">{% trans "Delete" %}</a> ]</td>
+      <td>{{ rules.entry_order }}</td>
+      <td>{{ rules.entry_subject }}</td>
+      <td>{{ rules.entry_message }}</td>
+      <td>[ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=rules&amp;action=edit&amp;id={{ rules.entry_id }}">{% trans "Edit" %}</a> ] [ <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=rules&amp;action=del&amp;id={{ rules.entry_id }}">{% trans "Delete" %}</a> ]</td>
     </tr>
   {% endfor %}
   </tbody>

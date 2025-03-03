@@ -2323,7 +2323,7 @@ class kxBans
 
     kxTemplate::assign('bans', $bans);
 
-    return $dwoo->get(KX_ROOT . kxEnv::Get('kx:templates:dir') . '/banned.tpl', $twigData);
+    return $dwoo->get(KX_ROOT . kxEnv::Get('kx:templates:dir') . '/banned.html.twig', $twigData);
   }
 
   public static function UpdateHtaccess()

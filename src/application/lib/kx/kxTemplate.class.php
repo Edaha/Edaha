@@ -109,7 +109,7 @@ class kxTemplate {
     
     // check if a template exists
     public static function templateExists($name){
-        return file_exists(self::$template_dir . $name . '.tpl');
+        return file_exists(self::$template_dir . $name . '.html.twig');
     }
     
     
@@ -117,11 +117,11 @@ class kxTemplate {
     public static function templateFromFile($name){
         self::init();
         
-        if(file_exists(self::$template_dir . $name . '.tpl')){
-            $file = $name . '.tpl';
+        if(file_exists(self::$template_dir . $name . '.html.twig')){
+            $file = $name . '.html.twig';
         }
         else{
-            throw new Exception('No template found ' . $name .'.tpl from ' . self::$template_dir, E_USER_ERROR);
+            throw new Exception('No template found ' . $name .'.html.twig from ' . self::$template_dir, E_USER_ERROR);
         }
         if (!self::$instance->getLoader() instanceof Twig_Loader_Filesystem) {
             self::$instance->setLoader(new Twig_Loader_Filesystem(self::$template_dir));
@@ -144,11 +144,11 @@ class kxTemplate {
     public static function output($tpl, $data = array()){
         self::init();
         if (is_string($tpl)) {
-            if(file_exists(self::$template_dir . $tpl . '.tpl')){
-                $tpl = $tpl . '.tpl';
+            if(file_exists(self::$template_dir . $tpl . '.html.twig')){
+                $tpl = $tpl . '.html.twig';
             }
             else{
-                throw new Exception('No template found ' . $tpl .'.tpl from ' . self::$template_dir, E_USER_ERROR);
+                throw new Exception('No template found ' . $tpl .'.html.twig from ' . self::$template_dir, E_USER_ERROR);
             }
         }
         if (IN_MANAGE && kxEnv::$current_module != 'login') {
@@ -172,11 +172,11 @@ class kxTemplate {
         self::init();
         if (is_string($tpl)) {
             
-            if(file_exists(self::$template_dir . $tpl . '.tpl')){
-                $tpl = $tpl . '.tpl';
+            if(file_exists(self::$template_dir . $tpl . '.html.twig')){
+                $tpl = $tpl . '.html.twig';
             }
             else{
-                throw new Exception('No template found ' . $tpl .'.tpl from ' . self::$template_dir, E_USER_ERROR);
+                throw new Exception('No template found ' . $tpl .'.html.twig from ' . self::$template_dir, E_USER_ERROR);
             }
         }
 		

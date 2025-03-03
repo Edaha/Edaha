@@ -1,4 +1,4 @@
-{% extends "board/image/post_box.tpl" %}
+{% extends "board/image/post_box.html.twig" %}
 {% block boardcontent %}
   {{ parent() }}
   <form id="delform" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post">
@@ -9,9 +9,9 @@
         <div class="op" id="p{{post.post_id}}">
           <div class="post">
             <div class="post_header">
-              {{ include("board/global/post_header.tpl") }}
+              {{ include("board/global/post_header.html.twig") }}
             </div>
-            {{ include("board/global/post_file_info.tpl") }}
+            {{ include("board/global/post_file_info.html.twig") }}
             <span id="dnb_{{board.board_name}}_{{post.post_id}}_y"></span>
     {% else %}
       {% if numimages > 0 and isexpand and loop.first %}
@@ -20,8 +20,8 @@
       <div class="reply"  id="reply_{{post.post_id}}">
         <div class="post">
           <div class="doubledash">&gt;&gt;</div>
-          {% include "board/global/post_header.tpl" %}
-          {% include "board/global/post_file_info.tpl" %}
+          {% include "board/global/post_header.html.twig" %}
+          {% include "board/global/post_file_info.html.twig" %}
           <span id="dnb_{{board.board_name}}_{{post.post_id}}_n"></span>
     {% endif %}
     {% if "mp3" in post.file_type %}

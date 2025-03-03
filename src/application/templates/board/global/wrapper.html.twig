@@ -1,4 +1,4 @@
-{% extends "global_wrapper.tpl" %}
+{% extends "global_wrapper.html.twig" %}
 
 {% block title %}{{board.board_name}}{% if board.board_desc %} - {{board.board_desc}}{% endif %}{% endblock %}
 
@@ -41,7 +41,7 @@
     </div>
     <div class="navbar">
       {%if kxEnv("misc:boardlist") %}
-        {{ include("board/global/boardlist.tpl") }}
+        {{ include("board/global/boardlist.html.twig") }}
       {% endif %}
       <span id="sitelinks">
         [<a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{{ kxEnv("paths:cgi:path") }}/manage.php" target="_top">{% trans "Manage" %}</a>]
@@ -171,7 +171,7 @@
       {% if boardlist %}
         <div class="navbar">
           {%if kxEnv("misc:boardlist") %}
-            {% include "board/global/boardlist.tpl" %}
+            {% include "board/global/boardlist.html.twig" %}
           {% endif %}
         </div>
       {% endif %}

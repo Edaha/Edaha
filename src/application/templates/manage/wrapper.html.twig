@@ -1,4 +1,4 @@
-{% extends "global_wrapper.tpl" %}
+{% extends "global_wrapper.html.twig" %}
 {% block title %}{{ "Edaha Management" }}{% endblock %}
 {% block css %}
   <link href="{{ kxEnv("paths:boards:path") }}/public/css/manage.css" rel="stylesheet" type="text/css" />
@@ -28,7 +28,7 @@
     
       <section class="content">
         <section class="sidebar">
-          {% include "manage/menu.tpl" %}
+          {% include "manage/menu.html.twig" %}
         </section>
       
         <section class="col_r">

@@ -160,22 +160,20 @@ class Posting
   }
   public function checkPostingTime($isReply, $boardId)
   {
-
     // Generate the query needed
-    $result = $this->db->select("posts");
-    $result->addExpression("MAX(post_timestamp)");
-    $result = $result->condition("post_board", $boardId)
-      ->condition("post_parent", 0, $isReply ? "!=" : "=")
+    $limit = $isReply ? $this->environment->get("kx:limits:replydelay") : kxEnv::Get("kx:limits:threaddelay");
+    $cutoff_time = time() - $limit;
+
+    $result = $this->db->select("posts")
+      ->condition("post_board", $boardId)
       ->condition("post_ip_md5", md5($_SERVER['REMOTE_ADDR']))
-      ->condition("post_timestamp", time() - $this->environment->get("kx:limits:" . $isReply ? "replydelay" : "threaddelay"), ">")
+      ->condition("post_timestamp", $cutoff_time, ">");
+    $result = $isReply ? $result->condition("post_parent", 0, "!=") : $result->condition("post_parent", 0, "=");
+    $result = $result->countQuery()
       ->execute()
       ->fetchField();
-    if (!empty($result)) {
-      // Check if they are posting too quickly
-      $check = $this->environment->get("kx:limits:" . $isReply ? "replydelay" : "threaddelay");
-      if (time() - $result <= $check) {
-        kxFunc::showError(_('Please wait a moment before posting again.'), _('You are currently posting faster than the configured minimum post delay allows.'));
-      }
+    if ($result > 0) {
+      kxFunc::showError(_('Please wait a moment before posting again.'), _('You are currently posting faster than the configured minimum post delay allows.'));
     }
   }
   public function checkMessageLength($maxMessageLength)

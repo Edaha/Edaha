@@ -52,6 +52,8 @@ class public_board_base_baseboard extends kxCmd
    */
   protected $twigData;
 
+  protected $postClass;
+
   /**
    * Run requested method
    *

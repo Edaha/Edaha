@@ -62,7 +62,7 @@ class public_core_index_news extends kxCmd {
       if (!isset($this->request['page'])) {
         $entries->range(0,2);
       } else {
-        $entries->range($this->request['page'] * 2, 2);
+        $entries->range((int)$this->request['page'] * 2, 2);
       }
     }
     $this->twigData['entries'] = $entries->execute()

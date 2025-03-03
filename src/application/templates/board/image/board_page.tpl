@@ -7,9 +7,9 @@
     {% set iteration = loop.index0 %}
     {% for post in thread %}
       {% if post.post_parent == 0 %}
-        <span id="unhidethread{{post.post_id}}{{board.board_name}}" style="display: none;">
+        <span id="unhidethread_{{post.post_id}}_{{board.board_name}}" style="display: none;">
           {% trans "Thread" %} <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}.html">{{post.post_id}}</a> {% trans "hidden." %}
-          <a href="#" id="togglethread" onclick="javascript:togglethread('{{post.post_id}}{{board.board_name}}');return false;" title="{% trans "Un-Hide Thread" %}">
+          <a href="#" id="togglethread" onclick="kusaba.togglethread('{{post.post_id}}', '{{board.board_name}}');return false;" title="{% trans "Un-Hide Thread" %}">
             <img src="{{ kxEnv("paths:main:path") }}css/icons/blank.gif" border="0" class="unhidethread" alt="{% trans "Un-Hide Thread" %}" />
           </a>
         </span>
@@ -20,7 +20,6 @@
               document.getElementById('thread_{{post.post_id}}_{{board.board_name}}').style.display = 'none';
             }
           //--></script>
-          <a name=></a>
           <div class="op" id="p{{post.post_id}}">
             <div id="{{ post.post_id }}" class="post">
               <div id="s{{iteration}}" class="post_header">

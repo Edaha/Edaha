@@ -7,9 +7,11 @@
     {% if post.post_parent == 0 %}
       <div class="thread" id="thread_{{post.post_id}}_{{board.board_name}}">
         <div class="op" id="p{{post.post_id}}">
-          {% include "board/global/post_file_info.tpl" %}
           <div class="post">
-            {% include "board/global/post_header.tpl"%}
+            <div class="post_header">
+              {{ include("board/global/post_header.tpl") }}
+            </div>
+            {{ include("board/global/post_file_info.tpl") }}
             <span id="dnb_{{board.board_name}}_{{post.post_id}}_y"></span>
     {% else %}
       {% if numimages > 0 and isexpand and loop.first %}
@@ -56,6 +58,7 @@
       {{post.post_message}}
       {% endautoescape %}
     </p>
+    <br class="clear-both">
     {% if not post.post_stickied and post.post_parent == 0 and ((board.board_max_age > 0 and (post.post_timestamp + (board.board_max_age * 3600)) < ("now"|date("U") + 7200 ) ) or (post.post_delete_time > 0 and post.post_delete_time <= ("now"|date("U") + 7200))) %}
       <span class="oldpost">
         {% trans "Marked for deletion (old)" %}
@@ -65,7 +68,7 @@
     {% if post.post_parent == 0 %}
         </div>
       </div>
-      <div id="replies_{{post.post_id}}_{{board.board_name}}">
+      <div id="replies_{{post.post_id}}_{{board.board_name}}" class="replies">
       {# needs to be redone
       {% if post.replies %}
         <span class="omittedposts">

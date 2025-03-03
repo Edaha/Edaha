@@ -44,8 +44,8 @@ class manage_board_recents_recents extends kxCmd {
     }
 
     foreach ($this->request['posts'] as $post) {
-      $board_id = explode('|', $post)[0];
-      $post_id = explode('|', $post)[1];
+      $board_id = (int) explode('|', $post)[0];
+      $post_id = (int) explode('|', $post)[1];
       $board_posts[$board_id][] = $post_id;
     }
 

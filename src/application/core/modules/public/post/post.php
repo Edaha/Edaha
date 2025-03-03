@@ -57,25 +57,19 @@ class public_core_post_post extends kxCmd
     if ($boardType === false) {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
-    //Check against our built-in board types.
-    if (in_array($boardType, array(0, 1, 2, 3))) {
-      $types = array('image', 'text', 'oekaki', 'upload');
-      $module_to_load = $types[$boardType];
-    }
-    //Okay, so it's a a custom board type. Let's find out which kind...
-    else {
-      $result = $this->db->select("modules")
-        ->fields("modules", array("module_variables", "module_directory"))
-        ->condition("module_application", 1)
-        ->execute()
-        ->fetchAll();
-      foreach ($result as $line) {
-        $varibles = unserialize($line->module_variables);
-        if (isset($variables['board_type_id']) && $variables['board_type_id'] == $boardType) {
-          $module_to_load = $line->module_directory;
-        }
+
+    $board_modules = $this->db->select("modules")
+      ->fields("modules", array("module_file"))
+      ->condition("module_application", "board")
+      ->condition("module_manage", 0)
+      ->execute()
+      ->fetchCol();
+    foreach ($board_modules as $module) {
+      if ($module == $boardType) {
+        $module_to_load = $module;
       }
     }
+
     // Module loading time!
     $moduledir = kxFunc::getAppDir("board") . '/modules/public/' . $module_to_load . '/';
     if (file_exists($moduledir . $module_to_load . '.php')) {

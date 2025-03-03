@@ -39,10 +39,9 @@
     
     <label for="type">{% trans "Board Type" %}:</label>
     <select name="type" id="type">
-      <option value="0"{% if board_options.board_type == 0 %} selected="selected"{% endif %}>{% trans "Normal Imageboad" %}</option>
-      <option value="1"{% if board_options.board_type == 1 %} selected="selected"{% endif %}>{% trans "Text Board" %}</option>
-      <option value="2"{% if board_options.board_type == 2 %} selected="selected"{% endif %}>{% trans "Oekaki Imageboad" %}</option>
-      <option value="3"{% if board_options.board_type == 3 %} selected="selected"{% endif %}>{% trans "Upload Imageboard" %}</option>
+      {% for type in board_types %}
+      <option value="{{ type.module_file }}"{% if board_options.board_type == type.module_file %} selected="selected"{% endif %}>{{ type.module_name }}</option>
+     {% endfor %}
     </select>
     <span class="desc"><a href="#" title="{% trans "The type of imageboard desired. A Normal Imageboad will feature image and extended-format posts. An Oekaki Imageboard will allow users to draw their own images for their posts. An Upload Imageboard will be styled more towards file uploads. A Text Board will allow only text posts." %}">?</a></span>
     <br>

@@ -76,7 +76,7 @@ class public_board_upload_upload extends public_board_base_baseboard {
     parent::regeneratePages();
   }
   public function buildThread($thread) {
-    if (!$thread['tag']) $thread['tag'] = '*';
+    if (!$thread->tag) $thread->tag = '*';
     return $thread;
   }
 }

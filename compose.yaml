@@ -27,7 +27,8 @@ services:
     restart: always
     volumes:
       - db-data:/var/lib/mysql
-      - ./src/teststructure.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./db/teststructure.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./db/2_migrate.sql:/docker-entrypoint-initdb.d/2.sql
     environment:
       - MYSQL_DATABASE=edaha
       - MYSQL_USER=edaha

@@ -72,16 +72,21 @@
       {% elseif board.board_image and board.board_image != "none" %}
         <img src="{{board.board_image}}" alt="{% trans "Logo"%}" /><br />
       {% endif %}
-	  <h1>
-      {% if kxEnv("pages:dirtitle") %}
-        /{{board.board_name}}/
-      {% endif %}
-	  {% if board.board_desc and kxEnv("pages:dirtitle") %} - {% endif %}
-	  {% if board.board_desc %}{{board.board_desc}}{% endif %}
-	  </h1>
+      <h1>
+        {% if kxEnv("pages:dirtitle") %}
+          /{{board.board_name}}/
+        {% endif %}
+      {% if board.board_desc and kxEnv("pages:dirtitle") %} - {% endif %}
+      {% if board.board_desc %}{{board.board_desc}}{% endif %}
+      </h1>
     </div>
+
     {{board.board_include_header}}
     <hr />
+{% if replythread != 0%}
+    [ <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/">{{ "Return"|trans }}</a> ]
+    <div class="replymode">{{ "Posting mode: Reply"|trans }}</div>
+{% endif %}
   {% endblock %}
   {% block boardcontent %}{% endblock %}
   {% block boardfooter %}

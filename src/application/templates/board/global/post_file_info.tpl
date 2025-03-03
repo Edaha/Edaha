@@ -2,7 +2,7 @@
   {% if link and post.file_type.0 != 'jpg' and post.file_type.0 != 'gif' and post.file_type.0 != 'png' and post.videobox == '' %}
     <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}" {% if kxEnv("posts:newwindow") %} target="_blank"{% endif %}>
   {% else %}
-    <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}" id="expands_{{post.post_id}}_{{post.file_image_width.0}}_{{post.file_image_height.0}}_{{post.thumb_w.0}}_{{post.thumb_h.0}}">
+    <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/src/{{post.file_name.0}}.{{post.file_type.0}}" id="expandimg_{{post.post_id}}_{{post.file_image_width.0}}_{{post.file_image_height.0}}_{{post.file_thumb_width.0}}_{{post.file_thumb_height.0}}">
   {% endif %}
   {% if post.post_id3[id].comments_html.artist.0 %}
   {{post.post_id3[id].comments_html.artist.0}} 

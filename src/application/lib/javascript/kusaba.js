@@ -587,7 +587,7 @@ kusaba.addevents = function (context) {
                 }
             } else {
                 var img = $("#thumb_" + imginfo[1] + " img:first-child");
-                if (img.attr("src") == thumburl) {
+                if (thumburl.indexOf(img.attr("src")) > -1) {
                     img.attr({ "src": this, "alt": imginfo[1], "height": imginfo[3], "width": imginfo[2], "style": "" });
                 } else if (img.attr("src") == this) {
                     img.attr({ "src": thumburl, "alt": imginfo[1], "height": imginfo[5], "width": imginfo[4], "style": "" });

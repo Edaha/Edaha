@@ -1,7 +1,17 @@
 <?php
 
 class manage_board_board_board extends kxCmd {
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
+  
   public $errorMessage='';
+
+  private $_boardClass;
+
   public function exec(kxEnv $environment){
     switch ($this->request['action']) {
       case 'post':

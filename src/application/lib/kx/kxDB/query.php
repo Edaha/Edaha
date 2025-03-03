@@ -1601,7 +1601,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
      * size of its conditional array minus one, because one element is the the
      * conjunction.
      */
-    public function count() {
+    public function count(): int {
         return count($this->conditions) - 1;
     }
     

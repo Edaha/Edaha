@@ -1,6 +1,12 @@
 <?php
 
 class manage_core_index_statgraphs extends kxCmd {
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
 
   public function exec( kxEnv $environment ) {
     

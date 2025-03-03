@@ -36,6 +36,13 @@ if (!defined('KUSABA_RUNNING'))
 
 class public_core_index_news extends kxCmd {
 
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
+
   public function exec( kxEnv $environment ) {
     if(isset($this->request['view'])){
       switch($this->request['view']){

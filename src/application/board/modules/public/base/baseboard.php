@@ -42,8 +42,15 @@ class public_board_base_baseboard extends kxCmd {
    * @var     object  stdClass
    */
   public $board;
-    
+  
   public $archive_dir;
+  
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
   
   /**
    * Run requested method
@@ -273,7 +280,7 @@ class public_board_base_baseboard extends kxCmd {
                           ->range($postsperpage * $i, $postsperpage)
                           ->execute()
                           ->fetchAll();
-
+      $outThread = array();
       foreach ($threads as &$thread) {
 
         //------------------------------------------------------------------------------------------
@@ -380,7 +387,7 @@ class public_board_base_baseboard extends kxCmd {
   
   public function getOmittedPosts(&$thread, $omitids = array()) {
 
-    $replycount = $this->db->select("posts", "p");
+    $replycount = $this->db->select("posts");
     $replycount->condition("post_board", $this->board->board_id)
                ->condition("post_parent", $thread->post_id);
     if ($this->board->board_type != 1) {
@@ -396,7 +403,7 @@ class public_board_base_baseboard extends kxCmd {
       //---------------------------------------------------------------------------------------------------
       // Get the number of file-replies for this thread, minus the ones that are already being shown.
       //----------------------------------------------------------------------------------------------------
-      $replycount = $this->db->select("posts", "p");
+      $replycount = $this->db->select("posts");
       $replycount->innerJoin("post_files", "f", "post_id = file_post AND file_board = post_board");
       $replycount->condition("post_board", $this->board->board_id)
                  ->condition("post_parent", $thread->post_id)

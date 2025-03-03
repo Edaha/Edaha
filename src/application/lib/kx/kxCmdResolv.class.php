@@ -167,8 +167,20 @@ abstract class kxCmd
      * @var		object
      */
     protected $environment;
+
+    /**
+     * kxDB instance
+     * 
+     * @var object
+     */
     protected $db;
     
+    /**
+     * The request infortmation
+     * 
+     * @var object
+     */
+    protected $request;
     
     /**
      * Constructor

@@ -1,6 +1,13 @@
 <?php
 
 class manage_board_board_boardopts extends kxCmd {
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
+  
   public function exec(kxEnv $environment){
     switch($this->request['do']) {
       case 'edit':

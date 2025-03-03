@@ -1,6 +1,13 @@
 <?php
 
 class manage_board_filter_filter extends kxCmd {
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
+  
   
   public function exec( kxEnv $environment ) {
     switch ($this->request['do']) {

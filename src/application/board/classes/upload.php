@@ -30,6 +30,7 @@ class Upload {
   public $isvideo      = false;
   protected $environment;
   protected $db;
+  protected $request;
 
   public function __construct( kxEnv $environment )
   {

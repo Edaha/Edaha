@@ -27,6 +27,13 @@ abstract class kxDB {
     const RETURN_INSERT_ID = 3;
     
     /**
+     * The PDO connection
+     * 
+     * @var PDO
+     */
+    protected $connection;
+
+    /**
      * Tracks the number of "layers" of transactions currently active.
      *
      * On many databases transactions cannot nest.  Instead, we track
@@ -102,7 +109,7 @@ abstract class kxDB {
             $this->connection->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
         }
     }
-    final private static function initialize() {
+    private static function initialize() {
         $driver_class = 'kxDB' .  substr(kxEnv::get('kx:db:dsn'), 0, strpos(kxEnv::get('kx:db:dsn'), ':'));
         $new_connection = new $driver_class();
         self::$instance = $new_connection;
@@ -1304,7 +1311,7 @@ class kxDBStatementBase extends PDOStatement implements kxDBStatementInterface {
         $this->setFetchMode(PDO::FETCH_OBJ);
     }
     
-    public function execute($args = array(), $options = array()) {
+    public function execute($args = array(), $options = array()): bool {
         if (isset($options['fetch'])) {
             if (is_string($options['fetch'])) {
                 // Default to an object. Note: db fields will be added to the object

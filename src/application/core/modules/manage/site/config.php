@@ -1,6 +1,20 @@
 <?php
 
 class manage_core_site_config extends kxCmd {
+  /**
+   * Groups that settings are placed into
+   * 
+   * @var Array()
+   */
+  protected $config_groups;
+
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
+
   public function exec(kxEnv $environment) {
     switch ( (isset($_GET['do'])) ? $_GET['do'] : '' ) {
       case 'save':

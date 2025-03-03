@@ -27,6 +27,13 @@
  *
  */
 class manage_core_bans_bans extends kxCmd {
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
+  
   
   public function exec( kxEnv $environment ) {
     switch ( (isset($_GET['do'])) ? $_GET['do'] : '' ) {
@@ -45,7 +52,7 @@ class manage_core_bans_bans extends kxCmd {
     // TODO: Add query,   
     $this->twigData['bans'] = $this->db->select("banlist")
                                        ->fields("banlist")
-                                       ->orderBy("ban_created", "DESC")
+                                       ->orderBy("created", "DESC")
                                        ->range(0,20)
                                        ->execute()
                                        ->fetchAll();

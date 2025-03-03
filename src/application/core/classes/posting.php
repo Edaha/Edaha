@@ -43,7 +43,7 @@ class Posting {
       if (isset($this->request['replythread'])) {
           if ((int)$this->request['replythread'] != 0) {
               /* Check if the thread id supplied really exists */
-              $sql = $this->db->select("posts",'pst');
+              $sql = $this->db->select("posts");
               $sql->addExpression("COUNT(*)"); // Because Saz is too dumb to SQL.
 			  $results = $sql->condition("post_board", $boardid)
                              ->condition("post_id", $this->request['replythread'])
@@ -315,7 +315,7 @@ class Posting {
               $this->db->update("posts")
               ->fields(array("post_bumped" => time()))
               ->condition("post_board", $boardboard_id)
-              ->condition("id", $postData['thread_info']['parent'])
+              ->condition("post_id", $postData['thread_info']['parent'])
               ->execute();
           }
       }

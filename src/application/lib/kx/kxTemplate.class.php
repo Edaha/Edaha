@@ -92,9 +92,9 @@ class kxTemplate {
  
                 // Get our manage username
                 if (isset(kxEnv::$request['sid'])) {
-                  $result = kxDB::getinstance()->select('staff', 'stf')
-                                               ->fields('stf', array('user_name'));
-                  $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = stf.user_id");
+                  $result = kxDB::getinstance()->select('staff')
+                                               ->fields('staff', array('user_name'));
+                  $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = staff.user_id");
                   self::assign('name', $result->condition('session_id', kxEnv::$request['sid'])
                                                ->execute()
                                                ->fetchField());                
@@ -209,7 +209,7 @@ class kxTemplate {
             $modules = Array(Array('module_file' => 'index'));
         }
         else {
-            $modules = kxDB::getinstance()->select("modules", "", array('fetch' => PDO::FETCH_ASSOC))
+            $modules = kxDB::getinstance()->select("modules", null, array('fetch' => PDO::FETCH_ASSOC))
                 ->fields("modules", array("module_name", "module_file"))
                 ->condition("module_application", $app)
                 ->condition("module_manage", 1)

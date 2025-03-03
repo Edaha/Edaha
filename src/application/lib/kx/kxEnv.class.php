@@ -47,7 +47,7 @@ class kxEnv {
                 array_intersect_key(
                     self::loadConfigFile($configfile),
                     array_flip(array('all', $environment))),
-                    array('self', 'mergeWrapper')), $configuration);
+                    array(self::class, 'mergeWrapper')), $configuration);
         }
 
         // Set our instance, load kxConfig

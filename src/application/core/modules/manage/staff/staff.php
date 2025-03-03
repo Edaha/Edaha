@@ -52,7 +52,9 @@ class manage_core_staff_staff extends kxCmd {
    */
   private function _viewLog() {
     $twigData = array();
-    
+    if (!isset($this->request['view'])) {
+      $this->request['view'] = '';
+    }
     if ($this->request['view']) {
       // Get actions of a specific moderator
       kxForm::addRule('view','numeric')
@@ -103,6 +105,9 @@ class manage_core_staff_staff extends kxCmd {
    */
   private function _show() {
     $twigData = array();
+    if (!isset($_GET['act'])) {
+      $_GET['act'] = '';
+    }
     if ($_GET['act'] == 'add' && $_POST) {
       // Adds a new staff member
       kxForm::addRule('username','required')

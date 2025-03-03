@@ -73,19 +73,19 @@ class kxConfig implements ArrayAccess {
         return $this->container;
     }
     /* {{{ ArrayAccess implementation */
-    public function offsetSet($offset, $value) {
+    public function offsetSet(mixed $offset, mixed $value): void {
         $this->container[$offset] = $value;
     }
     
-    public function offsetGet($offset) {
+    public function offsetGet(mixed $offset): mixed {
         return $this->container[$offset];
     }
     
-    public function offsetExists($offset) {
+    public function offsetExists(mixed $offset): bool {
         return array_key_exists($this->container[$offset]);
     }
     
-    public function offsetUnset($offset) {
+    public function offsetUnset(mixed $offset): void {
         unset($this->container[$offset]);
     }
     /* }}} */

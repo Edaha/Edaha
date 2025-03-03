@@ -1,6 +1,13 @@
 <?php
 
 class manage_core_site_front extends kxCmd {
+  /**
+   * Arguments eventually being sent to twig
+   * 
+   * @var Array()
+   */
+  protected $twigData;
+  
   public function exec(kxEnv $environment){
     switch ($this->request['action']) {
       case 'post':

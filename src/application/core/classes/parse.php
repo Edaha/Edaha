@@ -2,6 +2,7 @@
 class Parse {
   protected $environment;
   protected $db;
+  protected $request;
   
   public function __construct( kxEnv $environment ) {
     $this->environment = $environment;

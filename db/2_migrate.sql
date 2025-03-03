@@ -127,3 +127,8 @@ insert into
   )
 values
   ('webp', 'image/webp', 1);
+
+-- Update password hashing
+alter table `staff`
+    modify column `user_password`
+        binary(60);

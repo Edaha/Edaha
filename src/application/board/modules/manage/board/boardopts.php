@@ -126,7 +126,7 @@ class manage_board_board_boardopts extends kxCmd
 
     $this->twigData['boardredirect'] = true;
     $this->twigData['notice']['type'] = 'success';
-    $this->twigData['notice']['message'] = _gettext('Board updated. Redirecting...');
+    $this->twigData['notice']['message'] = _('Board updated. Redirecting...');
     logging::addLogEntry(
       kxFunc::getManageUser()['user_name'],
       sprintf('Edited board /%s/',  $this->request['board']),

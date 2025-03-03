@@ -68,18 +68,18 @@ class public_board_image_image extends public_board_base_baseboard {
     if (!$postData['is_reply']) {
       if (($this->board->board_upload_type == 1 || $this->board->board_upload_type == 2) && !empty($this->board->board_embeds_allowed)) {
         if ($this->postClass->checkEmbed($postData)) {
-          kxFunc::showError(_gettext('Please enter an embed ID.'));
+          kxFunc::showError(_('Please enter an embed ID.'));
         }
       }
       if (empty($postData['files'][0]) && ( ( !isset($this->request['nofile']) && $this->board->board_no_file == 1 ) || $this->board->board_no_file == 0 ) ) {
         if (($this->board->board_upload_type != 0 && empty($this->request['embed'])) || $this->board->board_upload_type == 0) {
-          kxFunc::showError(_gettext('A file is required for a new thread. If embedding is allowed, either a file or embed ID is required.'));
+          kxFunc::showError(_('A file is required for a new thread. If embedding is allowed, either a file or embed ID is required.'));
         }
       }
     }
     else {
       if (!$this->postClass->checkEmpty($postData)) {
-        kxFunc::showError(_gettext('An image, or message, is required for a reply.'));
+        kxFunc::showError(_('An image, or message, is required for a reply.'));
       }
     }
     if (isset($this->request['nofile']) && $this->board->board_enable_no_file == 1) {

@@ -96,11 +96,11 @@ class manage_board_filter_filter extends kxCmd {
       }
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
-      $this->twigData['notice']['message'] = _gettext('An error occured: ') . $e->getMessage();
+      $this->twigData['notice']['message'] = _('An error occured: ') . $e->getMessage();
     }
     
     if (!isset($this->twigData['notice'])) {
-      $this->twigData['notice']['message'] = ($this->request['do'] == 'add') ? _gettext('Filter successfully added!') : _gettext('Filter successfully edited!');
+      $this->twigData['notice']['message'] = ($this->request['do'] == 'add') ? _('Filter successfully added!') : _('Filter successfully edited!');
       $this->twigData['notice']['type'] = 'success';
     }
     
@@ -137,12 +137,12 @@ class manage_board_filter_filter extends kxCmd {
                ->execute();
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
-      $this->twigData['notice']['message'] = _gettext('An error occured: ') . $e->getMessage();
+      $this->twigData['notice']['message'] = _('An error occured: ') . $e->getMessage();
     }
     
     if (!isset($this->twigData['notice'])) {
       $this->twigData['notice']['type'] = 'success';
-      $this->twigData['notice']['message'] = _gettext('Filter deleted successfully!');
+      $this->twigData['notice']['message'] = _('Filter deleted successfully!');
       
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],

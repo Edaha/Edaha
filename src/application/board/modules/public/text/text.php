@@ -80,7 +80,7 @@ class public_board_text_text extends public_board_base_baseboard {
   public function checkFields($postData) {
     if ($postData['is_reply']) {
       if (!$postClass->checkEmpty($postData)) {
-        kxFunc::showError(_gettext('A message is required for a reply.'));
+        kxFunc::showError(_('A message is required for a reply.'));
       }
     }
     else {
@@ -93,7 +93,7 @@ class public_board_text_text extends public_board_base_baseboard {
                          ->execute()
                          ->fetchField();
       if ($result > 0) {
-        kxFunc::showError(_gettext('Duplicate thread subject'), _gettext('Text boards may have only one thread with a unique subject. Please pick another.'));
+        kxFunc::showError(_('Duplicate thread subject'), _('Text boards may have only one thread with a unique subject. Please pick another.'));
       }
     }
   }

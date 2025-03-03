@@ -63,7 +63,7 @@ class Posting
           return true;
         } else {
           /* Kill the script, stopping the posting process */
-          kxFunc::showError(_gettext('Invalid thread ID.'), _gettext('That thread may have been recently deleted.'));
+          kxFunc::showError(_('Invalid thread ID.'), _('That thread may have been recently deleted.'));
         }
       }
     }
@@ -174,7 +174,7 @@ class Posting
       // Check if they are posting too quickly
       $check = $this->environment->get("kx:limits:" . $isReply ? "replydelay" : "threaddelay");
       if (time() - $result <= $check) {
-        kxFunc::showError(_gettext('Please wait a moment before posting again.'), _gettext('You are currently posting faster than the configured minimum post delay allows.'));
+        kxFunc::showError(_('Please wait a moment before posting again.'), _('You are currently posting faster than the configured minimum post delay allows.'));
       }
     }
   }
@@ -183,7 +183,7 @@ class Posting
     // If the length of the message is greater than the board's maximum message length...
     if (strlen($this->request['message']) > $maxMessageLength) {
       // Kill the script, stopping the posting process
-      kxFunc::showError(sprintf(_gettext('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($this->request['message']), $maxMessageLength));
+      kxFunc::showError(sprintf(_('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($this->request['message']), $maxMessageLength));
     }
   }
   public function checkCaptcha($board, $postData)
@@ -199,7 +199,7 @@ class Posting
         // Check if they entered the correct code. If not...
         if ($_SESSION['security_code'] != strtolower($this->request['captcha']) || empty($_SESSION['security_code'])) {
           // Kill the script, stopping the posting process
-          kxFunc::showError(_gettext('Incorrect captcha entered.'));
+          kxFunc::showError(_('Incorrect captcha entered.'));
         }
         unset($_SESSION['security_code']);
       } else {
@@ -214,7 +214,7 @@ class Posting
         );
         if (!$resp->is_valid) {
           // Show error and give user opportunity to try again.
-          kxFunc::showError(_gettext('Incorrect captcha entered.'));
+          kxFunc::showError(_('Incorrect captcha entered.'));
         }
       }
     }
@@ -264,11 +264,11 @@ class Posting
   if ($filter->filter_type & 8) {
   // Ban them if they have the ban flag set on this filter
   $punishment = unserialize($filter->filter_punishment);
-  kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _gettext('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
+  kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
   }
   if ($filter->filter_type & 4) {
   // Stop the post from happening if the delete flag is set
-  kxFunc::showError(sprintf(_gettext('Blacklisted text ( %s ) detected.'), $filter));
+  kxFunc::showError(sprintf(_('Blacklisted text ( %s ) detected.'), $filter));
   }
   if ($filter->filter_type & 2 && !$reported) {
   // Report flag is set, report the post
@@ -389,13 +389,13 @@ class Posting
     if (!$uploadClass->isvideo) {
       foreach ($uploadClass->files as $key => $file) {
         if (!file_exists(KX_BOARD . '/' . $board->board_name . '/src/' . $file['file_name'] . $file['file_type']) || !$file['file_is_special'] && !file_exists(KX_BOARD . '/' . $board->board_name . '/thumb/' . $file['file_name'] . 's' . $file['file_type'])) {
-          kxFunc::showError(_gettext('Could not copy uploaded image.'));
+          kxFunc::showError(_('Could not copy uploaded image.'));
         }
       }
     }
     if (isset($postData['is_oekaki']) && $postData['is_oekaki']) {
       if (file_exists(KX_BOARD . '/' . $board->board_name . '/src/' . $uploadClass->files[0]['file_name'] . '.pch')) {
-        $postData['thread_info']['message'] .= '<br /><small><a href="' . KX_SCRIPT . '/animation.php?board=' . $board->board_name . '&amp;id=' . $uploadClass->files[0]['file_name'] . '">' . _gettext('View animation') . '</a></small>';
+        $postData['thread_info']['message'] .= '<br /><small><a href="' . KX_SCRIPT . '/animation.php?board=' . $board->board_name . '&amp;id=' . $uploadClass->files[0]['file_name'] . '">' . _('View animation') . '</a></small>';
       }
     }
     return $uploadClass->files;

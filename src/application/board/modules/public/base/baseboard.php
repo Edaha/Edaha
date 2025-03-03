@@ -170,7 +170,7 @@ class public_board_base_baseboard extends kxCmd
     $this->checkFields($postData);
 
     if ($this->board->board_locked == 1 && ($postData['user_authority'] != 1 && $postData['user_authority'] != 2)) {
-      kxFunc::showError(_gettext('Sorry, this board is locked and can not be posted in.'));
+      kxFunc::showError(_('Sorry, this board is locked and can not be posted in.'));
     } else {
       $files = $this->doUpload($postData);
       $this->postClass->forcedAnon($postData, $this->board);
@@ -545,7 +545,7 @@ class public_board_base_baseboard extends kxCmd
       }
 
       $output = $message_shortened . '<div class="abbrev">' . "\n" .
-      '  ' . sprintf(_gettext('Message too long. Click %shere%s to view the full text.'), '<a href="' . kxEnv::Get('kx:paths:boards:folder') . $board . '/res/' . $threadid . '.html">', '</a>') . "\n" .
+      '  ' . sprintf(_('Message too long. Click %shere%s to view the full text.'), '<a href="' . kxEnv::Get('kx:paths:boards:folder') . $board . '/res/' . $threadid . '.html">', '</a>') . "\n" .
         '</div>' . "\n";
     } else {
       $output .= $message . "\n";

@@ -99,7 +99,7 @@ class manage_core_site_front extends kxCmd {
       $this->db->insert("front")
                ->fields($fields)
                ->execute();
-      $this->twigData['notice'] = _gettext('Entry successfully added.');
+      $this->twigData['notice'] = _('Entry successfully added.');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],
         sprintf('Created new %s entry', $this->request['do']),
@@ -111,7 +111,7 @@ class manage_core_site_front extends kxCmd {
                ->fields($fields)
                ->condition("entry_id", $this->request['edit'])
                ->execute();
-      $this->twigData['notice'] = _gettext('Entry successfully edited.');
+      $this->twigData['notice'] = _('Entry successfully edited.');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],
         sprintf('Edited %s entry', $this->request['do']),
@@ -143,7 +143,7 @@ class manage_core_site_front extends kxCmd {
              ->condition("entry_id", $this->request['id'])
              ->execute();
     $this->twigData['notice_type'] = 'success';
-    $this->twigData['notice'] = _gettext('Entry successfully deleted.');
+    $this->twigData['notice'] = _('Entry successfully deleted.');
     logging::addLogEntry(
       kxFunc::getManageUser()['user_name'],
       sprintf('Deleted %s entry', $this->request['do']),

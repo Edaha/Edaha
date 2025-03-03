@@ -62,7 +62,7 @@ class manage_core_login_login extends kxCmd{
                         ->execute()
                         ->fetchAll();
     if (count($results) > 5) {
-      kxFunc::showError(_gettext('System lockout'), _gettext('Sorry, because of your numerous failed logins, you have been locked out from logging in for 20 minutes. Please wait and then try again.'));
+      kxFunc::showError(_('System lockout'), _('Sorry, because of your numerous failed logins, you have been locked out from logging in for 20 minutes. Please wait and then try again.'));
     } 
     else {
       // Find users with the username supplied to us
@@ -141,7 +141,7 @@ class manage_core_login_login extends kxCmd{
                      'attempt_time' => time()
                    ))
                    ->execute();
-          $this->showForm(_gettext('Incorrect username/password.'));
+          $this->showForm(_('Incorrect username/password.'));
         }
       } 
       else {
@@ -152,7 +152,7 @@ class manage_core_login_login extends kxCmd{
                      'attempt_time' => time()
                    ))
                    ->execute();
-        $this->showForm(_gettext('Incorrect username/password.'));
+        $this->showForm(_('Incorrect username/password.'));
       }
     }
   }

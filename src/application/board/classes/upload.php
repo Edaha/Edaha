@@ -50,7 +50,7 @@ class Upload
     // if (!isset($postData['is_oekaki'])) {
     if ($file_name[0]) {
       if (count($file_name) > $boardData->board_max_files) {
-        kxFunc::showError(sprintf(_gettext('Please select only %d file(s) to upload.'), $boardData->board_max_files));
+        kxFunc::showError(sprintf(_('Please select only %d file(s) to upload.'), $boardData->board_max_files));
       }
       for ($i = 0; $i < $boardData->board_max_files; $i++) {
         if ($i == 1 && !$postData['is_reply']) {
@@ -63,32 +63,32 @@ class Upload
         }
         // Too big?
         if ($i == 0 && array_sum($file_size) > $boardData->board_max_upload_size) {
-          kxFunc::showError(sprintf(_gettext('Please make sure your total upload does not exceed %dB'), $boardData->board_max_upload_size));
+          kxFunc::showError(sprintf(_('Please make sure your total upload does not exceed %dB'), $boardData->board_max_upload_size));
         }
         // Do we have an error?
         switch ($_FILES['imagefile']['error'][$i]) {
           case UPLOAD_ERR_OK:
             break;
           case UPLOAD_ERR_INI_SIZE:
-            kxFunc::showError(sprintf(_gettext('The total upload exceeds the upload_max_filesize directive (%s) in php.ini.'), ini_get('upload_max_filesize')));
+            kxFunc::showError(sprintf(_('The total upload exceeds the upload_max_filesize directive (%s) in php.ini.'), ini_get('upload_max_filesize')));
             break;
           case UPLOAD_ERR_FORM_SIZE:
-            kxFunc::showError(sprintf(_gettext('Please make sure your total upload does not exceed %dB'), $boardData->board_max_upload_size));
+            kxFunc::showError(sprintf(_('Please make sure your total upload does not exceed %dB'), $boardData->board_max_upload_size));
             break;
           case UPLOAD_ERR_PARTIAL:
-            kxFunc::showError(_gettext('The uploaded file was only partially uploaded.'));
+            kxFunc::showError(_('The uploaded file was only partially uploaded.'));
             break;
           case UPLOAD_ERR_NO_FILE:
-            kxFunc::showError(_gettext('No file was uploaded.'));
+            kxFunc::showError(_('No file was uploaded.'));
             break;
           case UPLOAD_ERR_NO_TMP_DIR:
-            kxFunc::showError(_gettext('Missing a temporary folder.'));
+            kxFunc::showError(_('Missing a temporary folder.'));
             break;
           case UPLOAD_ERR_CANT_WRITE:
-            kxFunc::showError(_gettext('Failed to write file to disk'));
+            kxFunc::showError(_('Failed to write file to disk'));
             break;
           default:
-            kxFunc::showError(_gettext('Unknown File Error'));
+            kxFunc::showError(_('Unknown File Error'));
         }
 
         $this->files[$i]['file_is_special'] = false;
@@ -115,7 +115,7 @@ class Upload
           }
         }
         if (!$pass) {
-          kxFunc::showError(_gettext('File transfer failure. Please go back and try again.'));
+          kxFunc::showError(_('File transfer failure. Please go back and try again.'));
         }
 
         // Clean up our file name
@@ -133,7 +133,7 @@ class Upload
             unlink($location);
           }
 
-          kxFunc::showError(_gettext('Duplicate file entry detected.'));
+          kxFunc::showError(_('Duplicate file entry detected.'));
         }
 
         // File already exists elsewhere?
@@ -142,7 +142,7 @@ class Upload
           foreach ($this->file_location as $location) {
             unlink($location);
           }
-          kxFunc::showError(_gettext('Duplicate file entry detected.'), sprintf(_gettext('Already posted %shere%s.'), '<a href="' . kxEnv::Get('kx:paths:boards:path') . '/' . $boardData->board_name . '/res/' . $exists_thread[0] . '.html#' . $exists_thread[1] . '">', '</a>'));
+          kxFunc::showError(_('Duplicate file entry detected.'), sprintf(_('Already posted %shere%s.'), '<a href="' . kxEnv::Get('kx:paths:boards:path') . '/' . $boardData->board_name . '/res/' . $exists_thread[0] . '.html#' . $exists_thread[1] . '">', '</a>'));
         }
         /* removed for now
         if (strtolower($this->files[$i]['file_type']) == 'svg') {
@@ -181,7 +181,7 @@ class Upload
               $this->file_thumb_cat_location[$i] = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[$i]['file_name'] . 'c' . $this->files[$i]['file_type'];
 
               if (!move_uploaded_file($_FILES['imagefile']['tmp_name'][$i], $this->file_location[$i])) {
-                kxFunc::showError(_gettext('Could not copy uploaded image.'));
+                kxFunc::showError(_('Could not copy uploaded image.'));
               }
               chmod($this->file_location[$i], 0644);
 
@@ -189,26 +189,26 @@ class Upload
                 if ((!$postData['is_reply'] && ($this->files[$i]['image_w'] > kxEnv::Get('kx:images:thumbw') || $this->files[$i]['image_h'] > kxEnv::Get('kx:images:thumbh'))) || ($postData['is_reply'] && ($this->files[$i]['image_w'] > kxEnv::Get('kx:images:replythumbw') || $this->files[$i]['image_h'] > kxEnv::Get('kx:images:replythumbh')))) {
                   if (!$postData['is_reply']) {
                     if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_location[$i], kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
-                      kxFunc::showError(_gettext('Could not create thumbnail.'));
+                      kxFunc::showError(_('Could not create thumbnail.'));
                     }
                   } else {
                     if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_location[$i], kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
-                      kxFunc::showError(_gettext('Could not create thumbnail.'));
+                      kxFunc::showError(_('Could not create thumbnail.'));
                     }
                   }
                 } else {
                   if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_location[$i], $this->files[$i]['image_w'], $this->files[$i]['image_h'])) {
-                    kxFunc::showError(_gettext('Could not create thumbnail.'));
+                    kxFunc::showError(_('Could not create thumbnail.'));
                   }
                 }
                 if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_cat_location[$i], kxEnv::Get('kx:images:catthumbw'), kxEnv::Get('kx:images:catthumbh'))) {
-                  kxFunc::showError(_gettext('Could not create thumbnail.'));
+                  kxFunc::showError(_('Could not create thumbnail.'));
                 }
                 $imageDim_thumb = getimagesize($this->file_thumb_location[$i]);
                 $this->files[$i]['thumb_w'] = $imageDim_thumb[0];
                 $this->files[$i]['thumb_h'] = $imageDim_thumb[1];
               } else {
-                kxFunc::showError(_gettext('File was not fully uploaded. Please go back and try again.'));
+                kxFunc::showError(_('File was not fully uploaded. Please go back and try again.'));
               }
             }
           } else {
@@ -231,7 +231,7 @@ class Upload
             {
               $this->file_location[$i] = KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[$i]['file_name'] . $this->files[$i]['file_type'];
               if (file_exists($this->file_location[$i])) {
-                kxFunc::showError(_gettext('A file by that name already exists'));
+                kxFunc::showError(_('A file by that name already exists'));
                 die;
               }
               // MP3 files get special processing to grab their embedded image should they have one
@@ -263,11 +263,11 @@ class Upload
                   $this->file_thumb_location[$i] = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[$i]['file_name'] . 's' . $ext;
                   if (!$postData['is_reply']) {
                     if (!$this->createThumbnail($this->file_location[$i] . ".tmp", $this->file_thumb_location[$i], kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
-                      kxFunc::showError(_gettext('Could not create thumbnail.'));
+                      kxFunc::showError(_('Could not create thumbnail.'));
                     }
                   } else {
                     if (!$this->createThumbnail($this->file_location[$i] . ".tmp", $this->file_thumb_location[$i], kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
-                      kxFunc::showError(_gettext('Could not create thumbnail.'));
+                      kxFunc::showError(_('Could not create thumbnail.'));
                     }
                   }
                   $imageDim_thumb = getimagesize($this->file_thumb_location[$i]);
@@ -279,7 +279,7 @@ class Upload
 
               // Move the file from the post data to the server
               if (!move_uploaded_file($_FILES['imagefile']['tmp_name'][$i], $this->file_location[$i])) {
-                kxFunc::showError(_gettext('Could not copy uploaded image.'));
+                kxFunc::showError(_('Could not copy uploaded image.'));
               }
 
               /* Check if the filetype provided comes with a MIME restriction */
@@ -291,7 +291,7 @@ class Upload
                     unlink($location);
                   }
 
-                  kxFunc::showError(_gettext('Invalid MIME type for this filetype.'));
+                  kxFunc::showError(_('Invalid MIME type for this filetype.'));
                 }
               }
 
@@ -301,14 +301,14 @@ class Upload
                   unlink($location);
                 }
 
-                kxFunc::showError(_gettext('File transfer failure. Please go back and try again.'));
+                kxFunc::showError(_('File transfer failure. Please go back and try again.'));
               }
             }
             /* Flag that the file used isn't an internally supported type */
             $this->files[$i]['file_is_special'] = true;
           }
         } else {
-          kxFunc::showError(_gettext('Sorry, that filetype is not allowed on this board.'));
+          kxFunc::showError(_('Sorry, that filetype is not allowed on this board.'));
         }
 
       }
@@ -334,7 +334,7 @@ class Upload
           }
 
           if (!$worked) {
-            kxFunc::showError(_gettext('Invalid video type.'));
+            kxFunc::showError(_('Invalid video type.'));
           }
 
           $results = $this->db->select("post_files")
@@ -350,10 +350,10 @@ class Upload
             $video_check = kxFunc::check_link($videourl_start . $video_id);
             switch ($video_check[1]) {
               case 404:
-                kxFunc::showError(_gettext('Unable to connect to') . ': ' . $videourl_start . $video_id);
+                kxFunc::showError(_('Unable to connect to') . ': ' . $videourl_start . $video_id);
                 break;
               case 303:
-                kxFunc::showError(_gettext('Invalid video ID.'));
+                kxFunc::showError(_('Invalid video ID.'));
                 break;
               case 302:
                 // Continue
@@ -365,7 +365,7 @@ class Upload
                 // Continue
                 break;
               default:
-                kxFunc::showError(_gettext('Invalid response code ') . ':' . $video_check[1]);
+                kxFunc::showError(_('Invalid response code ') . ':' . $video_check[1]);
                 break;
             }
             $this->isvideo = true;
@@ -382,11 +382,11 @@ class Upload
 
             foreach ($results as $line) {
               $real_threadid = ($line->post_parent == 0) ? $line->post_id : $line->post_parent;
-              kxFunc::showError(sprintf(_gettext('That video ID has already been posted %shere%s.'), '<a href="' . kxEnv::Get('kx:paths:boards:folder') . '/' . $boardData->board_id . '/res/' . $real_threadid . '.html#' . $line->post_parent . '">', '</a>'));
+              kxFunc::showError(sprintf(_('That video ID has already been posted %shere%s.'), '<a href="' . kxEnv::Get('kx:paths:boards:folder') . '/' . $boardData->board_id . '/res/' . $real_threadid . '.html#' . $line->post_parent . '">', '</a>'));
             }
           }
         } else {
-          kxFunc::showError(_gettext('Invalid ID'));
+          kxFunc::showError(_('Invalid ID'));
         }
       }
     }
@@ -404,13 +404,13 @@ class Upload
   $this->files[0]['image_h'] = $imageDim[1];
 
   if (!copy($postData['oekaki'], KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[0]['file_name'] . $this->files[0]['file_type'])) {
-  kxFunc::showError(_gettext('Could not copy uploaded image.'));
+  kxFunc::showError(_('Could not copy uploaded image.'));
   }
 
   $oeakaki_animation = substr($postData['oekaki'], 0, -4) . '.pch';
   if (file_exists($oeakaki_animation)) {
   if (!copy($oeakaki_animation, KX_BOARD . '/' . $boardData->board_name . '/src/' . $this->files[0]['file_name'] . '.pch')) {
-  kxFunc::showError(_gettext('Could not copy animation.'));
+  kxFunc::showError(_('Could not copy animation.'));
   }
   unlink($oeakaki_animation);
   }
@@ -423,20 +423,20 @@ class Upload
   ) {
   if (!$postData['is_reply']) {
   if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
-  kxFunc::showError(_gettext('Could not create thumbnail.'));
+  kxFunc::showError(_('Could not create thumbnail.'));
   }
   } else {
   if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
-  kxFunc::showError(_gettext('Could not create thumbnail.'));
+  kxFunc::showError(_('Could not create thumbnail.'));
   }
   }
   } else {
   if (!$this->createThumbnail($postData['oekaki'], $thumbpath, $this->files[0]['image_w'], $this->files[0]['image_h'])) {
-  kxFunc::showError(_gettext('Could not create thumbnail.'));
+  kxFunc::showError(_('Could not create thumbnail.'));
   }
   }
   if (!$this->createThumbnail($postData['oekaki'], $thumbpath_cat, kxEnv::Get('kx:images:catthumbw'), kxEnv::Get('kx:images:catthumbh'))) {
-  kxFunc::showError(_gettext('Could not create thumbnail.'));
+  kxFunc::showError(_('Could not create thumbnail.'));
   }
 
   $imgDim_thumb = getimagesize($thumbpath);
@@ -482,7 +482,7 @@ class Upload
       
       $src_img = imagecreatefromstring(file_get_contents($source));
       if (!$src_img) {
-        kxFunc::showError(_gettext('Unable to read uploaded file during thumbnailing.'), _gettext('A common cause for this is an incorrect extension when the file is actually of a different type.'));
+        kxFunc::showError(_('Unable to read uploaded file during thumbnailing.'), _('A common cause for this is an incorrect extension when the file is actually of a different type.'));
       }
       $old_x = imageSX($src_img);
       $old_y = imageSY($src_img);

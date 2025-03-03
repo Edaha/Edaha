@@ -60,12 +60,12 @@ class public_board_upload_upload extends public_board_base_baseboard {
     
     if (!$postData['is_reply']) {
       if (empty($postData['files'][0])) {
-        kxFunc::showError(_gettext('A file is required for a new thread.'));
+        kxFunc::showError(_('A file is required for a new thread.'));
       }
     }
     else {
       if (!$this->postClass->checkEmpty($postData)) {
-        kxFunc::showError(_gettext('An image, or message, is required for a reply.'));
+        kxFunc::showError(_('An image, or message, is required for a reply.'));
       }
     }
 

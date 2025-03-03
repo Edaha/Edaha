@@ -137,12 +137,12 @@ class manage_core_staff_staff extends kxCmd
           ))
           ->execute();
         $twigData['notice_type'] = 'success';
-        $twigData['notice'] = _gettext('User added successfully');
+        $twigData['notice'] = _('User added successfully');
         logging::addLogEntry(kxFunc::getManageUser()['user_name'], sprintf('Created user %s', $this->request['username']), __CLASS__);
       } else {
         // User with that username already exists
         $twigData['notice_type'] = 'error';
-        $twigData['notice'] = _gettext('A user with that username already exists');
+        $twigData['notice'] = _('A user with that username already exists');
       }
     } elseif ($_GET['act'] == 'edit') {
       // Edits a user's information
@@ -168,7 +168,7 @@ class manage_core_staff_staff extends kxCmd
           ->execute();
 
         $twigData['notice_type'] = 'success';
-        $twigData['notice'] = _gettext('User info updated!');
+        $twigData['notice'] = _('User info updated!');
         logging::addLogEntry(
           kxFunc::getManageUser()['user_name'],
           sprintf('Edited user %s', $this->request['username']),
@@ -190,7 +190,7 @@ class manage_core_staff_staff extends kxCmd
           ->condition("user_id", $this->request['id'])
           ->execute();
         $twigData['notice_type'] = 'success';
-        $twigData['notice'] = _gettext('User successfully deleted!');
+        $twigData['notice'] = _('User successfully deleted!');
         logging::addLogEntry(
           kxFunc::getManageUser()['user_name'],
           sprintf('Deleted user %s', $user_exists['user_name']),
@@ -198,7 +198,7 @@ class manage_core_staff_staff extends kxCmd
         );
       } else {
         $twigData['notice_type'] = 'error';
-        $twigData['notice'] = _gettext('A user with that ID does not exist');
+        $twigData['notice'] = _('A user with that ID does not exist');
       }
     }
 

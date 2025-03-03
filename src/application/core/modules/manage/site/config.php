@@ -80,7 +80,7 @@ class manage_core_site_config extends kxCmd
 
     if (file_put_contents(KX_ROOT . "/config/main.yml.php", $new_config) !== false) {
       $this->twigData['notice']['type'] = 'success';
-      $this->twigData['notice']['message'] = _gettext('Configuration updated.');
+      $this->twigData['notice']['message'] = _('Configuration updated.');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],
         sprintf('Updated site configuration', $this->request['do']),
@@ -88,7 +88,7 @@ class manage_core_site_config extends kxCmd
       );
     } else {
       $this->twigData['notice']['type'] = 'failure';
-      $this->twigData['notice']['message'] = _gettext('An error occured while trying to save configuration data.');
+      $this->twigData['notice']['message'] = _('An error occured while trying to save configuration data.');
     }
 
     $this->_show();

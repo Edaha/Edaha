@@ -1,6 +1,4 @@
 <?php
-include_once 'application/lib/gettext/gettext.inc.php';
-_bindtextdomain();
 class kxTemplate {
     private static $template_dir;
     private static $debug_flag = false;

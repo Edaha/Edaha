@@ -177,7 +177,7 @@ class public_core_post_post extends kxCmd
         // If the thread is locked
         if ($this->postData['thread_info']['locked'] == 1) {
           // Don't let the user post
-          kxFunc::showError(_gettext('Sorry, this thread is locked and can not be replied to.'));
+          kxFunc::showError(_('Sorry, this thread is locked and can not be replied to.'));
         }
 
         $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);

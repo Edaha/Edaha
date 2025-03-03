@@ -9,7 +9,6 @@ DEFINE('KUSABA_RUNNING', true);
 require_once (KX_ROOT . "/vendor/autoload.php");
 // Twig_Autoloader :: register();
 require_once (KX_LIB . '/kxAutoload.class.php');
-require_once (KX_ROOT . '/application/lib/gettext/gettext.inc.php');
 
 $repository = kxAutoload :: registerRepository(KX_LIB, array (
     'prefix' => 'kx'

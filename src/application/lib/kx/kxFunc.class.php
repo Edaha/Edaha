@@ -215,9 +215,9 @@ class kxFunc
       }
     } else {
       if ($ispost && $file != '') {
-        echo sprintf(_gettext('%s uploaded.'), $file) . ' ' . _gettext('Updating pages.');
+        echo sprintf(_('%s uploaded.'), $file) . ' ' . _('Updating pages.');
       } elseif ($ispost) {
-        echo _gettext('Post added.') . ' ' . _gettext('Updating pages.'); # TEE COME BACK
+        echo _('Post added.') . ' ' . _('Updating pages.'); # TEE COME BACK
       } else {
         echo '---> ---> --->';
       }
@@ -2277,7 +2277,7 @@ class kxBans
 
     if ($force_display) {
       /* Instructed to display a page whether banned or not, so we will inform them today is their rucky day */
-      echo '<title>' . _gettext('YOU ARE NOT BANNED!') . '</title><div align="center"><img src="' . kxEnv::Get('kx:paths:main:folder') . 'youarenotbanned.jpg"><br /><br />' . _gettext('Unable to find record of your IP being banned.') . '</div>';
+      echo '<title>' . _('YOU ARE NOT BANNED!') . '</title><div align="center"><img src="' . kxEnv::Get('kx:paths:main:folder') . 'youarenotbanned.jpg"><br /><br />' . _('Unable to find record of your IP being banned.') . '</div>';
     } else {
       return true;
     }

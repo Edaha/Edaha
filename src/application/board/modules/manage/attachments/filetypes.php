@@ -65,13 +65,13 @@ class manage_board_attachments_filetypes extends kxCmd {
       }
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
-      $this->twigData['notice']['message'] = _gettext('An error occured: ') . $e->getMessage();
+      $this->twigData['notice']['message'] = _('An error occured: ') . $e->getMessage();
     }
     
     if (!isset($this->twigData['notice'])) {
       $this->twigData['notice']['type'] = 'success';
-      $this->twigData['notice']['message'] = ($this->request['do'] == 'add') ? _gettext('Filetype added successfully!') : _gettext('Filetype edited successfully!');
-      $log_message = ($this->request['do'] == 'add') ? _gettext('Added filetype %s') : _gettext('Edited filetype %s');
+      $this->twigData['notice']['message'] = ($this->request['do'] == 'add') ? _('Filetype added successfully!') : _('Filetype edited successfully!');
+      $log_message = ($this->request['do'] == 'add') ? _('Added filetype %s') : _('Edited filetype %s');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],
         sprintf($log_message, $this->request['ext']),
@@ -97,12 +97,12 @@ class manage_board_attachments_filetypes extends kxCmd {
                ->execute();
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
-      $this->twigData['notice']['message'] = _gettext('An error occured: ') . $e->getMessage();
+      $this->twigData['notice']['message'] = _('An error occured: ') . $e->getMessage();
     }
     
     if (!isset($this->twigData['notice'])) {
       $this->twigData['notice']['type'] = 'success';
-      $this->twigData['notice']['message'] = _gettext('Filetype deleted successfully!');
+      $this->twigData['notice']['message'] = _('Filetype deleted successfully!');
     }
     
     // Need to update the cache

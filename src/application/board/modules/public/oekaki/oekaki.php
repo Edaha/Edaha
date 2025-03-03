@@ -55,7 +55,7 @@ class public_board_oekaki_oekaki extends public_board_base_baseboard {
     $postData['is_oekaki'] = $this->postClass->checkOekaki();
     if ($postData['is_oekaki']) {
       if (file_exists(KX_BOARD . '/' . $this->board->board_name . '/src/' . $files[0]['file_name'] . '.pch')) {
-        $postData['thread_info']['message'] .= '<br /><small><a href="' . KX_SCRIPT . '/animation.php?board=' . $this->board->board_name . '&amp;id=' . $files[0]['file_name'] . '">' . _gettext('View animation') . '</a></small>';
+        $postData['thread_info']['message'] .= '<br /><small><a href="' . KX_SCRIPT . '/animation.php?board=' . $this->board->board_name . '&amp;id=' . $files[0]['file_name'] . '">' . _('View animation') . '</a></small>';
       }
     }
     parent::processPost($postData);
@@ -64,12 +64,12 @@ class public_board_oekaki_oekaki extends public_board_base_baseboard {
   public function checkFields($postData) {
     if (!$postData['is_reply']) {
       if (empty($postData['files'][0]) && !$postData['is_oekaki'] && ( ( !isset($this->request['nofile']) && $this->board->board_enable_no_file == 1 ) || $this->board->board_enable_no_file ) ) {
-        kxFunc::showError(_gettext('A file is required for a new thread.'));
+        kxFunc::showError(_('A file is required for a new thread.'));
       }
     }
     else {
       if (!$postData['is_oekaki'] && !$this->postClass->checkEmpty($postData)) {
-        kxFunc::showError(_gettext('An image, or message, is required for a reply.'));
+        kxFunc::showError(_('An image, or message, is required for a reply.'));
       }
     }
     if (isset($this->request['nofile']) && $this->board->board_enable_no_file == 1) {

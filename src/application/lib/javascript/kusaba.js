@@ -180,7 +180,7 @@ kusaba.set_stylesheet = function (styletitle, txt, site) {
     } else {
         if (styletitle == kusaba.get_default_stylesheet())
             $.cookie("kustyle", null, { path: '/' });
-        else
+        else 
             $.cookie("kustyle", styletitle, { expires: 365, path: '/' })
     }
     var found = false;
@@ -200,7 +200,7 @@ kusaba.set_preferred_stylesheet = function () {
 }
 
 kusaba.get_active_stylesheet = function () {
-    return $('link[rel$=stylesheet][title]').filter(function () { return !this.disabled; }).last().attr('title');
+    return $('link[rel$=stylesheet][title]:not([rel^=alternate])').filter(function () { return !this.disabled; }).last().attr('title');
 }
 
 kusaba.get_default_stylesheet = function () {
@@ -663,7 +663,7 @@ kusaba.addevents = function (context) {
         }, function () {
             window.open(this.href);
         });
-    $('a[href*="#"]', context).click(function (e) {
+    $('a[href*="#"]:not([id^="style"])', context).click(function (e) {
         var anchor = this.href.split(/#/)[1];
         if (typeof anchor == 'undefined') {
             return true;
@@ -830,8 +830,9 @@ kusaba.addbacklinks = function (context) {
 
 if (kusaba.style_cookie) {
     var cookie = $.cookie(kusaba.style_cookie);
+    console.log(cookie);
     var title = cookie ? cookie : kusaba.get_default_stylesheet();
-
+    console.log(title);
     if (title != kusaba.get_active_stylesheet())
         kusaba.set_stylesheet(title);
 }
@@ -963,9 +964,9 @@ $(document).ready(function () {
         function (e) {
             if ($(this).children('option:selected').attr('value')) kusaba.set_stylesheet($(this).children('option:selected').attr('value'));
         });
-    $("#adminbar a[id$=style_]").click(
+    $("#adminbar a[id^=style_]").click(
         function (e) {
-            kusaba.set_stylesheet($(this).attr("id").substr(0, 6));
+            kusaba.set_stylesheet($(this).attr("id").substr(6));
             return false;
         });
     if (1 || $('link[rel$=stylesheet][title]:not([disabled])').attr("title") == "Burichan") {

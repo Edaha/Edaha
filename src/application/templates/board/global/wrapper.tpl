@@ -19,6 +19,7 @@
   {{parent()}}
 {% endblock %}
 {% block extrajs %}
+  kusaba.style_cookie  = 'kustyle';
   kusaba.board   = '{{board.board_name}}';
   kusaba.kumod_set = false;
   kusaba.quick_reply = false;
@@ -39,7 +40,7 @@
         </select>
       {% else %}
         {% for style in ku_styles %}
-          [<a href="#" id="{{ style|capitalize }}">{{ style|capitalize }}</a>]&nbsp;
+          [<a href="#" id="style_{{ style|capitalize }}">{{ style|capitalize }}</a>]&nbsp;
         {% endfor %}
       {% endif %}
       {% if ku_styles|length > 0 %}

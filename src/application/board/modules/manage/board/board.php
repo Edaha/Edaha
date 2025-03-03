@@ -148,10 +148,10 @@ class manage_board_board_board extends kxCmd {
   
   private function _del() {
     $this->db->delete("boards")
-             ->condition("board_id", $this->request['board'])
+             ->condition("board_name", $this->request['board'])
              ->execute();
-    $this->twigData['notice_type'] = 'success';
-    $this->twigData['notice'] = _gettext('Board successfully deleted.');
+    $this->twigData['notice']['type'] = 'success';
+    $this->twigData['notice']['message'] = _gettext('Board successfully deleted.');
   }
 
 }

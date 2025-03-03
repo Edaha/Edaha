@@ -87,6 +87,9 @@ RUN chown -R www-data:www-data /var/www
 FROM base as development
 # COPY ./tests /var/www/html/tests
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+COPY ./docker/php/conf.d /usr/local/etc/php/conf.d
 COPY --from=dev-deps app/vendor/ /var/www/html/vendor
 
 FROM development as test

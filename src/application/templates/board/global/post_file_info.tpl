@@ -97,7 +97,7 @@
       </div>
     {% endapply %}
     {% if loop.last %}
-      <br style="clear:both" />
+      <br class="clear-both" />
     {% endif %}
   {% endfor %}
 {% elseif post.file_name|length == 1 %} 

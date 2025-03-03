@@ -40,18 +40,19 @@
       {% endif %}
         <li>
           <label for="subject">{% trans "Subject" %}</label>
-          {# strip #}<input type="text" id="subject" name="subject" size="35" maxlength="75" accesskey="s" />&nbsp;
-            <input type="submit" value="
-            {% if kxEnv("extra:quickreply") and replythread == 0 %}
-              {% trans "Submit" %}" accesskey="z" />
-              <span id="posttypeindicator">&nbsp;({% trans "new thread" %})</span>
-            {% elseif kxEnv("extra:quickreply") and replythread != 0 %}
-              {% trans "Reply" %}" accesskey="z" />
-              <span id="posttypeindicator">&nbsp;({% trans %}reply to {{replythread}}{% endtrans %})</span>
-            {% else %}
-              {% trans "Submit" %}" accesskey="z" />
-          {% endif %}
-        </li>{# endstrip #}
+          <div class="fixer"><input type="text" id="subject" name="subject" size="28" maxlength="75" accesskey="s" /></div>
+
+{%- if kxEnv("extra:quickreply") and replythread == 0 -%}
+{% set submit_label = "Submit"|trans %}
+{% set post_indicator = "new thread"|trans %}
+{%- elseif kxEnv("extra:quickreply") and replythread != 0 -%}
+{% set submit_label = "Reply"|trans %}
+{% set post_indicator = "reply to "|trans ~ replythread %}
+{%- endif %}
+
+          <input type="submit" value="{{ submit_label }}" accesskey="z" />
+          <span id="posttypeindicator">&nbsp;({{post_indicator}})</span>
+        </li>
         <li>
           <label for="message" id="message_label">{% trans "Message" %}</label>
           <textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea>
@@ -62,7 +63,7 @@
             <li id="file{{ i }}"{% if not loop.first %} style="display:none"{% endif %}>
               <label for="file{{ i }}">{% trans "File" %} {{ i }}</label>
               <input{% if not loop.last %} onchange="$('#file{{ i + 1}}').show()"{% endif %} id="file{{ i }}" type="file" name="imagefile[]" size="35" accesskey="f" />
-              {% if loop.first and replythread == 0 and board.board_enablenofile == 1 %}
+              {% if loop.first and replythread == 0 and board.board_no_file == 1 %}
                 <input type="checkbox" name="nofile" id="nofile" accesskey="q" />[<span id="nofile"> {% trans "No File" %}]</span>
               {% endif %}
             </li>
@@ -71,7 +72,7 @@
           <li>
             <label for="file">{% trans "File" %}</label>
             <input id="file" type="file" name="imagefile[]" size="35" accesskey="f" />
-            {% if replythread == 0 and board.board_enablenofile == 1 %}
+            {% if replythread == 0 and board.board_no_file == 1 %}
               [<input type="checkbox" name="nofile" id="nofile" accesskey="q" /><span id="nofile"> {% trans "No File" %}</span>]
             {% endif %}
           </li>
@@ -92,10 +93,23 @@
       {% endif %}
         <li>
           <label for="password">{% trans "Password" %}</label>
-          <input id="password" type="password" name="postpassword" size="8" accesskey="p" /><small>({% trans "for post and file deletion" %})</small>
+          <div class="fixer"><input id="password" type="password" name="postpassword" size="8" accesskey="p" /></div><small>({% trans "for post and file deletion" %})</small>
         </li>
       </ol>
       <div id="rules">
+        <div class="rulescontent">
+{% set board_title = '' %}
+{% if kxEnv("pages:dirtitle") %}
+  {% set board_title = board_title ~ '/' ~ board.board_name ~ '/' %}
+  {% if board.board_desc %}
+    {% set board_title = board_title ~ ' - ' %}
+  {% endif %}
+{% endif %}
+{% if board.board_desc %}
+  {% set board_title = board_title ~ board.board_desc %}
+{% endif %}
+          <span class="title">{{ board_title }}</span>
+        </div>
         <ul style="margin-left: 0; margin-top: 0; margin-bottom: 0; padding-left: 0;">
           <li>{% trans "Supported file types are" %}:
           {% if board.board_filetypes_allowed != '' %}

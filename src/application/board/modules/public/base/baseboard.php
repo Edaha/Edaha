@@ -534,9 +534,9 @@ class public_board_base_baseboard extends kxCmd {
   public function formatReflink($post_board, $post_thread_start_id, $post_id, $locale = 'en') {
     $return = '  ';
 
-    $reflink_noquote = '<a href="' . kxEnv::Get('kx:paths:boards:folder') . $post_board . '/res/' . $post_thread_start_id . '.html#' . $post_id . '" onclick="return highlight(\'' . $post_id . '\');">';
+    $reflink_noquote = '<a href="' . kxEnv::Get('kx:paths:boards:folder') . '/' . $post_board . '/res/' . $post_thread_start_id . '.html#' . $post_id . '" onclick="return highlight(\'' . $post_id . '\');">';
 
-    $reflink_quote = '<a href="' . kxEnv::Get('kx:paths:boards:folder') . $post_board . '/res/' . $post_thread_start_id . '.html#i' . $post_id . '" onclick="return insert(\'>>' . $post_id . '\\n\');">';
+    $reflink_quote = '<a href="' . kxEnv::Get('kx:paths:boards:folder') . '/' . $post_board . '/res/' . $post_thread_start_id . '.html#i' . $post_id . '" onclick="return insert(\'>>' . $post_id . '\\n\');">';
 
     if ($locale == 'ja') {
       $return .= $reflink_quote . kxFunc::formatJapaneseNumbers($post_id) . '</a>' . $reflink_noquote . '?</a>';

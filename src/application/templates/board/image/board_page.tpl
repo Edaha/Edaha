@@ -7,60 +7,26 @@
     {% set iteration = loop.index0 %}
     {% for post in thread %}
       {% if post.post_parent == 0 %}
+        <span id="unhidethread{{post.post_id}}{{board.board_name}}" style="display: none;">
+          {% trans "Thread" %} <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}.html">{{post.post_id}}</a> {% trans "hidden." %}
+          <a href="#" id="togglethread" onclick="javascript:togglethread('{{post.post_id}}{{board.board_name}}');return false;" title="{% trans "Un-Hide Thread" %}">
+            <img src="{{ kxEnv("paths:main:path") }}css/icons/blank.gif" border="0" class="unhidethread" alt="{% trans "Un-Hide Thread" %}" />
+          </a>
+        </span>
         <div class="thread" id="thread_{{post.post_id}}_{{board.board_name}}">
-          <span id="unhidethread{{post.post_id}}{{board.board_name}}" style="display: none;">
-            {% trans "Thread" %} <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}.html">{{post.post_id}}</a> {% trans "hidden." %}
-            <a href="#" id="togglethread" onclick="javascript:togglethread('{{post.post_id}}{{board.board_name}}');return false;" title="{% trans "Un-Hide Thread" %}">
-              <img src="{{ kxEnv("paths:main:path") }}css/icons/blank.gif" border="0" class="unhidethread" alt="{% trans "Un-Hide Thread" %}" />
-            </a>
-          </span>
           <script type="text/javascript"><!--
             if (kusaba.hiddenthreads.toString().indexOf('{{post.post_id}}{{board.board_name}}')!==-1) {
-              document.getElementById('unhidethread{{post.post_id}}{{board.board_name}}').style.display = 'block';
-              document.getElementById('thread{{post.post_id}}{]board.board_name}}').style.display = 'none';
+              document.getElementById('unhidethread_{{post.post_id}}_{{board.board_name}}').style.display = 'block';
+              document.getElementById('thread_{{post.post_id}}_{{board.board_name}}').style.display = 'none';
             }
           //--></script>
-          <a name="s{{iteration}}"></a>
+          <a name=></a>
           <div class="op" id="p{{post.post_id}}">
-            {% include "board/global/post_file_info.tpl" %}
-            <div class="post">
-              {% include "board/global/post_header.tpl"%}
-              <span class="extrabtns">
-              {% if post.post_locked == 1 %}
-                <img style="border: 0;" src="{{boardpath}}css/locked.gif" alt="{% trans "Locked" %}" />
-              {% endif %}
-              {% if post.post_stickied == 1 %}
-                <img style="border: 0;" src="{{boardpath}}css/sticky.gif" alt="{% trans "Stickied" %}" />
-              {% endif %}
-              <span id="hide_{{post.post_id}}"></span>
-              {% if kxEnv("extra:watchthreads") %}
-                <span id="watch_{{post.post_id}}"></span>
-              {% endif %}
-              {% if kxEnv("extra:expand") and post.replies and (post.replies + kxEnv("display:replies")) < 300 %}
-                <span id="expand_{{post.post_id}}"></span>
-              {% endif %}
-              {% if kxEnv("extra:quickreply") %}
-                <span id="quickreply_{{post.post_id}}"></span>
-              {% endif %}
-              </span>
-              <span id="dnb_{{board.board_name}}_{{post.post_id}}_y"></span>
-              {% if post.replies > 1000 %}
-                {% if kxEnv("display:traditionalread") %}
-                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php/{{board.board_name}}/{{post.post_id}}/p1-100">{% trans "Reply" %}</a>&#93;
-                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php/{{board.board_name}}/{{post.post_id}}/l50">{% trans "Last 50 posts" %}</a>&#93;
-                {% else %}
-                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php?b={{board.board_name}}&t={{post.post_id}}&p=p1-100">{% trans "Reply" %}</a>&#93;
-                  &#91;<a href="{{ kxEnv("paths:main:path") }}/read.php?b={{board.board_name}}&t={{post.post_id}}&p=l50">{% trans "Last 50 posts" %}</a>&#93;
-                {% endif %}
-              {% else %}
-                [<a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}.html">{% trans "Reply" %}</a>]
-                {% if kxEnv("extra:firstlast") and ((post.post_stickied == 1 and post.replies + kxEnv("display:stickyreplies") > 50) or (post.post_stickied == 0 and post.replies + kxEnv("display:replies") > 50)) %}
-                  {% if ((post.post_stickied == 1 and post.replies + kxEnv("display:stickyreplies") > 100) or (post.post_stickied == 0 and post.replies + kxEnv("display:replies") > 100)) %}
-                    [<a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{% if post.post_parent == 0 %}{{post.post_id}}{% else %}{{post.post_parent}}{% endif %}-100.html">{% trans "First 100 posts" %}</a>]
-                  {% endif %}
-                  [<a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/res/{{post.post_id}}+50.html">{% trans "Last 50 posts" %}</a>]
-                {% endif %}
-              {% endif %}
+            <div id="{{ post.post_id }}" class="post">
+              <div id="s{{iteration}}" class="post_header">
+                {% include "board/global/post_header.tpl"%}
+              </div>
+              {% include "board/global/post_file_info.tpl" %}
       {% else %}
         <div class="reply"  id="reply_{{post.post_id}}">
           <div class="post">
@@ -103,6 +69,7 @@
         {{post.post_message}}
         {% endautoescape %}
       </p>
+      <br class="clear-both">
       {% if not post.post_stickied and post.post_parent == 0 and ((board.board_max_age > 0 and (post.post_timestamp + (board.board_max_age * 3600)) < ("now"|date("U") + 7200 ) ) or (post.post_delete_time > 0 and post.post_delete_time <= ("now"|date("U") + 7200))) %}
         <span class="oldpost">
           {% trans "Marked for deletion (old)" %}
@@ -112,7 +79,7 @@
       {% if post.post_parent == 0 %}
           </div>
         </div>
-        <div id="replies_{{post.post_id}}_{{board.board_name}}">
+        <div id="replies_{{post.post_id}}_{{board.board_name}}" class="replies">
         {# needs to be redone
         {% if post.replies %}
           <span class="omittedposts">

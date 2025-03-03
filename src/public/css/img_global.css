@@ -1,18 +1,24 @@
+
+###########################
+######IMG_GLOBAL.CSS#######
+###########################
+###########################
+
 /**
  * Globals.
  */
 
 html, body {
- height: 100%;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: .9em;
+  margin: 0px auto;
 }
 
 body {
- margin: 0px 0px;
- padding: 0px 5px 15px 5px;
-/* font-family: "Arial", "Helvetica", sans-serif;*/
- font-size: 10pt;
- background-repeat: repeat-x;
- background-position: top;
+  margin: 0px 0px;
+  padding: 0px 5px 15px 5px;
+  margin-left: 2%;
+  margin-right: 2%;
 }
 
 a, a:visited {
@@ -20,12 +26,51 @@ a, a:visited {
 }
 
 .spoiler, .spoiler a { 
- color: black; 
+ color: transparent; 
  background-color: black; 
 } 
 
 .spoiler:hover, .spoiler:hover a {
  color: white; 
+}
+
+br[clear=left], br[clear=right] {
+	line-height: 0;
+	display: none;
+}
+
+br.clear-left, br.clear-right, br.clear-both {
+	line-height: 0;
+}
+
+br.clear-left {
+	clear: left;
+}
+
+br.clear-right {
+	clear: right;
+}
+
+br.clear-both {
+	clear:both;
+}
+
+iframe {
+	border: 0;
+}
+
+ol, li {
+	list-style-position:inside;
+}
+
+hr {
+    clear: both;
+    float: none;
+    width: 100%;
+    height: 1px;
+    margin: 1em 0;
+    border: 0;
+    background-color: #000;
 }
 
 /**
@@ -36,6 +81,36 @@ a, a:visited {
  clear: both;
  margin-top: 2px;
  padding: 0px;
+}
+
+.logo {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	clear:both;
+	text-align:center;
+	font-size:24pt;
+	width:100%;
+  display:block;
+}
+
+.logo+hr {
+	display: none;
+}
+
+
+.adminbar {
+	display:none;
+}
+
+.navbar {
+  margin-top:5px;
+  padding: .5em;
+  text-align:center;
+}
+
+.footer {
+	text-align:center;
+	font-size:10px;
 }
 
 #footer {
@@ -53,19 +128,44 @@ a, a:visited {
  text-decoration: underline;
 }
 
+.content.notice {
+	text-align:center;
+}
+
+/**
+ * Posting mode: Reply header,
+ */
+ 
+ 
+.replymode {
+  width:100%;
+	padding: 5px;
+	margin-bottom: 5px;
+}
+.catalogmode {
+  width:100%;
+	padding: 5px;
+	margin-bottom: 5px;
+}
 
 /**
  * Posting form.
  */
 
 #postarea {
- text-align: center;
- padding: 5px;
+  text-align: center;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  min-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #posting_form {
- display: inline-table;
- border-spacing: 2px;
+  display: inline-table;
+  border-spacing: 2px;
+  overflow: hidden;
 }
 
 #posting_form ol, #posting_form ol li {
@@ -84,40 +184,50 @@ a, a:visited {
  width:auto;
 } 
 
+#posting_form label + * {
+    margin-left: 2px;
+}
+
 #message_label {
  vertical-align: middle;
 }
 
-#postform input[type="text"], 
-#postform input[type="password"], 
-#postform input[type="file"],
-#postform textarea {
+#posting_form input {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#posting_form input[type="text"], 
+#posting_form input[type="password"], 
+#posting_form input[type="file"],
+#posting_form select,
+#posting_form textarea {
  padding: 3px 4px 3px 1px;
  margin: 0px;
 }
 
-#postform input[type=text] {
- width: 241px;
+#posting_form input[type="text"],
+#posting_form input[type="password"],
+#posting_form textarea {
+	width: 100%;
 }
 
-#postform input[type="password"] {
- width: 80px;
+#posting_form .fixer {
+	margin: 0;
+  float: left;
+  padding-right: 10px;
 }
 
-#postform input[type="file"] {
- width: 309px;
-}
-
-#postform input[type="submit"] {
+#posting_form input[type="submit"] {
  margin-bottom: 1px;
  margin-left: 3px;
  margin-bottom: 2px;
  margin-left: 2px;
 } 
 
-#postform textarea {
- -moz-resize: none;
- width: 410px;
+#posting_form textarea {
+ resize:none;
+ width: 100%;
  min-height: 83px;
 }
 
@@ -125,10 +235,15 @@ a, a:visited {
 
 * html form#posting_form {
  display: block;
- width: 550px;
+ width: 980px;
  margin-left: auto;
  margin-right: auto;
 }
+
+* html form#posting_form ol {
+  width: 480px;
+}
+
 
 * html #posting_form label {
  float:left;
@@ -138,35 +253,188 @@ a, a:visited {
  width: 90px !important;
 }
 
+
+* html #posting_form input[type="password"] {
+ width: 70%;
+}
+
+* html #posting_form input[type="file"],
+* html #posting_form textarea,
+* html #posting_form input[type=text] {
+ width: 350px;
+}
+
+* html .fixer {
+  float: none !important;
+  display: inline;
+  padding:  0;
+}
+* html .fixer input {
+  width: 200px !important;
+}
+
+#posting_form ol li span {
+	font-size: .9em;
+}
+
+#rules ul#tabs {
+	width: 100%;
+	height: 1.9em;
+	list-style: none;
+	border-bottom: 1px solid;
+	padding: 0 22px 1px 0;
+	margin: 0;
+	position: relative;
+	right: 11px;
+	bottom: 2px;
+}
+
+#rules ul#tabs li {
+float: left;
+padding: 1px 7px;
+line-height: 1.7em;
+margin: 0 -1px 0 0;
+border: 1px solid #C5C8D2;
+border-bottom: 0;
+text-align: center;
+}
+
+#rules ul#tabs li.selected {
+	line-height: 1.7em;
+  padding-bottom: .2em;
+}
+
+
 /* The same, but for IE7 */
 
-*+html form#posting_form { 
+*:first-child+html form#posting_form { 
  display: block;
- width: 550px;
+ width: 980px;
  margin-left: auto;
  margin-right: auto;
 }
 
+*:first-child+html form#posting_form ol {
+	width: 480px;
+}
 
 *:first-child+html #posting_form label {
  float:left;
  margin-top: 2px !important;
  margin-bottom: 2px !important;
+ margin-right: 2px !important;
  display: inline;
- width: 90px !important;
+ width: 90px;!important;
+}
+*:first-child+html #posting_form label[htmlFor="message"] {
+	line-height: 100px;
+	vertical-align:middle;
 }
 
+*:first-child+html #posting_form label[htmlFor="captcha"] {
+	 line-height: 160px;
+}
+
+*:first-child+html #posting_form input[type=text] {
+ width: 350px;
+}
+
+
+*:first-child+html #posting_form input[type="password"] {
+ width: 60%
+}
+
+*:first-child+html #posting_form input[type="file"],
+*:first-child+html #posting_form textarea {
+ width: 60%;
+}
+
+*:first-child+html .fixer {
+	float: none !important;
+	display: inline;
+	padding:  0;
+}
+*:first-child+html .fixer input {
+	width: 200px !important;
+}
+
+*:first-child+html small {
+	float: none;
+}
+/*
+#posting_form > ol, #rules {
+  display: block;
+  float: left;
+  margin-right: 5px;
+  padding: 10px;
+  clear: none;
+  width: auto;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 9000px;
+  margin-bottom: -9000px;
+}
 
 #rules {
- clear: left;
- text-align: left;
- font-size: smaller;
- padding: 1px 0 0;
- margin-left: 40px;
+  border: 1px solid;
+  text-align: left;
+  font-size: 10px;
+  padding: 1px 0 0;
+  padding-bottom: 9000px;
+  width: 400px;
+  margin-left: 0;
+}
+*/
+#posting_form > ol, #rules {
+display: block;
+float: left;
+margin-right: 5px;
+padding: 10px;
+clear: none;
+width: auto;
+margin-top: 0;
+padding-top: 0;
+padding-bottom: 9000px;
+margin-bottom: -9000px;
+text-align:left;
+}
+#rules {
+width: 400px;
+font-size: 10px;
+font-family: sans-serif;
+}
+#rules a {
+  text-decoration: none;
 }
 
-#rules a {
- text-decoration: none;
+#rules li {
+	margin-left: 1em;
+}
+
+#rules .title {
+    display: block;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+		margin-bottom: 15px;
+		margin-top: 10px;
+}
+
+#rules ul {
+    display: block;
+    margin-left: 60px;
+}
+
+#recaptcha_logo, #recaptcha_tagline {
+    display: none;
+}
+
+#recaptcha_table {
+    border: 0 !important;
+}
+
+.recaptcha_image_cell {
+    background-color: transparent !important;
 }
 
 .ui-resizable { position: relative;}
@@ -185,13 +453,25 @@ a, a:visited {
  * Threads and posts
  */
 
+table.uploads {
+ margin-left:auto; 
+ margin-right:auto;
+}
+
+table.uploads th {
+ padding: 3px 0 3px 1px;
+ width:auto;
+}
+
 .thread {
- padding-bottom: 15px;
+ padding-top: 5px;
+ padding-bottom: 5px;
 }
 
 .post {
- background: inherit;
- padding-bottom: 7px;
+  padding-bottom: 7px;
+  height: auto;
+  border: 1px solid;
 }
 
 .post_thumb {
@@ -202,8 +482,13 @@ a, a:visited {
 }
 
 .op .post {
- padding-bottom: 3px;
- margin-left: 40px;
+  padding: 0;
+  margin: 0;
+}
+
+.op .post .message,
+.post:first-child .message {
+  margin-left: 20px;
 }
 
 .reflink a {
@@ -223,20 +508,25 @@ a, a:visited {
 }
 
 .reply .post {
- display: inline-block;
- clear: none;
- max-width: 95%;
- margin-left: 18px;
- padding: 2px;
- width: auto;
+  display: inline-block;
+  clear: none;
+  max-width: 95%;
+  padding: 2px;
+  padding-right: 10px;
+  margin-left: 0;
+  width: auto;
 }
 
 .doubledash {
- float: left;
- position: relative;
- left: -22px;
- width: 0;
- padding-left: 2px;
+  float: left;
+  position: relative;
+  left: -22px;
+  width: 0;
+  padding-left: 2px;
+  margin-left: -.5em;
+  clear:both;
+  font-size: 1.5em;
+
 }
 
 .post_thumb img {
@@ -251,12 +541,17 @@ a, a:visited {
  margin: 2px 20px;
  padding: 1em 0.5em 1em 0.5em;
  font-family: none;
-
 }
 
 .reply .post_thumb {
  margin: 3px 0;
 }
+
+.file_size {
+	font-size:12px;
+	padding-left:3em;
+}
+
 .reply .file_size {
  padding-left: 20px;
 }
@@ -269,11 +564,13 @@ a, a:visited {
 }
 
 .postername {
- font-weight: 800;
+  font-size:12px;
+  font-weight: 800;
 }
 
 .subject {
- font-weight: 800;
+  font-size: 16px;
+  font-weight: 800;
 }
 
 .post_link, .post_link:visited {
@@ -289,8 +586,25 @@ a, a:visited {
  clear: both;
 }
 
+.replies {
+    margin-left: 30px;
+		margin-top: 10px;
+}
 
+.post_header img {
+ vertical-align: middle;
+}
 
+.post_header {
+    border-bottom: 1px solid;
+		margin-bottom: 10px;
+		padding: 0 .5em;
+		line-height: 2em;
+}
+
+.reply .post_header {
+    border: 0;
+}
 
 /**
  * Thread controls, style switcher, index paging
@@ -302,7 +616,7 @@ a, a:visited {
 }
 
 .extrabtns {
- vertical-align: middle;
+  float:right;
 }
 
 .hidethread {
@@ -340,8 +654,12 @@ a, a:visited {
 .reflinkpreview {
  position: absolute;
  padding: 5px;
- background-color: #F0E0D6;
  border: 1px dotted #000000;
+ z-index: 1;
+}
+
+.reflinkpreview .post {
+	border: 0 ;
 }
 
 #paging {
@@ -391,6 +709,23 @@ a, a:visited {
  * Capcodes
  */
 
+.capcode_system
+{
+ color: purple;
+ font-weight: bold;
+}
+
+.capcode_system .postertrip
+{
+ color: purple;
+ font-weight: normal;
+}
+.capcode_system .postername
+{
+ color: purple;
+ font-weight: bold;
+}
+
 .capcode_admin
 {
  color: #f00000;
@@ -426,4 +761,29 @@ a, a:visited {
 {
  color: #900090;
  font-weight: bold;
+}
+
+/**
+ * Misc. functions
+ */
+ 
+ol li label {
+    text-align: center;
+    border-style: solid;
+    border-width: 1px;
+    padding: 2px;
+    padding-top: 2px;
+    padding-left: 2px;
+    padding-bottom: 2px;
+    padding-right: 2px;
+    font-size: 12px;
+}
+
+ol li * {
+    vertical-align: middle;
+}
+ 
+ol li small {
+		float:left;
+		margin-top: .5em;
 }

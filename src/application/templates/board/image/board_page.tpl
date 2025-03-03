@@ -79,36 +79,23 @@
           </div>
         </div>
         <div id="replies_{{post.post_id}}_{{board.board_name}}" class="replies">
-        {# needs to be redone
-        {% if post.replies %}
+        {% if post.replies > 0 %}
           <span class="omittedposts">
-            {% if post.post_stickied == 0 %}
-              {{post.replies}} 
-              {% if post.replies == 1 %}
-                {t "Post" lower="yes"} 
-              {else}
-                {t "Posts" lower="yes"} 
-              {% endif %}
-            {else}
-              {$post.replies}
-              {if $post.replies == 1}
-                {t "Post" lower="yes"} 
-              {else}
-                {t "Posts" lower="yes"} 
-              {% endif %}
+            {% if post.replies == 1 and post.images == 1 %}
+              {% set reply_text = "%s post and %s image omitted."|trans|format(post.replies, post.images) %}
+            {% elseif post.replies == 1 and post.images == 0 %}
+              {% set reply_text = "%s post omitted."|trans|format(post.replies) %}
+            {% elseif post.replies > 1 and post.images == 0 %}
+              {% set reply_text = "%s posts omitted."|trans|format(post.replies) %}
+            {% elseif post.replies > 1 and post.images == 1 %}
+              {% set reply_text = "%s posts and %s image omitted."|trans|format(post.replies, post.images) %}
+            {% elseif post.replies > 1 and post.images > 1 %}
+              {% set reply_text = "%s posts and %s images omitted."|trans|format(post.replies, post.images) %}
             {% endif %}
-            {if $post.images > 0}
-              {t "and"} {$post.images}
-              {if $post.images == 1}
-                {t "Image" lower="yes"} 
-              {else}
-                {t "Images" lower="yes"} 
-              {% endif %}
-            {% endif %}
-            {t "omitted"}. {t "Click Reply to view."}
+            {{ reply_text }}
+            {{ "Click Reply to view."|trans }}
           </span>
         {% endif %}
-        #}
       {% else %}
         </div>
             </div>

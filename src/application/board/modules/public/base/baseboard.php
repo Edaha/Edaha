@@ -393,6 +393,9 @@ class public_board_base_baseboard extends kxCmd {
     if ($this->board->board_type != 1) {
       $replycount->condition("post_deleted", 0);
     }
+    if (!empty($omitids)) {
+      $replycount->condition("post_id", $omitids, "NOT IN");
+    }
     $replycount = $replycount->countQuery()
                              ->execute()
                              ->fetchField();

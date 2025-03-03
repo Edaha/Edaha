@@ -96,7 +96,7 @@ class public_board_base_baseboard extends kxCmd {
                                                      ->execute()
                                                      ->fetchCol();
 
-    $this->board->boardlist = array();
+    $this->board->boardlist = kxFunc::visibleBoardList();
     $this->environment->set('kx:classes:board:id', $this->board);
     
     require_once( kxFunc::getAppDir('board') .'/classes/upload.php' );
@@ -679,10 +679,10 @@ class public_board_base_baseboard extends kxCmd {
     }
     $tpl['title'] .= $this->board->board_desc;
 
-    $twigData['title'] = $tpl['title'];
-    $twigData['htmloptions'] = $tpl['htmloptions'];
-    $twigData['locale'] = $this->board->board_locale;
-    $twigData['board'] = $this->board;
+    $this->twigData['title'] = $tpl['title'];
+    $this->twigData['htmloptions'] = $tpl['htmloptions'];
+    $this->twigData['locale'] = $this->board->board_locale;
+    $this->twigData['board'] = $this->board;
     // TODO: Fix ads
     /*$twigData['topads'] = $this->db->select("ads")
                                           ->fields("ads", array("ad_code"))
@@ -690,7 +690,7 @@ class public_board_base_baseboard extends kxCmd {
                                           ->condition("ad_display", 1)
                                           ->execute()
                                           ->fetchField();*/
-    $twigData['boardlist'] = $this->board->boardlist;
+    $this->twigData['boardlist'] = $this->board->boardlist;
     $this->twigData['replythread'] = $replythread;
     $this->twigData['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
     $this->twigData['ku_defaultstyle'] = (!empty($this->board->board_style_default) ? ($this->board->board_style_default) : (kxEnv::Get('kx:css:imgdefault')));

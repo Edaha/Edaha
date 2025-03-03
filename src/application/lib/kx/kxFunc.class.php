@@ -510,6 +510,28 @@ class kxFunc {
       $boards->execute(array(0));
       return(array_merge($boards->fetchAll(), $sections));
     }
+
+    static public function visibleBoardList() {
+      $sections = kxDB::getInstance()->select("sections")
+                                     ->fields("sections")
+                                     ->orderBy("section_order")
+                                     ->execute()
+                                     ->fetchAll();
+
+      $boards = kxDB::getInstance()->select("boards")
+                                   ->fields("boards", array('board_id', 'board_desc', 'board_name'))
+                                   ->where("board_section = ?")
+                                   ->orderBy("board_order")
+                                   ->build();
+
+      // Add boards to an array within their section
+      foreach ($sections as &$section) {
+        $boards->execute(array($section->id));
+        $section->boards = $boards->fetchAll();
+      }
+      
+      return($sections);
+    }
 }
 
 class kxMb {

@@ -56,12 +56,12 @@
       [<a href="#" id="togglepostspy" title="{% trans "Post Spy" %}">PS</a>]&nbsp;
     {% endif %}
 
-    [<a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{{ kxEnv("paths:cgi:path") }}/manage.php" target="_top">{% trans "Manage" %}</a>]
     </div>
     <div class="navbar">
       {%if kxEnv("misc:boardlist") %}
-        {% include "board/global/boardlist.tpl" %}
+        {{ include("board/global/boardlist.tpl") }}
       {% endif %}
+      [<a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{{ kxEnv("paths:cgi:path") }}/manage.php" target="_top">{% trans "Manage" %}</a>]
     </div>
     {% if kxEnv("extra:watchthreads") %}
       <div id="watchedthreads"></div>

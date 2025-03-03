@@ -36,7 +36,7 @@ class manage_board_recents_recents extends kxCmd {
   }
   
   private function _process() {
-    if (! isset($this->request['posts'])) return;
+    if (! isset($this->request['posts']) or $this->request['action'] == '') return;
     $fields['post_reviewed'] = 1;
     if ($this->request['action'] == 'delete') {
       $fields['post_deleted'] = 1;

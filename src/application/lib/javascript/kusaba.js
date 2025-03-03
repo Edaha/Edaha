@@ -830,9 +830,7 @@ kusaba.addbacklinks = function (context) {
 
 if (kusaba.style_cookie) {
     var cookie = $.cookie(kusaba.style_cookie);
-    console.log(cookie);
     var title = cookie ? cookie : kusaba.get_default_stylesheet();
-    console.log(title);
     if (title != kusaba.get_active_stylesheet())
         kusaba.set_stylesheet(title);
 }

@@ -106,6 +106,7 @@ class manage_core_login_login extends kxCmd{
 
           // Unfiltered on purpose
           if ($_POST['qstring']) {
+            print $_POST['qstring']. '<br>';
             $whereto = stripslashes($_POST['qstring']);
             $whereto = str_replace(kxEnv::Get('kx:paths:script:path'), "", $whereto);
             $whereto = str_ireplace("?manage.php", "" , $whereto);
@@ -113,6 +114,7 @@ class manage_core_login_login extends kxCmd{
             $whereto = preg_replace("/sid=(\w){32}/", "", $whereto);
             $whereto = str_replace( array( 'old_&', 'old_&amp;' ), "", $whereto );
             $whereto = str_replace("module=login", "", $whereto );
+            $whereto = str_replace("section=login", "", $whereto );
             $whereto = str_replace("do=login-validate", "", $whereto );
             $whereto = str_replace('&amp;', '&', $whereto );
             $whereto = preg_replace( "/&{1,}/", "&", $whereto );

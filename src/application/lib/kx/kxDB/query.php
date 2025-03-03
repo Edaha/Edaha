@@ -1552,7 +1552,6 @@ class MergeQuery extends Query implements QueryConditionInterface {
  * Generic class for a series of conditions in a query.
  */
 class DatabaseCondition implements QueryConditionInterface, Countable {
-    
     /**
      * Array of conditions.
      *
@@ -1576,6 +1575,14 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
      * @var bool
      */
     protected $changed = TRUE;
+
+    /**
+     * Query conditions in string form
+     * 
+     * @var string
+     */
+    
+    public $stringVersion = '';
     
     /**
      * Constructs a DataBaseCondition object.

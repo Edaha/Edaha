@@ -8,13 +8,13 @@
     <link rel="{% if style != ku_defaultstyle %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:boards:path") }}/public/css/{{ style }}/board.css" title="{{ style|capitalize }}" />
   {% endfor %}
   {% if locale == 'he' %}
-    {% raw %}
+    {% verbatim %}
       <style type="text/css">
         .thumb{
           float:right;
         }
       </style>
-    {% endraw %}
+    {% endverbatim %}
   {% endif %}
   {{parent()}}
 {% endblock %}
@@ -59,7 +59,7 @@
     [<a href="{{ kxEnv("paths:main:path") }}" target="_top">{% trans "Home" %}</a>]&nbsp;[<a href="{{ kxEnv("paths:cgi:path") }}/manage.php" target="_top">{% trans "Manage" %}</a>]
     </div>
     <div class="navbar">
-      {%ifkxEnv("misc:boardlist") %}
+      {%if kxEnv("misc:boardlist") %}
         {% include "board/global/boardlist.tpl" %}
       {% endif %}
     </div>
@@ -110,7 +110,7 @@
     {% if replythread == 0%}
       <div id="paging">
         <ul>
-          {% spaceless %}
+          {% apply spaceless %}
             <li id="prev">
               {% if thispage == 0 %}
                 {% trans "Previous" %}
@@ -119,10 +119,10 @@
                   <input value="{% trans "Previous" %}" type="submit" /></form>
               {% endif %}
             </li>
-          {% endspaceless %}
-          {% spaceless %}
+          {% endapply %}
+          {% apply spaceless %}
             {% for page in range(0, numpages) %}
-              {% spaceless %}
+              {% apply spaceless %}
                 <li>&#91;
                   {% if page != thispage %}
                     <a href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/{{page}}.html">
@@ -134,10 +134,10 @@
                     </a>
                   {% endif %}
                 &#93;</li>
-              {% endspaceless %}
+              {% endapply %}
             {% endfor %}	
-          {% endspaceless %}
-          {% spaceless %}
+          {% endapply %}
+          {% apply spaceless %}
             <li id="next">
               {% if thispage == numpages %}
                 {% trans "Next" %}
@@ -145,14 +145,14 @@
                 <form method="get" action="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/{{thispage+1}}.html"><input value="{% trans "Next" %}" type="submit" /></form>
               {% endif %}
             </li>
-          {% endspaceless %}
+          {% endapply %}
         </ul>
       </div>
     {% endif %}
     <div id="footer">
       {% if boardlist %}
         <div class="navbar">
-          {%ifkxEnv("misc:boardlist") %}
+          {%if kxEnv("misc:boardlist") %}
             {% include "board/global/boardlist.tpl" %}
           {% endif %}
         </div>

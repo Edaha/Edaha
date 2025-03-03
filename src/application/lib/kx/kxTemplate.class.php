@@ -191,7 +191,7 @@ class kxTemplate {
             return "";
         }
 		
-		$template=self::$instance->loadTemplate($tpl);
+		$template=self::$instance->load($tpl);
         //echo "<pre>";
 		//print_r($template);
 		//echo "</pre>";

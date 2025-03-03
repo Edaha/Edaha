@@ -9,12 +9,12 @@
     <a id="postbox"></a>
     <div id="postform">
       <form name="postform" id="posting_form" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post" enctype="multipart/form-data"
-      {% spaceless %}
+      {% apply spaceless %}
         {%if board.board_enablecaptcha == 1 %}
           onsubmit="return checkcaptcha('postform');"
         {% endif %}
         >
-      {% endspaceless %}
+      {% endapply %}
       <input type="hidden" name="board" value="{{board.board_name}}" />
       <input type="hidden" name="replythread" value="{{replythread}}" />
       {% if board.board.board_max_upload_size > 0 %}
@@ -40,7 +40,7 @@
       {% endif %}
         <li>
           <label for="subject">{% trans "Subject" %}</label>
-          {% strip %}<input type="text" id="subject" name="subject" size="35" maxlength="75" accesskey="s" />&nbsp;
+          {# strip #}<input type="text" id="subject" name="subject" size="35" maxlength="75" accesskey="s" />&nbsp;
             <input type="submit" value="
             {% if kxEnv("extra:quickreply") and replythread == 0 %}
               {% trans "Submit" %}" accesskey="z" />
@@ -51,7 +51,7 @@
             {% else %}
               {% trans "Submit" %}" accesskey="z" />
           {% endif %}
-        </li>{% endstrip %}
+        </li>{# endstrip #}
         <li>
           <label for="message" id="message_label">{% trans "Message" %}</label>
           <textarea id="message" name="message" cols="48" rows="4" accesskey="m"></textarea>

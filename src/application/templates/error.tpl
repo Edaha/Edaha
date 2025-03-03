@@ -7,13 +7,13 @@
     <link rel="{% if style != kxEnv("css:sitedefault") %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/sitemenu_{{ style }}.css" title="{{ style|capitalize }}" />
   {% endfor %}
 
-  {% raw %}
+  {% verbatim %}
     <style type="text/css">
     body {
       width: 100% !important;
     }
     </style>
-  {% endraw %}
+  {% endverbatim %}
   {{parent()}}
 {% endblock %}
 

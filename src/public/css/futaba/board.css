@@ -1,0 +1,290 @@
+
+###########################
+#######FUTABA.CSS##########
+###########################
+###########################
+
+
+/**
+ * Globals.
+ */
+
+html, body {
+	background-color:#ffffee;
+	color:#800000;
+	background-image:url('red-grad.png');
+	background-repeat: repeat-x;
+	background-position:top;
+}
+ input{
+background:#eeaa88;
+  color:#800000;
+  border: 1px solid #fe8765;
+}
+a[href], a[href]:visited {
+	color:#0000ee;
+	text-decoration: underline;
+}
+
+a[href]:hover {
+	color:#dd0000;
+}
+
+hr {
+    background: #C7CAD4;
+    background: -moz-linear-gradient(left, #ffffee 0%, #ffffee 1%, #eeaa88 10%, rgba(199,202,212,1) 50%, #eeaa88 90%, #ffffee 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#ffffee), color-stop(1%,#ffffee), color-stop(10%,#eeaa88), color-stop(50%,rgba(199,202,212,1)), color-stop(90%,#eeaa88), color-stop(100%,#ffffee)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left, #ffffee 0%,#ffffee 1%,#eeaa88 10%,rgba(199,202,212,1) 50%,#eeaa88 90%,#ffffee 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left, #ffffee 0%,#ffffee 1%,#eeaa88 10%,rgba(199,202,212,1) 50%,#eeaa88 90%,#ffffee 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left, #ffffee 0%,#ffffee 1%,#eeaa88 10%,rgba(199,202,212,1) 50%,#eeaa88 90%,#ffffee 100%); /* IE10+ */
+    background: linear-gradient(left, #ffffee 0%,#ffffee 1%,#eeaa88 10%,rgba(199,202,212,1) 50%,#eeaa88 90%,#ffffee 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0dc7cad4', endColorstr='#0dc7cad4',GradientType=1 ); /* IE6-9 */
+}
+
+
+/**
+ * Header and footer.
+ */
+
+.navbar {
+  background-color:#eeaa88;
+  border:1px solid #fe8765;
+  color:#800000;
+  text-transform:lowercase;
+}
+.navbar img {
+	height:1em;
+	width:1em;
+}
+/**
+ * Posting mode: Reply header,
+ */
+ 
+ 
+.replymode {
+  background:#eeaa88;
+  color:#800000;
+  border: 1px solid #fe8765;
+}
+.catalogmode {
+  background:#eeaa88;
+  color:#800000;
+	border: 1px solid #fe8765;
+}
+
+/**
+ * Posting form.
+ */
+
+
+#posting_form ol li span {
+	font-size: .9em;
+}
+
+#rules ul#tabs {
+	background-color: #FFE;
+	border-color:#eeaa88;
+	color:#800000;
+}
+
+#rules ul#tabs li {
+	border-color: #eeaa88;
+}
+
+#rules ul#tabs li.selected {
+  background-color: #F0E0D6;
+  font-weight: bold;
+  border-bottom-color:#F0E0D6;
+}
+#posting_form label {
+  background-color:#eeaa88;
+  color:#800000;
+  border: 1px solid #fe8765;
+}
+#posting_form input {
+	background-color:#ffffee;
+}
+
+.ui_wrapper, textarea {
+	background-color:#ffffee;
+    border: 1px solid #fe8765;
+}
+
+#rules {
+    border: 1px solid #eeaa88;
+    background-color: #F0E0D6;
+    color: #800000;
+}
+
+#rules .title {
+    text-shadow: 1px 1px 1px #800000;
+}
+
+/**
+ * Threads and posts
+ */
+
+table.uploads th {
+ background:#eeaa88;
+ color:#800000;
+
+}
+
+.post {
+  background-color: #f0e0d6;
+  border-color: #eeaa88;
+
+}
+
+.reply .post {
+  background-color: #f0e0d6;
+  color:#800000;
+  border:1px solid #f0e0d6;
+}
+
+.post_header {
+    background-color: #eeaa88;
+    border-bottom-color: #eeaa88;
+}
+
+.reply .post_header {
+	background-color:#e8d8ce;
+
+}
+
+
+.file_size {
+	text-decoration:none;
+}
+
+.file_size a {
+	text-decoration:underline;
+}
+
+.subject {
+  color: #cc1105;
+}
+
+.postername {
+	color:#117743;
+	font-size:1em;
+}
+
+.highlight .post {
+	background:#F0E0D6;
+	color:#800000;
+	border: 2px dashed #EEAA88;
+}
+
+
+.omittedposts, .abbrev, .oldpost {
+
+  font-size:small;
+  color:#800000;
+	margin-left: 1em;
+}
+
+.doubledash {
+  color: #800000;
+}
+
+.replytitle {
+	font-size:18px;
+	font-family:sans-serif;
+	color:#0F0C5D;
+	font-weight:800;
+}
+
+.thumbnailmsg {
+	background: transparent;
+	font-size:9px;
+	font-family:sans-serif;
+	color:#800000;
+}
+
+.quote {
+	color:#117743;
+}
+
+
+/**
+ * Misc. functions
+ */
+
+.reflinkpreview  {
+ background-color: #f0e0d6;
+  border:1px solid #eeaa88;
+}
+.reflinkpreview .post {
+ background-color: #f0e0d6;
+}
+
+ol li label {
+    background-color: #D6DAF0;
+    border-color: #C5C8D2;
+}
+
+ol li * {
+    vertical-align: middle;
+}
+
+.hidethread {
+ background: transparent url('./sakura/pink_icons.png') -32px -16px no-repeat;
+}
+
+.unhidethread {
+ background: transparent url('./sakura/pink_icons.png') -48px 0px no-repeat;
+}
+
+.watchthread {
+ background: transparent url('./sakura/pink_icons.png') -32px 0px no-repeat;
+}
+
+.expandthread {
+ background: transparent url('./sakura/pink_icons.png') 0px -16px no-repeat;
+}
+
+.quickreply {
+ background: transparent url('./sakura/pink_icons.png') 0px 0px no-repeat;
+}
+
+.hidewatchedthreads {
+ background: transparent url('./sakura/pink_icons.png') -48px -16px no-repeat;
+}
+
+.refreshwatchedthreads {
+ background: transparent url('./sakura/pink_icons.png') -16px -16px no-repeat;
+}
+
+.restorewatchedthreads {
+ background: transparent url('./sakura/pink_icons.png') -16px 0px no-repeat;
+}
+
+.expandall {
+  background: transparent url('./sakura/pink_icons.png') 0px -32px no-repeat;
+  height: 16px;
+  width: 16px;
+}
+
+
+.locked {
+  width:0;
+  height:0;
+  background: url('https://7chan.org/css/lockgray.png') no-repeat bottom left;
+  padding-left:12px;
+  padding-bottom:15px;
+}
+
+.stickied {
+  width:0;
+  height:0;
+  background: url('https://7chan.org/css/stickygray.png') no-repeat center;
+  padding-left:14px;
+  padding-bottom:15px;
+}
+html, body {
+  background-color:#FFFFEE;
+	background-image:url('red-grad.png');
+	background-repeat: repeat-x;
+	background-position:top;
+}

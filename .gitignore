@@ -6,3 +6,7 @@
 #Test site's pull script
 pull.php
 *.bak
+
+vendor/
+
+.DS_Store

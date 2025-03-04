@@ -1,0 +1,13 @@
+{
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "require": {
+        "ext-gettext": "*",
+        "twig/twig": "^3.0",
+        "jblond/twig-trans": "^1.1",
+        "twig/string-extra": "^3.19",
+        "james-heinrich/getid3": "^1.9",
+        "mustangostang/spyc": "^0.6.3"
+    }
+}

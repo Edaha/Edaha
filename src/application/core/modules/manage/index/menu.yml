@@ -1,0 +1,40 @@
+Common Tasks:
+  - title: Graph Statistics
+    section: statgraphs
+    url:
+    
+  - title: Edit Settings
+    module: site
+    section: config
+    url: '#'
+
+  - title: Board Options
+    app: board
+    module: board
+    section: board
+    url: 'do=board'
+
+  - title: Ban Manager
+    module: bans
+    section: bans 
+    url: '#'
+
+  - title: Staff Log
+    module: staff
+    section: staff
+    url: '&do=log'
+
+  - title: Recent Posts
+    app: board
+    module: recents
+    section: posts
+
+  - title: Recent Images
+    app: board
+    module: recents
+    section: images
+
+  - title: Installed Addons
+    section: 
+    url: '#'
+

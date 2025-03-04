@@ -1,0 +1,52 @@
+{% import "manage/macros.html.twig" as macros %}
+
+{% extends "manage/wrapper.html.twig" %}
+
+{% block heading %}{% trans "Bans - View" %}{% endblock %}
+
+{% block managecontent %}
+
+  <form action="{{ base_url }}app=core&amp;module=site&amp;section=bans&amp;do=view&amp;action=filter" method="post">
+       
+  </form>
+  
+  <p>
+    <form action="{{ base_url }}app=core&amp;module=site&amp;section=bans&amp;do=view&amp;action=delete" method="post">
+      <table class="users" cellspacing="1px">
+        <col class="col1" /><col class="col2" />
+        <col class="col1" /><col class="col2" />
+        <col class="col1" /><col class="col2" />
+        <col class="col1" /><col class="col2" />
+        
+        <thead>
+          <tr>
+            <th>{% trans "IP Address" %}</th>
+            <th>{% trans "Banned from" %}</th>
+            <th>{% trans "Reason" %}</th>
+            <th>{% trans "Staff Note" %}</th>
+            <th>{% trans "Added On" %}</th>
+            <th>{% trans "Expires On" %}</th>
+            <th>{% trans "Added By" %}</th>
+            <th>{% trans "Delete" %}</th>
+          </tr>
+        </thead>
+        
+        {# Need to finalize banlist table and then finish this. For now, fake data #}
+        <tbody>
+          {% for ban in bans %}
+          <tr>
+            <td>{{ ban.ip }}</td>
+            <td>{% for board in ban.boards %}{{ board.board_name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+            <td>{{ ban.reason }}</td>
+            <td>{{ ban.staff_note }}</td>
+            <td>{{ ban.created|date }}</td>
+            <td>{{ ban.expires|date }}</td>
+            <td>{{ ban.user_name }}</td>
+            <td><input type="checkbox" name="delete_bans[]" id="{{ ban.id }}" /></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </form>
+  </p>
+{% endblock %}

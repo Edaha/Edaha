@@ -1,200 +1,108 @@
-/***********************
- *     Edaha Theme     *
- * By N3X15 for Edaha  *
- *                     *
- *   I don't give a    *
- *    shit license     *
- ***********************/
-
-/* HTML5 for older browsers */ 
-article, aside, details, figcaption, figure, 
-footer, header, hgroup, menu, nav, section {
-	display: block;
-}
- 
-* {
-  margin: 0;
-  padding: 0;
+:root {
+  --color1: #000000;
+  --color2: #90a959;
+  --color6: #d0d9b6;
+  --color3: #6494AA;
+  --color4: #F9F9F9;
+  --color5: #A63D40;
+  --color5_10: #A63D4010;
+  --color5_50: #A63D4050;
 }
 
-body, html {
-  font-size: small;
-  background-color: #C6DAF0;
+html {
+  background: linear-gradient(0deg, var(--color2) 0%, var(--color6) 100%);
+  font-family: sans-serif;
+  font-size: 14px;
+  min-height: 100%;
 }
 
-#page_wrap {
-  background-color: inherit;
-  max-width: 1260px;
-  min-width: 775px; 
-  margin: 10px auto;
-} 
-
-#header {
-  padding: 10px;
-  background-color: #C5C9E0;
+body {
+  max-width: 1200px;
+  color: #000000;
+  margin: 0px auto;
 }
 
-nav#topmenu {
-  background-color: navy;
-  margin-bottom: 10px;
+a[href],
+a[href]:visited {
+  color: #34345C;
+  text-decoration: none;
 }
 
-nav#topmenu li {
-  list-style: none;
-  display: block;
-  float: left;
-  width: 60px;
-  padding: 5px;
-  text-align: center;
-  margin: 1px 0px 1px 1px;
-  background-color: white;
+a[href]:hover {
+  color: #DD0000;
 }
 
-nav#topmenu li.current {
-  background-color: #CCC;
-}
-
-section {
-  border: 1px solid;
-}
-
-section.leftcol, section.rightcol {
-  width: 20%;
-}
-
-section.leftcol {
-  float: left;
-}
-
-section.rightcol {
-  float: right;
-}
-
-section.maincol {
-  margin: auto;
-}
-
-section.news {
-  width: 55%;
-}
-
-section > header {
-  background-color: #C5C9E0;
-  padding: 3px 5px;
-}
-
-section.news article header, section.boardlist article header {
-  background-color: white;
-  padding: 2px 4px;
-}
-
-section.news article p {
-  padding: 2px 4px;
-}
-
-section.boardlist article ul {
-  list-style: none;
-  padding: 2px 4px;
+h1 {
+  color: var(--color5);
 }
 
 
-
-/* This is me trying something new.  Don't like it? Use something else. 
-body,html {
-  background:#C6DAF0;
-  font-family:sans-serif;
-  font-size:small;
-  margin:0;
+h3 {
+  border-bottom: 1px dashed var(--color5);
 }
 
-div#header h1 {
-  background:#C5C9E0;/*#C6DAF0*//*
-  margin:0;
-  text-align:center;
-  font-size:24pt;
-  color:navy;
-  text-shadow:#ffffff 0.5px 0.5px 1px;
+h4 {
+  background-color: var(--color6);
 }
 
-div#header h3 {
-  background:#C5C9E0;//#C6DAF0;
-  margin:0;
-  color:navy;
-  font-weight:normal;
-  padding:3px;
-  text-align:center;
+h6 {
+  color: var(--color5);
 }
 
-
-div#topmenu ul {
-  background:navy;
-  margin:0;
-  color:white;
-  padding:4px;
+section#recent {
+  background-color: var(--color6);
+  border: 1px solid var(--color5);
 }
 
-div#topmenu a {
-  color:#ffffff;
-  text-decoration:none;
+section#recent section#posts li {
+  border-bottom: 1px solid var(--color2);
 }
 
-div#topmenu ul li {
-  display:inline;
-  list-style:none;
-  font-weight:bold;
+section#recent section#posts li:nth-child(even) {
+  background-color: var(--color4);
 }
 
-div#topmenu ul li a {
-  padding:4px;
-  border-left:1px dotted #eff2ff;
-  margin-right:-4px;
+section#news {
+  background-color: var(--color4);
+  border-bottom: 1px solid var(--color5);
+  border-left: 1px solid var(--color5);
+  border-right: 1px solid var(--color5);
 }
 
-div#topmenu ul li.current {
-  color:#ccc !important;
+section#news header {
+  background-color: var(--color6);
+  border-top: 1px solid var(--color5);
+  border-bottom: 1px solid var(--color5);
 }
 
-div#topmenu ul li a:HOVER {
-  color:black;
-  background:white;
+section#news header ul li {
+  border-right: 1px solid var(--color5);
+  border-bottom: 1px solid var(--color5);
 }
 
-h2 {
-  background:#C6DAF0;
-  font-size:large;
-  padding-left:1em;
+section#news header ul li.selected {
+  background-color: var(--color4);
+  border-bottom: 1px solid transparent;
 }
 
-h2 span.permalink { 
-  float:right; 
-  margin-right: 1em; 
+section#boardlist {
+  background-color: var(--color4);
+  border: 1px solid var(--color5);
 }
 
-div.widget {
-  background:#eef2ff;
-  border:1px solid #C5C9E0;
-}
-div.widgetcontent {
-  padding:1em;
+section#boardlist li:hover {
+  background: #C6DAF0;
 }
 
-div.widget h2 {
-  margin:0;
-  margin-bottom:1em;
-  background:#ffffff;
-  border-bottom:1px solid #C5C9E0;
+div.wrap.hfix .lcol {
+  border: 1px solid var(--color5);
 }
 
-div.floatleft {
-  float:left;
-  margin-right:1em;
+div.wrap.hfix .rcol {
+  border: 1px solid var(--color5);
 }
 
-div.floatright {
-  float:right;
-  margin-left:1em;
-}
-
-div.floatcenter {
-  margin:auto;
+body>footer #foot_boardlist {
+  background-color: var(--color4);
+  border: 1px solid var(--color5);
 }

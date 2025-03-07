@@ -1,0 +1,51 @@
+
+{% block boardheader %}
+<div class="navbar">
+{% if kxEnv("misc:boardlist") %}
+	{{ include("board/global/boardlist.html.twig") }}
+{% else %}
+	{# {% if is_file($boardlist) %}
+		{include $boardlist}
+	{% endif %} #}
+{% endif %}
+</div>
+{# {% if not isthread %} #}
+	<div class="fullhead">
+		<div class="hborder">
+			<div class="head">
+				<a name="menu" rev="contents"></a>
+				{# {if $isindex eq 1} #}
+					<span class="navlinks"><a href="#0">&darr;</a>&nbsp;<a href="#menu">&#9632;</a></span>
+				{# {% endif %}	 #}
+				<h1 align="center">{{ board.board_desc }}</h1>
+				{{ board.board_includeheader }}
+				</div>
+			</div>
+			{% if kxEnv("css:txtswitcher") %} {# and $isindex #}
+				<div class="hborder">
+					<div class="head midhead">
+						<strong>Styles:</strong> 
+						{% for style in kxEnv("css:txtstyles") | split(":") %}
+							<a href="#" onclick="javascript:kusaba.set_stylesheet('{{ style }}',true);return false;">
+							{{ style|capitalize }}
+							</a> 
+						{% endfor %}
+					</div>
+				</div>
+			{% endif %}
+			{% if isindex == 0 %}
+				Pages:&nbsp;<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/">Front</a>
+				{% for page in pages %}
+					&nbsp;
+					{% if loop.index != thispage %}
+						<a href="list{% if loop.index != 1 %}{{ loop.index }}{% endif %}.html">
+					{% endif %}	
+					{{ loop.index }}
+					{% if loop.index != thispage %}
+						</a>
+					{% endif %}
+				{% endfor %}
+				<br />
+			{% endif %}
+{# {% endif %} #}
+{% endblock boardheader %}

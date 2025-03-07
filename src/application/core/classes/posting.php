@@ -330,11 +330,11 @@ class Posting
     // If the user replied to a thread, and they weren't sage-ing it...
     if ($postData['thread_info']['parent'] != 0 && strtolower($this->request['em']) != 'sage' /*&& unistr_to_ords($_POST['em']) != array(19979, 12370)*/) {
       // And if the number of replies already in the thread are less than the maximum thread replies before perma-sage...
-      if ($postData['thread_info']['replies'] <= $board->board_maxreplies) {
+      if ($postData['thread_info']['replies'] <= $board->board_max_replies) {
         // Bump the thread
         $this->db->update("posts")
           ->fields(array("post_bumped" => time()))
-          ->condition("post_board", $boardboard_id)
+          ->condition("post_board", $board->board_id)
           ->condition("post_id", $postData['thread_info']['parent'])
           ->execute();
       }

@@ -52,9 +52,7 @@ class public_board_text_text extends public_board_base_baseboard {
   public function coloredQuote(&$message) {
     parent::coloredQuote($message);
     // Remove the > from the quoted line if it is a text board 
-    if ($boardtype==1) {
-      $message = str_replace('<span class="quote">&gt;', '<span class="quote">', $message);
-    }
+    $message = str_replace('<span class="quote">&gt;', '<span class="quote">', $message);
   }
   
   public function clickableQuote(&$buffer) {
@@ -80,17 +78,17 @@ class public_board_text_text extends public_board_base_baseboard {
   
   public function checkFields($postData) {
     if ($postData['is_reply']) {
-      if (!$postClass->checkEmpty($postData)) {
+      if (!$this->postClass->checkEmpty($postData)) {
         kxFunc::showError(_('A message is required for a reply.'));
       }
     }
     else {
       $result = $this->db->select("posts")
-                         ->countQuery()
                          ->condition("post_board", $this->board->board_id)
                          ->condition("post_deleted",0)
-                         ->condition("post_subject", substr($postData['subject'], 0, 74))
+                         ->condition("post_subject", substr($postData['subject'] ?? '', 0, 74))
                          ->condition("post_parent", 0)
+                         ->countQuery()
                          ->execute()
                          ->fetchField();
       if ($result > 0) {

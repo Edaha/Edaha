@@ -1,0 +1,100 @@
+{% block postbox %}
+<div class="hborder head newthread">
+	<a id="newthread"></a><h2>New Thread</h2>
+	<a id="postbox"></a>
+    <form name="postform" id="posting_form" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post" enctype="multipart/form-data"
+    {% apply spaceless %}
+      {%if board.board_enablecaptcha == 1 %}
+        onsubmit="return checkcaptcha('postform');"
+      {% endif %}
+      >
+    {% endapply %}
+	<input type="hidden" name="board" value="{{ board.board_name }}" />
+	<input type="hidden" name="replythread" value="{{ replythread }}" />
+	<input type="text" name="email" size="28" maxlength="75" value="" style="display: none;" />
+	<table class="postform">
+		<tr>
+			<td class="label">
+				<label>Subject:</label>
+			</td>
+
+			<td colspan="4">
+				<input name="subject" maxlength="75" size="50" style="width: 70%;" />
+			</td>
+		</tr>
+		<tr>
+			{% if board.board_forcedanon != 1 %}
+				<td class="label">
+					<label>Name:</label>
+				</td>
+				<td>
+					<input name="name" size="25" maxlength="75" />
+				</td>
+			{% endif %}
+			<td class="label">
+				<label>Email:</label>
+			</td>
+			<td>
+				<input name="em" size="25" maxlength="75" />
+			</td>
+			
+			{% if board.board_forcedanon != 1 %}
+				<td>
+					<input type="submit" name="submit" value="Submit" class="submit" />
+					<a href="#" onclick="toggleOptions('0', 'postform', '{{ board.board_name }}');return false;">More...</a>
+				</td>
+			</tr>
+			<tr>
+			{% endif %}
+
+			{% if board.board_enablecaptcha == 1 %}
+				<tr>
+					<td class="postblock">Captcha</td>
+					<td colspan="2">{{ recaptcha }}</td>
+				</tr>
+			{% endif %}
+
+			{% if board.board_forcedanon == 1 and board.board_enablecaptcha == 1 or board.board_forcedanon != 1 %}
+				<td class="label">
+					<label>Password:</label>
+				</td>
+				<td>
+					<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
+				</td>
+			{% endif %}
+			{% if board.board_forcedanon == 1 %}
+				<td>
+					<input type="submit" name="submit" value="Submit" class="submit" />
+					<a href="#" onclick="toggleOptions('0', 'postform', '{{ board.board_name }}');return false;">More...</a>
+				</td>
+				{% if board.board_enablecaptcha == 1 %}
+				</tr>
+					<tr>
+						<td class="label">
+							<label>Password:</label>
+						</td>
+						<td>
+							<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
+						</td>
+				{% endif %}
+			{% endif %}
+		</tr>
+		<tr style="display: none;" id="opt0"><td></td></tr>
+		<tr>
+			<td class="postfieldleft">
+				<span class="postnum">
+					1
+				</span>
+			</td>
+			<td colspan="4">
+				<textarea name="message" rows="8" cols="64"></textarea>
+			</td>
+		</tr>
+	</table>
+	<div id="preview0"></div>
+	</form>
+</div>
+<script type="text/javascript"><!--
+	set_inputs("postform");
+//--></script>
+{% endblock postbox %}

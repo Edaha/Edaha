@@ -1,4 +1,22 @@
 {% extends "board/global/wrapper.html.twig" %}
+
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/img_global.css" />
+  {% for style in kxEnv("css:imgstyles") | split(":") %}
+    <link rel="{% if style != kxEnv("css:imgdefault") %}alternate {% endif %}stylesheet" type="text/css" href="{{ kxEnv("paths:main:path") }}/public/css/{{ style }}/board.css" title="{{ style|capitalize }}" />
+  {% endfor %}
+  {% if locale == 'he' %}
+    {% verbatim %}
+      <style type="text/css">
+        .thumb{
+          float:right;
+        }
+      </style>
+    {% endverbatim %}
+  {% endif %}
+  {{ parent() }}
+{% endblock %}
+
 {% block extrajs %}
   {{parent()}}
   kusaba.thread = {{replythread}};

@@ -1,0 +1,53 @@
+{% block text_threadlist %}
+<div class="hborder">
+	<div class="head threadldiv"{% if board.board_compact_list %} style="padding: 4px;"{% endif %}>
+		<a name="menu"></a>
+		{% if not board.board_compact_list or not isindex %}
+			<table class="threads">
+			<thead>
+				<tr>
+					<th width="10%">#</th>
+					<th nowrap="nowrap" width="100%">Subject</th>
+					<th>Posts</th>
+				<th>Last Post</th>
+				</tr>
+			</thead>
+			<tbody>
+		{% endif %}
+		{% for thread in posts %}				
+			{% if board.board_compact_list and isindex %}
+				<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index }}">{{ loop.index }}: </a><a href="res/{{ thread.0.post_id }}.html">{% else %}res/{{ thread.0.post_id }}.html">{{ loop.index }}: {% endif %}{{ thread.0.post_subject }} ({{ thread.0.replies + 1 }})</a>{% if loop.last %}{% else %} &nbsp;{% endif %}
+			{% else %}
+				<tr><td><a href="res/{{ thread.0.post_id }}.html">{{ loop.index }}</a></td><td><a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index - 1 }}{% else %}res/{{ thread.0.post_id }}.html{% endif %}">{{ thread.0.post_subject }}</a></td><td>{{ thread.0.replies + 1 }}</td><td nowrap="nowrap"><small>{{ thread.0.post_bumped|date("d/m/y @ h:i a T") }}</small></td></tr>
+			{% endif %}
+		{% else %}
+			{% if board.board_compact_list and isindex %}
+				There are currently no threads to display.
+			{% else %}
+				<tr><td>N/A</td><td>There are currently no threads to display.</td><td>N/A</td><td>N/A</td></tr>
+			{% endif %}
+		{% endfor %}
+		
+		{% if isindex %}
+			{% if board.board_compact_list %}
+				<br /><div class="threadlinks">
+			{% else %}
+				<tr><td colspan="4" class="threadlinks">
+			{% endif %}
+			<a href="#newthread" style="display: inline;">New Thread</a> | <a href="list.html" style="display: inline;">All Threads</a>
+			{% if board.board_compact_list %}
+				</div>
+			{% else %}
+				</td></tr>
+			{% endif %}
+		{% endif %}
+		{% if not board.board_compact_list or not isindex %}
+				</tbody>
+			</table>
+		{% endif %}
+
+		</div>
+	</div>
+</div>
+</div>
+{% endblock text_threadlist %}

@@ -1,4 +1,9 @@
 {% extends "board/image/post_box.html.twig" %}
+
+{% use "board/image/img_header.html.twig" %}
+
+{% use "board/image/img_footer.html.twig" %}
+
 {% block boardcontent %}
   {{ parent() }}
   <form id="delform" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post">

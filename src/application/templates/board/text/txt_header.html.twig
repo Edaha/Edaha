@@ -23,10 +23,10 @@
 			</div>
 			{% if kxEnv("css:txtswitcher") %} {# and $isindex #}
 				<div class="hborder">
-					<div class="head midhead">
+					<div class="head midhead" id="styleswitcher">
 						<strong>Styles:</strong> 
 						{% for style in kxEnv("css:txtstyles") | split(":") %}
-							<a href="#" onclick="javascript:kusaba.set_stylesheet('{{ style }}',true);return false;">
+							<a href="#" id="style_{{ style|capitalize }}">
 							{{ style|capitalize }}
 							</a> 
 						{% endfor %}

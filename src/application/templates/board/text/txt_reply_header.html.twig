@@ -1,0 +1,12 @@
+	<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/">Return</a>
+	{% if replythread %}
+		<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ replythread }}.html">Entire Thread</a>
+	{% endif %}
+	{% if kxEnv("extras:firstlast") and (posts|length > 50 or replycount > 50) %}
+		<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ posts.0.id }}+50.html">Last 50 posts</a>
+		{% if posts|length > 100 or replycount > 100 %}
+			<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ posts.0.id }}-100.html">First 100 posts</a>
+		{% endif %}
+	{% endif %}
+	<br />
+	<br />

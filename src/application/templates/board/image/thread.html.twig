@@ -15,7 +15,7 @@
             <span id="dnb_{{board.board_name}}_{{post.post_id}}_y"></span>
     {% else %}
       {% if numimages > 0 and isexpand and loop.first %}
-        <a href="#top" onclick="$('#thread{{post.post_parent}}_{{board.board_name}} [id^=expandimg], #thread{$post.parentid}{$board.name} .file_size a').click();return false;">{t "Expand all images"}</a>
+        <a href="#top" onclick="$('#thread{{post.post_parent}}_{{board.board_name}} [id^=expandimg], #thread{{ post.post_parent }}{{ board.board_name }} .file_size a').click();return false;">{t "Expand all images"}</a>
       {% endif %}
       <div class="reply"  id="reply_{{post.post_id}}">
         <div class="post">
@@ -76,14 +76,14 @@
             {{post.replies}} 
             {% if post.replies == 1 %}
               {t "Post" lower="yes"} 
-            {else}
+            {% else %}
               {t "Posts" lower="yes"} 
             {% endif %}
-          {else}
+          {% else %}
             {$post.replies}
             {if $post.replies == 1}
               {t "Post" lower="yes"} 
-            {else}
+            {% else %}
               {t "Posts" lower="yes"} 
             {% endif %}
           {% endif %}
@@ -91,7 +91,7 @@
             {t "and"} {$post.images}
             {if $post.images == 1}
               {t "Image" lower="yes"} 
-            {else}
+            {% else %}
               {t "Images" lower="yes"} 
             {% endif %}
           {% endif %}

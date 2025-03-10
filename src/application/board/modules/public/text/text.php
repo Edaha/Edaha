@@ -100,4 +100,32 @@ class public_board_text_text extends public_board_base_baseboard {
   public function doUpload($postData) {
     return array();
   }
+
+  public function regeneratePages() {
+    $this->twigData['isindex'] = true;
+    parent::regeneratePages();
+    $this->buildPageAllThreads();
+  }
+
+  protected function buildPageAllThreads() {
+    $this->twigData['isindex'] = false;
+    $this->twigData['posts'] = $this->db->select("posts")
+      ->fields("posts")
+      ->condition("post_board", $this->board->board_id)
+      ->condition("post_parent", 0)
+      ->condition("post_deleted", 0)
+      ->orderBy("post_stickied", "DESC")
+      ->orderBy("post_bumped", "DESC")
+      ->execute()
+      ->fetchAll();
+    
+    foreach ($this->twigData['posts'] as &$thread) {
+      $thread = $this->buildPost($thread, true);
+      $thread = $this->buildThread($thread);
+    }
+
+    $content = kxTemplate::get('board/' . $this->boardType . '/txt_all_threads', $this->twigData, true);
+    
+    kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . '/list.html', $content, $this->board->board_name);
+  } 
 }

@@ -25,7 +25,8 @@ RUN composer update
 RUN --mount=type=bind,source=composer.json,target=composer.json \
     --mount=type=bind,source=composer.lock,target=composer.lock \
     --mount=type=cache,target=/tmp/cache \
-    composer install --no-dev --no-interaction --ignore-platform-req=ext-gettext
+    composer install --no-dev --no-interaction --ignore-platform-req=ext-gettext \
+    composer dump-autoload
 
 # Dev dependencies
 FROM composer:lts as dev-deps
@@ -48,7 +49,7 @@ RUN --mount=type=bind,source=./composer.json,target=composer.json \
 # most recent version of that tag when you build your Dockerfile.
 # If reproducibility is important, consider using a specific digest SHA, like
 # php@sha256:99cede493dfd88720b610eb8077c8688d3cca50003d76d1d539b0efc8cca72b4.
-FROM php:8.2-apache as base
+FROM php:8.4-apache as base
 
 # Your PHP application may require additional PHP extensions to be installed
 # manually. For detailed instructions for installing extensions can be found, see

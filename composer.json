@@ -9,5 +9,9 @@
         "twig/string-extra": "^3.19",
         "james-heinrich/getid3": "^1.9",
         "mustangostang/spyc": "^0.6.3"
+    },
+
+    "autoload": {
+        "psr-4": {"Edaha\\": "application/lib/Edaha"}
     }
 }

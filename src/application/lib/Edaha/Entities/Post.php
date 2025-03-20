@@ -28,19 +28,30 @@ class Post
         }
     }
 
-    protected function __construct(int $board_id, int $post_id, object &$db)
+    protected function __construct(int $board_id, int $post_id, ?object &$db = null)
     {
         $this->board_id = $board_id;
         $this->id       = $post_id;
         $this->db       = $db;
     }
 
-    public static function LoadPost(int $board_id, int $post_id, object &$db)
+    public static function loadPostFromDb(int $board_id, int $post_id, object &$db)
     {
         $post           = new Post($board_id, $post_id, $db);
         if (!$post->validatePost()) return false;
 
         $post->loadPostFields();
+        return $post;
+    }
+
+    public static function loadPostFromAssoc(array $assoc)
+    {
+        $post = new Post($assoc['post_board'], $assoc['post_id']);
+
+        foreach ($assoc as $key => $value) {
+            $post->$key = $value;
+        }
+        
         return $post;
     }
 

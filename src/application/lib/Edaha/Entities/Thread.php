@@ -34,13 +34,8 @@ class Thread extends Post
         $results = $results->orderBy("post_id", "ASC")
             ->execute();
         
-
         while ($row = $results->fetchAssoc()) {
-            $reply = new Post($row['post_id'], $row['post_board'], $this->db);
-            foreach ($row as $key => $value) {
-                $reply->$key = $value;
-            }
-            $this->replies[] = $reply;
+            $this->replies[] = Post::loadPostFromAssoc($row);
         }
     }
 }

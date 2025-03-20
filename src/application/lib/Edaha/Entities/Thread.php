@@ -4,6 +4,21 @@ namespace Edaha\Entities;
 class Thread extends Post
 {
     public array $replies = [];
+    public bool $is_stickied {
+        get {
+            return ($this->post_stickied > 0);
+        }
+    }
+    public bool $is_locked {
+        get {
+            return ($this->post_locked > 0);
+        }
+    }
+    public bool $is_valid {
+        get {
+            return $this->validateThread();
+        }
+    }
 
     public static function loadThread(int $board_id, int $post_id, object &$db)
     {
@@ -15,7 +30,7 @@ class Thread extends Post
         return $thread;
     }
 
-    public function validateThread()
+    protected function validateThread()
     {
         return ($this->post_parent == 0) ? true : false;
     }

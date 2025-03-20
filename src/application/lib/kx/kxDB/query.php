@@ -143,7 +143,7 @@ interface QueryConditionInterface {
      *   The query this condition belongs to. If not given, the current query is
      *   used.
      */
-    public function compile(kxDB $connection, QueryPlaceholderInterface $queryPlaceholder = NULL);
+    public function compile(kxDB $connection, ?QueryPlaceholderInterface $queryPlaceholder = NULL);
 }
 
 
@@ -757,7 +757,7 @@ class DeleteQuery extends Query implements QueryConditionInterface {
     /**
      * Implements QueryConditionInterface::compile().
      */
-    public function compile(kxDB $connection, QueryPlaceholderInterface $queryPlaceholder = NULL) {
+    public function compile(kxDB $connection, ?QueryPlaceholderInterface $queryPlaceholder = NULL) {
         return $this->condition->compile($connection, isset($queryPlaceholder) ? $queryPlaceholder : $this);
     }
     
@@ -832,7 +832,7 @@ class TruncateQuery extends Query {
     /**
      * Implements QueryConditionInterface::compile().
      */
-    public function compile(kxDB $connection, QueryPlaceholderInterface $queryPlaceholder = NULL) {
+    public function compile(kxDB $connection, ?QueryPlaceholderInterface $queryPlaceholder = NULL) {
         return $this->condition->compile($connection, isset($queryPlaceholder) ? $queryPlaceholder : $this);
     }
     
@@ -993,7 +993,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
     /**
      * Implements QueryConditionInterface::compile().
      */
-    public function compile(kxDB $connection, QueryPlaceholderInterface $queryPlaceholder = NULL) {
+    public function compile(kxDB $connection, ?QueryPlaceholderInterface $queryPlaceholder = NULL) {
         return $this->condition->compile($connection, isset($queryPlaceholder) ? $queryPlaceholder : $this);
     }
     
@@ -1030,7 +1030,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
      * @return UpdateQuery
      *   The called object.
      */
-    public function expression($field, $expression, array $arguments = NULL) {
+    public function expression($field, $expression, ?array $arguments = NULL) {
         $this->expressionFields[$field] = array(
             'expression' => $expression,
             'arguments' => $arguments,
@@ -1291,7 +1291,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
      * @return MergeQuery
      *   The called object.
      */
-    public function expression($field, $expression, array $arguments = NULL) {
+    public function expression($field, $expression, ?array $arguments = NULL) {
         $this->expressionFields[$field] = array(
             'expression' => $expression,
             'arguments' => $arguments,
@@ -1479,7 +1479,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
     /**
      * Implements QueryConditionInterface::compile().
      */
-    public function compile(kxDB $connection, QueryPlaceholderInterface $queryPlaceholder = NULL) {
+    public function compile(kxDB $connection, ?QueryPlaceholderInterface $queryPlaceholder = NULL) {
         return $this->condition->compile($connection, isset($queryPlaceholder) ? $queryPlaceholder : $this);
     }
     
@@ -1694,7 +1694,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
     /**
      * Implements QueryConditionInterface::compile().
      */
-    public function compile(kxDB $connection, QueryPlaceholderInterface $queryPlaceholder = NULL) {
+    public function compile(kxDB $connection, ?QueryPlaceholderInterface $queryPlaceholder = NULL) {
         if ($this->changed) {
             $condition_fragments = array();
             $arguments = array();

@@ -25,3 +25,16 @@ if ($thread) {
 { 
     echo 'false';
 }
+
+$posts = Edaha\Entities\Post::getRecentPosts($db);
+
+echo('<pre>');
+print_r($posts);
+echo('</pre>');
+
+
+$posts = Edaha\Entities\Post::getRecentPosts($db, 25, 1);
+
+echo('<pre>');
+print_r($posts);
+echo('</pre>');

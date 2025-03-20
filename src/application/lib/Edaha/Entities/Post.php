@@ -80,4 +80,20 @@ class Post
         
         return $post;
     }
+
+    public static function getRecentPosts(object &$db, int $rows_to_return = 50, int $page = 0)
+    {
+        $recent_posts = [];
+        $results = $db->select("posts")
+            ->fields("posts")
+            ->condition("post_deleted", false)
+            ->range(($page * $rows_to_return), $rows_to_return)
+            ->execute();
+        
+        while ($row = $results->fetchAssoc()) {
+            $recent_posts[] = Post::loadPostFromAssoc($row);
+        }
+
+        return $recent_posts;
+    }
 }

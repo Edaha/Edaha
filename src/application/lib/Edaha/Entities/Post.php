@@ -1,6 +1,9 @@
 <?php
 namespace Edaha\Entities;
 
+/* Nothing more permanent than a temporary fix */
+/* Adding this until finalizing the db model revamp */
+#[\AllowDynamicProperties]
 class Post
 {
     public int $id;
@@ -13,45 +16,57 @@ class Post
     public string $ip;
     public string $ip_md5;
 
-    public bool $is_locked;
-    public bool $is_stickied;
-    public bool $is_deleted {
-        get {
-            return ($this->deleted_at > 0);
-        }
-    }
-
     public int $created_at;
     public int $deleted_at;
     public int $bumped_at;
 
-    public static function LoadPost(int $board_id, int $post_id, object $db)
-    {
-        $post           = new Post();
-        $post->board_id = $board_id;
-        $post->id       = $post_id;
-        $post->db       = $db;
+    public bool $is_locked = false;
+    public bool $is_stickied = false;
+    public bool $is_deleted {
+        get {
+            return ($this->post_deleted > 0);
+        }
+    }
 
-        $post_query = $post->db->select("posts")
+    protected function __construct(int $board_id, int $post_id, object &$db)
+    {
+        $this->board_id = $board_id;
+        $this->id       = $post_id;
+        $this->db       = $db;
+    }
+
+    public static function LoadPost(int $board_id, int $post_id, object &$db)
+    {
+        $post           = new Post($board_id, $post_id, $db);
+        if (!$post->validatePost()) return false;
+
+        $post->loadPostFields();
+        return $post;
+    }
+
+    protected function loadPostFields()
+    {
+        $post_query = $this->db->select("posts")
             ->fields("posts")
-            ->condition("post_id", $post->id)
-            ->condition("post_board", $post->board_id)
+            ->condition("post_id", $this->id)
+            ->condition("post_board", $this->board_id)
             ->execute()
             ->fetchAssoc();
 
-        $post->name        = $post_query['post_name'];
-        $post->tripcode    = $post_query['post_tripcode'];
-        $post->email       = $post_query['post_email'];
-        $post->password    = $post_query['post_password'];
-        $post->message     = $post_query['post_message'];
-        $post->ip          = $post_query['post_ip'];
-        $post->ip_md5      = $post_query['post_ip_md5'];
-        $post->is_locked   = (bool) $post_query['post_locked'];
-        $post->is_stickied = (bool) $post_query['post_stickied'];
-        $post->created_at  = $post_query['post_timestamp'];
-        $post->deleted_at  = $post_query['post_deleted'];
-        $post->bumped_at   = $post_query['post_bumped'];
+        foreach ($post_query as $key => $value) {
+            $this->$key = $value;
+        }
+    }
 
-        return $post;
+    protected function validatePost() 
+    {
+        $post_exists = $this->db->select("posts")
+            ->fields("posts")
+            ->condition("post_id", $this->id)
+            ->condition("post_board", $this->board_id)
+            ->countQuery()
+            ->execute()
+            ->fetchField();
+        return ($post_exists == 1);
     }
 }

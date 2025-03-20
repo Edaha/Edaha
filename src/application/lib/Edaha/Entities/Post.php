@@ -87,6 +87,7 @@ class Post
         $results = $db->select("posts")
             ->fields("posts")
             ->condition("post_deleted", false)
+            ->orderBy("post_timestamp", "DESC")
             ->range(($page * $rows_to_return), $rows_to_return)
             ->execute();
         

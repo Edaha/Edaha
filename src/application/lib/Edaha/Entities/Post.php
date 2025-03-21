@@ -61,6 +61,41 @@ class Post
         return ($post_exists == 1);
     }
 
+    public function delete()
+    {
+        if (!isset($this->db)) return false;
+        $this->post_reviewed = 1;
+        $this->post_deleted = 1;
+        $this->post_delete_time = time();
+
+        $fields = [
+            "post_reviewed" => $this->post_reviewed,
+            "post_deleted" => $this->post_deleted,
+            "post_delete_time" => $this->post_delete_time,
+        ];
+
+        $results = $this->db->update("posts")
+            ->fields($fields)
+            ->condition('post_id', $this->id)
+            ->condition('post_board', $this->board_id)
+            ->execute();
+
+        return ($results > 0);
+    }
+
+    protected function deletePostFiles()
+    {
+        $post_files = $this->db->select("post_files")
+            ->fields("post_files", ["file_board", "file_name"])
+            ->condition("file_board", $this->board_id)
+            ->condition("file_post", $this->id)
+            ->execute();
+        
+        while ($row = $post_files->fetch()) {
+            PostAttachment::deleteFile($row->file_board, $row->file_name, $this->db); 
+        }
+    }
+
     public static function loadPostFromDb(int $board_id, int $post_id, object &$db)
     {
         $post           = new Post($board_id, $post_id, $db);

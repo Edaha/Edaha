@@ -38,3 +38,22 @@ $posts = Edaha\Entities\Post::getRecentPosts($db, 25, 1);
 echo('<pre>');
 print_r($posts);
 echo('</pre>');
+
+
+$post = Edaha\Entities\Post::loadPostFromDb(15, 212, $db);
+echo('<pre>');
+print_r($post);
+echo('</pre>');
+
+$post->delete();
+echo('<pre>');
+print_r($post);
+echo('</pre>');
+
+$post = null;
+$post = Edaha\Entities\Post::loadPostFromDb(15, 188, $db);
+echo('<pre>');
+print_r($post);
+echo('</pre>');
+
+$post->deletePostFiles();

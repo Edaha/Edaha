@@ -40,7 +40,14 @@ class manage_board_contentmoderation_posts extends kxCmd
       foreach ($this->request['posts'] as $post) {
         $board_id = (int) explode('|', $post)[0];
         $post_id = (int) explode('|', $post)[1];
-        kxFunc::deletePost($board_id, $post_id);
+        $post = Edaha\Entities\Post::loadPostFromAssoc(
+          [
+            'post_board' => $board_id, 
+            'post_id' => $post_id
+          ],
+          $this->db
+        );
+        $post->delete();
       }
     } else {
       foreach ($this->request['posts'] as $post) {

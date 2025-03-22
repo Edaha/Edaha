@@ -79,6 +79,8 @@ class Post
             ->condition('post_id', $this->id)
             ->condition('post_board', $this->board_id)
             ->execute();
+        
+        $this->deletePostFiles();
 
         return ($results > 0);
     }
@@ -105,9 +107,9 @@ class Post
         return $post;
     }
 
-    public static function loadPostFromAssoc(array $assoc)
+    public static function loadPostFromAssoc(array $assoc, ?object &$db = null)
     {
-        $post = new Post($assoc['post_board'], $assoc['post_id']);
+        $post = new Post($assoc['post_board'], $assoc['post_id'], $db);
 
         foreach ($assoc as $key => $value) {
             $post->$key = $value;

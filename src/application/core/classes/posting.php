@@ -162,7 +162,7 @@ class Posting
   {
     // Generate the query needed
     $limit = $isReply ? $this->environment->get("kx:limits:replydelay") : kxEnv::Get("kx:limits:threaddelay");
-    $cutoff_time = time() - $limit;
+    $cutoff_time = date('Y-m-d H:i:s', time() - $limit);
 
     $result = $this->db->select("posts")
       ->condition("post_board", $boardId)
@@ -333,7 +333,7 @@ class Posting
       if ($postData['thread_info']['replies'] <= $board->board_max_replies) {
         // Bump the thread
         $this->db->update("posts")
-          ->fields(array("post_bumped" => time()))
+          ->fields(array("post_bumped" => date('Y-m-d H:i:s')))
           ->condition("post_board", $board->board_id)
           ->condition("post_id", $postData['thread_info']['parent'])
           ->execute();
@@ -436,7 +436,7 @@ class Posting
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board)
   {
 
-    $timeStamp = time();
+    $timeStamp = date('Y-m-d H:i:s', time());
     $id = $this->db->insert("posts")
       ->fields(array(
         'post_parent' => $postData['thread_info']['parent'],

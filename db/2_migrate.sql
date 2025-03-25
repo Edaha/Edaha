@@ -74,15 +74,16 @@ add
     column `source_module` varchar(255);
 
 -- Get reports working
-alter table `reports`
-    add primary key id,
+alter table
+    `reports`
+add
+    primary key id,
     rename column `postid` to `post_id`;
-    add column `board_id` smallint,
-    add foreign key (board_id)
-        references boards(board_id)
-        on delete cascade
-    drop column `board`
-    rename column `when` to `timestamp`;
+
+add
+    column `board_id` smallint,
+add
+    foreign key (board_id) references boards(board_id) on delete cascade drop column `board` rename column `when` to `timestamp`;
 
 insert into
     `modules` (
@@ -104,31 +105,67 @@ values
     );
 
 -- Improve bans functionality
-alter table `banlist`
-    drop column `type`,
-    modify column `expired` 
-        boolean default false,
-    modify column `allow_read` 
-        boolean default true,
-    modify column `boards`
-        json,
+alter table
+    `banlist` drop column `type`,
+modify
+    column `expired` boolean default false,
+modify
+    column `allow_read` boolean default true,
+modify
+    column `boards` json,
     drop column `by`,
-    add column `created_by_staff_id` 
-        smallint unsigned not null,
-    add foreign key (created_by_staff_id)
-        references staff(user_id);
+add
+    column `created_by_staff_id` smallint unsigned not null,
+add
+    foreign key (created_by_staff_id) references staff(user_id);
 
 -- Webp functionality
 insert into
-  `filetypes` (
-    `type_ext`,
-    `type_mime`,
-    `type_force_thumb`
-  )
+    `filetypes` (
+        `type_ext`,
+        `type_mime`,
+        `type_force_thumb`
+    )
 values
-  ('webp', 'image/webp', 1);
+    ('webp', 'image/webp', 1);
 
 -- Update password hashing
-alter table `staff`
-    modify column `user_password`
-        binary(60);
+alter table
+    `staff`
+modify
+    column `user_password` binary(60);
+
+-- Clean up `posts` db model
+-- Timestamp fields to mysql timestamp
+alter table
+    posts
+modify
+    column post_timestamp bigint,
+modify
+    column post_delete_time bigint,
+modify
+    column post_bumped bigint;
+
+update
+    posts
+set
+    post_timestamp = cast(from_unixtime(post_timestamp) as unsigned);
+
+update
+    posts
+set
+    post_delete_time = cast(from_unixtime(post_delete_time) as unsigned);
+
+update
+    posts
+set
+    post_bumped = cast(from_unixtime(post_bumped) as unsigned);
+
+alter table
+    posts
+modify
+    column post_timestamp timestamp not null default current_timestamp,
+modify
+    column post_delete_time timestamp,
+modify
+    column post_bumped timestamp;

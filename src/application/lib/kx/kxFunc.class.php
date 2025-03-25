@@ -345,7 +345,7 @@ class kxFunc
       return array('generic.png', 48, 48);
     }
   }
-
+  #[MigrateToTwig]
   public static function formatDate($timestamp, $type = 'post', $locale = 'en', $email = '')
   {
     $output = '';
@@ -402,7 +402,7 @@ class kxFunc
         return $output . $fulldate . (($email != '') ? ('</a>') : (""));
       } else {
         /* Format the timestamp english style */
-        return $output . date('y/m/d(D)H:i', $timestamp) . (($email != '') ? ('</a>') : (""));
+        return $output . $timestamp . (($email != '') ? ('</a>') : (""));
       }
     }
 

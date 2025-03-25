@@ -66,7 +66,7 @@ class Post
         if (!isset($this->db)) return false;
         $this->post_reviewed = 1;
         $this->post_deleted = 1;
-        $this->post_delete_time = time();
+        $this->post_delete_time = date('Y-m-d H:i:s');
 
         $fields = [
             "post_reviewed" => $this->post_reviewed,

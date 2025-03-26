@@ -80,9 +80,9 @@ class public_board_base_baseboard extends kxCmd
     // Get the unique posts for this board
     //-----------------------------------------
     $result = $this->db->select("posts");
-    $result->addExpression("COUNT(DISTINCT post_ip_md5)");
-    $this->board->board_uniqueposts = $result->condition("post_board", $this->board->board_id)
-      ->condition("post_deleted", 0)
+    $result->addExpression("COUNT(DISTINCT ip_md5)");
+    $this->board->board_uniqueposts = $result->condition("board_id", $this->board->board_id)
+      ->condition("is_deleted", 0)
       ->execute()
       ->fetchField();
 
@@ -259,9 +259,9 @@ class public_board_base_baseboard extends kxCmd
 
     $numposts = $this->db->select("posts")
       ->fields("posts")
-      ->condition("post_board", $this->board->board_id)
-      ->condition("post_parent", 0)
-      ->condition("post_deleted", 0)
+      ->condition("board_id", $this->board->board_id)
+      ->condition("parent_post_id", 0)
+      ->condition("is_deleted", 0)
       ->countQuery()
       ->execute()
       ->fetchField();
@@ -286,11 +286,11 @@ class public_board_base_baseboard extends kxCmd
       //--------------------------------------------------------------------------------------------------
       $threads = $this->db->select("posts")
         ->fields("posts")
-        ->condition("post_board", $this->board->board_id)
-        ->condition("post_parent", 0)
-        ->condition("post_deleted", 0)
-        ->orderBy("post_stickied", "DESC")
-        ->orderBy("post_bumped", "DESC")
+        ->condition("board_id", $this->board->board_id)
+        ->condition("parent_post_id", 0)
+        ->condition("is_deleted", 0)
+        ->orderBy("is_stickied", "DESC")
+        ->orderBy("bumped_at_timestamp", "DESC")
         ->range($postsperpage * $i, $postsperpage)
         ->execute()
         ->fetchAll();
@@ -366,11 +366,11 @@ class public_board_base_baseboard extends kxCmd
     // Process stickies without using prepared statements (because they have a different range than regular threads).
     // Since there's usually very few to no stickies we can get away with this with minimal performance impact.
     //-----------------------------------------------------------------------------------------------------------------------------------
-    if ($thread->post_stickied == 1) {
+    if ($thread->is_stickied == 1) {
       $posts = $this->db->select("posts")
-        ->condition("post_board", $this->board->board_id)
-        ->condition("post_parent", $thread->post_id)
-        ->condition("post_deleted", 0)
+        ->condition("board_id", $this->board->board_id)
+        ->condition("parent_post_id", $thread->post_id)
+        ->condition("is_deleted", 0)
         ->orderBy("post_id", "DESC")
         ->range(0, kxEnv::Get('kx:display:stickyreplies'))
         ->execute()
@@ -386,7 +386,7 @@ class public_board_base_baseboard extends kxCmd
       if (empty($this->board->buildPageResults) || !($this->board->buildPageResults instanceof kxDBStatementInterface)) {
         $this->board->buildPageResults = $this->db->select("posts")
           ->fields("posts")
-          ->where("post_board = ? AND post_parent = ? AND post_deleted = 0")
+          ->where("board_id = ? AND parent_post_id = ? AND is_deleted = 0")
           ->orderBy("post_id", "DESC")
           ->range(0, kxEnv::Get('kx:display:replies'))
           ->build();
@@ -405,10 +405,10 @@ class public_board_base_baseboard extends kxCmd
   {
 
     $replycount = $this->db->select("posts");
-    $replycount->condition("post_board", $this->board->board_id)
-      ->condition("post_parent", $thread->post_id);
+    $replycount->condition("board_id", $this->board->board_id)
+      ->condition("parent_post_id", $thread->post_id);
     if ($this->board->board_type != 1) {
-      $replycount->condition("post_deleted", 0);
+      $replycount->condition("is_deleted", 0);
     }
     if (!empty($omitids)) {
       $replycount->condition("post_id", $omitids, "NOT IN");
@@ -425,10 +425,10 @@ class public_board_base_baseboard extends kxCmd
     // Get the number of file-replies for this thread, minus the ones that are already being shown.
     //----------------------------------------------------------------------------------------------------
     $replycount = $this->db->select("posts");
-    $replycount->innerJoin("post_files", "f", "post_id = file_post AND file_board = post_board");
-    $replycount->condition("post_board", $this->board->board_id)
-      ->condition("post_parent", $thread->post_id)
-      ->condition("post_deleted", 0)
+    $replycount->innerJoin("post_files", "f", "post_id = file_post AND file_board = board_id");
+    $replycount->condition("board_id", $this->board->board_id)
+      ->condition("parent_post_id", $thread->post_id)
+      ->condition("is_deleted", 0)
       ->condition("file_md5", "", "!=");
     if (!empty($omitids)) {
       $replycount->condition("file_post", $omitids, "NOT IN");
@@ -502,10 +502,10 @@ class public_board_base_baseboard extends kxCmd
 
   public function formatPost($post, $page)
   {
-    $dateEmail = (empty($this->board->board_default_name)) ? $post->post_email : 0;
-    $post->post_message = stripslashes($this->formatLongMessage($post->post_message, $this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $page));
-    $post->timestamp_formatted = kxFunc::formatDate($post->post_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
-    $post->reflink = $this->formatReflink($this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $post->post_id, $this->environment->get('kx:language:currentlocale'));
+    $dateEmail = (empty($this->board->board_default_name)) ? $post->email : 0;
+    $post->message = stripslashes($this->formatLongMessage($post->message, $this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $page));
+    $post->timestamp_formatted = kxFunc::formatDate($post->created_at_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
+    $post->reflink = $this->formatReflink($this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $post->post_id, $this->environment->get('kx:language:currentlocale'));
     return $post;
   }
 
@@ -589,9 +589,9 @@ class public_board_base_baseboard extends kxCmd
       // Okay let's do this!
       $threads = $this->db->select("posts")
         ->fields("posts")
-        ->condition("post_board", $this->board->board_id)
-        ->condition("post_parent", 0)
-        ->condition("post_deleted", 0)
+        ->condition("board_id", $this->board->board_id)
+        ->condition("parent_post_id", 0)
+        ->condition("is_deleted", 0)
         ->orderBy("post_id", "DESC")
         ->execute()
         ->fetchAll();
@@ -617,7 +617,7 @@ class public_board_base_baseboard extends kxCmd
           if (!isset($this->board->preparedThreads)) {
             $this->board->preparedThreads = $this->db->select("posts")
               ->fields("posts")
-              ->where("post_board = " . $this->board->board_id . " AND (post_id = ? OR post_parent = ?) AND post_deleted = 0")
+              ->where("board_id = " . $this->board->board_id . " AND (post_id = ? OR parent_post_id = ?) AND is_deleted = 0")
               ->orderBy("post_id")
               ->build();
           }
@@ -766,10 +766,10 @@ class public_board_base_baseboard extends kxCmd
 
   public function markThread($thread, $i)
   {
-    if ($thread->post_delete_time == 0 && $this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
+    if ($thread->deleted_at_timestamp == 0 && $this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
       $this->db->update("posts")
         ->fields([
-          'post_delete_time' => time() + 7200,
+          'deleted_at_timestamp' => time() + 7200,
         ])
         ->condition("post_board", $this->board->board_id)
         ->condition("post_id", $thread->post_id)

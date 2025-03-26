@@ -4,16 +4,8 @@ namespace Edaha\Entities;
 class Thread extends Post
 {
     public array $replies = [];
-    public bool $is_stickied {
-        get {
-            return ($this->post_stickied > 0);
-        }
-    }
-    public bool $is_locked {
-        get {
-            return ($this->post_locked > 0);
-        }
-    }
+    public bool $is_stickied;
+    public bool $is_locked;
     public bool $is_valid {
         get {
             return $this->validateThread();
@@ -32,18 +24,18 @@ class Thread extends Post
 
     protected function validateThread()
     {
-        return ($this->post_parent == 0) ? true : false;
+        return ($this->parent_post_id == 0) ? true : false;
     }
 
     public function getAllReplies(bool $include_deleted = false)
     {
         $results = $this->db->select("posts")
             ->fields("posts")
-            ->condition("post_parent", $this->id)
-            ->condition("post_board", $this->board_id);
+            ->condition("parent_post_id", $this->post_id)
+            ->condition("board_id", $this->board_id);
         
         if ($include_deleted) {
-            $results = $results->condition("post_deleted", false);
+            $results = $results->condition("is_deleted", false);
         }
 
         $results = $results->orderBy("post_id", "ASC")

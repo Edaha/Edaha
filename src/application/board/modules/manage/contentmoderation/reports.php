@@ -36,17 +36,17 @@ class manage_board_contentmoderation_reports extends kxCmd
       $post = $this->db->select("posts")
         ->fields("posts", [
           "post_id",
-          "post_parent",
-          "post_name",
-          "post_email",
-          "post_subject", 
-          "post_message",
-          "post_ip",
+          "parent_post_id",
+          "name",
+          "email",
+          "subject", 
+          "message",
+          "ip",
           ]
         )
         ->fields("boards", ["board_name"]);
-      $post->innerJoin("boards", "", "post_board = board_id");
-      $post = $post->condition("post_board", $report->board_id)
+      $post->innerJoin("boards", "", "posts.board_id = boards.board_id");
+      $post = $post->condition("posts.board_id", $report->board_id)
         ->condition("post_id", $report->post_id)
         ->execute()
         ->fetchAssoc();

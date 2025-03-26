@@ -1,12 +1,9 @@
 <?php
 namespace Edaha\Entities;
 
-/* Nothing more permanent than a temporary fix */
-/* Adding this until finalizing the db model revamp */
-#[\AllowDynamicProperties]
 class Post
 {
-    public int $id;
+    public int $post_id;
     public int $board_id;
     public string $name;
     public string $tripcode;
@@ -16,22 +13,30 @@ class Post
     public string $ip;
     public string $ip_md5;
 
-    public int $created_at;
-    public int $deleted_at;
-    public int $bumped_at;
+    public \DateTimeImmutable $created_at_timestamp {
+        set(string|\DateTimeImmutable $timestamp) {
+            $this->created_at_timestamp = new \DateTimeImmutable($timestamp, new \DateTimeZone('UTC'));
+        }
+    }
+    public \DateTimeImmutable $deleted_at_timestamp {
+        set(string|\DateTimeImmutable $timestamp) {
+            $this->deleted_at_timestamp = new \DateTimeImmutable($timestamp, new \DateTimeZone('UTC'));
+        }
+    }
+    public \DateTime $bumped_at_timestamp {
+        set(string|\DateTime $timestamp) {
+            $this->bumped_at_timestamp = new \DateTime($timestamp, new \DateTimeZone('UTC'));
+        }
+    }
 
     public bool $is_locked = false;
     public bool $is_stickied = false;
-    public bool $is_deleted {
-        get {
-            return ($this->post_deleted > 0);
-        }
-    }
+    public bool $is_deleted = false;
 
     protected function __construct(int $board_id, int $post_id, ?object &$db = null)
     {
         $this->board_id = $board_id;
-        $this->id       = $post_id;
+        $this->post_id  = $post_id;
         $this->db       = $db;
     }
 
@@ -39,13 +44,13 @@ class Post
     {
         $post_query = $this->db->select("posts")
             ->fields("posts")
-            ->condition("post_id", $this->id)
-            ->condition("post_board", $this->board_id)
+            ->condition("post_id", $this->post_id)
+            ->condition("board_id", $this->board_id)
             ->execute()
             ->fetchAssoc();
 
         foreach ($post_query as $key => $value) {
-            $this->$key = $value;
+            if (!is_null($value)) $this->$key = $value;
         }
     }
 
@@ -53,8 +58,8 @@ class Post
     {
         $post_exists = $this->db->select("posts")
             ->fields("posts")
-            ->condition("post_id", $this->id)
-            ->condition("post_board", $this->board_id)
+            ->condition("post_id", $this->post_id)
+            ->condition("board_id", $this->board_id)
             ->countQuery()
             ->execute()
             ->fetchField();
@@ -64,20 +69,20 @@ class Post
     public function delete()
     {
         if (!isset($this->db)) return false;
-        $this->post_reviewed = 1;
-        $this->post_deleted = 1;
-        $this->post_delete_time = date('Y-m-d H:i:s');
+        $this->is_reviewed = 1;
+        $this->is_deleted = 1;
+        $this->deleted_at_timestamp = date('Y-m-d H:i:s');
 
         $fields = [
-            "post_reviewed" => $this->post_reviewed,
-            "post_deleted" => $this->post_deleted,
-            "post_delete_time" => $this->post_delete_time,
+            "is_reviewed" => $this->is_reviewed,
+            "is_deleted" => $this->is_deleted,
+            "deleted_at_timestamp" => $this->deleted_at_timestamp,
         ];
 
         $results = $this->db->update("posts")
             ->fields($fields)
-            ->condition('post_id', $this->id)
-            ->condition('post_board', $this->board_id)
+            ->condition('post_id', $this->post_id)
+            ->condition('board_id', $this->board_id)
             ->execute();
         
         $this->deletePostFiles();
@@ -109,10 +114,10 @@ class Post
 
     public static function loadPostFromAssoc(array $assoc, ?object &$db = null)
     {
-        $post = new Post($assoc['post_board'], $assoc['post_id'], $db);
+        $post = new Post($assoc['board_id'], $assoc['post_id'], $db);
 
         foreach ($assoc as $key => $value) {
-            $post->$key = $value;
+            if (!is_null($value)) $post->$key = $value;
         }
         
         return $post;
@@ -123,8 +128,8 @@ class Post
         $recent_posts = [];
         $results = $db->select("posts")
             ->fields("posts")
-            ->condition("post_deleted", false)
-            ->orderBy("post_timestamp", "DESC")
+            ->condition("is_deleted", false)
+            ->orderBy("created_at_timestamp", "DESC")
             ->range(($page * $rows_to_return), $rows_to_return)
             ->execute();
         

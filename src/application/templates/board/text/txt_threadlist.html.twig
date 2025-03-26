@@ -16,9 +16,9 @@
 		{% endif %}
 		{% for thread in posts %}				
 			{% if board.board_compact_list and isindex %}
-				<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index }}">{{ loop.index }}: </a><a href="res/{{ thread.0.post_id }}.html">{% else %}res/{{ thread.0.post_id }}.html">{{ loop.index }}: {% endif %}{{ thread.0.post_subject }} ({{ thread.0.replies + 1 }})</a>{% if loop.last %}{% else %} &nbsp;{% endif %}
+				<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index }}">{{ loop.index }}: </a><a href="res/{{ thread.0.post_id }}.html">{% else %}res/{{ thread.0.post_id }}.html">{{ loop.index }}: {% endif %}{{ thread.0.subject }} ({{ thread.0.replies + 1 }})</a>{% if loop.last %}{% else %} &nbsp;{% endif %}
 			{% else %}
-				<tr><td><a href="res/{{ thread.0.post_id }}.html">{{ loop.index }}</a></td><td><a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index - 1 }}{% else %}res/{{ thread.0.post_id }}.html{% endif %}">{{ thread.0.post_subject }}</a></td><td>{{ thread.0.replies + 1 }}</td><td nowrap="nowrap"><small>{{ thread.0.post_bumped|date("d/m/y @ h:i a T") }}</small></td></tr>
+				<tr><td><a href="res/{{ thread.0.post_id }}.html">{{ loop.index }}</a></td><td><a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index - 1 }}{% else %}res/{{ thread.0.post_id }}.html{% endif %}">{{ thread.0.subject }}</a></td><td>{{ thread.0.replies + 1 }}</td><td nowrap="nowrap"><small>{{ thread.0.bumped_at_timestamp|date("d/m/y @ h:i a T") }}</small></td></tr>
 			{% endif %}
 		{% else %}
 			{% if board.board_compact_list and isindex %}

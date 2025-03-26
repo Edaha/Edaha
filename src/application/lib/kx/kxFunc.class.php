@@ -246,16 +246,16 @@ class kxFunc
   {
 
     $matches = kxDB::getinstance()->select("posts");
-    $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = post_board");
-    $matches = $matches->fields("posts", array("post_id", "post_parent"))
-      ->condition("post_board", $boardid)
-      ->condition("post_deleted", 0)
+    $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = board_id");
+    $matches = $matches->fields("posts", array("post_id", "parent_post_id"))
+      ->condition("board_id", $boardid)
+      ->condition("is_deleted", 0)
       ->condition("file_md5", $md5)
       ->range(0, 1)
       ->execute()
       ->fetchAll();
     if (count($matches) > 0) {
-      $real_parentid = ($matches[0]->post_parent == 0) ? $matches[0]->post_id : $matches[0]->post_parent;
+      $real_parentid = ($matches[0]->parent_post_id == 0) ? $matches[0]->post_id : $matches[0]->parent_post_id;
       return array($real_parentid, $matches[0]->post_id);
     }
 

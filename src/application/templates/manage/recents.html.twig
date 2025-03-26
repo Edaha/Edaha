@@ -56,8 +56,8 @@
         {% for post in recent_posts %}
           <div>
             <input type="checkbox" name="posts[]" value="{{ "%s|%s"|format(post.board_id, post.post_id) }}">
-            {{ _self.create_point_link(post.board_name, post.parent_id, post.post_id) }}
-            {{ post.post_message|striptags|raw }}
+            {{ _self.create_point_link(post.board_name, post.parent_post_id, post.post_id) }}
+            {{ post.message|striptags|raw }}
           </div>
           <hr>
         {% endfor %}
@@ -71,7 +71,7 @@
           ) %}
           <div>
             <input type="checkbox" name="files[]" value="{{ "%s|%s|%s"|format(file.board_id, file.file_post, file.file_name) }}">
-            {{ _self.create_point_link(file.board_name, file.post_parent, file.file_post) }}
+            {{ _self.create_point_link(file.board_name, file.parent_post_id, file.file_post) }}
             <img src="{{ thumburl }}">
           </div>
           <hr>
@@ -82,8 +82,8 @@
             <input type="checkbox" name="reports[]" value="{{ report.id }}">
             Reported by {{ report.ip }} at {{ report.timestamp|date }}, reason: {{ report.reason }}
             <br>
-            {{ _self.create_point_link(report.post.board_name, report.post.post_parent, report.post.post_id) }}
-            {{ report.post.post_message|striptags|raw }}
+            {{ _self.create_point_link(report.post.board_name, report.post.parent_post_id, report.post.post_id) }}
+            {{ report.post.message|striptags|raw }}
             {% for file in report.post.post_files %}
               {% set thumburl = "%s/%s/thumb/%ss.%s" | format(
                 kxEnv("paths:boards:path"),

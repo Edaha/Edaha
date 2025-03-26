@@ -84,10 +84,10 @@ class public_board_text_text extends public_board_base_baseboard {
     }
     else {
       $result = $this->db->select("posts")
-                         ->condition("post_board", $this->board->board_id)
-                         ->condition("post_deleted",0)
-                         ->condition("post_subject", substr($postData['subject'] ?? '', 0, 74))
-                         ->condition("post_parent", 0)
+                         ->condition("board_id", $this->board->board_id)
+                         ->condition("is_deleted",0)
+                         ->condition("subject", substr($postData['subject'] ?? '', 0, 74))
+                         ->condition("parent_post_id", 0)
                          ->countQuery()
                          ->execute()
                          ->fetchField();
@@ -111,11 +111,11 @@ class public_board_text_text extends public_board_base_baseboard {
     $this->twigData['isindex'] = false;
     $this->twigData['posts'] = $this->db->select("posts")
       ->fields("posts")
-      ->condition("post_board", $this->board->board_id)
-      ->condition("post_parent", 0)
-      ->condition("post_deleted", 0)
-      ->orderBy("post_stickied", "DESC")
-      ->orderBy("post_bumped", "DESC")
+      ->condition("board_id", $this->board->board_id)
+      ->condition("parent_post_id", 0)
+      ->condition("is_deleted", 0)
+      ->orderBy("is_stickied", "DESC")
+      ->orderBy("bumped_at_timestamp", "DESC")
       ->execute()
       ->fetchAll();
     

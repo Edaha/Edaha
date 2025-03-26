@@ -35,14 +35,14 @@ class manage_board_contentmoderation_posts extends kxCmd
       return;
     }
 
-    $fields['post_reviewed'] = 1;
+    $fields['is_reviewed'] = 1;
     if ($this->request['action'] == 'delete') {
       foreach ($this->request['posts'] as $post) {
         $board_id = (int) explode('|', $post)[0];
         $post_id = (int) explode('|', $post)[1];
         $post = Edaha\Entities\Post::loadPostFromAssoc(
           [
-            'post_board' => $board_id, 
+            'board_id' => $board_id, 
             'post_id' => $post_id
           ],
           $this->db
@@ -57,7 +57,7 @@ class manage_board_contentmoderation_posts extends kxCmd
       }
 
       foreach ($board_posts as $board_id => $posts) {
-        $where_clauses[] = '(post_board = ' . $board_id . ' and post_id in (' . implode(',', $posts) . '))';
+        $where_clauses[] = '(board_id = ' . $board_id . ' and post_id in (' . implode(',', $posts) . '))';
       }
 
       $process_query = $this->db->update("posts")

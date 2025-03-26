@@ -171,12 +171,36 @@ modify
     column post_bumped timestamp;
 
 -- Boolean fields to boolean
-alter table posts
-modify column 
-  post_stickied boolean default false,
-modify column 
-  post_locked boolean default false,
-modify column 
-  post_reviewed boolean default false,
-modify column 
-  post_deleted boolean default false;
+alter table
+    posts
+modify
+    column post_stickied boolean default false,
+modify
+    column post_locked boolean default false,
+modify
+    column post_reviewed boolean default false,
+modify
+    column post_deleted boolean default false;
+
+-- Clean up column names
+alter table
+    posts 
+    rename column post_board to board_id,
+    rename column post_parent to parent_post_id,
+    rename column post_name to name,
+    rename column post_tripcode to tripcode,
+    rename column post_email to email,
+    rename column post_subject to subject,
+    rename column post_message to message,
+    rename column post_password to password,
+    rename column post_ip to ip,
+    rename column post_ip_md5 to ip_md5,
+    rename column post_tag to tag,
+    rename column post_timestamp to created_at_timestamp,
+    rename column post_stickied to is_stickied,
+    rename column post_locked to is_locked,
+    rename column post_authority to authority,
+    rename column post_reviewed to is_reviewed,
+    rename column post_delete_time to deleted_at_timestamp,
+    rename column post_deleted to is_deleted,
+    rename column post_bumped to bumped_at_timestamp;

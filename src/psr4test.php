@@ -56,4 +56,7 @@ echo('<pre>');
 print_r($post);
 echo('</pre>');
 
-$post->deletePostFiles();
+$board = Edaha\Entities\Board::loadBoardFromDb(15, $db);
+echo('<pre>');
+print_r($board);
+echo('</pre>');

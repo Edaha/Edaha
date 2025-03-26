@@ -3,13 +3,19 @@ namespace Edaha\Entities;
 
 class Post
 {
+    public object $db;
+
     public int $post_id;
     public int $board_id;
+    public int $parent_post_id;
     public string $name;
     public string $tripcode;
     public string $email;
     public string $password;
     public string $message;
+    public string $subject;
+    public int $authority;
+    public string $tag;
     public string $ip;
     public string $ip_md5;
 
@@ -32,12 +38,13 @@ class Post
     public bool $is_locked = false;
     public bool $is_stickied = false;
     public bool $is_deleted = false;
+    public bool $is_reviewed = false;
 
     protected function __construct(int $board_id, int $post_id, ?object &$db = null)
     {
         $this->board_id = $board_id;
         $this->post_id  = $post_id;
-        $this->db       = $db;
+        if (!is_null($db)) $this->db = $db;
     }
 
     protected function loadPostFields()
@@ -76,7 +83,7 @@ class Post
         $fields = [
             "is_reviewed" => $this->is_reviewed,
             "is_deleted" => $this->is_deleted,
-            "deleted_at_timestamp" => $this->deleted_at_timestamp,
+            "deleted_at_timestamp" => $this->deleted_at_timestamp->format('Y-m-d H:i:s'),
         ];
 
         $results = $this->db->update("posts")
@@ -95,7 +102,7 @@ class Post
         $post_files = $this->db->select("post_files")
             ->fields("post_files", ["file_board", "file_name"])
             ->condition("file_board", $this->board_id)
-            ->condition("file_post", $this->id)
+            ->condition("file_post", $this->post_id)
             ->execute();
         
         while ($row = $post_files->fetch()) {

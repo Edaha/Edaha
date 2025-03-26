@@ -169,3 +169,14 @@ modify
     column post_delete_time timestamp,
 modify
     column post_bumped timestamp;
+
+-- Boolean fields to boolean
+alter table posts
+modify column 
+  post_stickied boolean default false,
+modify column 
+  post_locked boolean default false,
+modify column 
+  post_reviewed boolean default false,
+modify column 
+  post_deleted boolean default false;

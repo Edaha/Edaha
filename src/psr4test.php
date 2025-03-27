@@ -60,3 +60,8 @@ $board = Edaha\Entities\Board::loadBoardFromDb(15, $db);
 echo('<pre>');
 print_r($board);
 echo('</pre>');
+
+echo $board->board_id;
+echo $board->board_name;
+echo $board->board_default_style;
+echo $board->board_up_the_windows;

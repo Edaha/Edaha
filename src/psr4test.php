@@ -70,3 +70,24 @@ $board->getAllThreads();
 echo('<pre>');
 print_r($board);
 echo('</pre>');
+
+
+$thread = Edaha\Entities\Thread::loadThread(8, 168, $db);
+$thread->getReplies();
+
+echo('<pre>');
+print_r($thread);
+echo('</pre>');
+
+$thread->getReplies('last', 5);
+
+echo('<pre>');
+print_r($thread);
+echo('</pre>');
+
+$thread->getReplies('first', 3);
+
+echo('<pre>');
+print_r($thread);
+echo('</pre>');
+

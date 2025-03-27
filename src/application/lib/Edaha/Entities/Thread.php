@@ -45,7 +45,7 @@ class Thread extends Post
             ->condition("parent_post_id", $this->post_id)
             ->condition("board_id", $this->board_id);
         
-        if ($include_deleted) {
+        if (!$include_deleted) {
             $results = $results->condition("is_deleted", false);
         }
 
@@ -55,5 +55,35 @@ class Thread extends Post
         while ($row = $results->fetchAssoc()) {
             $this->replies[] = Post::loadPostFromAssoc($row);
         }
+    }
+
+    public function getReplies(string $first_or_last = 'first', int $count_of_replies = 3)
+    {
+        $this->replies = [];
+        $results = $this->db->select("posts")
+            ->fields("posts")
+            ->condition("parent_post_id", $this->post_id)
+            ->condition("board_id", $this->board_id)
+            ->condition("is_deleted", false);
+        
+        switch ($first_or_last) {
+            case 'first':
+                $results = $results->orderBy("created_at_timestamp", "ASC");
+                break;
+            case 'last':
+                $results = $results->orderBy("created_at_timestamp", "DESC");
+                break;
+            default:
+                return false;
+                break;
+        }
+        $results = $results->range(0, $count_of_replies)
+            ->execute();
+        
+        while ($row = $results->fetchAssoc()) {
+            $this->replies[] = Post::loadPostFromAssoc($row);
+        }
+
+        if ($first_or_last == 'last')  $this->replies = array_reverse($this->replies);
     }
 }

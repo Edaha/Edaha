@@ -8,6 +8,7 @@ class Board
     public int $board_id;
     public string $board_name;
     protected array $options = [];
+    public array $threads = [];
 
     protected function __construct(int $board_id, ?object &$db = null)
     {
@@ -60,5 +61,25 @@ class Board
         if (!$board->validate()) return false;
         $board->loadBoardFields();
         return $board;
+    }
+
+    public function getAllThreads(bool $include_deleted = false)
+    {
+        $this->threads = [];
+        $results = $this->db->select("posts")
+            ->fields("posts")
+            ->condition("parent_post_id", 0)
+            ->condition("board_id", $this->board_id);
+        
+        if ($include_deleted) {
+            $results = $results->condition("is_deleted", false);
+        }
+
+        $results = $results->orderBy("post_id", "ASC")
+            ->execute();
+
+        while ($row = $results->fetchAssoc()) {
+            $this->threads[] = Thread::loadThreadFromAssoc($row);
+        }
     }
 }

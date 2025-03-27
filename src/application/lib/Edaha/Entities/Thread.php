@@ -22,6 +22,17 @@ class Thread extends Post
         return $thread;
     }
 
+    public static function loadThreadFromAssoc(array $assoc, ?object &$db = null)
+    {
+        $thread = new Thread($assoc['board_id'], $assoc['post_id'], $db);
+
+        foreach ($assoc as $key => $value) {
+            if (!is_null($value)) $thread->$key = $value;
+        }
+        
+        return $thread;
+    }
+
     protected function validateThread()
     {
         return ($this->parent_post_id == 0) ? true : false;

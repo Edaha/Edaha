@@ -91,3 +91,9 @@ echo('<pre>');
 print_r($thread);
 echo('</pre>');
 
+
+
+$board = Edaha\Entities\Board::loadBoardFromDbByName('edakiri', $db);
+echo('<pre>');
+print_r($board);
+echo('</pre>');

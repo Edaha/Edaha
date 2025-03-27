@@ -10,6 +10,30 @@ class Board
     protected array $options = [];
     public array $threads = [];
 
+    public int $board_uniqueposts {
+        get {
+            $result = $this->db->select("posts");
+            $result->addExpression("COUNT(DISTINCT ip_md5)");
+            return $result->condition("board_id", $this->board_id)
+                ->condition("is_deleted", 0)
+                ->execute()
+                ->fetchField();
+        }
+    }
+
+    public array $board_filetypes_allowed {
+        get {
+            $result = $this->db->select("filetypes", "f")
+                ->fields("f", ["type_ext"]);
+            $result->innerJoin("board_filetypes", "bf", "bf.type_id = f.type_id");
+            $result->innerJoin("boards", "b", "b.board_id = bf.board_id");
+            return $result->condition("bf.board_id", $this->board_id)
+                ->orderBy("type_ext")
+                ->execute()
+                ->fetchCol();
+        }
+    }
+
     protected function __construct(int $board_id, ?object &$db = null)
     {
         $this->board_id = $board_id;
@@ -61,6 +85,22 @@ class Board
         if (!$board->validate()) return false;
         $board->loadBoardFields();
         return $board;
+    }
+
+    public static function loadBoardFromDbByName(string $board_name, object &$db)
+    {
+        $board_id = $db->select("boards")
+            ->fields("boards", ['board_id'])
+            ->condition('board_name', $board_name)
+            ->execute()
+            ->fetchField();
+        
+        if ($board_id) {
+            $board = Board::loadBoardFromDb($board_id, $db);
+            return $board;
+        }
+
+        return null;
     }
 
     public function getAllThreads(bool $include_deleted = false)

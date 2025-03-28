@@ -71,7 +71,7 @@ class public_board_base_baseboard extends kxCmd
    */
   public function exec(kxEnv $environment)
   {
-    $this->board = Edaha\Entities\Board::loadBoardFromDbByName($this->request['board'], $this->db);
+    $this->board = Edaha\Entities\Board::loadFromDbByName($this->request['board'], $this->db);
 
     $this->environment->set('kx:classes:board:id', $this->board);
 

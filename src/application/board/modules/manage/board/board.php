@@ -43,7 +43,7 @@ class manage_board_board_board extends kxCmd
 
   private function onRegen()
   {
-    $board = Edaha\Entities\Board::loadBoardFromDbByName($this->request['board'], $this->db);
+    $board = Edaha\Entities\Board::loadFromDbByName($this->request['board'], $this->db);
     if (is_null($board)) {
       $this->errorMessage = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
       return false;

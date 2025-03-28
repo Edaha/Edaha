@@ -337,10 +337,10 @@ class Upload
 
           $results = $this->db->select("post_files")
             ->fields("post_files")
-            ->innerJoin("posts", "", "post_board = file_board AND post_id = file_post")
+            ->innerJoin("posts", "", "board_id = file_board AND post_id = file_post")
             ->condition("file_board", $boardData->board_id)
             ->condition("file_name", $video_id)
-            ->condition("post_deleted", 0)
+            ->condition("is_deleted", 0)
             ->countQuery()
             ->execute()
             ->fetch();
@@ -369,18 +369,18 @@ class Upload
             $this->isvideo = true;
           } else {
             $results = $this->db->select("post_files");
-            $results->innerJoin("posts", "", "post_board = file_board AND post_id = file_post");
-            $results = $results->fields("posts", array("post_id", "post_parent"))
+            $results->innerJoin("posts", "", "board_id = file_board AND post_id = file_post");
+            $results = $results->fields("posts", array("post_id", "parent_post_id"))
               ->condition("file_board", $boardData->board_id)
               ->condition("file_name", $video_id)
-              ->condition("post_deleted", 0)
+              ->condition("is_deleted", 0)
               ->range(0, 1)
               ->execute()
               ->fetchAll();
 
             foreach ($results as $line) {
-              $real_threadid = ($line->post_parent == 0) ? $line->post_id : $line->post_parent;
-              kxFunc::showError(sprintf(_('That video ID has already been posted %shere%s.'), '<a href="' . kxEnv::Get('kx:paths:boards:folder') . '/' . $boardData->board_id . '/res/' . $real_threadid . '.html#' . $line->post_parent . '">', '</a>'));
+              $real_threadid = ($line->parent_post_id == 0) ? $line->post_id : $line->parent_post_id;
+              kxFunc::showError(sprintf(_('That video ID has already been posted %shere%s.'), '<a href="' . kxEnv::Get('kx:paths:boards:folder') . '/' . $boardData->board_id . '/res/' . $real_threadid . '.html#' . $line->parent_post_id . '">', '</a>'));
             }
           }
         } else {

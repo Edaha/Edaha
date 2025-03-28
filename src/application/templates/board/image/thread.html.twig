@@ -4,7 +4,7 @@
   <form id="delform" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post">
   <input type="hidden" name="board" value="{{board.board_name}}" />
   {% for post in posts %}
-    {% if post.post_parent == 0 %}
+    {% if post.parent_post_id == 0 %}
       <div class="thread" id="thread_{{post.post_id}}_{{board.board_name}}">
         <div class="op" id="p{{post.post_id}}">
           <div class="post">
@@ -15,7 +15,7 @@
             <span id="dnb_{{board.board_name}}_{{post.post_id}}_y"></span>
     {% else %}
       {% if numimages > 0 and isexpand and loop.first %}
-        <a href="#top" onclick="$('#thread{{post.post_parent}}_{{board.board_name}} [id^=expandimg], #thread{{ post.post_parent }}{{ board.board_name }} .file_size a').click();return false;">{t "Expand all images"}</a>
+        <a href="#top" onclick="$('#thread{{post.parent_post_id}}_{{board.board_name}} [id^=expandimg], #thread{{ post.parent_post_id }}{{ board.board_name }} .file_size a').click();return false;">{t "Expand all images"}</a>
       {% endif %}
       <div class="reply"  id="reply_{{post.post_id}}">
         <div class="post">
@@ -55,24 +55,24 @@
         {{post.videobox}}
       {% endif %}
       {% autoescape false %}
-      {{post.post_message}}
+      {{post.message}}
       {% endautoescape %}
     </p>
     <br class="clear-both">
-    {% if not post.post_stickied and post.post_parent == 0 and ((board.board_max_age > 0 and (post.post_timestamp + (board.board_max_age * 3600)) < ("now"|date("U") + 7200 ) ) or (post.post_delete_time > 0 and post.post_delete_time <= ("now"|date("U") + 7200))) %}
+    {% if not post.is_stickied and post.parent_post_id == 0 and ((board.board_max_age > 0 and (post.created_at_timestamp + (board.board_max_age * 3600)) < ("now"|date("U") + 7200 ) ) or (post.deleted_at_timestamp > 0 and post.deleted_at_timestamp <= ("now"|date("U") + 7200))) %}
       <span class="oldpost">
         {% trans "Marked for deletion (old)" %}
       </span>
       <br />
     {% endif %}
-    {% if post.post_parent == 0 %}
+    {% if post.parent_post_id == 0 %}
         </div>
       </div>
       <div id="replies_{{post.post_id}}_{{board.board_name}}" class="replies">
       {# needs to be redone
       {% if post.replies %}
         <span class="omittedposts">
-          {% if post.post_stickied == 0 %}
+          {% if post.is_stickied == 0 %}
             {{post.replies}} 
             {% if post.replies == 1 %}
               {t "Post" lower="yes"} 

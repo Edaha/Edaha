@@ -25,7 +25,7 @@ class manage_core_index_statgraphs extends kxCmd {
     
     $postsperboard = $this->db->select("posts")
                               ->fields("posts")
-                              ->where("post_board = ? AND post_timestamp >= ?")
+                              ->where("board_id = ? AND created_at_timestamp >= ?")
                               ->countQuery()
                               ->build();
     $period = time() - (86400 * $period);

@@ -106,10 +106,10 @@ class public_core_index_news extends kxCmd {
 
     // Get recent posts
     $recentposts = $this->db->select("posts");
-    $recentposts->innerJoin("boards", "", "post_board = board_id");
+    $recentposts->innerJoin("boards", "", "posts.board_id = boards.board_id");
     $recentposts = $recentposts->fields("posts")
                                ->fields("boards", array("board_name"))
-                               ->orderBy("post_timestamp", "DESC")
+                               ->orderBy("created_at_timestamp", "DESC")
                                ->range(0,6)
                                ->execute()
                                ->fetchAll();
@@ -118,13 +118,13 @@ class public_core_index_news extends kxCmd {
     
     // Get recent images
     $images = $this->db->select("post_files");
-    $images->innerJoin("posts", "", "post_id = file_post AND post_board = file_board");
-    $images->innerJoin("boards", "", "post_board = board_id");
+    $images->innerJoin("posts", "", "post_id = file_post AND posts.board_id = file_board");
+    $images->innerJoin("boards", "", "posts.board_id = boards.board_id");
     $images = $images->fields("post_files", array("file_name", "file_type", "file_board", "file_thumb_width", "file_thumb_height"))
-                     ->fields("posts", array("post_id", "post_parent"))
+                     ->fields("posts", array("post_id", "parent_post_id"))
                      ->fields("boards", array("board_name"))
                      ->condition("file_name", "", "!=")
-                     ->orderBy("post_timestamp", "DESC")
+                     ->orderBy("created_at_timestamp", "DESC")
                      ->range(0,3)
                      ->execute()
                      ->fetchAll();

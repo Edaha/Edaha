@@ -34,9 +34,9 @@ class Posting
     $threadData = array('replies' => 0, 'locked' => 0, 'parent' => 0);
     $sql = $this->db->select('posts');
     $sql->addExpression('COUNT(*)');
-    $threadData['replies'] = $sql->condition('post_board', $boardID)
-      ->condition('post_parent', $threadID)
-      ->condition('post_deleted', 0)
+    $threadData['replies'] = $sql->condition('board_id', $boardID)
+      ->condition('parent_post_id', $threadID)
+      ->condition('is_deleted', 0)
       ->execute()
       ->fetchField();
     $threadData['parent'] = $threadID;
@@ -51,10 +51,10 @@ class Posting
         /* Check if the thread id supplied really exists */
         $sql = $this->db->select("posts");
         $sql->addExpression("COUNT(*)"); // Because Saz is too dumb to SQL.
-        $results = $sql->condition("post_board", $boardid)
+        $results = $sql->condition("board_id", $boardid)
           ->condition("post_id", $this->request['replythread'])
-          ->condition("post_parent", 0)
-          ->condition("post_deleted", 0)
+          ->condition("parent_post_id", 0)
+          ->condition("is_deleted", 0)
           ->execute()
           ->fetchField();
         /* If it does... */
@@ -139,7 +139,7 @@ class Posting
       if ($fields) {
         $this->db->update("posts")
           ->fields($fields)
-          ->condition("post_board", $this->board->board_id)
+          ->condition("board_id", $this->board->board_id)
           ->condition("post_id", $postData['thread_info']['parent'])
           ->execute();
       }
@@ -162,13 +162,13 @@ class Posting
   {
     // Generate the query needed
     $limit = $isReply ? $this->environment->get("kx:limits:replydelay") : kxEnv::Get("kx:limits:threaddelay");
-    $cutoff_time = time() - $limit;
+    $cutoff_time = date('Y-m-d H:i:s', time() - $limit);
 
     $result = $this->db->select("posts")
-      ->condition("post_board", $boardId)
-      ->condition("post_ip_md5", md5($_SERVER['REMOTE_ADDR']))
-      ->condition("post_timestamp", $cutoff_time, ">");
-    $result = $isReply ? $result->condition("post_parent", 0, "!=") : $result->condition("post_parent", 0, "=");
+      ->condition("board_id", $boardId)
+      ->condition("ip_md5", md5($_SERVER['REMOTE_ADDR']))
+      ->condition("created_at_timestamp", $cutoff_time, ">");
+    $result = $isReply ? $result->condition("parent_post_id", 0, "!=") : $result->condition("parent_post_id", 0, "=");
     $result = $result->countQuery()
       ->execute()
       ->fetchField();
@@ -333,8 +333,8 @@ class Posting
       if ($postData['thread_info']['replies'] <= $board->board_max_replies) {
         // Bump the thread
         $this->db->update("posts")
-          ->fields(array("post_bumped" => time()))
-          ->condition("post_board", $board->board_id)
+          ->fields(array("bumped_at_timestamp" => date('Y-m-d H:i:s')))
+          ->condition("board_id", $board->board_id)
           ->condition("post_id", $postData['thread_info']['parent'])
           ->execute();
       }
@@ -355,9 +355,9 @@ class Posting
       if ($viewing_thread_is_watched[0] > 0) {
         $newestreplyid = $this->db->select("posts")
           ->fields("posts", array("post_id"))
-          ->condition("post_board", $board->board_id)
-          ->condition("post_deleted", 0)
-          ->condition("post_parent", $postData['thread_info']['parent'])
+          ->condition("board_id", $board->board_id)
+          ->condition("is_deleted", 0)
+          ->condition("parent_post_id", $postData['thread_info']['parent'])
           ->orderBy("post_id", "DESC")
           ->range(0, 1)
           ->execute()
@@ -436,25 +436,25 @@ class Posting
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board)
   {
 
-    $timeStamp = time();
+    $timeStamp = date('Y-m-d H:i:s', time());
     $id = $this->db->insert("posts")
       ->fields(array(
-        'post_parent' => $postData['thread_info']['parent'],
-        'post_board' => $board->board_id,
-        'post_name' => $post['name'],
-        'post_tripcode' => $post['tripcode'],
-        'post_email' => $post['email'],
-        'post_subject' => $post['subject'],
-        'post_message' => $post['message'],
-        'post_password' => $postData['post_fields']['postpassword'],
-        'post_timestamp' => $timeStamp,
-        'post_bumped' => $timeStamp,
-        'post_ip' => kxFunc::encryptMD5($ip, kxEnv::Get('kx:misc:randomseed')),
-        'post_ip_md5' => md5($ip),
-        'post_authority' => $postData['user_authority_display'],
-        'post_tag' => isset($post['tag']) ? $post['tag'] : '',
-        'post_stickied' => $stickied,
-        'post_locked' => $locked,
+        'parent_post_id' => $postData['thread_info']['parent'],
+        'board_id' => $board->board_id,
+        'name' => $post['name'],
+        'tripcode' => $post['tripcode'],
+        'email' => $post['email'],
+        'subject' => $post['subject'],
+        'message' => $post['message'],
+        'password' => $postData['post_fields']['postpassword'],
+        'created_at_timestamp' => $timeStamp,
+        'bumped_at_timestamp' => $timeStamp,
+        'ip' => kxFunc::encryptMD5($ip, kxEnv::Get('kx:misc:randomseed')),
+        'ip_md5' => md5($ip),
+        'authority' => $postData['user_authority_display'],
+        'tag' => isset($post['tag']) ? $post['tag'] : '',
+        'is_stickied' => $stickied,
+        'is_locked' => $locked,
       ))
       ->execute();
 
@@ -462,9 +462,9 @@ class Posting
       // Non-mysql installs don't return the insert ID after insertion, we need to manually get it.
       $id = $this->db->select("posts")
         ->fields("posts", array("post_id"))
-        ->condition("post_board", $board->board_id)
-        ->condition("post_timestamp", $timeStamp)
-        ->condition("post_ip_md5", md5($ip))
+        ->condition("board_id", $board->board_id)
+        ->condition("created_at_timestamp", $timeStamp)
+        ->condition("ip_md5", md5($ip))
         ->range(0, 1)
         ->execute()
         ->fetchField();
@@ -473,7 +473,7 @@ class Posting
     if ($id == 1 && $board->board_start > 1) {
       $this->db->update("posts")
         ->fields(array("id" => $board->board_start))
-        ->condition("post_board", $board->board_id)
+        ->condition("board_id", $board->board_id)
         ->execute();
       $id = $board->board_start;
     }

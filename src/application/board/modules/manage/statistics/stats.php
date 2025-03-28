@@ -21,7 +21,7 @@ class manage_board_statistics_stats extends kxCmd {
         case "uniques":
           // Total uniques
           $result = $this->db->select("posts")
-                              ->fields("posts", array("post_ip_md5"))
+                              ->fields("posts", array("ip_md5"))
                               ->distinct();
           break;
         case "files":
@@ -30,9 +30,9 @@ class manage_board_statistics_stats extends kxCmd {
           $result->join("posts", NULL, "file_post = post_id");
           break;
       }
-      $result = $result->where("post_deleted = ?")
-                       ->where("post_board = ?")
-                       ->where("post_timestamp >= ?");
+      $result = $result->where("is_deleted = ?")
+                       ->where("board_id = ?")
+                       ->where("created_at_timestamp >= ?");
       $results[$type] = $result->countQuery()
                                ->build();
     }

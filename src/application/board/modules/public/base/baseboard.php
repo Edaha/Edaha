@@ -39,11 +39,13 @@ class public_board_base_baseboard extends kxCmd
    * Board data
    *
    * @access  public
-   * @var     object  stdClass
+   * @var     object  Edaha\Entities\Board
    */
   public $board;
 
   public $archive_dir;
+
+  public $embeds;
 
   /**
    * Arguments eventually being sent to twig
@@ -54,6 +56,9 @@ class public_board_base_baseboard extends kxCmd
 
   protected $postClass;
 
+  protected $buildPageResults;
+
+  protected $preparedThreads;
   /**
    * Run requested method
    *
@@ -66,43 +71,13 @@ class public_board_base_baseboard extends kxCmd
    */
   public function exec(kxEnv $environment)
   {
-    //-----------------------------------------
-    // Setup...
-    //-----------------------------------------
+    $this->board = Edaha\Entities\Board::loadBoardFromDbByName($this->request['board'], $this->db);
 
-    $this->board = $this->db->select("boards")
-      ->fields("boards")
-      ->condition("board_name", $this->request['board'])
-      ->execute()
-      ->fetch();
-
-    //-----------------------------------------
-    // Get the unique posts for this board
-    //-----------------------------------------
-    $result = $this->db->select("posts");
-    $result->addExpression("COUNT(DISTINCT post_ip_md5)");
-    $this->board->board_uniqueposts = $result->condition("post_board", $this->board->board_id)
-      ->condition("post_deleted", 0)
-      ->execute()
-      ->fetchField();
-
-    //-----------------------------------------------
-    // Get the the allowed filetypes for this board
-    //-----------------------------------------------
-    $result = $this->db->select("filetypes", "f")
-      ->fields("f", ["type_ext"]);
-    $result->innerJoin("board_filetypes", "bf", "bf.type_id = f.type_id");
-    $result->innerJoin("boards", "b", "b.board_id = bf.board_id");
-    $this->board->board_filetypes_allowed = $result->condition("bf.board_id", $this->board->board_id)
-      ->orderBy("type_ext")
-      ->execute()
-      ->fetchCol();
-
-    $this->board->boardlist = kxFunc::visibleBoardList();
     $this->environment->set('kx:classes:board:id', $this->board);
 
     require_once kxFunc::getAppDir('board') . '/classes/upload.php';
     $this->environment->set('kx:classes:board:upload:id', new upload($environment));
+
     require_once kxFunc::getAppDir('core') . '/classes/parse.php';
     $this->environment->set('kx:classes:board:parse:id', new parse($environment));
   }
@@ -232,15 +207,15 @@ class public_board_base_baseboard extends kxCmd
 
   public function getEmbeds()
   {
-    $this->board->embeds = [];
+    $this->embeds = [];
     $results = $this->db->select("embeds")
       ->fields("embeds", ["embed_ext"])
       ->execute()
       ->fetchAll();
     foreach ($results as $line) {
-      $this->board->embeds[] = $line->embed_ext;
+      $this->embeds[] = $line->embed_ext;
     }
-    return $this->board->embeds;
+    return $this->embeds;
   }
 
   public function regeneratePages()
@@ -259,9 +234,9 @@ class public_board_base_baseboard extends kxCmd
 
     $numposts = $this->db->select("posts")
       ->fields("posts")
-      ->condition("post_board", $this->board->board_id)
-      ->condition("post_parent", 0)
-      ->condition("post_deleted", 0)
+      ->condition("board_id", $this->board->board_id)
+      ->condition("parent_post_id", 0)
+      ->condition("is_deleted", 0)
       ->countQuery()
       ->execute()
       ->fetchField();
@@ -286,11 +261,11 @@ class public_board_base_baseboard extends kxCmd
       //--------------------------------------------------------------------------------------------------
       $threads = $this->db->select("posts")
         ->fields("posts")
-        ->condition("post_board", $this->board->board_id)
-        ->condition("post_parent", 0)
-        ->condition("post_deleted", 0)
-        ->orderBy("post_stickied", "DESC")
-        ->orderBy("post_bumped", "DESC")
+        ->condition("board_id", $this->board->board_id)
+        ->condition("parent_post_id", 0)
+        ->condition("is_deleted", 0)
+        ->orderBy("is_stickied", "DESC")
+        ->orderBy("bumped_at_timestamp", "DESC")
         ->range($postsperpage * $i, $postsperpage)
         ->execute()
         ->fetchAll();
@@ -366,11 +341,11 @@ class public_board_base_baseboard extends kxCmd
     // Process stickies without using prepared statements (because they have a different range than regular threads).
     // Since there's usually very few to no stickies we can get away with this with minimal performance impact.
     //-----------------------------------------------------------------------------------------------------------------------------------
-    if ($thread->post_stickied == 1) {
+    if ($thread->is_stickied == 1) {
       $posts = $this->db->select("posts")
-        ->condition("post_board", $this->board->board_id)
-        ->condition("post_parent", $thread->post_id)
-        ->condition("post_deleted", 0)
+        ->condition("board_id", $this->board->board_id)
+        ->condition("parent_post_id", $thread->post_id)
+        ->condition("is_deleted", 0)
         ->orderBy("post_id", "DESC")
         ->range(0, kxEnv::Get('kx:display:stickyreplies'))
         ->execute()
@@ -383,16 +358,16 @@ class public_board_base_baseboard extends kxCmd
     // query is prepared, otherwise, we used the prepared statement already given to us
     //----------------------------------------------------------------------------------------------------
     else {
-      if (empty($this->board->buildPageResults) || !($this->board->buildPageResults instanceof kxDBStatementInterface)) {
-        $this->board->buildPageResults = $this->db->select("posts")
+      if (empty($this->buildPageResults) || !($this->buildPageResults instanceof kxDBStatementInterface)) {
+        $this->buildPageResults = $this->db->select("posts")
           ->fields("posts")
-          ->where("post_board = ? AND post_parent = ? AND post_deleted = 0")
+          ->where("board_id = ? AND parent_post_id = ? AND is_deleted = 0")
           ->orderBy("post_id", "DESC")
           ->range(0, kxEnv::Get('kx:display:replies'))
           ->build();
       }
-      $this->board->buildPageResults->execute([$this->board->board_id, $thread->post_id]);
-      $posts = $this->board->buildPageResults->fetchAll();
+      $this->buildPageResults->execute([$this->board->board_id, $thread->post_id]);
+      $posts = $this->buildPageResults->fetchAll();
     }
     foreach ($posts as &$post) {
       $omitids[] = $post->post_id;
@@ -405,10 +380,10 @@ class public_board_base_baseboard extends kxCmd
   {
 
     $replycount = $this->db->select("posts");
-    $replycount->condition("post_board", $this->board->board_id)
-      ->condition("post_parent", $thread->post_id);
+    $replycount->condition("board_id", $this->board->board_id)
+      ->condition("parent_post_id", $thread->post_id);
     if ($this->board->board_type != 1) {
-      $replycount->condition("post_deleted", 0);
+      $replycount->condition("is_deleted", 0);
     }
     if (!empty($omitids)) {
       $replycount->condition("post_id", $omitids, "NOT IN");
@@ -425,10 +400,10 @@ class public_board_base_baseboard extends kxCmd
     // Get the number of file-replies for this thread, minus the ones that are already being shown.
     //----------------------------------------------------------------------------------------------------
     $replycount = $this->db->select("posts");
-    $replycount->innerJoin("post_files", "f", "post_id = file_post AND file_board = post_board");
-    $replycount->condition("post_board", $this->board->board_id)
-      ->condition("post_parent", $thread->post_id)
-      ->condition("post_deleted", 0)
+    $replycount->innerJoin("post_files", "f", "post_id = file_post AND file_board = board_id");
+    $replycount->condition("board_id", $this->board->board_id)
+      ->condition("parent_post_id", $thread->post_id)
+      ->condition("is_deleted", 0)
       ->condition("file_md5", "", "!=");
     if (!empty($omitids)) {
       $replycount->condition("file_post", $omitids, "NOT IN");
@@ -461,7 +436,7 @@ class public_board_base_baseboard extends kxCmd
     $post = $this->formatPost($post, $page);
     if (!empty($post->file_type)) {
       foreach ($post->file_type as $key => $type) {
-        if (isset($this->board->embeds) && in_array($type, $this->board->embeds)) {
+        if (isset($this->embeds) && in_array($type, $this->embeds)) {
           $post->videobox = $this->embeddedVideoBox($post);
         }
 
@@ -473,13 +448,13 @@ class public_board_base_baseboard extends kxCmd
           $post->id3[$key] = $getID3->analyze(KX_BOARD . '/' . $this->board->board_name . '/src/' . $post->file_name[$key] . '.mp3');
           getid3_lib::CopyTagsToComments($post->id3[$key]);
         }
-        if (!in_array($type, ['jpg', 'gif', 'png', 'webp', '']) && !in_array($type, $this->board->embeds)) {
+        if (!in_array($type, ['jpg', 'gif', 'png', 'webp', '']) && !in_array($type, $this->embeds)) {
           if (!isset($filetype_info[$type])) {
             $filetype_info[$type] = kxFunc::getFileTypeInfo($type);
           }
 
           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/public/filetypes/' . $filetype_info[$type][0];
-          if ($post->post_thumb_width != 0 && $post->post_thumb_height != 0) {
+          if ($post->file_thumb_width[$key] != 0 && $post->file_thumb_height[$key] != 0) {
             if (file_exists(KX_BOARD . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg')) {
               $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg';
             } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.png')) {
@@ -487,12 +462,12 @@ class public_board_base_baseboard extends kxCmd
             } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.gif')) {
               $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.gif';
             } else {
-              $post->post_thumb_width[$key] = $filetype_info[$type][1];
-              $post->post_thumb_height[$key] = $filetype_info[$type][2];
+              $post->file_thumb_width[$key] = $filetype_info[$type][1];
+              $post->file_thumb_height[$key] = $filetype_info[$type][2];
             }
           } else {
-            $post->post_thumb_width[$key] = $filetype_info[$type][1];
-            $post->post_thumb_height[$key] = $filetype_info[$type][2];
+            $post->file_thumb_width[$key] = $filetype_info[$type][1];
+            $post->file_thumb_height[$key] = $filetype_info[$type][2];
           }
         }
       }
@@ -502,10 +477,10 @@ class public_board_base_baseboard extends kxCmd
 
   public function formatPost($post, $page)
   {
-    $dateEmail = (empty($this->board->board_default_name)) ? $post->post_email : 0;
-    $post->post_message = stripslashes($this->formatLongMessage($post->post_message, $this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $page));
-    $post->timestamp_formatted = kxFunc::formatDate($post->post_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
-    $post->reflink = $this->formatReflink($this->board->board_name, (($post->post_parent == 0) ? ($post->post_id) : ($post->post_parent)), $post->post_id, $this->environment->get('kx:language:currentlocale'));
+    $dateEmail = (empty($this->board->board_default_name)) ? $post->email : 0;
+    $post->message = stripslashes($this->formatLongMessage($post->message, $this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $page));
+    $post->timestamp_formatted = kxFunc::formatDate($post->created_at_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
+    $post->reflink = $this->formatReflink($this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $post->post_id, $this->environment->get('kx:language:currentlocale'));
     return $post;
   }
 
@@ -589,9 +564,9 @@ class public_board_base_baseboard extends kxCmd
       // Okay let's do this!
       $threads = $this->db->select("posts")
         ->fields("posts")
-        ->condition("post_board", $this->board->board_id)
-        ->condition("post_parent", 0)
-        ->condition("post_deleted", 0)
+        ->condition("board_id", $this->board->board_id)
+        ->condition("parent_post_id", 0)
+        ->condition("is_deleted", 0)
         ->orderBy("post_id", "DESC")
         ->execute()
         ->fetchAll();
@@ -614,16 +589,16 @@ class public_board_base_baseboard extends kxCmd
           // instead of executing it every time. This is only really useful if we're regenerating all threads,
           // but the perfomance impact otherwise is minimal.
           //----------------------------------------------------------------------------------------------------
-          if (!isset($this->board->preparedThreads)) {
-            $this->board->preparedThreads = $this->db->select("posts")
+          if (!isset($this->preparedThreads)) {
+            $this->preparedThreads = $this->db->select("posts")
               ->fields("posts")
-              ->where("post_board = " . $this->board->board_id . " AND (post_id = ? OR post_parent = ?) AND post_deleted = 0")
+              ->where("board_id = " . $this->board->board_id . " AND (post_id = ? OR parent_post_id = ?) AND is_deleted = 0")
               ->orderBy("post_id")
               ->build();
           }
           // Since we prepared the statement earlier, we just need to execute it.
-          $this->board->preparedThreads->execute([$id, $id]);
-          $thread = $this->board->preparedThreads->fetchAll();
+          $this->preparedThreads->execute([$id, $id]);
+          $thread = $this->preparedThreads->fetchAll();
           foreach ($thread as &$post) {
             $post = $this->buildPost($post, false);
             if (!empty($post->file_type)) {
@@ -645,8 +620,8 @@ class public_board_base_baseboard extends kxCmd
           // Now we can get rid of it
           unset($post);
 
-          $this->board->header = $this->pageHeader($id);
-          $this->board->postbox = $this->postBox($id);
+          $this->pageHeader($id);
+          $this->postBox($id);
           //-----------
           // Dwoo-hoo
           //-----------
@@ -656,9 +631,7 @@ class public_board_base_baseboard extends kxCmd
           $this->twigData['posts'] = $thread;
           $replycount = (count($thread) - 1);
           $this->twigData['replycount'] = $replycount;
-          if (!isset($this->board->footer)) {
-            $this->board->footer = $this->footer(false, (microtime(true) - $executiontime_start_thread));
-          }
+          $this->footer(false, (microtime(true) - $executiontime_start_thread));
 
         } else if ($i == 1) {
           $lastBit = "+50";
@@ -716,7 +689,7 @@ class public_board_base_baseboard extends kxCmd
     ->condition("ad_display", 1)
     ->execute()
     ->fetchField();*/
-    $this->twigData['boardlist'] = $this->board->boardlist;
+    $this->twigData['boardlist'] = kxFunc::visibleBoardList();
     $this->twigData['replythread'] = $replythread;
     $this->twigData['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
     $this->twigData['ku_defaultstyle'] = (!empty($this->board->board_style_default) ? ($this->board->board_style_default) : (kxEnv::Get('kx:css:imgdefault')));
@@ -766,10 +739,10 @@ class public_board_base_baseboard extends kxCmd
 
   public function markThread($thread, $i)
   {
-    if ($thread->post_delete_time == 0 && $this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
+    if ($thread->deleted_at_timestamp == 0 && $this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
       $this->db->update("posts")
         ->fields([
-          'post_delete_time' => time() + 7200,
+          'deleted_at_timestamp' => time() + 7200,
         ])
         ->condition("post_board", $this->board->board_id)
         ->condition("post_id", $thread->post_id)

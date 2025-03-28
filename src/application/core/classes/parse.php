@@ -92,8 +92,8 @@ class Parse
   public function doStaticPostLink($matches)
   {
     $result = $this->db->select("posts")
-      ->fields("posts", array("post_parent"))
-      ->condition("post_board", $this->environment->get('kx:classes:board:id')->board_id)
+      ->fields("posts", array("parent_post_id"))
+      ->condition("board_id", $this->environment->get('kx:classes:board:id')->board_id)
       ->condition("post_id", $matches[1])
       ->execute()
       ->fetchField();
@@ -144,8 +144,8 @@ class Parse
 
     if ($board !== false) {
       $thread = $this->db->select("posts")
-        ->fields("posts", array("post_parent"))
-        ->condition("post_board", $board->board_id)
+        ->fields("posts", array("parent_post_id"))
+        ->condition("board_id", $board->board_id)
         ->condition("post_id", $matches[2])
         ->execute()
         ->fetchField();

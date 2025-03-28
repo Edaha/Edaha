@@ -246,16 +246,16 @@ class kxFunc
   {
 
     $matches = kxDB::getinstance()->select("posts");
-    $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = post_board");
-    $matches = $matches->fields("posts", array("post_id", "post_parent"))
-      ->condition("post_board", $boardid)
-      ->condition("post_deleted", 0)
+    $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = board_id");
+    $matches = $matches->fields("posts", array("post_id", "parent_post_id"))
+      ->condition("board_id", $boardid)
+      ->condition("is_deleted", 0)
       ->condition("file_md5", $md5)
       ->range(0, 1)
       ->execute()
       ->fetchAll();
     if (count($matches) > 0) {
-      $real_parentid = ($matches[0]->post_parent == 0) ? $matches[0]->post_id : $matches[0]->post_parent;
+      $real_parentid = ($matches[0]->parent_post_id == 0) ? $matches[0]->post_id : $matches[0]->parent_post_id;
       return array($real_parentid, $matches[0]->post_id);
     }
 
@@ -345,7 +345,7 @@ class kxFunc
       return array('generic.png', 48, 48);
     }
   }
-
+  #[MigrateToTwig]
   public static function formatDate($timestamp, $type = 'post', $locale = 'en', $email = '')
   {
     $output = '';
@@ -402,7 +402,7 @@ class kxFunc
         return $output . $fulldate . (($email != '') ? ('</a>') : (""));
       } else {
         /* Format the timestamp english style */
-        return $output . date('y/m/d(D)H:i', $timestamp) . (($email != '') ? ('</a>') : (""));
+        return $output . $timestamp . (($email != '') ? ('</a>') : (""));
       }
     }
 
@@ -568,70 +568,6 @@ class kxFunc
     }
 
     return ($sections);
-  }
-
-  public static function deletePost($board_id, $post_id) {
-    // Soft delete the post
-    $fields['post_reviewed'] = 1;
-    $fields['post_deleted'] = 1;
-    $fields['post_delete_time'] = time();
-
-    $update_post = kxDb::getInstance()->update("posts")
-      ->fields($fields)
-      ->condition("post_id", $post_id)
-      ->condition("post_board", $board_id)
-      ->execute();
-    
-    // Hard delete its images
-    $post_files = kxDb::getInstance()->select("post_files")
-      ->fields("post_files", ["file_board", "file_name"])
-      ->condition("file_board", $board_id)
-      ->condition("file_post", $post_id)
-      ->execute()
-      ->fetchAll();
-
-    foreach ($post_files as $file) {  
-      kxFunc::deleteFile($file->file_board, $file->file_name);   
-    }
-  }
-
-  public static function deleteFile($board_id, $file_name) {
-    $file_type = kxDb::getInstance()->select("post_files")
-      ->fields("post_files", ["file_type"])
-      ->condition("file_board", $board_id)
-      ->condition("file_name", $file_name)
-      ->execute()
-      ->fetchField();
-    
-    if (isset($file_type)) {
-      // TODO This should come from the cache if available
-      $board_name = kxDb::getInstance()->select("boards")
-        ->fields("boards", ["board_name"])
-        ->condition("board_id", $board_id)
-        ->execute()
-        ->fetchField();
-      
-      $file_paths['main']    = KX_BOARD . '/' . $board_name . '/src/' . $file_name . '.' . $file_type;
-      $file_paths['thumb']   = KX_BOARD . '/' . $board_name . '/thumb/' . $file_name . 's.' . $file_type;
-      $file_paths['catalog'] = KX_BOARD . '/' . $board_name . '/src/' . $file_name . 'c.' . $file_type;
-
-      foreach ($file_paths as $path) {
-        if (file_exists($path)) {
-          try {
-            unlink($path);
-          } catch (Exception $e) {
-            kxFunc::showError('Error when deleting file: ' . $e->getMessage());
-          }
-        }
-      }
-    }
-
-    $deleted = kxDb::getInstance()->delete("post_files")
-      ->condition("file_board", $board_id)
-      ->condition("file_name", $file_name)
-      ->execute();
-    
-    return $deleted;
   }
 }
 

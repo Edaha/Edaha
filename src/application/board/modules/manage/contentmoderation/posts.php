@@ -24,16 +24,8 @@ class manage_board_contentmoderation_posts extends kxCmd
 
   private function _show()
   {
-    $this->twigData['recent_posts'] = $this->db->select("posts")
-      ->fields("posts", ["post_id", "post_message", "post_parent"])
-      ->fields("boards", ["board_id", "board_name"]);
-    $this->twigData['recent_posts']->innerJoin("boards", "", "post_board = board_id");
-    $this->twigData['recent_posts'] = $this->twigData['recent_posts']->condition("post_deleted", 0)
-      ->condition("post_reviewed", 0)
-      ->orderBy("post_timestamp", "DESC")
-      ->range(0, 100)
-      ->execute()
-      ->fetchAll();
+    $recent_posts = Edaha\Entities\Post::getRecentPosts($this->db, 100, 0);
+    $this->twigData['recent_posts'] = $recent_posts;
     kxTemplate::output('manage/recents', $this->twigData);
   }
 
@@ -43,12 +35,19 @@ class manage_board_contentmoderation_posts extends kxCmd
       return;
     }
 
-    $fields['post_reviewed'] = 1;
+    $fields['is_reviewed'] = 1;
     if ($this->request['action'] == 'delete') {
       foreach ($this->request['posts'] as $post) {
         $board_id = (int) explode('|', $post)[0];
         $post_id = (int) explode('|', $post)[1];
-        kxFunc::deletePost($board_id, $post_id);
+        $post = Edaha\Entities\Post::loadPostFromAssoc(
+          [
+            'board_id' => $board_id, 
+            'post_id' => $post_id
+          ],
+          $this->db
+        );
+        $post->delete();
       }
     } else {
       foreach ($this->request['posts'] as $post) {
@@ -58,7 +57,7 @@ class manage_board_contentmoderation_posts extends kxCmd
       }
 
       foreach ($board_posts as $board_id => $posts) {
-        $where_clauses[] = '(post_board = ' . $board_id . ' and post_id in (' . implode(',', $posts) . '))';
+        $where_clauses[] = '(board_id = ' . $board_id . ' and post_id in (' . implode(',', $posts) . '))';
       }
 
       $process_query = $this->db->update("posts")

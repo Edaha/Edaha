@@ -99,16 +99,16 @@ class public_board_oekaki_oekaki extends public_board_base_baseboard {
     parent::postBox($replythread);
     $oekposts = $this->db->select("posts")
                          ->fields("posts", array("post_id"))
-                         ->innerJoin("post_files", "", "file_post = post_id AND file_board = post_board");
-    $oekposts = $oekposts->condition("post_board", $this->board->board_id)
+                         ->innerJoin("post_files", "", "file_post = post_id AND file_board = board_id");
+    $oekposts = $oekposts->condition("board_id", $this->board->board_id)
                          ->condition($this->db->condition("OR")
                                               ->condition("post_id", $replythread)
-                                              ->condition("post_parent", $replythread))
+                                              ->condition("parent_post_id", $replythread))
                          ->condition("file_name", "", "!=")
                          ->condition("file_type", array("jpg", "gif", "png"), "IN")
-                         ->condition("post_deleted", 0)
-                         ->orderBy("post_parent")
-                         ->orderBy("post_timestamp")
+                         ->condition("is_deleted", 0)
+                         ->orderBy("parent_post_id")
+                         ->orderBy("created_at_timestamp")
                          ->execute()
                          ->fetchAll();
     $this->twigData['oekposts'] = $oekposts;

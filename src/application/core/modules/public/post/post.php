@@ -137,7 +137,7 @@ class public_core_post_post extends kxCmd
 
       $nextid = $this->db->select("posts")
         ->fields("posts", array("post_id"))
-        ->condition("post_board", $this->_boardClass->board->board_id)
+        ->condition("board_id", $this->_boardClass->board->board_id)
         ->execute()
         ->fetchField();
       if ($nextid) {

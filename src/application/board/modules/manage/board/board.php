@@ -43,14 +43,8 @@ class manage_board_board_board extends kxCmd
 
   private function onRegen()
   {
-    // Grabing essential data about the board
-    $boardType = $this->db->select("boards")
-      ->fields("boards", array("board_type"))
-      ->condition("board_name", $this->request['board'])
-      ->execute()
-      ->fetchField();
-    // Nope
-    if ($boardType === false) {
+    $board = Edaha\Entities\Board::loadBoardFromDbByName($this->request['board'], $this->db);
+    if (is_null($board)) {
       $this->errorMessage = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
       return false;
     }
@@ -62,7 +56,7 @@ class manage_board_board_board extends kxCmd
       ->execute()
       ->fetchCol();
     foreach ($board_modules as $module) {
-      if ($module == $boardType) {
+      if ($module == $board->board_type) {
         $module_to_load = $module;
       }
     }

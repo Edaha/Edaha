@@ -27,12 +27,12 @@ class manage_board_contentmoderation_images extends kxCmd
     $this->twigData['recent_images'] = $this->db->select("post_files")
       ->fields("post_files", ["file_post", "file_board", "file_name", "file_type", "file_thumb_width", "file_thumb_height"])
       ->fields("boards", ["board_id", "board_name"])
-      ->fields("posts", ["post_timestamp", "post_parent"]);
+      ->fields("posts", ["created_at_timestamp", "parent_post_id"]);
     $this->twigData['recent_images']->innerJoin("boards", "", "file_board = board_id");
     $this->twigData['recent_images']->innerJoin("posts", "", "file_post = post_id");
-    $this->twigData['recent_images'] = $this->twigData['recent_images']->condition("post_deleted", 0)
+    $this->twigData['recent_images'] = $this->twigData['recent_images']->condition("is_deleted", 0)
       ->condition("file_reviewed", 0)
-      ->orderBy("post_timestamp", "DESC")
+      ->orderBy("created_at_timestamp", "DESC")
       ->range(0, 100)
       ->execute()
       ->fetchAll();

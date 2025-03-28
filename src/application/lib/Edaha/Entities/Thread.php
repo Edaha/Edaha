@@ -11,18 +11,20 @@ class Thread extends Post
             return $this->validateThread();
         }
     }
-
-    public static function loadThread(int $board_id, int $post_id, object &$db)
+    public static function loadFromDb(array $identifiers, object &$db)
     {
-        $thread = new Thread($board_id, $post_id, $db);
+        if (!array_key_exists('board_id', $identifiers) || !array_key_exists('post_id', $identifiers)) return null;
 
+        $thread           = new Thread($identifiers['board_id'], $identifiers['post_id'], $db);
         if (!$thread->validatePost()) return false;
+        
         $thread->loadPostFields();
         if (!$thread->validateThread()) return false;
+        
         return $thread;
     }
 
-    public static function loadThreadFromAssoc(array $assoc, ?object &$db = null)
+    public static function loadFromAssoc(array $assoc)
     {
         $thread = new Thread($assoc['board_id'], $assoc['post_id'], $db);
 
@@ -53,7 +55,7 @@ class Thread extends Post
             ->execute();
         
         while ($row = $results->fetchAssoc()) {
-            $this->replies[] = Post::loadPostFromAssoc($row);
+            $this->replies[] = Post::loadFromAssoc($row);
         }
     }
 
@@ -81,7 +83,7 @@ class Thread extends Post
             ->execute();
         
         while ($row = $results->fetchAssoc()) {
-            $this->replies[] = Post::loadPostFromAssoc($row);
+            $this->replies[] = Post::loadFromAssoc($row);
         }
 
         if ($first_or_last == 'last')  $this->replies = array_reverse($this->replies);

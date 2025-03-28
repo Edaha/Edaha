@@ -1,7 +1,7 @@
 <?php
 namespace Edaha\Entities;
 
-class Board
+class Board implements EntityInterface
 {
     public object $db;
 
@@ -49,6 +49,11 @@ class Board
         return null;
     }
 
+    public function __set(string $name, mixed $value)
+    {
+        $this->options[$name] = $value;
+    }
+
     protected function validate() 
     {
         $board_exists = $this->db->select("boards")
@@ -69,25 +74,21 @@ class Board
             ->fetchAssoc();
 
         foreach ($results as $key => $value) {
-            if (!is_null($value)) {
-                if (property_exists(__CLASS__, $key)) {
-                    $this->$key = $value;
-                } else {
-                    $this->options[$key] = $value;
-                }
-            }
+            $this->$key = $value;
         }
     }
 
-    public static function loadBoardFromDb(int $board_id, object &$db)
+    public static function loadFromDb(array $identifiers, object &$db) 
     {
-        $board = new Board($board_id, $db);
+        if (!array_key_exists('board_id', $identifiers)) return null;
+
+        $board = new Board($identifiers['board_id'], $db);
         if (!$board->validate()) return false;
         $board->loadBoardFields();
         return $board;
     }
 
-    public static function loadBoardFromDbByName(string $board_name, object &$db)
+    public static function loadFromDbByName(string $board_name, object &$db)
     {
         $board_id = $db->select("boards")
             ->fields("boards", ['board_id'])
@@ -96,11 +97,22 @@ class Board
             ->fetchField();
         
         if ($board_id) {
-            $board = Board::loadBoardFromDb($board_id, $db);
+            $board = Board::loadFromDb(['board_id' => $board_id], $db);
             return $board;
         }
 
         return null;
+    }
+
+    public static function loadFromAssoc(array $assoc) 
+    {
+        $post = new Board(['board_id' => $assoc['board_id']]);
+
+        foreach ($assoc as $key => $value) {
+            if (!is_null($value)) $post->$key = $value;
+        }
+        
+        return $post;
     }
 
     public function getAllThreads(bool $include_deleted = false)
@@ -119,7 +131,7 @@ class Board
             ->execute();
 
         while ($row = $results->fetchAssoc()) {
-            $this->threads[] = Thread::loadThreadFromAssoc($row);
+            $this->threads[] = Thread::loadFromAssoc($row);
         }
     }
 }

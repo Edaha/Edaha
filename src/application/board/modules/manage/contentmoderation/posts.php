@@ -40,7 +40,7 @@ class manage_board_contentmoderation_posts extends kxCmd
       foreach ($this->request['posts'] as $post) {
         $board_id = (int) explode('|', $post)[0];
         $post_id = (int) explode('|', $post)[1];
-        $post = Edaha\Entities\Post::loadPostFromAssoc(
+        $post = Edaha\Entities\Post::loadFromAssoc(
           [
             'board_id' => $board_id, 
             'post_id' => $post_id

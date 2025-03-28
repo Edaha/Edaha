@@ -1,7 +1,7 @@
 <?php
 namespace Edaha\Entities;
 
-class Post
+class Post implements EntityInterface
 {
     public object $db;
 
@@ -110,18 +110,20 @@ class Post
         }
     }
 
-    public static function loadPostFromDb(int $board_id, int $post_id, object &$db)
+    public static function loadFromDb(array $identifiers, object &$db)
     {
-        $post           = new Post($board_id, $post_id, $db);
-        if (!$post->validatePost()) return false;
+        if (!array_key_exists('board_id', $identifiers) || !array_key_exists('post_id', $identifiers)) return null;
+
+        $post           = new Post($identifiers['board_id'], $identifiers['post_id'], $db);
+        if (!$post->validatePost()) return null;
 
         $post->loadPostFields();
         return $post;
     }
 
-    public static function loadPostFromAssoc(array $assoc, ?object &$db = null)
+    public static function loadFromAssoc(array $assoc)
     {
-        $post = new Post($assoc['board_id'], $assoc['post_id'], $db);
+        $post = new Post($assoc['board_id'], $assoc['post_id']);
 
         foreach ($assoc as $key => $value) {
             if (!is_null($value)) $post->$key = $value;
@@ -141,7 +143,7 @@ class Post
             ->execute();
         
         while ($row = $results->fetchAssoc()) {
-            $recent_posts[] = Post::loadPostFromAssoc($row);
+            $recent_posts[] = Post::loadFromAssoc($row);
         }
 
         return $recent_posts;

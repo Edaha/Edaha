@@ -43,7 +43,7 @@ class manage_board_board_board extends kxCmd
 
   private function onRegen()
   {
-    $board = Edaha\Entities\Board::loadFromDbByName($this->request['board'], $this->db);
+    $board = $this->entityManager->getRepository('\Edaha\Entities\Board')->findOneBy(['directory' => $this->request['board']]);
     if (is_null($board)) {
       $this->errorMessage = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
       return false;
@@ -85,19 +85,12 @@ class manage_board_board_board extends kxCmd
     return true;
   }
 
+
   private function _board()
   {
-    // DATABASE DRIVERS, DATABASE DRIVERS NEVER CHANGE
-    // EXCEPT WHEN SAZ FUCKS WITH THEM
-    $array_o_boards = $this->db->select("boards")
-      ->fields('boards', array('board_name', 'board_desc'))
-      ->orderBy("board_name")
-      ->execute()
-      ->fetchAll();
-    $this->twigData['entries'] = array();
-    foreach ($array_o_boards as $board) {
-      $this->twigData['entries'][$board->board_name] = $board->board_desc;
-    }
+    $boards_doctrine = $this->entityManager->getRepository('\Edaha\Entities\Board')->getAllBoards();
+
+    $this->twigData['boards'] = $boards_doctrine;
 
     $board_types_query = $this->db->select("modules")
       ->fields("modules", ["module_file", "module_name"])
@@ -105,12 +98,13 @@ class manage_board_board_board extends kxCmd
       ->condition("module_manage", 0)
       ->execute()
       ->fetchAll();
+
+    $this->twigData['board_types'] = array();
     foreach ($board_types_query as $type) {
       $this->twigData['board_types'][$type->module_name] = [
         'value' => $type->module_file,
       ];
     }
-    $this->twigData['board_types'];
 
     kxTemplate::output("manage/board", $this->twigData);
   }
@@ -122,24 +116,23 @@ class manage_board_board_board extends kxCmd
       ->addRule('description', 'required')
       ->addRule('start', 'numeric')
       ->check();
-    $fields = array(
-      'board_name' => $this->request['name'],
-      'board_desc' => $this->request['description'],
-      'board_start' => intval($this->request['start']),
-      'board_created_on' => time(),
-      'board_header_image' => '',
-      'board_include_header' => '',
-      'board_type' => $this->request['board_type'],
-    );
-    // If the first post ID is left empty make it 1
-    if ($fields['board_start'] == "") {
-      $fields['board_start'] = 1;
+
+    // Begin Doctrine implementation
+    $board = $this->entityManager->getRepository('\Edaha\Entities\Board')->findOneBy(['directory' => $this->request['name']]);
+
+    if ($board && $this->request['edit'] == "") {
+      $this->twigData['notice']['type'] = 'error';
+      $this->twigData['notice']['message'] = sprintf(_('Board /%s/ already exists.'), $this->request['name']);
+      return;
+    } elseif (is_null($board) && $this->request['edit'] == "") {
+      $board = new Edaha\Entities\Board($this->request['description'], $this->request['name']);
+      $board->setOption('type', $this->request['board_type']);
+      $board->setOption('post_id_start_at', $this->request['start'] || 1);
+      $this->entityManager->persist($board);
+      $this->entityManager->flush();
     }
+
     if ($this->request['edit'] == "") {
-      // Add board
-      $this->db->insert("boards")
-        ->fields($fields)
-        ->execute();
       $this->twigData['notice']['message'] = _('Board successfully added.');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],
@@ -148,10 +141,6 @@ class manage_board_board_board extends kxCmd
       );
     } else {
       // Edit board
-      $this->db->update("boards")
-        ->fields($fields)
-        ->condition("board_id", $this->request['edit'])
-        ->execute();
       $this->twigData['notice']['message'] = _('Board successfully edited.');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],

@@ -31,21 +31,24 @@ class manage_board_board_boardopts extends kxCmd
 
   private function _edit()
   {
-    $board_options = kxEnv::Get('cache:boardopts:' . $this->request['board']);
-    if (!isset($board_options)) {
-      $board_options = $this->db->select("boards")
-        ->fields("boards")
-        ->condition("board_name", $this->request['board'])
-        ->execute()
-        ->fetchAll();
+    // $board_options = kxEnv::Get('cache:boardopts:' . $this->request['board']);
+    $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['id']);
+    if (is_null($board)) {
+      $this->twigData['notice']['type'] = 'error';
+      $this->twigData['notice']['message'] = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
+      return;
     }
-    $this->twigData['board_options'] = $board_options[0];
-    $this->twigData['sections'] = $this->db->select("sections")
-      ->fields("sections")
-      ->orderBy("section_order")
-      ->execute()
-      ->fetchAll();
+
+    $board->locale;
+
+    $this->twigData['board'] = $board;
+    
+    foreach ($board->getOptions() as $option) {
+      $this->twigData['options'][$option->name] = $option->value;
+    }
+
     $this->twigData['filetypes'] = kxEnv::get('cache:attachments:filetypes');
+    
     $this->twigData['board_types'] = $this->db->select("modules")
       ->fields("modules", ["module_file", "module_name"])
       ->condition("module_application", "board")
@@ -60,69 +63,61 @@ class manage_board_board_boardopts extends kxCmd
     kxForm::addRule('id', 'numeric')
       ->addRule('board', 'required')
       ->check();
-    $board_exists = $this->db->select("boards")
-      ->condition("board_id", $this->request['id'])
-      ->countQuery()
-      ->execute()
-      ->fetchField();
-    // Should return 1, otherwise something is very wrong
-    if ($board_exists != 1) {
-      die();
+
+    $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['id']);
+
+    if (is_null($board)) {
+      $this->twigData['notice']['type'] = 'error';
+      $this->twigData['notice']['message'] = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
+      return;
     }
-    /*echo '<pre>';
-    print_r($this->request);
-    die();*/
+
     $board_fields = array(
-      'board_desc' => $this->request['title'],
-      'board_locale' => $this->request['locale'],
-      'board_type' => $this->request['type'],
-      'board_upload_type' => (int) $this->request['upload_type'],
+      'name' => $this->request['title'],
+      'locale' => $this->request['locale'],
+      'type' => $this->request['type'],
+      'upload_type' => (int) $this->request['upload_type'],
       'board_section' => (int) $this->request['board_section'],
-      'board_order' => (int) $this->request['order'],
-      'board_header_image' => $this->request['header_image'],
-      'board_include_header' => $this->request['include_header'],
-      'board_anonymous' => $this->request['anonymous'],
+      'order' => (int) $this->request['order'],
+      'header_image' => $this->request['header_image'],
+      'include_header' => $this->request['include_header'],
+      'anonymous' => $this->request['anonymous'],
       // TODO: Add this to the template
-      'board_default_style' => 'edaha',
-      'board_allowed_embeds' => '',
-      'board_max_upload_size' => (int) $this->request['max_upload_size'],
-      'board_max_message_length' => (int) $this->request['max_message_length'],
-      'board_max_pages' => (int) $this->request['max_pages'],
-      'board_max_age' => (int) $this->request['max_age'],
-      'board_mark_page' => (int) $this->request['mark_page'],
-      'board_max_replies' => (int) $this->request['max_replies'],
-      'board_locked' => (int) isset($this->request['locked']),
-      'board_show_id' => (int) isset($this->request['show_id']),
-      'board_compact_list' => (int) isset($this->request['compact_list']),
-      'board_reporting' => (int) isset($this->request['reporting']),
-      'board_captcha' => (int) isset($this->request['captcha']),
-      'board_archiving' => (int) isset($this->request['archiving']),
-      'board_catalog' => (int) isset($this->request['catalog']),
-      'board_no_file' => (int) isset($this->request['no_file']),
-      'board_redirect_to_thread' => (int) isset($this->request['redirect_to_thread']),
-      'board_forced_anon' => (int) isset($this->request['forced_anon']),
-      'board_trial' => (int) isset($this->request['trial']),
-      'board_popular' => (int) isset($this->request['popular']),
-      'board_max_files' => (int) $this->request['max_files'],
+      'default_style' => 'edaha',
+      'allowed_embeds' => '',
+      'max_upload_size' => (int) $this->request['max_upload_size'],
+      'max_message_length' => (int) $this->request['max_message_length'],
+      'max_pages' => (int) $this->request['max_pages'],
+      'max_age' => (int) $this->request['max_age'],
+      'mark_page' => (int) $this->request['mark_page'],
+      'max_replies' => (int) $this->request['max_replies'],
+      'locked' => (int) isset($this->request['locked']),
+      'show_id' => (int) isset($this->request['show_id']),
+      'compact_list' => (int) isset($this->request['compact_list']),
+      'reporting' => (int) isset($this->request['reporting']),
+      'captcha' => (int) isset($this->request['captcha']),
+      'archiving' => (int) isset($this->request['archiving']),
+      'catalog' => (int) isset($this->request['catalog']),
+      'no_file' => (int) isset($this->request['no_file']),
+      'redirect_to_thread' => (int) isset($this->request['redirect_to_thread']),
+      'forced_anon' => (int) isset($this->request['forced_anon']),
+      'trial' => (int) isset($this->request['trial']),
+      'popular' => (int) isset($this->request['popular']),
+      'max_files' => (int) $this->request['max_files'],
     );
 
-    $this->db->update("boards")
-      ->fields($board_fields)
-      ->condition('board_id', $this->request['id'])
-      ->execute();
-
-    // Clear previous filetype settings
-    $this->db->delete("board_filetypes")
-      ->condition("board_id", $this->request['id'])
-      ->execute();
-
-    // Add new filetypes
-
-    foreach ($this->request['filetypes'] as $type) {
-      $this->db->insert("board_filetypes")
-        ->fields(array('board_id' => $this->request['id'], 'type_id' => $type))
-        ->execute();
+    foreach ($board_fields as $key => $value) {
+      if ($value != $board->$key) {
+        $board->setOption($key, $value);
+      }
     }
+
+    $this->entityManager->persist($board);
+    $this->entityManager->flush();
+
+    // TODO: Filetypes (Attachments) object
+    // Clear previous filetype settings
+    // Add new filetypes
 
     $this->twigData['boardredirect'] = true;
     $this->twigData['notice']['type'] = 'success';
@@ -132,8 +127,8 @@ class manage_board_board_boardopts extends kxCmd
       sprintf('Edited board /%s/',  $this->request['board']),
       __CLASS__
     );
-    // Update the cache
-    $this->recacheBoardOptions();
+    // TODO Update the cache
+    // $this->recacheBoardOptions();
   }
 
   public function recacheBoardOptions()

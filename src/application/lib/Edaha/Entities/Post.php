@@ -1,151 +1,126 @@
 <?php
 namespace Edaha\Entities;
+use Edaha\Entities\PostAttachment;
+use Edaha\Entities\Board;
+use Edaha\Entities\PostRepository;
 
-class Post implements EntityInterface
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+
+#[ORM\Entity(repositoryClass: PostRepository::class)]
+#[ORM\Table(name: 'posts')]
+class Post
 {
-    public object $db;
-
-    public int $post_id;
-    public int $board_id;
-    public int $parent_post_id;
-    public string $name;
-    public string $tripcode;
-    public string $email;
-    public string $password;
-    public string $message;
-    public string $subject;
-    public int $authority;
-    public string $tag;
-    public string $ip;
-    public string $ip_md5;
-
-    public \DateTimeImmutable $created_at_timestamp {
-        set(string|\DateTimeImmutable $timestamp) {
-            $this->created_at_timestamp = new \DateTimeImmutable($timestamp, new \DateTimeZone('UTC'));
-        }
-    }
-    public \DateTimeImmutable $deleted_at_timestamp {
-        set(string|\DateTimeImmutable $timestamp) {
-            $this->deleted_at_timestamp = new \DateTimeImmutable($timestamp, new \DateTimeZone('UTC'));
-        }
-    }
-    public \DateTime $bumped_at_timestamp {
-        set(string|\DateTime $timestamp) {
-            $this->bumped_at_timestamp = new \DateTime($timestamp, new \DateTimeZone('UTC'));
+    #[ORM\Id]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    public ?int $id = null {
+        get {
+            return $this->id;
         }
     }
 
-    public bool $is_locked = false;
-    public bool $is_stickied = false;
-    public bool $is_deleted = false;
-    public bool $is_reviewed = false;
-
-    protected function __construct(int $board_id, int $post_id, ?object &$db = null)
-    {
-        $this->board_id = $board_id;
-        $this->post_id  = $post_id;
-        if (!is_null($db)) $this->db = $db;
-    }
-
-    protected function loadPostFields()
-    {
-        $post_query = $this->db->select("posts")
-            ->fields("posts")
-            ->condition("post_id", $this->post_id)
-            ->condition("board_id", $this->board_id)
-            ->execute()
-            ->fetchAssoc();
-
-        foreach ($post_query as $key => $value) {
-            if (!is_null($value)) $this->$key = $value;
+    #[ORM\ManyToOne(targetEntity: Board::class, inversedBy: 'posts')]
+    #[ORM\JoinColumn(name: 'board_id', referencedColumnName: 'id', nullable: false)]
+    public Board $board {
+        get {
+            return $this->board;
+        }
+        set {
+            $this->board = $value;
         }
     }
 
-    protected function validatePost() 
-    {
-        $post_exists = $this->db->select("posts")
-            ->fields("posts")
-            ->condition("post_id", $this->post_id)
-            ->condition("board_id", $this->board_id)
-            ->countQuery()
-            ->execute()
-            ->fetchField();
-        return ($post_exists == 1);
-    }
-
-    public function delete()
-    {
-        if (!isset($this->db)) return false;
-        $this->is_reviewed = 1;
-        $this->is_deleted = 1;
-        $this->deleted_at_timestamp = date('Y-m-d H:i:s');
-
-        $fields = [
-            "is_reviewed" => $this->is_reviewed,
-            "is_deleted" => $this->is_deleted,
-            "deleted_at_timestamp" => $this->deleted_at_timestamp->format('Y-m-d H:i:s'),
-        ];
-
-        $results = $this->db->update("posts")
-            ->fields($fields)
-            ->condition('post_id', $this->post_id)
-            ->condition('board_id', $this->board_id)
-            ->execute();
-        
-        $this->deletePostFiles();
-
-        return ($results > 0);
-    }
-
-    protected function deletePostFiles()
-    {
-        $post_files = $this->db->select("post_files")
-            ->fields("post_files", ["file_board", "file_name"])
-            ->condition("file_board", $this->board_id)
-            ->condition("file_post", $this->post_id)
-            ->execute();
-        
-        while ($row = $post_files->fetch()) {
-            PostAttachment::deleteFile($row->file_board, $row->file_name, $this->db); 
+    #[ORM\Column(nullable: true)]
+    public ?string $subject = null {
+        get {
+            return $this->subject;
+        }
+        set {
+            $this->subject = $value;
         }
     }
 
-    public static function loadFromDb(array $identifiers, object &$db)
-    {
-        if (!array_key_exists('board_id', $identifiers) || !array_key_exists('post_id', $identifiers)) return null;
-
-        $post           = new Post($identifiers['board_id'], $identifiers['post_id'], $db);
-        if (!$post->validatePost()) return null;
-
-        $post->loadPostFields();
-        return $post;
+    #[ORM\Column]
+    public ?string $message = null  {
+        get {
+            return $this->message;
+        }
+        set {
+            $this->message = $value;
+        }
     }
 
-    public static function loadFromAssoc(array $assoc)
-    {
-        $post = new Post($assoc['board_id'], $assoc['post_id']);
-
-        foreach ($assoc as $key => $value) {
-            if (!is_null($value)) $post->$key = $value;
+    #[ORM\Column]
+    public ?DateTime $created_at {
+        get {
+            return $this->created_at;
         }
-        
-        return $post;
+        set {
+            if (!isset($this->created_at)) {
+                $this->created_at = new DateTime('now');
+            }
+        }
     }
 
-    public static function getRecentPosts(object &$db, int $rows_to_return = 50, int $page = 0)
-    {
-        $recent_posts = [];
-        $results = $db->select("posts")
-            ->fields("posts")
-            ->condition("is_deleted", false)
-            ->orderBy("created_at_timestamp", "DESC")
-            ->range(($page * $rows_to_return), $rows_to_return)
-            ->execute();
-        
-        while ($row = $results->fetchAssoc()) {
-            $recent_posts[] = Post::loadFromAssoc($row);
-        }
+    #[ORM\Embedded(class: Poster::class)]
+    public Poster $poster;
 
-        return $recent_posts;
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'parent', fetch: 'EXTRA_LAZY')]
+    #[ORM\OrderBy(['created_at' => 'DESC'])]
+    public Collection $replies;
+
+    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'replies')]
+    #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'id')]
+    public ?Post $parent = null;
+
+    public bool $is_thread {
+        get {
+            return $this->parent === null;
+        }
+    }
+    public bool $is_reply {
+        get {
+            return $this->parent !== null;
+        }
+    }
+
+    #[ORM\OneToMany(targetEntity: PostAttachment::class, mappedBy: 'post', cascade: ['persist', 'remove'])]
+    public Collection $attachments {
+        get {
+            return $this->attachments;
+        }
+    }
+
+    public function __construct()
+    {
+        $this->created_at = new DateTime('now');
+        $this->poster = new Poster();
+        $this->replies = new ArrayCollection();
+        $this->attachments = new ArrayCollection();
+    }
+
+    public function addAttachment(PostAttachment $attachment): void
+    {
+        $this->attachments[] = $attachment;
+    }
+}
+
+#[ORM\Embeddable]
+class Poster {
+    #[ORM\Column(nullable: true)]
+    public ?string $name = null;
+
+    #[ORM\Column(nullable: true)]
+    public ?string $email = null;
+    
+    #[ORM\Column]
+    public string $ip = '127.0.0.1';
+
+    public bool $is_anonymous {
+        get {
+            return empty($this->name);
+        }
     }
 }

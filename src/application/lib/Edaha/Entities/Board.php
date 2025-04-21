@@ -2,6 +2,7 @@
 namespace Edaha\Entities;
 use Edaha\Entities\BoardOption;
 use Edaha\Entities\Post;
+use Edaha\Entities\AttachmentType;
 use DateTime;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -54,11 +55,30 @@ class Board
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy:'board', fetch: 'EXTRA_LAZY')]
     public Collection $posts;
 
+    /** @var Collection<int, AttachmentType> */
+    #[ORM\JoinTable(name: 'boards_attachment_types')]
+    #[ORM\JoinColumn(name: 'board_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'attachment_type_id', referencedColumnName: 'id')]
+    #[ORM\ManyToMany(targetEntity: AttachmentType::class)]
+    public Collection $attachment_types {
+        get {
+            return $this->attachment_types;
+        }
+    }
+    
+    public function addAttachmentType(AttachmentType $attachmentType): void
+    {
+        if (!$this->attachment_types->contains($attachmentType)) {
+            $this->attachment_types[] = $attachmentType;
+        }
+    }
+
     public function __construct(string $name, string $directory)
     {
         $this->created_at = new DateTime('now');
         $this->options = new ArrayCollection();
         $this->posts = new ArrayCollection();
+        $this->attachment_types = new ArrayCollection();
 
         $this->name = $name;
         $this->directory = $directory;

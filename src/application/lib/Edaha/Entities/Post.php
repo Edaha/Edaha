@@ -87,14 +87,19 @@ class Post
     }
 
     #[ORM\OneToMany(targetEntity: PostAttachment::class, mappedBy: 'post', cascade: ['persist', 'remove'])]
-    public Collection $attachments {
+    private Collection $attachments {
         get {
             return $this->attachments;
         }
     }
 
-    public function __construct()
+    public function __construct(Board $board, string $message, ?string $subject = null, ?Post $parent = null)
     {
+        $this->board = $board;
+        $this->message = $message;
+        $this->subject = $subject;
+        $this->parent = $parent;
+
         $this->created_at = new DateTime('now');
         $this->poster = new Poster();
         $this->replies = new ArrayCollection();
@@ -105,6 +110,17 @@ class Post
     {
         $this->attachments[] = $attachment;
     }
+
+    public function getAttachments(): Collection
+    {
+        return $this->attachments;
+    }
+
+    public function getAllReplies(): Collection
+    {
+        return $this->replies;
+    }
+
 }
 
 #[ORM\Embeddable]

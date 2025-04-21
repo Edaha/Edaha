@@ -88,7 +88,7 @@ COPY ./docker/apache/httpd.conf /etc/apache2/apache2.conf
 RUN chown -R www-data:www-data /var/www
 
 FROM base as development
-# COPY ./tests /var/www/html/tests
+COPY ./tests /var/www/html/tests
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug
@@ -97,7 +97,7 @@ COPY --from=dev-deps app/vendor/ /var/www/html/vendor
 
 FROM development as test
 WORKDIR /var/www/html
-RUN ./vendor/bin/phpunit tests/HelloWorldTest.php
+RUN ./vendor/bin/phpunit tests/application/lib/Edaha/Entities/BoardTest.php
 
 FROM base as final
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

@@ -37,7 +37,7 @@ class Board implements EntityInterface
     protected function __construct(int $board_id, ?object &$db = null)
     {
         $this->board_id = $board_id;
-        $this->db       = $db;
+        if (!is_null($db)) $this->db = $db;
     }
 
     public function __get(string $name)
@@ -106,7 +106,7 @@ class Board implements EntityInterface
 
     public static function loadFromAssoc(array $assoc) 
     {
-        $post = new Board(['board_id' => $assoc['board_id']]);
+        $post = new Board($assoc['board_id']);
 
         foreach ($assoc as $key => $value) {
             if (!is_null($value)) $post->$key = $value;

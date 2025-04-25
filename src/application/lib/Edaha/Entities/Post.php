@@ -1,8 +1,11 @@
 <?php
 namespace Edaha\Entities;
+
 use Edaha\Entities\PostAttachment;
 use Edaha\Entities\Board;
 use Edaha\Entities\PostRepository;
+
+use DateTime;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
@@ -64,9 +67,6 @@ class Post
         }
     }
 
-    #[ORM\Embedded(class: Poster::class)]
-    public Poster $poster;
-
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'parent', fetch: 'EXTRA_LAZY')]
     #[ORM\OrderBy(['created_at' => 'DESC'])]
     public Collection $replies;
@@ -93,6 +93,9 @@ class Post
         }
     }
 
+    #[ORM\Embedded(class: Poster::class)]
+    public Poster $poster;
+
     public function __construct(Board $board, string $message, ?string $subject = null, ?Post $parent = null)
     {
         $this->board = $board;
@@ -104,6 +107,8 @@ class Post
         $this->poster = new Poster();
         $this->replies = new ArrayCollection();
         $this->attachments = new ArrayCollection();
+
+        $this->board->addPost($this);
     }
 
     public function addAttachment(PostAttachment $attachment): void
@@ -124,7 +129,8 @@ class Post
 }
 
 #[ORM\Embeddable]
-class Poster {
+class Poster 
+{
     #[ORM\Column(nullable: true)]
     public ?string $name = null;
 
@@ -133,10 +139,4 @@ class Poster {
     
     #[ORM\Column]
     public string $ip = '127.0.0.1';
-
-    public bool $is_anonymous {
-        get {
-            return empty($this->name);
-        }
-    }
 }

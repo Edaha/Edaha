@@ -1,0 +1,1 @@
+docker build -t php-docker-image-test --progress plain --no-cache --target test .

@@ -1,8 +1,10 @@
 <?php
 namespace Edaha\Entities;
+
 use Edaha\Entities\BoardOption;
 use Edaha\Entities\Post;
 use Edaha\Entities\AttachmentType;
+
 use DateTime;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -49,7 +51,11 @@ class Board
 
     /** @var Collection<int, BoardOption> */
     #[ORM\OneToMany(targetEntity: BoardOption::class, mappedBy:'board', cascade: ['persist'])]
-    private Collection $options;
+    public Collection $options {
+        get {
+            return $this->options;
+        }
+    }
 
     /** @var Collection<int, Post> */
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy:'board', fetch: 'EXTRA_LAZY')]
@@ -84,7 +90,7 @@ class Board
         $this->directory = $directory;
     }
 
-    public function setOption(string $name, ?string $value): void
+    private function setOption(string $name, ?string $value): void
     {
         // Check if the option already exists
         $criteria = Criteria::create()
@@ -97,11 +103,6 @@ class Board
             // Create a new option
             $this->options[] = new BoardOption($this, $name, $value);
         }
-    }
-
-    public function getOptions(): Collection
-    {
-        return $this->options;
     }
 
     public function addPost(Post $post): void
@@ -119,5 +120,9 @@ class Board
         } else {
             return null;
         }
+    }
+
+    public function __set(string $name, $value): void {
+        $this->setOption($name, $value);
     }
 }

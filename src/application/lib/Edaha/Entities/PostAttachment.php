@@ -55,13 +55,13 @@ class PostAttachment
         }
     }
 
-    public SplFileInfo $file;
+    public \SplFileInfo $file;
 
     public function __construct($post, $path)
     {
         $this->post = $post;
 
-        $this->file = new SplFileInfo($path);
+        $this->file = new \SplFileInfo($path);
         $this->path = $this->file->getRealPath();
         $this->file_name =  $this->file->getFileName();
         $this->original_name = $this->file->getFileName();

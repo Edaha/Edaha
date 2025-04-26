@@ -3,7 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 final class BoardTest extends TestCase
 {
-    public function testCanBeCreated()
+    public function testCanBeCreated(): void
     {
         $board = new Edaha\Entities\Board('name', 'directory');
 

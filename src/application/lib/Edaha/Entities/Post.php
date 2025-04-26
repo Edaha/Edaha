@@ -10,6 +10,7 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ORM\Table(name: 'posts')]
@@ -109,6 +110,18 @@ class Post
         $this->attachments = new ArrayCollection();
 
         $this->board->addPost($this);
+        if (!is_null($parent)) {
+            $this->parent->addReply($this);
+        }
+    }
+
+    public function addReply(Post $reply): void
+    {
+        if (is_null($this->parent) and !$this->replies->contains($reply)) {
+            $this->replies[] = $reply;
+        } else {
+            throw new \Exception('Cannot add reply to a non-thread post');
+        }
     }
 
     public function addAttachment(PostAttachment $attachment): void
@@ -126,6 +139,21 @@ class Post
         return $this->replies;
     }
 
+    public function getFirstNReplies(int $n): Array
+    {
+        return $this->replies->slice(0, $n);
+    }
+
+    public function getLastNReplies(int $n): Array
+    {
+        $criteria = Criteria::create()
+            ->orderBy(['created_at' => 'DESC'])
+            ->setMaxResults($n);
+        $lastReplies = $this->replies->matching($criteria);
+        $lastReplies = $lastReplies->toArray();
+        $lastReplies = array_reverse($lastReplies);
+        return $lastReplies;
+    }
 }
 
 #[ORM\Embeddable]

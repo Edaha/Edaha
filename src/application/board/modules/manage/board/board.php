@@ -26,7 +26,7 @@ class manage_board_board_board extends kxCmd
         // Vars $_GET['id']
         if ($this->onRegen()) {
           $this->twigData['notice']['type'] = 'success';
-          $this->twigData['notice']['message'] = sprintf(_('Board %s successfully regenerated!'), $this->request['board']);
+          $this->twigData['notice']['message'] = sprintf(_('Board %s successfully regenerated!'), $this->request['id']);
         } else {
           $this->twigData['notice']['type'] = 'error';
           $this->twigData['notice']['message'] = _('Board failed to regenerate') . ": " . $this->errorMessage;
@@ -43,12 +43,13 @@ class manage_board_board_board extends kxCmd
 
   private function onRegen()
   {
-    $board = $this->entityManager->getRepository('\Edaha\Entities\Board')->findOneBy(['directory' => $this->request['board']]);
+    $board = $this->entityManager->find(\Edaha\Entities\Board::class, $this->request['id']);
     if (is_null($board)) {
       $this->errorMessage = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
       return false;
     }
 
+    // TODO: Modules should be a Doctrine object
     $board_modules = $this->db->select("modules")
       ->fields("modules", array("module_file"))
       ->condition("module_application", "board")
@@ -56,12 +57,13 @@ class manage_board_board_board extends kxCmd
       ->execute()
       ->fetchCol();
     foreach ($board_modules as $module) {
-      if ($module == $board->board_type) {
+      if ($module == $board->type) {
         $module_to_load = $module;
       }
     }
 
     // Module loading time!
+    // TODO: We should be able to replace this with an autoloader
     $moduledir = kxFunc::getAppDir("board") . '/modules/public/' . $module_to_load . '/';
     if (file_exists($moduledir . $module_to_load . '.php')) {
       require_once $moduledir . $module_to_load . '.php';
@@ -126,8 +128,8 @@ class manage_board_board_board extends kxCmd
       return;
     } elseif (is_null($board) && $this->request['edit'] == "") {
       $board = new Edaha\Entities\Board($this->request['description'], $this->request['name']);
-      $board->setOption('type', $this->request['board_type']);
-      $board->setOption('post_id_start_at', $this->request['start'] || 1);
+      $board->type = $this->request['board_type'];
+      $board->post_id_start_at = $this->request['start'] || 1;
       $this->entityManager->persist($board);
       $this->entityManager->flush();
     }

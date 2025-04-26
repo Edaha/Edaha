@@ -43,44 +43,22 @@ class public_core_post_post extends kxCmd
   public function exec(kxEnv $environment)
   {
     // Before we do anything, let's check if we even have any board info
-    if (!$this->request['board']) {
-      die();
+    $board = $this->entityManager->find(\Edaha\Entities\Board::class, $this->request['board_id']);
+    if (is_null($board)) {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
-    }
-    // Grabing essential data about the board
-    $boardType = $this->db->select("boards")
-      ->fields("boards", array("board_type"))
-      ->condition("board_name", $this->request['board'])
-      ->execute()
-      ->fetchField();
-    // Uh oh! Someone's being naughty! Silently redirect them to the mainpage if they supply us with a non-existing board.
-    if ($boardType === false) {
-      kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
-    }
-
-    $board_modules = $this->db->select("modules")
-      ->fields("modules", array("module_file"))
-      ->condition("module_application", "board")
-      ->condition("module_manage", 0)
-      ->execute()
-      ->fetchCol();
-    foreach ($board_modules as $module) {
-      if ($module == $boardType) {
-        $module_to_load = $module;
-      }
     }
 
     // Module loading time!
-    $moduledir = kxFunc::getAppDir("board") . '/modules/public/' . $module_to_load . '/';
-    if (file_exists($moduledir . $module_to_load . '.php')) {
-      require_once $moduledir . $module_to_load . '.php';
+    $moduledir = kxFunc::getAppDir("board") . '/modules/public/' . $board->type . '/';
+    if (file_exists($moduledir . $board->type . '.php')) {
+      require_once $moduledir . $board->type . '.php';
     }
     // Module is not a board type module or is isn't properly configured
     else {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
     // Some routine checks...
-    $className = "public_board_" . $module_to_load . "_" . $module_to_load;
+    $className = "public_board_" . $board->type . "_" . $board->type;
 
     if (class_exists($className)) {
       $module_class = new ReflectionClass($className);
@@ -117,11 +95,11 @@ class public_core_post_post extends kxCmd
         $this->postData['files'] = array($_FILES['imagefile']['name'][0]);
       }
 
-      $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->board_id);
+      $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->id);
 
-      $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->board_id);
-      $this->_postingClass->checkMessageLength($this->_boardClass->board->board_max_message_length);
-      $this->_postingClass->checkBlacklistedText($this->_boardClass->board->board_id);
+      $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->id);
+      $this->_postingClass->checkMessageLength($this->_boardClass->board->max_message_length);
+      $this->_postingClass->checkBlacklistedText($this->_boardClass->board->id);
       $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
       $this->_postingClass->checkBannedHash($this->_boardClass->board);
 
@@ -137,7 +115,7 @@ class public_core_post_post extends kxCmd
 
       $nextid = $this->db->select("posts")
         ->fields("posts", array("post_id"))
-        ->condition("board_id", $this->_boardClass->board->board_id)
+        ->condition("board_id", $this->_boardClass->board->id)
         ->execute()
         ->fetchField();
       if ($nextid) {

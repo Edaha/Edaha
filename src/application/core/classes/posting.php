@@ -4,12 +4,14 @@ class Posting
   protected $environment;
   protected $db;
   protected $request;
+  protected $entityManager;
 
   public function __construct(kxEnv $environment)
   {
     $this->environment = $environment;
     $this->db = kxDB::getInstance();
     $this->request = kxEnv::$request;
+    $this->entityManager = kxOrm::getEntityManager();
   }
   public function checkUtf8()
   {
@@ -435,69 +437,83 @@ class Posting
   }
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board)
   {
-
-    $timeStamp = date('Y-m-d H:i:s', time());
-    $id = $this->db->insert("posts")
-      ->fields(array(
-        'parent_post_id' => $postData['thread_info']['parent'],
-        'board_id' => $board->board_id,
-        'name' => $post['name'],
-        'tripcode' => $post['tripcode'],
-        'email' => $post['email'],
-        'subject' => $post['subject'],
-        'message' => $post['message'],
-        'password' => $postData['post_fields']['postpassword'],
-        'created_at_timestamp' => $timeStamp,
-        'bumped_at_timestamp' => $timeStamp,
-        'ip' => kxFunc::encryptMD5($ip, kxEnv::Get('kx:misc:randomseed')),
-        'ip_md5' => md5($ip),
-        'authority' => $postData['user_authority_display'],
-        'tag' => isset($post['tag']) ? $post['tag'] : '',
-        'is_stickied' => $stickied,
-        'is_locked' => $locked,
-      ))
-      ->execute();
-
-    if (!$id || kxEnv::Get('kx:db:type') == 'sqlite') {
-      // Non-mysql installs don't return the insert ID after insertion, we need to manually get it.
-      $id = $this->db->select("posts")
-        ->fields("posts", array("post_id"))
-        ->condition("board_id", $board->board_id)
-        ->condition("created_at_timestamp", $timeStamp)
-        ->condition("ip_md5", md5($ip))
-        ->range(0, 1)
-        ->execute()
-        ->fetchField();
+    $reply_to_post = null;
+    if (isset($postData['parent_post_id']) and $postData['parent_post_id'] != 0) {
+      $reply_to_post = $this->entityManager->find(Edaha\Entities\Post::class, $postData['parent_post_id']);
     }
 
-    if ($id == 1 && $board->board_start > 1) {
-      $this->db->update("posts")
-        ->fields(array("id" => $board->board_start))
-        ->condition("board_id", $board->board_id)
-        ->execute();
-      $id = $board->board_start;
-    }
+    $new_post = New Edaha\Entities\Post($board, $post['message'], $post['subject'], $reply_to_post);
 
-    if (!empty($files)) {
-      foreach ($files as $file) {
-        $this->db->insert("post_files")
-          ->fields(array(
-            'file_post' => $id,
-            'file_board' => $board->board_id,
-            'file_md5' => $file['file_md5'],
-            'file_name' => $file['file_name'],
-            'file_type' => substr($file['file_type'], 1),
-            'file_original' => mb_convert_encoding($file['original_file_name'], 'ASCII', 'UTF-8'),
-            'file_size' => $file['file_size'],
-            'file_size_formatted' => /*kxFunc::convertBytes($file['file_size'])*/$file['file_size'],
-            'file_image_width' => $file['image_w'],
-            'file_image_height' => $file['image_h'],
-            'file_thumb_width' => $file['thumb_w'],
-            'file_thumb_height' => $file['thumb_h'],
-          ))
-          ->execute();
-      }
-    }
-    return $id;
+    $new_post->poster->name  = $post['name'];
+    $new_post->poster->email = $post['email'];
+    $new_post->poster->ip = '192.168.0.1';
+
+    $this->entityManager->persist($new_post);
+    $this->entityManager->flush();
+
+    return $new_post->id;
+
+    // $id = $this->db->insert("posts")
+    //   ->fields(array(
+    //     'parent_post_id' => $postData['thread_info']['parent'],
+    //     'board_id' => $board->board_id,
+    //     'name' => $post['name'],
+    //     'tripcode' => $post['tripcode'],
+    //     'email' => $post['email'],
+    //     'subject' => $post['subject'],
+    //     'message' => $post['message'],
+    //     'password' => $postData['post_fields']['postpassword'],
+    //     'created_at_timestamp' => $timeStamp,
+    //     'bumped_at_timestamp' => $timeStamp,
+    //     'ip' => kxFunc::encryptMD5($ip, kxEnv::Get('kx:misc:randomseed')),
+    //     'ip_md5' => md5($ip),
+    //     'authority' => $postData['user_authority_display'],
+    //     'tag' => isset($post['tag']) ? $post['tag'] : '',
+    //     'is_stickied' => $stickied,
+    //     'is_locked' => $locked,
+    //   ))
+    //   ->execute();
+
+    // if (!$id || kxEnv::Get('kx:db:type') == 'sqlite') {
+    //   // Non-mysql installs don't return the insert ID after insertion, we need to manually get it.
+    //   $id = $this->db->select("posts")
+    //     ->fields("posts", array("post_id"))
+    //     ->condition("board_id", $board->board_id)
+    //     ->condition("created_at_timestamp", $timeStamp)
+    //     ->condition("ip_md5", md5($ip))
+    //     ->range(0, 1)
+    //     ->execute()
+    //     ->fetchField();
+    // }
+
+    // if ($id == 1 && $board->board_start > 1) {
+    //   $this->db->update("posts")
+    //     ->fields(array("id" => $board->board_start))
+    //     ->condition("board_id", $board->board_id)
+    //     ->execute();
+    //   $id = $board->board_start;
+    // }
+
+    // if (!empty($files)) {
+    //   foreach ($files as $file) {
+    //     $this->db->insert("post_files")
+    //       ->fields(array(
+    //         'file_post' => $id,
+    //         'file_board' => $board->board_id,
+    //         'file_md5' => $file['file_md5'],
+    //         'file_name' => $file['file_name'],
+    //         'file_type' => substr($file['file_type'], 1),
+    //         'file_original' => mb_convert_encoding($file['original_file_name'], 'ASCII', 'UTF-8'),
+    //         'file_size' => $file['file_size'],
+    //         'file_size_formatted' => /*kxFunc::convertBytes($file['file_size'])*/$file['file_size'],
+    //         'file_image_width' => $file['image_w'],
+    //         'file_image_height' => $file['image_h'],
+    //         'file_thumb_width' => $file['thumb_w'],
+    //         'file_thumb_height' => $file['thumb_h'],
+    //       ))
+    //       ->execute();
+    //   }
+    // }
+    // return $id;
   }
 }

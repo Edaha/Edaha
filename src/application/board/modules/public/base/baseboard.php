@@ -71,7 +71,9 @@ class public_board_base_baseboard extends kxCmd
    */
   public function exec(kxEnv $environment)
   {
-    $this->board = Edaha\Entities\Board::loadFromDbByName($this->request['board'], $this->db);
+    $this->board = $this->entityManager->find(\Edaha\Entities\Board::class, $this->request['board_id'] || $this->request['id']);
+    // $this->board = Edaha\Entities\Board::loadFromDbByName($this->request['board'], $this->db);
+    
 
     $this->environment->set('kx:classes:board:id', $this->board);
 
@@ -232,14 +234,7 @@ class public_board_base_baseboard extends kxCmd
       $postsperpage = $this->environment->get('kx:display:imgthreads');
     }
 
-    $numposts = $this->db->select("posts")
-      ->fields("posts")
-      ->condition("board_id", $this->board->board_id)
-      ->condition("parent_post_id", 0)
-      ->condition("is_deleted", 0)
-      ->countQuery()
-      ->execute()
-      ->fetchField();
+    $numposts = count($this->board->posts);
     $totalpages = kxFunc::pageCount($this->board->board_type, ($numposts - 1)) - 1;
 
     // If no posts, $totalpages==-2, which causes the board to not regen.
@@ -295,7 +290,7 @@ class public_board_base_baseboard extends kxCmd
       $this->twigData['posts'] = $outThread;
 
       //print_r($this->board);
-      $this->twigData['file_path'] = KX_BOARD . '/' . $this->board->board_name;
+      $this->twigData['file_path'] = KX_BOARD . '/' . $this->board->directory;
 
       // Make required folders
       @mkdir($this->twigData['file_path'], 0777, true);
@@ -312,13 +307,13 @@ class public_board_base_baseboard extends kxCmd
       $content = kxTemplate::get('board/' . $this->boardType . '/board_page', $this->twigData, true);
 
       if ($i == 0) {
-        $page = KX_BOARD . '/' . $this->board->board_name . '/' . kxEnv::Get('kx:pages:first');
+        $page = KX_BOARD . '/' . $this->board->directory . '/' . kxEnv::Get('kx:pages:first');
       } else {
-        $page = KX_BOARD . '/' . $this->board->board_name . '/' . $i . '.html';
+        $page = KX_BOARD . '/' . $this->board->directory . '/' . $i . '.html';
       }
       //echo "<br />$page";
       //die($content);
-      kxFunc::outputToFile($page, $content, $this->board->board_name);
+      kxFunc::outputToFile($page, $content, $this->board->directory);
       $i++;
     }
   }

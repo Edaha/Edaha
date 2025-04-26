@@ -43,7 +43,7 @@ class manage_board_board_boardopts extends kxCmd
 
     $this->twigData['board'] = $board;
     
-    foreach ($board->getOptions() as $option) {
+    foreach ($board->options as $option) {
       $this->twigData['options'][$option->name] = $option->value;
     }
 
@@ -108,7 +108,7 @@ class manage_board_board_boardopts extends kxCmd
 
     foreach ($board_fields as $key => $value) {
       if ($value != $board->$key) {
-        $board->setOption($key, $value);
+        $board->$key = $value;
       }
     }
 

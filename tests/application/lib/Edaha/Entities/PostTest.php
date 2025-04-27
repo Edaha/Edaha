@@ -76,4 +76,56 @@ final class PostTest extends TestCase
         $this->assertSame($post3, $post1->getLastNReplies(2)[0]);
         $this->assertSame($post4, $post1->getLastNReplies(2)[1]);
     }
+
+    public function testCanStickyPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+
+        $this->assertFalse($post->is_stickied);
+        $post->sticky();
+        $this->assertTrue($post->is_stickied);
+    }
+
+    public function testCanUnstickyPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+
+        $post->sticky();
+        $this->assertTrue($post->is_stickied);
+        $post->unsticky();
+        $this->assertFalse($post->is_stickied);
+    }
+
+    public function testCanLockPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+
+        $this->assertFalse($post->is_locked);
+        $post->lock();
+        $this->assertTrue($post->is_locked);
+    }
+
+    public function testCanUnlockPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+
+        $post->lock();
+        $this->assertTrue($post->is_locked);
+        $post->unlock();
+        $this->assertFalse($post->is_locked);
+    }
+
+    public function testCanNotReplyToLockedPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post1 = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post1->lock();
+
+        $this->expectException(Exception::class);
+        $post2 = new Edaha\Entities\Post($board, 'message2', 'subject2', $post1);
+    }
 }

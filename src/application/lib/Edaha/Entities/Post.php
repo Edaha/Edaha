@@ -62,9 +62,39 @@ class Post
             return $this->created_at;
         }
         set {
-            if (!isset($this->created_at)) {
-                $this->created_at = new DateTime('now');
-            }
+            $this->created_at = $value;
+        }
+    }
+
+    #[ORM\Column]
+    public ?DateTime $locked_at = null {
+        get {
+            return $this->locked_at;
+        }
+        set {
+            $this->locked_at = $value;
+        }
+    }
+
+    public bool $is_locked {
+        get {
+            return isset($this->locked_at);
+        }
+    }
+
+    #[ORM\Column]
+    public ?DateTime $stickied_at = null {
+        get {
+            return $this->stickied_at;
+        }
+        set {
+            $this->stickied_at = $value;
+        }
+    }
+
+    public bool $is_stickied {
+        get {
+            return isset($this->stickied_at);
         }
     }
 
@@ -117,10 +147,14 @@ class Post
 
     public function addReply(Post $reply): void
     {
-        if (is_null($this->parent) and !$this->replies->contains($reply)) {
-            $this->replies[] = $reply;
+        if ($this->is_locked) {
+            throw new \Exception('Cannot add reply to a locked post');
+        } elseif (!is_null($this->parent)) {
+            throw new \Exception('Cannot add reply to a reply post');
+        } elseif ($this->replies->contains($reply)) {
+            throw new \Exception('Reply already exists');
         } else {
-            throw new \Exception('Cannot add reply to a non-thread post');
+            $this->replies[] = $reply;
         }
     }
 
@@ -153,6 +187,44 @@ class Post
         $lastReplies = $lastReplies->toArray();
         $lastReplies = array_reverse($lastReplies);
         return $lastReplies;
+    }
+
+    public function sticky(): void
+    {
+        if ($this->is_stickied) {
+            throw new \Exception('Post is already stickied');
+        }
+        if ($this->is_reply) {
+            throw new \Exception('Cannot sticky a reply post'); // TODO: But what if we could?
+        }
+        $this->stickied_at = new DateTime('now');
+    }
+
+    public function unsticky(): void
+    {
+        if (!$this->is_stickied) {
+            throw new \Exception('Post is not stickied');
+        }
+        $this->stickied_at = null;
+    }
+
+    public function lock(): void
+    {
+        if ($this->is_locked) {
+            throw new \Exception('Post is already locked');
+        }
+        if ($this->is_reply) {
+            throw new \Exception('Cannot lock a reply post');
+        }
+        $this->locked_at = new DateTime('now');
+    }
+
+    public function unlock(): void
+    {
+        if (!$this->is_locked) {
+            throw new \Exception('Post is not locked');
+        }
+        $this->locked_at = null;
     }
 }
 

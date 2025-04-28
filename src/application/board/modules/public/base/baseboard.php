@@ -194,10 +194,11 @@ class public_board_base_baseboard extends kxCmd
       $this->regeneratePages();
       if ($postData['thread_info']['parent'] == 0) {
         // Regenerate the thread
-        $this->regenerateThreads($post['post_id']);
+        // TODO Readd once renderer objects are implemented
+        // $this->regenerateThreads($post['post_id']);
       } else {
         // Regenerate the thread
-        $this->regenerateThreads($postData['thread_info']['parent']);
+        // $this->regenerateThreads($postData['thread_info']['parent']);
       }
     }
   }
@@ -226,7 +227,8 @@ class public_board_base_baseboard extends kxCmd
     // Setup
     //-----------------------------------------
     $executiontime_start_page = microtime(true);
-    $this->twigData['filetypes'] = $this->getEmbeds();
+    // TODO This only applies to certain types of boards and should move to them
+    // $this->twigData['filetypes'] = $this->getEmbeds();
 
     $i = 0;
 
@@ -254,18 +256,11 @@ class public_board_base_baseboard extends kxCmd
       //--------------------------------------------------------------------------------------------------
       // Grab our threads, stickies go first, then follow by bump time, then run through them
       //--------------------------------------------------------------------------------------------------
-      $threads = $this->db->select("posts")
-        ->fields("posts")
-        ->condition("board_id", $this->board->board_id)
-        ->condition("parent_post_id", 0)
-        ->condition("is_deleted", 0)
-        ->orderBy("is_stickied", "DESC")
-        ->orderBy("bumped_at_timestamp", "DESC")
-        ->range($postsperpage * $i, $postsperpage)
-        ->execute()
-        ->fetchAll();
+      $threads = $this->entityManager->getRepository(\Edaha\Entities\Post::class)
+        ->getPaginatedThreadsByBoard($this->board->id, $i, $postsperpage);
+
       $outThread = [];
-      foreach ($threads as &$thread) {
+      foreach ($threads as $thread) {
 
         //------------------------------------------------------------------------------------------
         // If the thread is on the page set to mark, and hasn't been marked yet, mark it
@@ -275,7 +270,7 @@ class public_board_base_baseboard extends kxCmd
           // RegenerateThreads overwrites the replythread variable. Reset it here.
           $this->twigData['replythread'] = 0;
         }
-        $thread = $this->buildPost($thread, true);
+        // $thread = $this->buildPost($thread, true);
         $outThread[] = $this->buildThread($thread);
 
       }
@@ -299,6 +294,11 @@ class public_board_base_baseboard extends kxCmd
       @mkdir($this->twigData['file_path'] . '/res/', 0777, true);
 
       $this->twigData['board'] = $this->board;
+      $board_options = $this->entityManager->getRepository(\Edaha\Entities\BoardOption::class)
+        ->getOptionsByBoard($this->board->id);
+      foreach ($board_options as $option) {
+        $this->twigData['board_options'][$option['name']] = $option['value'];
+      }
 
       $this->footer(false, (microtime(true) - $executiontime_start_page));
       $this->pageHeader(0);
@@ -320,55 +320,22 @@ class public_board_base_baseboard extends kxCmd
 
   public function buildThread($thread)
   {
-    $tempPosts = $this->buildPageThread($thread, true);
-    $thread->replies = $this->getOmittedPosts($thread, $tempPosts[1]);
-    $thread->images = $this->getOmittedFiles($thread, $tempPosts[1]);
-    $posts = array_reverse($tempPosts[0]);
-    array_unshift($posts, $thread);
-    return $posts;
+    $this->twigData['threads'][] = $thread;
+    // $thread->replies = $this->getOmittedPosts($thread, $tempPosts[1]);
+    // $thread->images = $this->getOmittedFiles($thread, $tempPosts[1]);
+    // $posts = array_reverse($tempPosts[0]);
+    // array_unshift($posts, $thread);
+    return $thread;
   }
 
-  public function buildPageThread($thread)
+  public function getThreadRepliesToDisplay($thread)
   {
-    $omitids = [];
-
-    //-----------------------------------------------------------------------------------------------------------------------------------
-    // Process stickies without using prepared statements (because they have a different range than regular threads).
-    // Since there's usually very few to no stickies we can get away with this with minimal performance impact.
-    //-----------------------------------------------------------------------------------------------------------------------------------
     if ($thread->is_stickied == 1) {
-      $posts = $this->db->select("posts")
-        ->condition("board_id", $this->board->board_id)
-        ->condition("parent_post_id", $thread->post_id)
-        ->condition("is_deleted", 0)
-        ->orderBy("post_id", "DESC")
-        ->range(0, kxEnv::Get('kx:display:stickyreplies'))
-        ->execute()
-        ->fetchAll();
+      $thread_replies = $thread->getLastNReplies(kxEnv::Get('kx:display:stickyreplies'));
+    } else {
+      $thread_replies = $thread->getLastNReplies(kxEnv::Get('kx:display:replies'));
     }
-
-    //---------------------------------------------------------------------------------------------------
-    // For non-stickies, we check if the $results object exists, or if it isn't an instance of
-    // kxDBStatementInterface (like if it was overwritten somwehere else). If is isn't, the
-    // query is prepared, otherwise, we used the prepared statement already given to us
-    //----------------------------------------------------------------------------------------------------
-    else {
-      if (empty($this->buildPageResults) || !($this->buildPageResults instanceof kxDBStatementInterface)) {
-        $this->buildPageResults = $this->db->select("posts")
-          ->fields("posts")
-          ->where("board_id = ? AND parent_post_id = ? AND is_deleted = 0")
-          ->orderBy("post_id", "DESC")
-          ->range(0, kxEnv::Get('kx:display:replies'))
-          ->build();
-      }
-      $this->buildPageResults->execute([$this->board->board_id, $thread->post_id]);
-      $posts = $this->buildPageResults->fetchAll();
-    }
-    foreach ($posts as &$post) {
-      $omitids[] = $post->post_id;
-      $post = $this->buildPost($post, true);
-    }
-    return [$posts, $omitids];
+    return $thread_replies;
   }
 
   public function getOmittedPosts(&$thread, $omitids = [])
@@ -411,71 +378,73 @@ class public_board_base_baseboard extends kxCmd
 
   public function buildPost($post, $page)
   {
-    $post_files = $this->db->select("post_files")
-      ->fields("post_files")
-      ->condition("file_board", $this->board->board_id)
-      ->condition("file_post", $post->post_id)
-      ->execute()
-      ->fetchAll();
-    foreach ($post_files as $line) {
-      $post->file_name[] = $line->file_name;
-      $post->file_type[] = $line->file_type;
-      $post->file_original[] = $line->file_original;
-      $post->file_size[] = $line->file_size;
-      $post->file_size_formatted[] = $line->file_size_formatted;
-      $post->file_image_width[] = $line->file_image_width;
-      $post->file_image_height[] = $line->file_image_height;
-      $post->file_thumb_width[] = $line->file_thumb_width;
-      $post->file_thumb_height[] = $line->file_thumb_height;
-    }
+    // TODO: This probably belongs elsewhere. Also deserves to be an array of attachment objects vs. this set of arrays.
+    // $post_files = $this->db->select("post_files")
+    //   ->fields("post_files")
+    //   ->condition("file_board", $this->board->board_id)
+    //   ->condition("file_post", $post->post_id)
+    //   ->execute()
+    //   ->fetchAll();
+    // foreach ($post_files as $line) {
+    //   $post->file_name[] = $line->file_name;
+    //   $post->file_type[] = $line->file_type;
+    //   $post->file_original[] = $line->file_original;
+    //   $post->file_size[] = $line->file_size;
+    //   $post->file_size_formatted[] = $line->file_size_formatted;
+    //   $post->file_image_width[] = $line->file_image_width;
+    //   $post->file_image_height[] = $line->file_image_height;
+    //   $post->file_thumb_width[] = $line->file_thumb_width;
+    //   $post->file_thumb_height[] = $line->file_thumb_height;
+    // }
     $post = $this->formatPost($post, $page);
-    if (!empty($post->file_type)) {
-      foreach ($post->file_type as $key => $type) {
-        if (isset($this->embeds) && in_array($type, $this->embeds)) {
-          $post->videobox = $this->embeddedVideoBox($post);
-        }
+    // if (!empty($post->file_type)) {
+    //   foreach ($post->file_type as $key => $type) {
+    //     if (isset($this->embeds) && in_array($type, $this->embeds)) {
+    //       $post->videobox = $this->embeddedVideoBox($post);
+    //     }
 
-        if ($type == 'mp3' /*&& $this->board['loadbalanceurl'] == ''*/) {
+    //     if ($type == 'mp3' /*&& $this->board['loadbalanceurl'] == ''*/) {
 
-          // Initialize getID3 engine
-          $getID3 = new getID3;
+    //       // Initialize getID3 engine
+    //       $getID3 = new getID3;
 
-          $post->id3[$key] = $getID3->analyze(KX_BOARD . '/' . $this->board->board_name . '/src/' . $post->file_name[$key] . '.mp3');
-          getid3_lib::CopyTagsToComments($post->id3[$key]);
-        }
-        if (!in_array($type, ['jpg', 'gif', 'png', 'webp', '']) && !in_array($type, $this->embeds)) {
-          if (!isset($filetype_info[$type])) {
-            $filetype_info[$type] = kxFunc::getFileTypeInfo($type);
-          }
+    //       $post->id3[$key] = $getID3->analyze(KX_BOARD . '/' . $this->board->board_name . '/src/' . $post->file_name[$key] . '.mp3');
+    //       getid3_lib::CopyTagsToComments($post->id3[$key]);
+    //     }
+    //     if (!in_array($type, ['jpg', 'gif', 'png', 'webp', '']) && !in_array($type, $this->embeds)) {
+    //       if (!isset($filetype_info[$type])) {
+    //         $filetype_info[$type] = kxFunc::getFileTypeInfo($type);
+    //       }
 
-          $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/public/filetypes/' . $filetype_info[$type][0];
-          if ($post->file_thumb_width[$key] != 0 && $post->file_thumb_height[$key] != 0) {
-            if (file_exists(KX_BOARD . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg')) {
-              $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg';
-            } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.png')) {
-              $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.png';
-            } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.gif')) {
-              $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.gif';
-            } else {
-              $post->file_thumb_width[$key] = $filetype_info[$type][1];
-              $post->file_thumb_height[$key] = $filetype_info[$type][2];
-            }
-          } else {
-            $post->file_thumb_width[$key] = $filetype_info[$type][1];
-            $post->file_thumb_height[$key] = $filetype_info[$type][2];
-          }
-        }
-      }
-    }
+    //       $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/public/filetypes/' . $filetype_info[$type][0];
+    //       if ($post->file_thumb_width[$key] != 0 && $post->file_thumb_height[$key] != 0) {
+    //         if (file_exists(KX_BOARD . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg')) {
+    //           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg';
+    //         } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.png')) {
+    //           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.png';
+    //         } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.gif')) {
+    //           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.gif';
+    //         } else {
+    //           $post->file_thumb_width[$key] = $filetype_info[$type][1];
+    //           $post->file_thumb_height[$key] = $filetype_info[$type][2];
+    //         }
+    //       } else {
+    //         $post->file_thumb_width[$key] = $filetype_info[$type][1];
+    //         $post->file_thumb_height[$key] = $filetype_info[$type][2];
+    //       }
+    //     }
+    //   }
+    // }
     return $post;
   }
 
+  // TODO: This should be done in the templates
   public function formatPost($post, $page)
   {
-    $dateEmail = (empty($this->board->board_default_name)) ? $post->email : 0;
-    $post->message = stripslashes($this->formatLongMessage($post->message, $this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $page));
-    $post->timestamp_formatted = kxFunc::formatDate($post->created_at_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
-    $post->reflink = $this->formatReflink($this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $post->post_id, $this->environment->get('kx:language:currentlocale'));
+    // $dateEmail = (empty($this->board->board_default_name)) ? $post->email : 0;
+    // $post->message = stripslashes($this->formatLongMessage($post->message, $this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $page));
+    // $post->timestamp_formatted = kxFunc::formatDate($post->created_at_timestamp, 'post', $this->environment->get('kx:language:currentlocale'), $dateEmail);
+    // $post->reflink = $this->formatReflink($this->board->board_name, (($post->parent_post_id == 0) ? ($post->post_id) : ($post->parent_post_id)), $post->post_id, $this->environment->get('kx:language:currentlocale'));
     return $post;
   }
 
@@ -548,11 +517,12 @@ class public_board_base_baseboard extends kxCmd
   {
 
     $numimages = 0;
-    $embeds = $this->db->select("embeds")
-      ->fields("embeds")
-      ->execute()
-      ->fetchAll();
-    $this->twigData['embeds'] = $embeds;
+    // TODO Replaced by Attachments concept
+    // $embeds = $this->db->select("embeds")
+    //   ->fields("embeds")
+    //   ->execute()
+    //   ->fetchAll();
+    // $this->twigData['embeds'] = $embeds;
     // No ID? Get every thread.
     if ($id == 0) {
 
@@ -734,7 +704,7 @@ class public_board_base_baseboard extends kxCmd
 
   public function markThread($thread, $i)
   {
-    if ($thread->deleted_at_timestamp == 0 && $this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
+    if ($this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
       $this->db->update("posts")
         ->fields([
           'deleted_at_timestamp' => time() + 7200,

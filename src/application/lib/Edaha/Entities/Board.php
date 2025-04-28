@@ -110,6 +110,26 @@ class Board
         $this->posts[] = $post;
     }
 
+    public function getAllThreads(): Collection
+    {
+        $criteria = Criteria::create()
+            ->where(Criteria::expr()->eq('parent', null))
+            ->orderBy(['stickied_at' => 'DESC'])
+            ->orderBy(['created_at' => 'DESC']);
+        return $this->posts->matching($criteria);
+    }
+
+    public function getPaginatedThreads(int $page, int $perPage): Collection
+    {
+        $criteria = Criteria::create()
+            ->where(Criteria::expr()->eq('parent', null))
+            ->orderBy(['stickied_at' => 'DESC'])
+            ->orderBy(['created_at' => 'DESC'])
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+        return $this->posts->matching($criteria);
+    }
+
     public function __get(string $name)
     {
         $criteria = Criteria::create()

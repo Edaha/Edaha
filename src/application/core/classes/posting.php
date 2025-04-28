@@ -51,21 +51,12 @@ class Posting
     if (isset($this->request['replythread'])) {
       if ((int) $this->request['replythread'] != 0) {
         /* Check if the thread id supplied really exists */
-        $sql = $this->db->select("posts");
-        $sql->addExpression("COUNT(*)"); // Because Saz is too dumb to SQL.
-        $results = $sql->condition("board_id", $boardid)
-          ->condition("post_id", $this->request['replythread'])
-          ->condition("parent_post_id", 0)
-          ->condition("is_deleted", 0)
-          ->execute()
-          ->fetchField();
-        /* If it does... */
-        if ($results > 0) {
-          /* If it doesn't... */
-          return true;
-        } else {
+        $thread = $this->entityManager->find(Edaha\Entities\Post::class, $this->request['replythread']);
+        if ($thread == null) {
           /* Kill the script, stopping the posting process */
           kxFunc::showError(_('Invalid thread ID.'), _('That thread may have been recently deleted.'));
+        } else {
+          return true;
         }
       }
     }
@@ -80,10 +71,10 @@ class Posting
   }
   public function checkEmpty($postData)
   {
-    //var_dump($postData['thread_info']['message']);
-    if (is_array($postData['files']) && empty($postData['files'][0]) && empty($postData['thread_info']['message'])) {
-      return false;
-    }
+    // TODO Move to Post Validator
+    // if (is_array($postData['files']) && empty($postData['files'][0]) && empty($postData['thread_info']['message'])) {
+    //   return false;
+    // }
     return true;
   }
   public function checkNoFile($postData)
@@ -438,8 +429,8 @@ class Posting
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board)
   {
     $reply_to_post = null;
-    if (isset($postData['parent_post_id']) and $postData['parent_post_id'] != 0) {
-      $reply_to_post = $this->entityManager->find(Edaha\Entities\Post::class, $postData['parent_post_id']);
+    if (isset($postData['thread_info']['parent']) and $postData['thread_info']['parent'] != 0) {
+      $reply_to_post = $this->entityManager->find(Edaha\Entities\Post::class, $postData['thread_info']['parent']);
     }
 
     $new_post = New Edaha\Entities\Post($board, $post['message'], $post['subject'], $reply_to_post);

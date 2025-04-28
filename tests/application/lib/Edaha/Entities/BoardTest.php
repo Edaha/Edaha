@@ -33,4 +33,28 @@ final class BoardTest extends TestCase
         $this->assertSame($post1, $board->posts[0]);
         $this->assertSame($post2, $board->posts[1]);
     }
+
+    public function testCanGetAllThreads(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $thread1 = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post2 = new Edaha\Entities\Post($board, 'message2', 'subject2', $thread1);
+        $post3 = new Edaha\Entities\Post($board, 'message3', 'subject3', $thread1);
+        $thread2 = new Edaha\Entities\Post($board, 'message4', 'subject4');
+
+        $this->assertCount(2, $board->getAllThreads());
+    }
+
+    public function testCanGetPaginatedThreads(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $thread1 = new Edaha\Entities\Post($board, 'message', 'subject');
+        $thread2 = new Edaha\Entities\Post($board, 'message2', 'subject2');
+
+        $paginatedThreads = $board->getPaginatedThreads(1, 1);
+        $this->assertCount(1, $paginatedThreads);
+
+        $paginatedThreads = $board->getPaginatedThreads(2, 1);
+        $this->assertCount(1, $paginatedThreads);
+    }
 }

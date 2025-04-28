@@ -39,26 +39,32 @@ class public_core_post_post extends kxCmd
   protected $_boardClass;
   protected $_postingClass;
   protected $postData = array();
+  
+  protected \Edaha\Entities\Board $board;
 
-  public function exec(kxEnv $environment)
+  private function verifyBoard($board_id)
   {
-    // Before we do anything, let's check if we even have any board info
-    $board = $this->entityManager->find(\Edaha\Entities\Board::class, $this->request['board_id']);
+    $board = $this->entityManager->find(\Edaha\Entities\Board::class, $board_id);
     if (is_null($board)) {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
+    $this->board = $board;
+  }
 
-    // Module loading time!
-    $moduledir = kxFunc::getAppDir("board") . '/modules/public/' . $board->type . '/';
-    if (file_exists($moduledir . $board->type . '.php')) {
-      require_once $moduledir . $board->type . '.php';
+  private function setUpBoardClass()
+  {
+    $board_type = $this->board->type;
+
+    $moduledir = kxFunc::getAppDir("board") . '/modules/public/' . $board_type . '/';
+    if (file_exists($moduledir . $board_type . '.php')) {
+      require_once $moduledir . $board_type . '.php';
     }
     // Module is not a board type module or is isn't properly configured
     else {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
     // Some routine checks...
-    $className = "public_board_" . $board->type . "_" . $board->type;
+    $className = "public_board_" . $board_type . "_" . $board_type;
 
     if (class_exists($className)) {
       $module_class = new ReflectionClass($className);
@@ -71,10 +77,25 @@ class public_core_post_post extends kxCmd
     } else {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
-    // Include our posting class
+  }
+
+  private function setUpPostingClass()
+  {
     require_once kxFunc::getAppDir('core') . '/classes/posting.php';
     $this->_postingClass = new posting($this->environment);
     $this->environment->set('kx:classes:board:posting:id', $this->_postingClass);
+  }
+
+  public function exec(kxEnv $environment)
+  {
+    // Before we do anything, let's check if we even have any board info
+    $this->verifyBoard($this->request['board_id']);
+
+    // Module loading time!
+    $this->setUpBoardClass();
+
+    // Include our posting class
+    $this->setUpPostingClass();
 
     // Phew, that's over with. Let's now prepare our post for generation.
 
@@ -83,18 +104,20 @@ class public_core_post_post extends kxCmd
 
     // Is post valid according to our board's spec?
     if ($this->_boardClass->validPost()) {
-      $this->db->startTransaction();
+      // TODO Add Doctrine transaction support
 
+      // TODO Move to an image handler
       // Do we have files?
-      $this->postData['files'] = isset($_FILES['imagefile']) ? $_FILES['imagefile']['name'] : '';
-      // Backwards compatability hack for dumpers that don't support multifile uploading
-      if ($this->postData['files'] && !is_array($this->postData['files'])) {
-        foreach ($_FILES['imagefile'] as $key => $value) {
-          $_FILES['imagefile'][$key] = array($value);
-        }
-        $this->postData['files'] = array($_FILES['imagefile']['name'][0]);
-      }
+      // $this->postData['files'] = isset($_FILES['imagefile']) ? $_FILES['imagefile']['name'] : '';
+      // // Backwards compatability hack for dumpers that don't support multifile uploading
+      // if ($this->postData['files'] && !is_array($this->postData['files'])) {
+      //   foreach ($_FILES['imagefile'] as $key => $value) {
+      //     $_FILES['imagefile'][$key] = array($value);
+      //   }
+      //   $this->postData['files'] = array($_FILES['imagefile']['name'][0]);
+      // }
 
+      // TODO This is more "Validate the Thread ID" than "Is this a reply"
       $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->id);
 
       $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->id);
@@ -201,11 +224,16 @@ class public_core_post_post extends kxCmd
 
       @header('Location: ' . $url);
     } elseif (isset($this->request['reportpost'])) {
-      logging::addReport(
-        $this->request['board_id'],
-        $this->request['post'],
-        $this->request['reportreason'],
-      );
+      $this->reportPost();
     }
+  }
+
+  private function reportPost()
+  {
+    logging::addReport(
+      $this->request['board_id'],
+      $this->request['post'],
+      $this->request['reportreason'],
+    );
   }
 }

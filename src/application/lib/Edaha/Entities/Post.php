@@ -66,7 +66,7 @@ class Post
         }
     }
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     public ?DateTime $locked_at = null {
         get {
             return $this->locked_at;
@@ -82,7 +82,7 @@ class Post
         }
     }
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     public ?DateTime $stickied_at = null {
         get {
             return $this->stickied_at;
@@ -118,7 +118,7 @@ class Post
     }
 
     #[ORM\OneToMany(targetEntity: PostAttachment::class, mappedBy: 'post', cascade: ['persist', 'remove'])]
-    private Collection $attachments {
+    public Collection $attachments {
         get {
             return $this->attachments;
         }

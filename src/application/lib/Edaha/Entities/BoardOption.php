@@ -4,7 +4,7 @@ use Edaha\Entities\Board;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: BoardOptionRepository::class)]
 #[ORM\Table(name: 'board_options')]
 class BoardOption
 {

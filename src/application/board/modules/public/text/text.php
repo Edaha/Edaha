@@ -78,20 +78,15 @@ class public_board_text_text extends public_board_base_baseboard {
   
   public function checkFields($postData) {
     if ($postData['is_reply']) {
-      if (!$this->postClass->checkEmpty($postData)) {
+      if (!isset($postData['thread_info']['message']) || $postData['thread_info']['message'] == '') {
         kxFunc::showError(_('A message is required for a reply.'));
       }
     }
     else {
-      $result = $this->db->select("posts")
-                         ->condition("board_id", $this->board->board_id)
-                         ->condition("is_deleted",0)
-                         ->condition("subject", substr($postData['subject'] ?? '', 0, 74))
-                         ->condition("parent_post_id", 0)
-                         ->countQuery()
-                         ->execute()
-                         ->fetchField();
-      if ($result > 0) {
+      $thread = $this->entityManager
+        ->getRepository(\Edaha\Entities\Post::class)
+        ->findOneBy(array('board' => $this->board->id, 'subject' => $postData['post_fields']['subject'], 'parent' => null));
+      if (isset($thread)) {
         kxFunc::showError(_('Duplicate thread subject'), _('Text boards may have only one thread with a unique subject. Please pick another.'));
       }
     }
@@ -109,23 +104,12 @@ class public_board_text_text extends public_board_base_baseboard {
 
   protected function buildPageAllThreads() {
     $this->twigData['isindex'] = false;
-    $this->twigData['posts'] = $this->db->select("posts")
-      ->fields("posts")
-      ->condition("board_id", $this->board->board_id)
-      ->condition("parent_post_id", 0)
-      ->condition("is_deleted", 0)
-      ->orderBy("is_stickied", "DESC")
-      ->orderBy("bumped_at_timestamp", "DESC")
-      ->execute()
-      ->fetchAll();
     
-    foreach ($this->twigData['posts'] as &$thread) {
-      $thread = $this->buildPost($thread, true);
-      $thread = $this->buildThread($thread);
-    }
-
+    $this->twigData['posts'] = $this->entityManager->getRepository(\Edaha\Entities\Post::class)
+      ->getRecentThreads($this->board->id, null);
+    
     $content = kxTemplate::get('board/' . $this->boardType . '/txt_all_threads', $this->twigData, true);
     
-    kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . '/list.html', $content, $this->board->board_name);
+    kxFunc::outputToFile(KX_BOARD . '/' . $this->board->directory . '/list.html', $content, $this->board->directory);
   } 
 }

@@ -325,11 +325,10 @@ class Posting
       // And if the number of replies already in the thread are less than the maximum thread replies before perma-sage...
       if ($postData['thread_info']['replies'] <= $board->board_max_replies) {
         // Bump the thread
-        $this->db->update("posts")
-          ->fields(array("bumped_at_timestamp" => date('Y-m-d H:i:s')))
-          ->condition("board_id", $board->board_id)
-          ->condition("post_id", $postData['thread_info']['parent'])
-          ->execute();
+        $thread = $this->entityManager->find(Edaha\Entities\Post::class, $postData['thread_info']['parent']);
+        $thread->bump();
+        // $this->entityManager->persist($thread);
+        // $this->entityManager->flush();
       }
     }
   }

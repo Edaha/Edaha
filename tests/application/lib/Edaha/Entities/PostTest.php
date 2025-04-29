@@ -98,6 +98,26 @@ final class PostTest extends TestCase
         $this->assertFalse($post->is_stickied);
     }
 
+    public function testCanNotStickyReplyPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post1 = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post2 = new Edaha\Entities\Post($board, 'message2', 'subject2', $post1);
+
+        $this->expectException(Exception::class);
+        $post2->sticky();
+    }
+
+    public function testCanNotStickyAlreadyStickyPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post->sticky();
+
+        $this->expectException(Exception::class);
+        $post->sticky();
+    }
+
     public function testCanLockPost(): void
     {
         $board = new Edaha\Entities\Board('name', 'directory');
@@ -127,5 +147,66 @@ final class PostTest extends TestCase
 
         $this->expectException(Exception::class);
         $post2 = new Edaha\Entities\Post($board, 'message2', 'subject2', $post1);
+    }
+
+    public function testCanNotLockReplyPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post1 = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post2 = new Edaha\Entities\Post($board, 'message2', 'subject2', $post1);
+
+        $this->expectException(Exception::class);
+        $post2->lock();
+    }
+    
+    public function testCanNotLockAlreadyLockedPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post->lock();
+
+        $this->expectException(Exception::class);
+        $post->lock();
+    }
+
+    public function testCanNotUnlockAlreadyUnlockedPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+
+        $this->expectException(Exception::class);
+        $post->unlock();
+    }
+    
+    public function testCanBumpThread(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+
+        $this->assertInstanceOf(DateTime::class, $post->bumped_at);
+        $originalBumpTime = $post->bumped_at;
+        sleep(1);
+        $post->bump();
+        $this->assertNotEquals($originalBumpTime, $post->bumped_at);
+    }
+
+    public function testCanNotBumpLockedPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post->lock();
+
+        $this->expectException(Exception::class);
+        $post->bump();
+    }
+
+    public function testCanNotBumpReplyPost(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post1 = new Edaha\Entities\Post($board, 'message', 'subject');
+        $post2 = new Edaha\Entities\Post($board, 'message2', 'subject2', $post1);
+
+        $this->expectException(Exception::class);
+        $post2->bump();
     }
 }

@@ -61,9 +61,6 @@ class Post
         get {
             return $this->created_at;
         }
-        set {
-            $this->created_at = $value;
-        }
     }
 
     #[ORM\Column(nullable: true)]
@@ -117,6 +114,13 @@ class Post
         }
     }
 
+    #[ORM\Column(nullable: true)]
+    public ?DateTime $bumped_at = null {
+        get {
+            return $this->bumped_at;
+        }
+    }
+
     #[ORM\OneToMany(targetEntity: PostAttachment::class, mappedBy: 'post', cascade: ['persist', 'remove'])]
     public Collection $attachments {
         get {
@@ -142,6 +146,9 @@ class Post
         $this->board->addPost($this);
         if (!is_null($parent)) {
             $this->parent->addReply($this);
+        }
+        if (is_null($parent)) {
+            $this->bump();
         }
     }
 
@@ -225,6 +232,17 @@ class Post
             throw new \Exception('Post is not locked');
         }
         $this->locked_at = null;
+    }
+
+    public function bump(): void
+    {
+        if ($this->is_reply) {
+            throw new \Exception('Cannot bump a reply post');
+        }
+        if ($this->is_locked) {
+            throw new \Exception('Cannot bump a locked post');
+        }
+        $this->bumped_at = new DateTime('now');
     }
 }
 

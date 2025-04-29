@@ -14,13 +14,13 @@
 			</thead>
 			<tbody>
 	{% endif %}
-		{% for thread in threads %}				
+		{% for thread in threads %}
 			{% if board.board_compact_list and isindex %}
 				<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index }}">{{ loop.index }}: </a><a href="res/{{ thread.id }}.html">{% else %}res/{{ thread.id }}.html">{{ loop.index }}: {% endif %}{{ thread.subject }} ({{ thread.replies|length + 1 }})</a>{% if loop.last %}{% else %} &nbsp;{% endif %}
 			{% else %}
 				<tr>
 					<td>
-						<a href="res/{{ thread.id }}.html">{{ loop.index }}</a>
+						<a href="res/{{ thread.id }}.html">{{ loop.index }}{% if thread.is_stickied %}!{% endif %}</a>
 					</td>
 					<td>
 						<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index - 1 }}{% else %}res/{{ thread.id }}.html{% endif %}">
@@ -31,7 +31,7 @@
 						{{ thread.replies|length + 1 }}
 					</td>
 					<td nowrap="nowrap">
-						<small>{{ thread.bumped_at_timestamp|date("d/m/y @ h:i a T") }}</small>
+						<small>{{ thread.bumped_at|date("d/m/y @ h:i a T") }}</small>
 					</td>
 				</tr>
 			{% endif %}

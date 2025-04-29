@@ -95,14 +95,16 @@
 					{{ thread.message }}
 				</blockquote>
 			</div>
+
 	{% set replies_to_show = (thread.is_stickied) ? kxEnv("display:stickyreplies") : kxEnv("display:replies") %}
 	{% set omitted_reply_count = (thread.replies|length > replies_to_show) ? thread.replies|length - replies_to_show : 0 %}
+	
 	{% if omitted_reply_count > 0 %}
 		<span class="omitted">
 			{{ omitted_reply_count }} more replies omitted.
 		</span>
 	{% endif %}
-	{% for post in thread.getLastNReplies( (thread.is_stickied) ? kxEnv("display:stickyreplies") : kxEnv("display:replies") ) %}
+	{% for post in thread.getLastNReplies( replies_to_show ) %}
 		{% set thread_post_counter = 1 + omitted_reply_count + loop.index %}
 		<h3>
 			<span class="postnum">

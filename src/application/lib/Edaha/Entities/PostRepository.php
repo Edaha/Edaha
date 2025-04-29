@@ -11,7 +11,7 @@ class PostRepository extends EntityRepository
                 FROM \Edaha\Entities\Post p
                 JOIN p.board b
                 WHERE b.id = :board_id AND p.parent IS NULL
-                ORDER BY p.stickied_at DESC, p.created_at DESC";
+                ORDER BY p.stickied_at DESC, p.bumped_at DESC";
         $query = $this->getEntityManager()->createQuery($dql);
         $query->setParameter('board_id', $board_id);
         // $query->setFirstResult(($page - 1) * $limit);
@@ -22,7 +22,7 @@ class PostRepository extends EntityRepository
     public function getAllRecentPosts(?int $limit = 10)
     {
         $dql = "SELECT p, b
-                FROM Post p
+                FROM \Edaha\Entities\Post p
                 JOIN p.board b
                 ORDER BY p.created_at DESC";
         $query = $this->getEntityManager()->createQuery($dql);
@@ -35,7 +35,7 @@ class PostRepository extends EntityRepository
     public function getRecentPosts(int $board_id, ?int $limit = 10)
     {
         $dql = "SELECT p, b
-                FROM Post p
+                FROM \Edaha\Entities\Post p
                 JOIN p.board b
                 WHERE b.id = :board_id
                 ORDER BY p.created_at DESC";
@@ -50,13 +50,15 @@ class PostRepository extends EntityRepository
     public function getRecentThreads($boardName, $limit = 10)
     {
         $dql = "SELECT p, b
-                FROM Post p
+                FROM \Edaha\Entities\Post p
                 JOIN p.board b
                 WHERE b.name = :boardName AND p.parent IS NULL
                 ORDER BY p.created_at DESC";
         $query = $this->getEntityManager()->createQuery($dql);
         $query->setParameter('boardName', $boardName);
-        $query->setMaxResults($limit);
+        if (!is_null($limit)) {
+            $query->setMaxResults($limit);
+        }
         return $query->getResult();
     }
 
@@ -64,7 +66,7 @@ class PostRepository extends EntityRepository
     public function getPostsByIp($ip, $limit = 10)
     {
         $dql = "SELECT p, b
-                FROM Post p
+                FROM \Edaha\Entities\Post p
                 JOIN p.board b
                 WHERE p.ip = :ip
                 ORDER BY p.created_at DESC";

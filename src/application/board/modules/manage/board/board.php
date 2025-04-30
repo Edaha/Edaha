@@ -122,7 +122,7 @@ class manage_board_board_board extends kxCmd
     // Begin Doctrine implementation
     $board = $this->entityManager->getRepository('\Edaha\Entities\Board')->findOneBy(['directory' => $this->request['name']]);
 
-    if ($board && $this->request['edit'] == "") {
+    if ($board && (!isset($this->request['edit']) || $this->request['edit'] == "")) {
       $this->twigData['notice']['type'] = 'error';
       $this->twigData['notice']['message'] = sprintf(_('Board /%s/ already exists.'), $this->request['name']);
       return;
@@ -134,11 +134,11 @@ class manage_board_board_board extends kxCmd
       $this->entityManager->flush();
     }
 
-    if ($this->request['edit'] == "") {
+    if (!isset($this->request['edit']) || $this->request['edit'] == "") {
       $this->twigData['notice']['message'] = _('Board successfully added.');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],
-        sprintf('Created board /%s/', $fields['board_name']),
+        sprintf('Created board /%s/', $board->directory),
         __CLASS__
       );
     } else {
@@ -146,7 +146,7 @@ class manage_board_board_board extends kxCmd
       $this->twigData['notice']['message'] = _('Board successfully edited.');
       logging::addLogEntry(
         kxFunc::getManageUser()['user_name'],
-        sprintf('Edited board /%s/', $fields['board_name']),
+        sprintf('Edited board /%s/', $board->directory),
         __CLASS__
       );
     }

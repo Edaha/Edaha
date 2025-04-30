@@ -83,6 +83,9 @@ class public_board_text_text extends public_board_base_baseboard {
       }
     }
     else {
+      if (!isset($postData['post_fields']['subject']) || $postData['post_fields']['subject'] == '') {
+        kxFunc::showError(_('A subject is required for a new thread.'));
+      }
       $thread = $this->entityManager
         ->getRepository(\Edaha\Entities\Post::class)
         ->findOneBy(array('board' => $this->board->id, 'subject' => $postData['post_fields']['subject'], 'parent' => null));

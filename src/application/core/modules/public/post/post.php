@@ -42,7 +42,7 @@ class public_core_post_post extends kxCmd
   
   protected \Edaha\Entities\Board $board;
 
-  private function verifyBoard($board_id)
+  private function verifyBoard($board_id): void
   {
     $board = $this->entityManager->find(\Edaha\Entities\Board::class, $board_id);
     if (is_null($board)) {
@@ -51,7 +51,7 @@ class public_core_post_post extends kxCmd
     $this->board = $board;
   }
 
-  private function setUpBoardClass()
+  private function setUpBoardClass(): void
   {
     $board_type = $this->board->type;
 
@@ -79,11 +79,118 @@ class public_core_post_post extends kxCmd
     }
   }
 
-  private function setUpPostingClass()
+  private function setUpPostingClass(): void
   {
     require_once kxFunc::getAppDir('core') . '/classes/posting.php';
     $this->_postingClass = new posting($this->environment);
     $this->environment->set('kx:classes:board:posting:id', $this->_postingClass);
+  }
+
+  private function checkPostingRules(): void
+  {
+    $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->id);
+    $this->_postingClass->checkMessageLength($this->_boardClass->board->max_message_length);
+    $this->_postingClass->checkBlacklistedText($this->_boardClass->board->id);
+    $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
+    $this->_postingClass->checkBannedHash($this->_boardClass->board);
+  }
+
+  private function setThreadInfo(): void
+  {
+    //How many replies, is the thread locked, etc
+    if ($this->postData['is_reply']) {
+      $this->postData['thread_info'] = $this->_postingClass->threadInfo($this->environment->get('kx:classes:board:id')->board_id, $this->request['replythread']);
+    } else {
+      $this->postData['thread_info'] = array('replies' => 0, 'locked' => 0, 'parent' => 0);
+    }
+  }
+
+  private function setPostFields(): void
+  {
+      // Subject, email, etc fields need special processing
+      $this->postData['post_fields'] = $this->_postingClass->parseFields();
+      $this->postData['post_fields']['postpassword'] = isset($this->request['postpassword']) ? $this->request['postpassword'] : '';
+  }
+
+  private function handleModPosting(): void
+  {
+    // Are we modposting?
+    $this->postData['user_authority'] = $this->_postingClass->userAuthority();
+    if (isset($this->request['displaystaffstatus'])) {
+      $this->postData['flags'] .= 'D';
+    }
+
+    if (isset($this->request['lockonpost'])) {
+      $this->postData['flags'] .= 'L';
+    }
+
+    if (isset($this->request['stickyonpost'])) {
+      $this->postData['flags'] .= 'S';
+    }
+
+    if (isset($this->request['rawhtml'])) {
+      $this->postData['flags'] .= 'RH';
+    }
+
+    if (isset($this->request['usestaffname'])) {
+      $this->postData['flags'] .= 'N';
+    }
+
+    $this->postData['display_status'] = 0;
+    $this->postData['lock_on_post'] = 0;
+    $this->postData['sticky_on_post'] = 0;
+
+    // If they are just a normal user, or vip...
+    if ($this->postData['user_authority'] == 0 || $this->postData['user_authority'] > 2) {
+      // If the thread is locked
+      if ($this->postData['thread_info']['locked'] == 1) {
+        // Don't let the user post
+        kxFunc::showError(_('Sorry, this thread is locked and can not be replied to.'));
+      }
+
+      $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
+      // Or, if they are a moderator/administrator...
+    } else {
+      // If they checked the D checkbox, set the variable to tell the script to display their staff status (Admin/Mod) on the post during insertion
+      if (isset($this->request['displaystaffstatus'])) {
+        $this->postData['display_status'] = true;
+      }
+
+      // If they checked the RH checkbox, set the variable to tell the script to insert the post as-is...
+      if (isset($this->request['rawhtml'])) {
+        $this->postData['thread_info']['message'] = $this->request['message'];
+        // Otherwise, parse it as usual...
+      } else {
+        $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
+      }
+
+      // If they checked the L checkbox, set the variable to tell the script to lock the post after insertion
+      if (isset($this->request['lockonpost'])) {
+        $this->postData['lock_on_post'] = true;
+      }
+
+      // If they checked the S checkbox, set the variable to tell the script to sticky the post after insertion
+      if (isset($this->request['stickyonpost'])) {
+        $this->postData['sticky_on_post'] = true;
+      }
+      if (isset($this->request['usestaffname'])) {
+        $_POST['name'] = kxFunc::md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed'));
+        $post_name = kxFunc::md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed'));
+      }
+    }
+  }
+
+  private function redirectToBoardOrPost(): void
+  {
+    $url = kxEnv::Get("kx:paths:boards:path") . '/' . $this->_boardClass->board->directory;
+
+    if (!$this->postData['is_reply']) {
+      $url .= '/' . kxEnv::Get('kx:pages:first');
+    } else {
+      $url .= '/res/' . intval($this->request['replythread']) . '.html';
+    }
+
+    @header('Location: ' . $url);
   }
 
   public function exec(kxEnv $environment)
@@ -120,115 +227,25 @@ class public_core_post_post extends kxCmd
       // TODO This is more "Validate the Thread ID" than "Is this a reply"
       $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->id);
 
-      $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->id);
-      $this->_postingClass->checkMessageLength($this->_boardClass->board->max_message_length);
-      $this->_postingClass->checkBlacklistedText($this->_boardClass->board->id);
-      $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
-      $this->_postingClass->checkBannedHash($this->_boardClass->board);
+      $this->checkPostingRules();
 
-      //How many replies, is the thread locked, etc
-      if ($this->postData['is_reply']) {
-        $this->postData['thread_info'] = $this->_postingClass->threadInfo($this->environment->get('kx:classes:board:id')->board_id, $this->request['replythread']);
-      } else {
-        $this->postData['thread_info'] = array('replies' => 0, 'locked' => 0, 'parent' => 0);
-      }
-      // Subject, email, etc fields need special processing
-      $this->postData['post_fields'] = $this->_postingClass->parseFields();
-      $this->postData['post_fields']['postpassword'] = isset($this->request['postpassword']) ? $this->request['postpassword'] : '';
+      $this->setThreadInfo();
+      
+      $this->setPostFields();
 
-      $nextid = $this->db->select("posts")
-        ->fields("posts", array("post_id"))
-        ->condition("board_id", $this->_boardClass->board->id)
-        ->execute()
-        ->fetchField();
-      if ($nextid) {
-        $this->postData['next_id'] = ($nextid + 1);
-      } else {
-        $this->postData['next_id'] = 1;
-      }
+      $this->handleModPosting();
 
-      // Are we modposting?
-      $this->postData['user_authority'] = $this->_postingClass->userAuthority();
-      if (isset($this->request['displaystaffstatus'])) {
-        $this->postData['flags'] .= 'D';
-      }
-
-      if (isset($this->request['lockonpost'])) {
-        $this->postData['flags'] .= 'L';
-      }
-
-      if (isset($this->request['stickyonpost'])) {
-        $this->postData['flags'] .= 'S';
-      }
-
-      if (isset($this->request['rawhtml'])) {
-        $this->postData['flags'] .= 'RH';
-      }
-
-      if (isset($this->request['usestaffname'])) {
-        $this->postData['flags'] .= 'N';
-      }
-
-      $this->postData['display_status'] = 0;
-      $this->postData['lock_on_post'] = 0;
-      $this->postData['sticky_on_post'] = 0;
-
-      // If they are just a normal user, or vip...
-      if ($this->postData['user_authority'] == 0 || $this->postData['user_authority'] > 2) {
-        // If the thread is locked
-        if ($this->postData['thread_info']['locked'] == 1) {
-          // Don't let the user post
-          kxFunc::showError(_('Sorry, this thread is locked and can not be replied to.'));
-        }
-
-        $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
-        // Or, if they are a moderator/administrator...
-      } else {
-        // If they checked the D checkbox, set the variable to tell the script to display their staff status (Admin/Mod) on the post during insertion
-        if (isset($this->request['displaystaffstatus'])) {
-          $this->postData['display_status'] = true;
-        }
-
-        // If they checked the RH checkbox, set the variable to tell the script to insert the post as-is...
-        if (isset($this->request['rawhtml'])) {
-          $this->postData['thread_info']['message'] = $this->request['message'];
-          // Otherwise, parse it as usual...
-        } else {
-          $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
-        }
-
-        // If they checked the L checkbox, set the variable to tell the script to lock the post after insertion
-        if (isset($this->request['lockonpost'])) {
-          $this->postData['lock_on_post'] = true;
-        }
-
-        // If they checked the S checkbox, set the variable to tell the script to sticky the post after insertion
-        if (isset($this->request['stickyonpost'])) {
-          $this->postData['sticky_on_post'] = true;
-        }
-        if (isset($this->request['usestaffname'])) {
-          $_POST['name'] = kxFunc::md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed'));
-          $post_name = kxFunc::md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed'));
-        }
-      }
       //kxFunc::checkBadUnicode($this->postData['post_fields']);
 
       $this->_boardClass->processPost($this->postData);
-      $url = kxEnv::Get("kx:paths:boards:path") . '/' . $this->_boardClass->board->board_name;
 
-      if (!$this->postData['is_reply']) {
-        $url .= '/' . kxEnv::Get('kx:pages:first');
-      } else {
-        $url .= '/res/' . intval($this->request['replythread']) . '.html';
-      }
-
-      @header('Location: ' . $url);
+      $this->redirectToBoardOrPost();
     } elseif (isset($this->request['reportpost'])) {
       $this->reportPost();
     }
   }
 
-  private function reportPost()
+  private function reportPost(): void
   {
     logging::addReport(
       $this->request['board_id'],

@@ -31,6 +31,17 @@ class Posting
     }
   }
 
+  /**
+   * Retrieves information about a thread, including the number of replies, 
+   * whether the thread is locked, and its parent post ID.
+   *
+   * @param int $boardID The ID of the board where the thread is located.
+   * @param int $threadID The ID of the thread to retrieve information for.
+   * @return array An associative array containing:
+   *               - 'replies' (int): The number of replies in the thread.
+   *               - 'locked' (int): Whether the thread is locked (default is 0).
+   *               - 'parent' (int): The parent post ID of the thread.
+   */
   public function threadInfo($boardID, $threadID)
   {
     $threadData = array('replies' => 0, 'locked' => 0, 'parent' => 0);
@@ -69,6 +80,13 @@ class Posting
       return false;
     }
   }
+
+  /**
+   * Checks if the post data is empty.
+   *
+   * @param array $postData The data of the post being validated.
+   * @return bool Always returns true (placeholder for future validation logic).
+   */
   public function checkEmpty($postData)
   {
     // TODO Move to Post Validator
@@ -77,12 +95,26 @@ class Posting
     // }
     return true;
   }
+
+  /**
+   * Checks if the post contains no file (supposedly) but actually if there's no message.
+   *
+   * @param array $postData The data of the post being validated.
+   * @return bool Returns false if the message is empty, otherwise null.
+   */
   public function checkNoFile($postData)
   {
     if (empty($postData['message'])) {
       return false;
     }
   }
+
+  /**
+   * Forces anonymity for the post if the board requires it.
+   *
+   * @param array $postData The data of the post being modified.
+   * @param object $board The board object containing board settings.
+   */
   public function forcedAnon(&$postData, $board)
   {
     if ($board->board_forced_anon == 0) {
@@ -91,6 +123,13 @@ class Posting
       }
     }
   }
+
+  /**
+   * Handles the calculation of the name and tripcode (stubbed) for a post.
+   *
+   * @param array $postData The data of the post being processed.
+   * @return array An array containing the name and tripcode.
+   */
   public function handleTripcode($postData)
   {
     $nameandtripcode = ''; //$nameandtripcode = kxFunc::calculateNameAndTripcode($postData['post_fields']['name']);
@@ -103,6 +142,13 @@ class Posting
     }
     return array($name, $tripcode);
   }
+
+  /**
+   * Checks and processes post commands, including sticky and lock status.
+   *
+   * @param array $postData The data of the post being processed.
+   * @return array An array containing the sticky and lock status.
+   */
   public function checkPostCommands(&$postData)
   {
     $commands = $this->checkStickyAndLock($postData);
@@ -116,6 +162,14 @@ class Posting
     }
     return $commands;
   }
+
+  /**
+   * Checks if the sticky-on-post or lock-on-post commands were set
+   * and then processes the sticky and lock status of a post.
+   *
+   * @param array $postData The data of the post being processed.
+   * @return array An array containing the sticky and lock status.
+   */
   public function checkStickyAndLock($postData)
   {
     $result = array('sticky' => 0, 'lock' => 0);
@@ -139,6 +193,12 @@ class Posting
     }
     return $result;
   }
+
+  /**
+   * Checks if the reply is empty and sets a default message if configured.
+   *
+   * @param array $postData The data of the post being processed.
+   */
   public function checkEmptyReply(&$postData)
   {
     if ($postData['thread_info']['parent'] != 0) {
@@ -151,6 +211,13 @@ class Posting
       }
     }
   }
+
+  /**
+   * Checks if the user is posting too quickly and enforces a delay.
+   *
+   * @param bool $isReply Indicates if the post is a reply.
+   * @param int $boardId The ID of the board where the post is being made.
+   */
   public function checkPostingTime($isReply, $boardId)
   {
     // Generate the query needed
@@ -169,6 +236,12 @@ class Posting
       kxFunc::showError(_('Please wait a moment before posting again.'), _('You are currently posting faster than the configured minimum post delay allows.'));
     }
   }
+
+  /**
+   * Checks the length of the message and enforces a maximum length.
+   *
+   * @param int $maxMessageLength The maximum allowed message length.
+   */
   public function checkMessageLength($maxMessageLength)
   {
     // If the length of the message is greater than the board's maximum message length...
@@ -177,6 +250,13 @@ class Posting
       kxFunc::showError(sprintf(_('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($this->request['message']), $maxMessageLength));
     }
   }
+
+  /**
+   * Checks if the captcha is valid and verifies it.
+   *
+   * @param object $board The board object containing board settings.
+   * @param array $postData The data of the post being processed.
+   */
   public function checkCaptcha($board, $postData)
   {
     //TODO: This NEEDS to be looked to see if it can be fit somewhere better
@@ -210,6 +290,12 @@ class Posting
       }
     }
   }
+
+  /**
+   * Checks if the file hash is banned and bans the user if it is.
+   *
+   * @param object $board The board object containing board settings.
+   */
   public function checkBannedHash($board)
   {
     // Banned file hash check
@@ -237,6 +323,12 @@ class Posting
       }
     }
   }
+
+  /**
+   * Checks if the post contains blacklisted text and takes appropriate action.
+   *
+   * @param int $boardId The ID of the board where the post is being made.
+   */
   public function checkBlacklistedText($boardId)
   {
     // TODO Revisit filters operation
@@ -270,6 +362,12 @@ class Posting
   }
   }*/
   }
+
+  /**
+   * Checks if the oekaki file is valid and returns its path.
+   *
+   * @return string|bool The path to the oekaki file if valid, false otherwise.
+   */
   public function checkOekaki()
   {
     // If oekaki seems to be in the url...
@@ -284,6 +382,8 @@ class Posting
 
     return false;
   }
+
+
   public function getPostTag()
   {
     /* Check for and parse tags if one was provided, and they are enabled */
@@ -293,6 +393,13 @@ class Posting
     }
     return false;
   }
+
+  /**
+   * Checks if the post is a modpost and logs it.
+   *
+   * @param array $post The post data.
+   * @param object $board The board object containing board settings.
+   */
   public function modPost($post, $board)
   {
     if ($post['user_authority'] > 0 && $post['user_authority'] != 3) {
@@ -306,6 +413,12 @@ class Posting
       management_addlogentry($modpost_message, 1, md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed')));
     }
   }
+
+  /**
+   * Sets cookies for the post data.
+   *
+   * @param array $post The post data.
+   */
   public function setCookies($post)
   {
     if ($post['name_save'] && isset($this->request['name'])) {
@@ -318,6 +431,13 @@ class Posting
 
     setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
   }
+
+  /**
+   * Checks if the post is a sage and handles it accordingly.
+   *
+   * @param array $postData The data of the post being processed.
+   * @param object $board The board object containing board settings.
+   */
   public function checkSage($postData, $board)
   {
     // If the user replied to a thread, and they weren't sage-ing it...
@@ -332,6 +452,13 @@ class Posting
       }
     }
   }
+
+  /**
+   * Updates the thread watch status for the user.
+   *
+   * @param array $postData The data of the post being processed.
+   * @param object $board The board object containing board settings.
+   */
   public function updateThreadWatch($postData, $board)
   {
     // If the user replied to a thread he is watching, update it so it doesn't count his reply as unread
@@ -364,6 +491,14 @@ class Posting
       }
     }
   }
+
+  /**
+   * Handles the upload of files and images for the post.
+   *
+   * @param array $postData The data of the post being processed.
+   * @param object $board The board object containing board settings.
+   * @return array An array of uploaded files.
+   */
   public function doUpload(&$postData, $board)
   {
     $uploadClass = $this->environment->get('kx:classes:board:upload:id');
@@ -390,6 +525,12 @@ class Posting
     }
     return $uploadClass->files;
   }
+
+  /**
+   * Parses the fields from the request data and returns them as an array.
+   *
+   * @return array An associative array containing the parsed fields: name, email, and subject.
+   */
   public function parseFields()
   {
     /* Fetch and process the name, email, and subject fields from the post data */
@@ -404,6 +545,12 @@ class Posting
 
     return array("name" => $post_name, "email" => $post_email, "subject" => $post_subject);
   }
+
+  /**
+   * Checks if the user has mod or admin authority based on the provided password.
+   *
+   * @return int The authority level of the user (0 = no authority, 1 = admin, 2 = mod).
+   */
   public function userAuthority()
   {
     $user_authority = 0;
@@ -425,6 +572,19 @@ class Posting
 
     return $user_authority;
   }
+
+  /**
+   * Creates a new post and saves it to the database.
+   *
+   * @param array $postData The data of the post being created.
+   * @param array $post The post data.
+   * @param array $files The files associated with the post.
+   * @param string $ip The IP address of the user making the post.
+   * @param bool $stickied Indicates if the post should be stickied.
+   * @param bool $locked Indicates if the post should be locked.
+   * @param object $board The board object containing board settings.
+   * @return int The ID of the newly created post.
+   */
   public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board)
   {
     $reply_to_post = null;
@@ -442,68 +602,5 @@ class Posting
     $this->entityManager->flush();
 
     return $new_post->id;
-
-    // $id = $this->db->insert("posts")
-    //   ->fields(array(
-    //     'parent_post_id' => $postData['thread_info']['parent'],
-    //     'board_id' => $board->board_id,
-    //     'name' => $post['name'],
-    //     'tripcode' => $post['tripcode'],
-    //     'email' => $post['email'],
-    //     'subject' => $post['subject'],
-    //     'message' => $post['message'],
-    //     'password' => $postData['post_fields']['postpassword'],
-    //     'created_at_timestamp' => $timeStamp,
-    //     'bumped_at_timestamp' => $timeStamp,
-    //     'ip' => kxFunc::encryptMD5($ip, kxEnv::Get('kx:misc:randomseed')),
-    //     'ip_md5' => md5($ip),
-    //     'authority' => $postData['user_authority_display'],
-    //     'tag' => isset($post['tag']) ? $post['tag'] : '',
-    //     'is_stickied' => $stickied,
-    //     'is_locked' => $locked,
-    //   ))
-    //   ->execute();
-
-    // if (!$id || kxEnv::Get('kx:db:type') == 'sqlite') {
-    //   // Non-mysql installs don't return the insert ID after insertion, we need to manually get it.
-    //   $id = $this->db->select("posts")
-    //     ->fields("posts", array("post_id"))
-    //     ->condition("board_id", $board->board_id)
-    //     ->condition("created_at_timestamp", $timeStamp)
-    //     ->condition("ip_md5", md5($ip))
-    //     ->range(0, 1)
-    //     ->execute()
-    //     ->fetchField();
-    // }
-
-    // if ($id == 1 && $board->board_start > 1) {
-    //   $this->db->update("posts")
-    //     ->fields(array("id" => $board->board_start))
-    //     ->condition("board_id", $board->board_id)
-    //     ->execute();
-    //   $id = $board->board_start;
-    // }
-
-    // if (!empty($files)) {
-    //   foreach ($files as $file) {
-    //     $this->db->insert("post_files")
-    //       ->fields(array(
-    //         'file_post' => $id,
-    //         'file_board' => $board->board_id,
-    //         'file_md5' => $file['file_md5'],
-    //         'file_name' => $file['file_name'],
-    //         'file_type' => substr($file['file_type'], 1),
-    //         'file_original' => mb_convert_encoding($file['original_file_name'], 'ASCII', 'UTF-8'),
-    //         'file_size' => $file['file_size'],
-    //         'file_size_formatted' => /*kxFunc::convertBytes($file['file_size'])*/$file['file_size'],
-    //         'file_image_width' => $file['image_w'],
-    //         'file_image_height' => $file['image_h'],
-    //         'file_thumb_width' => $file['thumb_w'],
-    //         'file_thumb_height' => $file['thumb_h'],
-    //       ))
-    //       ->execute();
-    //   }
-    // }
-    // return $id;
   }
 }

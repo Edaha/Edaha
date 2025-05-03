@@ -33,7 +33,7 @@ if (!defined('KUSABA_RUNNING')) {
   die();
 }
 
-class public_board_base_baseboard extends kxCmd
+abstract class public_board_base_baseboard extends kxCmd
 {
   /**
    * Board data
@@ -45,7 +45,7 @@ class public_board_base_baseboard extends kxCmd
 
   public $archive_dir;
 
-  public $embeds;
+  // public $embeds; // TODO Embeds will be a type of PostAttachment
 
   /**
    * Arguments eventually being sent to twig
@@ -59,6 +59,7 @@ class public_board_base_baseboard extends kxCmd
   protected $buildPageResults;
 
   protected $preparedThreads;
+
   /**
    * Run requested method
    *
@@ -71,9 +72,7 @@ class public_board_base_baseboard extends kxCmd
    */
   public function exec(kxEnv $environment)
   {
-    $this->board = $this->entityManager->find(\Edaha\Entities\Board::class, $this->request['board_id'] || $this->request['id']);
-    // $this->board = Edaha\Entities\Board::loadFromDbByName($this->request['board'], $this->db);
-    
+    $this->board = $this->entityManager->find(\Edaha\Entities\Board::class, $this->request['board_id']);    
 
     $this->environment->set('kx:classes:board:id', $this->board);
 
@@ -88,58 +87,22 @@ class public_board_base_baseboard extends kxCmd
   {
 
     $message = trim($message);
-    //$this->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
+    //$this->parser->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
     //var_dump($message);
     //$message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
     if (kxEnv::Get('kx:posts:makelinks')) {
-      $this->makeClickable($message);
+      $this->environment->get('kx:classes:board:parse:id')->makeClickable($message);
     }
-    $this->clickableQuote($message);
-    $this->coloredQuote($message);
-    $this->bbCode($message);
-    $this->wordFilter($message);
-    $this->checkNotEmpty($message);
-    return $message;
-  }
-
-  public function cutWord(&$message, $where)
-  {
-    $this->environment->get('kx:classes:board:parse:id')->cutWord($message, $where);
-  }
-
-  public function makeClickable(&$message)
-  {
-    $this->environment->get('kx:classes:board:parse:id')->makeClickable($message);
-  }
-
-  public function clickableQuote(&$message)
-  {
     $this->environment->get('kx:classes:board:parse:id')->clickableQuote($message);
-  }
-
-  public function coloredQuote(&$message)
-  {
     $this->environment->get('kx:classes:board:parse:id')->coloredQuote($message);
-  }
-
-  public function bbCode(&$message)
-  {
     $this->environment->get('kx:classes:board:parse:id')->bbCode($message);
-  }
-
-  public function wordFilter(&$message)
-  {
     $this->environment->get('kx:classes:board:parse:id')->wordFilter($message);
-  }
-
-  public function checkNotEmpty(&$message)
-  {
     $this->environment->get('kx:classes:board:parse:id')->checkNotEmpty($message);
+    return $message;
   }
 
   public function processPost($postData)
   {
-
     if (empty($this->postClass)) {
       $this->postClass = $this->environment->get('kx:classes:board:posting:id');
     }
@@ -195,10 +158,10 @@ class public_board_base_baseboard extends kxCmd
       if ($postData['thread_info']['parent'] == 0) {
         // Regenerate the thread
         // TODO Readd once renderer objects are implemented
-        // $this->regenerateThreads($post['post_id']);
+        $this->regenerateThreads($post['post_id']);
       } else {
         // Regenerate the thread
-        // $this->regenerateThreads($postData['thread_info']['parent']);
+        $this->regenerateThreads($postData['thread_info']['parent']);
       }
     }
   }
@@ -510,13 +473,68 @@ class public_board_base_baseboard extends kxCmd
     return $return . "\n";
   }
 
+  public function regenerateThread(\Edaha\Entities\Post $thread)
+  {
+    for ($i = 0; $i < 3; $i++) {
+      if ((!$i > 0 && kxEnv::Get('kx:extras:firstlast')) || ($i == 1 && count($thread->replies) < 50) || ($i == 2 && count($thread->replies) < 100)) {
+        break;
+      }
+      if ($i == 0) {
+        $lastBit = "";
+        $executiontime_start_thread = microtime(true);
+
+        $post = $this->buildPost($thread, false);
+
+        //-----------------------------------------------------------------------
+        // When using a pointer in a foreach, the $value variable persists
+        // as the last index of an array, we can use this to our advantage here.
+        //-----------------------------------------------------------------------
+        // TODO Readd Post Spy
+        // if (kxEnv::Get('kx:extras:postspy')) {
+        //   $twigData['lastid'] = $post->post_id;
+        // }
+        // // Now we can get rid of it
+        // unset($post);
+
+        $this->pageHeader($thread->id);
+        $this->postBox($thread->id);
+        //-----------
+        // Dwoo-hoo
+        //-----------
+        $this->twigData['replythread'] = $thread->id;
+        $this->twigData['threadid'] = $thread->id;
+        $this->twigData['thread'] = $thread;
+        $this->twigData['replycount'] = count($this->twigData['posts']) - 1;
+        $this->footer(false, (microtime(true) - $executiontime_start_thread));
+
+      } else if ($i == 1) {
+        $lastBit = "+50";
+        $this->twigData['modifier'] = "last50";
+
+        // Grab the last 50 replies
+        $this->twigData['posts'] = array_slice($thread, -50, 50);
+        // Add the thread to the top of this, since it wont be included in the result
+        array_unshift($this->twigData['posts'], $thread[0]);
+
+      } elseif ($i == 2) {
+        $lastBit = "-100";
+        $this->twigData['modifier'] = "first100";
+
+        // Grab the first 100 posts
+        $this->twigData['posts'] = array_slice($thread, 0, 100);
+      }
+      $this->twigData['board'] = $this->board;
+      //print_r($this->twigData);
+      $content = kxTemplate::get('board/' . $this->board->type . '/thread', $this->twigData, true);
+      kxFunc::outputToFile(KX_BOARD . '/' . $this->board->directory . $this->archive_dir . '/res/' . $thread->id . $lastBit . '.html', $content, $this->board->directory);
+    }
+    
+  }
   /**
    * Regenerate each thread's corresponding html file, starting with the most recently bumped
    */
   public function regenerateThreads($id = 0)
   {
-
-    $numimages = 0;
     // TODO Replaced by Attachments concept
     // $embeds = $this->db->select("embeds")
     //   ->fields("embeds")
@@ -527,98 +545,15 @@ class public_board_base_baseboard extends kxCmd
     if ($id == 0) {
 
       // Okay let's do this!
-      $threads = $this->db->select("posts")
-        ->fields("posts")
-        ->condition("board_id", $this->board->board_id)
-        ->condition("parent_post_id", 0)
-        ->condition("is_deleted", 0)
-        ->orderBy("post_id", "DESC")
-        ->execute()
-        ->fetchAll();
+      $threads = $this->board->getAllThreads();
+
       if (count($threads) > 0) {
         foreach ($threads as $thread) {
-          $this->regenerateThreads($thread->post_id);
+          $this->regenerateThread($thread);
         }
       }
-    } else {
-      for ($i = 0; $i < 3; $i++) {
-        if ((!$i > 0 && kxEnv::Get('kx:extras:firstlast')) || ($i == 1 && $replycount < 50) || ($i == 2 && $replycount < 100)) {
-          break;
-        }
-        if ($i == 0) {
-          $lastBit = "";
-          $executiontime_start_thread = microtime(true);
-
-          //---------------------------------------------------------------------------------------------------
-          // Okay, this may seem confusing, but we're caching this so we can use it as a prepared statement
-          // instead of executing it every time. This is only really useful if we're regenerating all threads,
-          // but the perfomance impact otherwise is minimal.
-          //----------------------------------------------------------------------------------------------------
-          if (!isset($this->preparedThreads)) {
-            $this->preparedThreads = $this->db->select("posts")
-              ->fields("posts")
-              ->where("board_id = " . $this->board->board_id . " AND (post_id = ? OR parent_post_id = ?) AND is_deleted = 0")
-              ->orderBy("post_id")
-              ->build();
-          }
-          // Since we prepared the statement earlier, we just need to execute it.
-          $this->preparedThreads->execute([$id, $id]);
-          $thread = $this->preparedThreads->fetchAll();
-          foreach ($thread as &$post) {
-            $post = $this->buildPost($post, false);
-            if (!empty($post->file_type)) {
-              foreach ($post->file_type as $type) {
-                if (in_array($type, ['jpg', 'gif', 'png', '.webp', '.webp'])) {
-                  $numimages++;
-                }
-              }
-            }
-          }
-
-          //-----------------------------------------------------------------------
-          // When using a pointer in a foreach, the $value variable persists
-          // as the last index of an array, we can use this to our advantage here.
-          //-----------------------------------------------------------------------
-          if (kxEnv::Get('kx:extras:postspy')) {
-            $twigData['lastid'] = $post->post_id;
-          }
-          // Now we can get rid of it
-          unset($post);
-
-          $this->pageHeader($id);
-          $this->postBox($id);
-          //-----------
-          // Dwoo-hoo
-          //-----------
-          $this->twigData['numimages'] = $numimages;
-          $this->twigData['replythread'] = $id;
-          $this->twigData['threadid'] = $thread[0]->post_id;
-          $this->twigData['posts'] = $thread;
-          $replycount = (count($thread) - 1);
-          $this->twigData['replycount'] = $replycount;
-          $this->footer(false, (microtime(true) - $executiontime_start_thread));
-
-        } else if ($i == 1) {
-          $lastBit = "+50";
-          $this->twigData['modifier'] = "last50";
-
-          // Grab the last 50 replies
-          $this->twigData['posts'] = array_slice($thread, -50, 50);
-          // Add the thread to the top of this, since it wont be included in the result
-          array_unshift($this->twigData['posts'], $thread[0]);
-
-        } elseif ($i == 2) {
-          $lastBit = "-100";
-          $this->twigData['modifier'] = "first100";
-
-          // Grab the first 100 posts
-          $this->twigData['posts'] = array_slice($thread, 0, 100);
-        }
-        $this->twigData['board'] = $this->board;
-        //print_r($this->twigData);
-        $content = kxTemplate::get('board/' . $this->boardType . '/thread', $this->twigData, true);
-        kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . $this->archive_dir . '/res/' . $id . $lastBit . '.html', $content, $this->board->board_name);
-      }
+    } else { 
+      $this->regenerateThread($this->entityManager->find(\Edaha\Entities\Post::class, $id));
     }
   }
 
@@ -632,28 +567,17 @@ class public_board_base_baseboard extends kxCmd
    */
   public function pageHeader($replythread = 0)
   {
-    $tpl = [];
-
-    $tpl['htmloptions'] = ((kxEnv::Get('kx:misc:locale') == 'he' && empty($this->board->board_locale)) || $this->board->board_locale == 'he') ? ' dir="rtl"' : '';
-
-    $tpl['title'] = '';
+    $this->twigData['title'] = '';
 
     if (kxEnv::Get('kx:pages:dirtitle')) {
-      $tpl['title'] .= '/' . $this->board->board_name . '/ - ';
+      $this->twigData['title'] .= '/' . $this->board->directory . '/ - ';
     }
-    $tpl['title'] .= $this->board->board_desc;
+    $this->twigData['title'] .= $this->board->name;
 
-    $this->twigData['title'] = $tpl['title'];
-    $this->twigData['htmloptions'] = $tpl['htmloptions'];
-    $this->twigData['locale'] = $this->board->board_locale;
+    $this->twigData['htmloptions'] = ((kxEnv::Get('kx:misc:locale') == 'he' && empty($this->board->locale)) || $this->board->locale == 'he') ? ' dir="rtl"' : '';
+    $this->twigData['locale'] = $this->board->locale;
     $this->twigData['board'] = $this->board;
-    // TODO: Fix ads
-    /*$twigData['topads'] = $this->db->select("ads")
-    ->fields("ads", array("ad_code"))
-    ->condition("ad_position", "top")
-    ->condition("ad_display", 1)
-    ->execute()
-    ->fetchField();*/
+
     $this->twigData['boardlist'] = kxFunc::visibleBoardList();
     $this->twigData['replythread'] = $replythread;
     $this->twigData['ku_styles'] = explode(':', kxEnv::Get('kx:css:imgstyles'));
@@ -684,7 +608,6 @@ class public_board_base_baseboard extends kxCmd
    */
   public function footer($noboardlist = false, $executiontime = 0, $hide_extra = false)
   {
-
     if ($noboardlist || $hide_extra) {
       $this->twigData['boardlist'] = "";
     }
@@ -692,14 +615,6 @@ class public_board_base_baseboard extends kxCmd
     if ($executiontime) {
       $this->twigData['executiontime'] = round($executiontime, 2);
     }
-
-    // TODO: Fix ads
-    /*$this->twigData['botads'] = $this->db->select("ads")
-  ->fields("ads", array("ad_code"))
-  ->condition("ad_position", "bot")
-  ->condition("ad_display", 1)
-  ->execute()
-  ->fetchField();*/
   }
 
   public function markThread($thread, $i)

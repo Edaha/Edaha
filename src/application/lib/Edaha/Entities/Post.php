@@ -96,7 +96,7 @@ class Post
     }
 
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'parent', fetch: 'EXTRA_LAZY')]
-    #[ORM\OrderBy(['created_at' => 'DESC'])]
+    #[ORM\OrderBy(['created_at' => 'ASC'])]
     public Collection $replies;
 
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'replies')]
@@ -243,6 +243,15 @@ class Post
             throw new \Exception('Cannot bump a locked post');
         }
         $this->bumped_at = new DateTime('now');
+    }
+
+    public function getPosterDisplayName(): string
+    {
+        if ($this->poster->name === null || $this->poster->name === '' || $this->board->forced_anonymous) {
+            return (isset($this->board->anonymous)) ? $this->board->anonymous : 'Anonymous';
+        } else {
+            return $this->poster->name;
+        }
     }
 }
 

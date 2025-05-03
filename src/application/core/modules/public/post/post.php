@@ -229,11 +229,11 @@ class public_core_post_post extends kxCmd
 
       $this->checkPostingRules();
 
-      $this->setThreadInfo();
-      
-      $this->setPostFields();
+      // These two suck, it needs to be done differently
+      // $this->setThreadInfo();
+      // $this->setPostFields();
 
-      $this->handleModPosting();
+      // $this->handleModPosting();
 
       //kxFunc::checkBadUnicode($this->postData['post_fields']);
 

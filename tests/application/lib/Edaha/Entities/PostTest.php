@@ -209,4 +209,14 @@ final class PostTest extends TestCase
         $this->expectException(Exception::class);
         $post2->bump();
     }
+
+    public function testCanGetPosterDisplayName(): void
+    {
+        $board = new Edaha\Entities\Board('name', 'directory');
+        $post = new Edaha\Entities\Post($board, 'message', 'subject');
+
+        $this->assertSame('Anonymous', $post->getPosterDisplayName());
+        $post->poster->name = 'John Doe';
+        $this->assertSame('John Doe', $post->getPosterDisplayName());   
+    }
 }

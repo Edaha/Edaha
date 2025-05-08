@@ -22,188 +22,210 @@
 {% endblock %}
 
 {% block boardcontent %}
-{% for post in posts %}
+<form id="delform" action="{{ kxEnv("paths:script:path") }}/board.php" method="post">
+<input type="hidden" name="board" value="{{ board.id }}" />
+<h2>
+	{{ thread.subject }}
+	<span class="replies">({{ thread.replies|length - 1 }})</span>
+</h2>
 
-		{% if post.parent_post_id == 0 %} {# or isread #}
-			<form id="delform" action="{{ kxEnv("paths:script:path") }}/board.php" method="post">
-			<input type="hidden" name="board" value="{{ board.board_name }}" />
-
-			{% if post.parent_post_id == 0 %}
-			<h2>
-				{{ post.subject }}
-				<span class="replies">({{ posts|length - 1 }})</span></h2>
-			{% endif %} 
-		{% endif %}
-		
-		<div class="post even">
-		<h3>
-			<span class="postnum">
-			{% if post.parent_post_id == 0 %}
-				<a href="javascript:quote(1, 'post{{ post.post_id }}');">1</a>
-				<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ post.post_id }}.html#1">.</a>
-			{% else %}
-				<a href="javascript:quote({% if not postnum %}{{ loop.index }}{% else %}{{ postnum }}{% endif %}, 'post{{ post.post_id }}');">{% if not postnum %}{{ loop.index  }}{% else %}{{ postnum }}{% endif %}</a>
-				<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ post.parent_post_id }}.html#{% if not postnum %}{{ loop.index }}{% else %}{{ postnum }}{% endif %}">.</a>
-			{% endif %}
-			</span>
-			<span class="postinfo">
+<div class="post">
+	<h3>
+		<span class="postnum">
+			<a href="javascript:quote(1, 'post{{ thread.id }}');">1</a>
+			<a href="{{ kxEnv("paths:boards:path") }}/{{ board.directory }}/res/{{ thread.id }}.html#1">.</a>
+		</span>
+		<span class="postinfo">
 			Name: 
 			<span class="postername">
-			{% if post.email != '' and board.board_anonymous != '' %}
-				<a href="mailto:{{ post.email }}">
-			{% endif %}
-			{% if post.name == '' and post.tripcode == '' %}
-				{{ board.board_anonymouse }}
-			{% elseif post.name == '' and post.tripcode != '' %}
-			{% else %}
-				{{ post.name }}
-			{% endif %}
-			{% if post.email != '' and board.board_anonymous != '' %}
-				</a>
-			{% endif %}
-
+				{% if thread.poster.email != '' and board_options.anonymous != '' %}
+					<a href="mailto:{{ post.email }}">
+				{% endif %}
+				{{ thread.getPosterDisplayName() }}
+				{% if thread.poster.email != '' and board_options.anonymous != '' %}
+					</a>
+				{% endif %}
 			</span>
-			{% if post.tripcode != '' %}
-				<span class="postertrip">!{{ post.tripcode }}</span>
+			{% if thread.poster.tripcode != '' %}
+				<span class="postertrip">!{{ thread.poster.tripcode }}</span>
 			{% endif %}
-			@ {{ post.timestamp_formatted }}
-			{% if board.board_show_id %}
-				ID: {{ post.ip_md5|slice(0,5) }}
+			@ {{ thread.created_at|date("Y-m-d H:i:s") }}
+			{% if board.show_id %}
+				ID: {{ thread.poster.ip_md5|slice(0,5) }}
 			{% endif %}
-			<input type="checkbox" name="post[]" value="{{ post.post_id }}" />
-			<span id="dnb-{{ board.board_name }}-{{ post.post_id }}-{% if post.parent_post_id == 0 %}y{% else %}n{% endif %}"></span>
+			<input type="checkbox" name="post[]" value="{{ thread.id }}" />
+			<span id="dnb-{{ board.directory }}-{{ thread.id }}-y"></span>
 			<span class="id"></span>
-			</span>
+		</span>
+	</h3>
+
+	<blockquote>
+		{{ thread.message }}
+	</blockquote>	
+	{% if not thread.is_stickied and ((board.max_age > 0 and (thread.created_at + (board.max_age * 3600)) < ("now"|date("U") + 7200 ) )) %}
+		<span class="oldpost">
+			Marked for deletion (old)
+		</span>
+		<br />
+	{% endif %}
+</div>
+<div id="replies{{ thread.id }}{{ board.directory }}">
+	{% if modifier %}
+		<span class="abbrev">
+			{% if modifier == 'last50' %}
+				{% set omitted_posts = replycount - 50 %}
+				{% set shown_text = 'Last 50 posts shown'|trans %}
+			{% elseif modifier == 'first100' %}
+				{% set omitted_posts = replycount - 50 %}
+				{% set shown_text = 'First 100 posts shown'|trans %}
+			{% endif %}
+			{% if omitted_posts == 1 %}
+				{{ '%s post omitted.'|trans|format(omitted_posts) }}
+			{% else %}
+				{{ '%s posts omitted.'|trans|format(omitted_posts) }}
+			{% endif %}
+			{{ shown_text }}
+		</span>
+	{% endif %}
+	{% for post in thread.getAllReplies() %}
+		<div class="post even">
+			<h3>
+				<span class="postnum">
+				{% if post.parent_post_id == 0 %}
+					<a href="javascript:quote(1, 'post{{ post.post_id }}');">1</a>
+					<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ post.post_id }}.html#1">.</a>
+				{% else %}
+					<a href="javascript:quote({% if not postnum %}{{ loop.index }}{% else %}{{ postnum }}{% endif %}, 'post{{ post.post_id }}');">{% if not postnum %}{{ loop.index  }}{% else %}{{ postnum }}{% endif %}</a>
+					<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ post.parent_post_id }}.html#{% if not postnum %}{{ loop.index }}{% else %}{{ postnum }}{% endif %}">.</a>
+				{% endif %}
+				</span>
+				<span class="postinfo">
+				Name: 
+				<span class="postername">
+				{% if post.poster.email != '' and board_options.anonymous != '' %}
+					<a href="mailto:{{ post.email }}">
+				{% endif %}
+					{{ post.getPosterDisplayName() }}
+				{% if post.poster.email != '' and board_options.anonymous != '' %}
+					</a>
+				{% endif %}
+
+				</span>
+				{% if post.poster.tripcode != '' %}
+					<span class="postertrip">!{{ post.poster.tripcode }}</span>
+				{% endif %}
+				@ {{ post.created_at|date("Y-m-d H:i:s") }}
+				{% if board.board_show_id %}
+					ID: {{ post.ip_md5|slice(0,5) }}
+				{% endif %}
+				<input type="checkbox" name="post[]" value="{{ post.id }}" />
+				<span id="dnb-{{ board.directory }}-{{ post.id }}-n"></span>
+				<span class="id"></span>
+				</span>
 			</h3>
 			<blockquote>
 				{{ post.message }}
 			</blockquote>
-			</div>
-			{% if not post.is_stickied and post.parent_post_id == 0 and ((board.board_max_age > 0 and (post.created_at_timestamp + (board.board_max_age * 3600)) < ("now"|date("U") + 7200 ) ) or (post.deleted_at_timestamp > 0 and post.deleted_at_timestamp <= ("now"|date("U") + 7200))) %}
-				<span class="oldpost">
-					Marked for deletion (old)
-				</span>
-				<br />
-			{% endif %}
-			{% if post.parent_post_id == 0 %}
-				<div id="replies{{ post.post_id }}{{ board.board_name }}">
-				{% if modifier %}
-					<span class="abbrev">
-						{% if modifier == 'last50' %}
-							{% set omitted_posts = replycount - 50 %}
-							{% set shown_text = 'Last 50 posts shown'|trans %}
-						{% elseif modifier == 'first100' %}
-							{% set omitted_posts = replycount - 50 %}
-							{% set shown_text = 'First 100 posts shown'|trans %}
-						{% endif %}
-						{% if omitted_posts == 1 %}
-							{{ '%s post omitted.'|trans|format(omitted_posts) }}
-						{% else %}
-							{{ '%s posts omitted.'|trans|format(omitted_posts) }}
-						{% endif %}
-						{{ shown_text }}
-						</span>
-					{% endif %}
-			{% endif %}
-			{% if loop.last %}{# and not isread? #}
+		</div>
+		{% if loop.last %}{# and not isread? #}
 			<table class="hborder">
-			<tbody>
-			<tr>
-			<td>
-			Delete Post: <input type="password" name="postpassword" size="8" />&nbsp;<input name="deletepost" value="Delete" type="submit" />
-			</td>
-			</tr>
-			</tbody>
-			</table>
-			</form>
-			<script type="text/javascript"><!--
-				set_delpass("delform");
-			//--></script>
-			
-			{% if loop.last and not posts.0.post_locked %}
-				<form name="post{{ posts.0.post_id }}" id="post{{ posts.0.post_id }}" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post" {% if board.board_enablecaptcha == 1 %}onsubmit="return checkcaptcha('post{{ post.parent_post_id }}');"{% endif %}>
-				<input type="hidden" name="board" value="{{ board.board_name }}" />
-				<input type="hidden" name="replythread" value="{{ posts.0.post_id }}" />
-				<input name="email" size="25" value="" style="display: none;" />
-				<table class="postform">
-				<tr>
-					{% if board.board_forcedanon != 1 %}
-						<td class="label">
-							<label>Name:</label>
-						</td>
+				<tbody>
+					<tr>
 						<td>
-							<input name="name" size="25" maxlength="75" />
-						</td>
-					{% endif %}
-					<td class="label">
-						<label>Email:</label>
-					</td>
-					<td>
-						<input name="em" size="25" maxlength="75" />
-					</td>
-					{% if board.board_forcedanon != 1 %}
-						<td>
-							<input type="submit" name="submit" value="Reply" class="submit" />
-							<a href="#" onclick="toggleOptions('{$threadid}', 'post{$threadid}', '{{ board.board_name }}');return false;">More...</a>
+							Delete Post: <input type="password" name="postpassword" size="8" />&nbsp;<input name="deletepost" value="Delete" type="submit" />
 						</td>
 					</tr>
-					<tr>
-					{% endif %}
-
-					{% if board.board_enablecaptcha == 1 %}
-						<td class="label"><label for="captcha">Captcha:</label></td>
-						<td>
-							<a href="#" onclick="javascript:document.getElementById('captchaimage').src = '{{ kxEnv("paths:script:path") }}/captcha.php?' + Math.random();return false;">
-							<img id="captchaimage" src="{{ kxEnv("paths:script:path") }}/captcha.php" border="0" width="90" height="30" alt="Captcha image" />
-							</a>&nbsp;
-							<input type="text" id="captcha" name="captcha" size="8" maxlength="6" />
-						</td>
-					{% endif %}
-					{% if (board.board_forcedanon == 1 and board.board_enablecaptcha != 1) or board.board_forcedanon != 1 %}
-						<td class="label">
-							<label>Password:</label>
-						</td>
-						<td>
-							<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
-						</td>
-					{% endif %}
-					{% if board.board_forcedanon == 1 %}
-						<td>
-							<input type="submit" name="submit" value="Reply" class="submit" />
-							<a href="#" onclick="toggleOptions('{$threadid}', 'post{$threadid}', '{{ board.board_name }}');return false;">More...</a>
-						</td>
-						{% if board.board_enablecaptcha == 1 %}
-						</tr>
+				</tbody>
+			</table>
+		</form>
+		<script type="text/javascript"><!--
+			set_delpass("delform");
+		//--></script>
+				
+				{% if loop.last and not thread.is_locked %}
+					<form name="post{{ thread.id }}" id="post{{ thread.id }}" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post" {% if board.board_enablecaptcha == 1 %}onsubmit="return checkcaptcha('post{{ post.parent_post_id }}');"{% endif %}>
+						<input type="hidden" name="board_id" value="{{ board.id }}" />
+						<input type="hidden" name="replythread" value="{{ thread.id }}" />
+						<input name="email" size="25" value="" style="display: none;" />
+						<table class="postform">
 							<tr>
+								{% if board.board_forcedanon != 1 %}
+									<td class="label">
+										<label>Name:</label>
+									</td>
+									<td>
+										<input name="name" size="25" maxlength="75" />
+									</td>
+								{% endif %}
 								<td class="label">
-									<label>Password:</label>
+									<label>Email:</label>
 								</td>
 								<td>
-									<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
+									<input name="em" size="25" maxlength="75" />
 								</td>
+								{% if board.board_forcedanon != 1 %}
+									<td>
+										<input type="submit" name="submit" value="Reply" class="submit" />
+										<a href="#" onclick="toggleOptions('{$threadid}', 'post{$threadid}', '{{ board.board_name }}');return false;">More...</a>
+									</td>
+							</tr>
+						<tr>
 						{% endif %}
-					{% endif %}
-				</tr>
-				<tr style="display: none;" id="opt{$threadid}"><td></td></tr>
-				<tr>
-					<td class="postfieldleft">
-						<span class="postnum">
-							{{ posts|length + 1 }}
-						</span>
-					</td>
-					<td colspan="4">
-						<textarea name="message" rows="8" cols="64"></textarea>
-					</td>
-				</tr>
-			</table>
-			<div id="preview{$threadid}"></div>
+
+						{% if board.board_enablecaptcha == 1 %}
+							<td class="label"><label for="captcha">Captcha:</label></td>
+							<td>
+								<a href="#" onclick="javascript:document.getElementById('captchaimage').src = '{{ kxEnv("paths:script:path") }}/captcha.php?' + Math.random();return false;">
+								<img id="captchaimage" src="{{ kxEnv("paths:script:path") }}/captcha.php" border="0" width="90" height="30" alt="Captcha image" />
+								</a>&nbsp;
+								<input type="text" id="captcha" name="captcha" size="8" maxlength="6" />
+							</td>
+						{% endif %}
+						{% if (board.board_forcedanon == 1 and board.board_enablecaptcha != 1) or board.board_forcedanon != 1 %}
+							<td class="label">
+								<label>Password:</label>
+							</td>
+							<td>
+								<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
+							</td>
+						{% endif %}
+						{% if board.board_forcedanon == 1 %}
+							<td>
+								<input type="submit" name="submit" value="Reply" class="submit" />
+								<a href="#" onclick="toggleOptions('{$threadid}', 'post{$threadid}', '{{ board.board_name }}');return false;">More...</a>
+							</td>
+							{% if board.board_enablecaptcha == 1 %}
+							</tr>
+								<tr>
+									<td class="label">
+										<label>Password:</label>
+									</td>
+									<td>
+										<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
+									</td>
+							{% endif %}
+						{% endif %}
+					</tr>
+					<tr style="display: none;" id="opt{$threadid}"><td></td></tr>
+					<tr>
+						<td class="postfieldleft">
+							<span class="postnum">
+								{{ posts|length + 1 }}
+							</span>
+						</td>
+						<td colspan="4">
+							<textarea name="message" rows="8" cols="64"></textarea>
+						</td>
+					</tr>
+				</table>
+				<div id="preview{$threadid}"></div>
+					</form>
+					<script type="text/javascript"><!--
+						set_inputs('post{{ thread.id }}');
+					//--></script>
+			{% elseif isread %}
 				</form>
-				<script type="text/javascript"><!--
-					set_inputs('post{{ post.parent_post_id }}');
-				//--></script>
-		{% elseif isread %}
-			</form>
-		{% endif %}
-		{% endif %}
-{% endfor %}
+			{% endif %}
+			{% endif %}
+	{% endfor %}
 {% endblock boardcontent %}

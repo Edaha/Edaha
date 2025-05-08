@@ -19,33 +19,34 @@
 				{# {% endif %}	 #}
 				<h1 align="center">{{ board.board_desc }}</h1>
 				{{ board.board_includeheader }}
-				</div>
 			</div>
-			{% if kxEnv("css:txtswitcher") %} {# and $isindex #}
-				<div class="hborder">
-					<div class="head midhead" id="styleswitcher">
-						<strong>Styles:</strong> 
-						{% for style in kxEnv("css:txtstyles") | split(":") %}
-							<a href="#" id="style_{{ style|capitalize }}">
-							{{ style|capitalize }}
-							</a> 
-						{% endfor %}
-					</div>
-				</div>
-			{% endif %}
-			{% if isindex == 0 %}
-				Pages:&nbsp;<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/">Front</a>
-				{% for page in pages %}
-					&nbsp;
-					{% if loop.index != thispage %}
-						<a href="list{% if loop.index != 1 %}{{ loop.index }}{% endif %}.html">
-					{% endif %}	
-					{{ loop.index }}
-					{% if loop.index != thispage %}
-						</a>
-					{% endif %}
+		</div>
+	{% if kxEnv("css:txtswitcher") %} {# and $isindex #}
+		<div class="hborder">
+			<div class="head midhead" id="styleswitcher">
+				<strong>Styles:</strong> 
+				{% for style in kxEnv("css:txtstyles") | split(":") %}
+					<a href="#" id="style_{{ style|capitalize }}">
+					{{ style|capitalize }}
+					</a> 
 				{% endfor %}
-				<br />
+			</div>
+		</div>
+	{% endif %}
+	{% if isindex == 0 %}
+		Pages:&nbsp;<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/">Front</a>
+		{% for page in pages %}
+			&nbsp;
+			{% if loop.index != thispage %}
+				<a href="list{% if loop.index != 1 %}{{ loop.index }}{% endif %}.html">
+			{% endif %}	
+			{{ loop.index }}
+			{% if loop.index != thispage %}
+				</a>
 			{% endif %}
+		{% endfor %}
+		<br />
+	{% endif %}
+	</div>
 {# {% endif %} #}
 {% endblock boardheader %}

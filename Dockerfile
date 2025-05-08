@@ -9,7 +9,7 @@
 ################################################################################
 
 # Create a stage for installing app dependencies defined in Composer.
-FROM composer:lts as prod-deps
+FROM composer:lts AS prod-deps
 WORKDIR /app
 RUN composer update
 
@@ -29,7 +29,7 @@ RUN --mount=type=bind,source=composer.json,target=composer.json \
     composer dump-autoload
 
 # Dev dependencies
-FROM composer:lts as dev-deps
+FROM composer:lts AS dev-deps
 WORKDIR /app
 RUN --mount=type=bind,source=./composer.json,target=composer.json \
     --mount=type=bind,source=./composer.lock,target=composer.lock \
@@ -49,7 +49,7 @@ RUN --mount=type=bind,source=./composer.json,target=composer.json \
 # most recent version of that tag when you build your Dockerfile.
 # If reproducibility is important, consider using a specific digest SHA, like
 # php@sha256:99cede493dfd88720b610eb8077c8688d3cca50003d76d1d539b0efc8cca72b4.
-FROM php:8.4-apache as base
+FROM php:8.4-apache AS base
 
 # Your PHP application may require additional PHP extensions to be installed
 # manually. For detailed instructions for installing extensions can be found, see
@@ -87,7 +87,7 @@ COPY ./src /var/www/html
 COPY ./docker/apache/httpd.conf /etc/apache2/apache2.conf
 RUN chown -R www-data:www-data /var/www
 
-FROM base as development
+FROM base AS development
 COPY ./tests /var/www/html/tests
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 RUN pecl install xdebug \
@@ -95,11 +95,11 @@ RUN pecl install xdebug \
 COPY ./docker/php/conf.d /usr/local/etc/php/conf.d
 COPY --from=dev-deps app/vendor/ /var/www/html/vendor
 
-FROM development as test
+FROM development AS test
 WORKDIR /var/www/html
-RUN ./vendor/bin/phpunit tests/application/lib/Edaha/Entities/BoardTest.php
+RUN ./vendor/bin/phpunit tests/
 
-FROM base as final
+FROM base AS final
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --from=prod-deps app/vendor/ /var/www/html/vendor
 USER www-data

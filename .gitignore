@@ -10,3 +10,4 @@ pull.php
 vendor/
 
 .DS_Store
+*.sqlite

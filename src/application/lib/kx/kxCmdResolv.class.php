@@ -174,6 +174,13 @@ abstract class kxCmd
      * @var object
      */
     protected $db;
+
+    /**
+     * kxOrm instance
+     * 
+     * @var object
+     */
+    protected $entityManager;
     
     /**
      * The request infortmation
@@ -202,6 +209,7 @@ abstract class kxCmd
         $this->environment   =  $environment;
         $this->db            =  kxDB::getinstance();
         $this->request       =  kxEnv::$request;
+        $this->entityManager  =  kxOrm::getEntityManager();
     }
     
     /**

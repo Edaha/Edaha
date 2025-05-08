@@ -24,7 +24,8 @@ class manage_board_contentmoderation_posts extends kxCmd
 
   private function _show()
   {
-    $recent_posts = Edaha\Entities\Post::getRecentPosts($this->db, 100, 0);
+    $recent_posts = $this->entityManager->getRepository(\Edaha\Entities\Post::class)
+        ->getAllRecentPosts(10);
     $this->twigData['recent_posts'] = $recent_posts;
     kxTemplate::output('manage/recents', $this->twigData);
   }

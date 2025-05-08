@@ -299,7 +299,9 @@ class public_core_post_post extends kxCmd
     if (!$this->noko) {
       $url .= '/' . kxEnv::Get('kx:pages:first');
     } else {
-      $url .= '/res/' . ($this->post->is_reply) ? $this->parent_post->id : $this->post->id . '.html';
+      $url .= '/res/';
+      $url .=  ($this->post->is_reply) ? $this->parent_post->id : $this->post->id;
+      $url .=  '.html';
     }
 
     @header('Location: ' . $url);
@@ -307,21 +309,17 @@ class public_core_post_post extends kxCmd
 
   public function exec(kxEnv $environment)
   {
-    // TODO Add Doctrine transaction support
     $this->preValidate();
     $this->validate();
-    
-    $this->preProcess();
-    
-    $this->buildPost();
-    $this->process();
-    
-    $this->postProcess();
 
-    $this->entityManager->flush();
-
+    $this->entityManager->wrapInTransaction(function() {
+      $this->preProcess();
+      $this->buildPost();
+      $this->process();
+      $this->postProcess();
+    });
+    
     $this->postCommit();
-
     $this->redirectToBoardOrPost();
 
     { // TODO Move to an image handler
@@ -335,14 +333,9 @@ class public_core_post_post extends kxCmd
       //   $this->postData['files'] = array($_FILES['imagefile']['name'][0]);
       // }
     }
-
-
-    // TODO Readd Reporting
-    // elseif (isset($this->request['reportpost'])) {
-    //   $this->reportPost();
-    // }
   }
 
+  // TODO Move to a report.php
   private function reportPost(): void
   {
     logging::addReport(

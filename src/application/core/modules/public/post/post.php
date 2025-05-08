@@ -283,9 +283,11 @@ class public_core_post_post extends kxCmd
       $this->parent_post->bump();
     }
 
+
     // TODO Set Cookies
     // TODO Modlog entries after modposting
     // TODO ThreadWatch
+    $this->_boardClass->postProcess($this->post);
   }
   
   private function redirectToBoardOrPost(): void

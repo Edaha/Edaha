@@ -119,15 +119,6 @@ abstract class public_board_base_baseboard extends kxCmd
     // TODO Move to postProcess
     // $this->postClass->setCookies($post);
 
-    // Regenerate board pages
-    $this->regeneratePages();
-
-    // Regenerate thread pages
-    if ($post->is_thread) {
-      $this->regenerateThreads($post->id);
-    } else {
-      $this->regenerateThreads($post->parent->id);
-    }
 
     {
       // TODO Readd once PostAttachment is implemented
@@ -142,6 +133,19 @@ abstract class public_board_base_baseboard extends kxCmd
 
       // Trim any threads which have been pushed past the limit, or exceed the maximum age limit
       //kxExec:TrimToPageLimit($board_class->board);
+    }
+  }
+
+  public function postProcess(\Edaha\Entities\Post $post)
+  {
+    // Regenerate board pages
+    $this->regeneratePages();
+
+    // Regenerate thread pages
+    if ($post->is_thread) {
+      $this->regenerateThreads($post->id);
+    } else {
+      $this->regenerateThreads($post->parent->id);
     }
   }
 

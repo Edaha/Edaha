@@ -131,6 +131,13 @@ class Post
     #[ORM\Embedded(class: Poster::class)]
     public Poster $poster;
 
+    #[ORM\Column]
+    public string $deletion_password {
+        set {
+            $this->deletion_password = password_hash($value, PASSWORD_DEFAULT);
+        }
+    }
+
     public function __construct(Board $board, string $message, ?string $subject = null, ?Post $parent = null)
     {
         $this->board = $board;
@@ -260,6 +267,9 @@ class Poster
 {
     #[ORM\Column(nullable: true)]
     public ?string $name = null;
+
+    #[ORM\Column(nullable: true)]
+    public ?string $tripcode = null;
 
     #[ORM\Column(nullable: true)]
     public ?string $email = null;

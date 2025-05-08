@@ -34,6 +34,14 @@ if (!defined('KUSABA_RUNNING')) {
   die();
 }
 
+/**
+ * @file
+ * Posting module
+ *
+ * This module handles the posting of messages to the board.
+ *
+ * @todo Work out a system to allow modules to hook into the posting module and do their own magic at certain points during posting.
+ */
 class public_core_post_post extends kxCmd
 {
   protected $_boardClass;
@@ -41,6 +49,11 @@ class public_core_post_post extends kxCmd
   protected $postData = array();
   
   protected \Edaha\Entities\Board $board;
+  protected \Edaha\Entities\Post $parent_post;
+  protected \Edaha\Entities\Post $post;
+
+  protected bool $sage = false;
+  protected bool $noko = false;
 
   private function verifyBoard($board_id): void
   {
@@ -88,11 +101,11 @@ class public_core_post_post extends kxCmd
 
   private function checkPostingRules(): void
   {
-    $this->_postingClass->checkPostingTime($this->postData['is_reply'], $this->_boardClass->board->id);
-    $this->_postingClass->checkMessageLength($this->_boardClass->board->max_message_length);
-    $this->_postingClass->checkBlacklistedText($this->_boardClass->board->id);
-    $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
-    $this->_postingClass->checkBannedHash($this->_boardClass->board);
+    $this->_postingClass->checkIfPostingTooFast($this->post);
+    $this->_postingClass->checkIfMessageTooLong($this->post);
+    // $this->_postingClass->checkBlacklistedText($this->_boardClass->board->id);
+    // $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
+    // $this->_postingClass->checkBannedHash($this->_boardClass->board);
   }
 
   private function setThreadInfo(): void
@@ -148,7 +161,6 @@ class public_core_post_post extends kxCmd
         kxFunc::showError(_('Sorry, this thread is locked and can not be replied to.'));
       }
 
-      $this->postData['thread_info']['message'] = $this->_boardClass->parseData($this->request['message']);
       // Or, if they are a moderator/administrator...
     } else {
       // If they checked the D checkbox, set the variable to tell the script to display their staff status (Admin/Mod) on the post during insertion
@@ -180,14 +192,110 @@ class public_core_post_post extends kxCmd
     }
   }
 
+  private function validateReplyThread(): void
+  {
+    if ($this->request['replythread'] > 0) {
+      $this->parent_post = $this->entityManager->find(Edaha\Entities\Post::class, $this->request['replythread']);
+      if ($this->parent_post == null || $this->parent_post->is_reply) {
+        /* Kill the script, stopping the posting process */
+        kxFunc::showError(_('Invalid thread ID.'), _('That thread may have been recently deleted.'));
+      }
+    }
+  }
+
+  private function checkEmailCommands(): void
+  {
+    if (isset($this->request['em'])) {
+      $email = strtolower($this->request['em']);
+      
+      // Check if used Noko/Return
+      if ($email == 'noko' || $email == 'return') {
+        $this->noko = true;
+        $this->request['email'] = '';
+      }
+
+      // TODO Support Japanese sage
+      // Reference from before:
+      //   $ords_email = unistr_to_ords($email);
+      //   'sage' = $ords_email != [19979, 12370] 
+      //   'age' && $ords_email != [19978, 12370]
+      if ($email == 'sage') {
+        $this->sage = true;
+      }
+    }
+  }
+
+  private function preValidate(): void
+  {
+    // TODO Add pre-validation checks
+    // $this->checkIfUserIsBannedFromSite();
+  }
+
+  private function validate(): void
+  {
+    // TODO Add validation checks
+    $this->verifyBoard($this->request['board_id']);
+
+    $this->setUpBoardClass();
+    $this->setUpPostingClass();
+
+    // more like valid POST, TODO better name
+    $this->_boardClass->validPost();
+  }
+
+  private function preProcess(): void
+  {
+    $this->_postingClass->checkUTF8();
+    // TODO shouldn't this be part of the $request object
+    //kxFunc::checkBadUnicode($this->postData['post_fields']);
+    $this->checkEmailCommands();
+
+    // TODO fix these to work as preprocessors
+    // $this->checkModPosting();
+    // $this->checkPostingRules();
+    // $this->checkIfThreadLocked();
+  }
+
+  private function buildPost(): void
+  {
+    // TODO This is more "Validate the Thread ID" than "Is this a reply"
+    $this->validateReplyThread();
+
+    $subject = isset($this->request['subject']) ? $this->request['subject'] : '';
+
+    $this->post = New \Edaha\Entities\Post($this->board, $this->request['message'], $subject, $this->parent_post);
+    $this->post->poster->email = $this->request['em'];
+    $this->post->poster->name = $this->request['name'];
+    $this->post->deletion_password = $this->request['postpassword'];
+    
+    $this->entityManager->persist($this->post);
+  }
+
+  private function process(): void
+  {
+    $this->_boardClass->checkFields($this->post);
+    $this->_boardClass->processPost($this->post);
+  }
+
+  private function postProcess(): void
+  {
+    if (isset($this->parent_post) and !$this->sage and count($this->parent_post->replies) <= !$this->board->max_replies) {
+      $this->parent_post->bump();
+    }
+
+    // TODO Set Cookies
+    // TODO Modlog entries after modposting
+    // TODO ThreadWatch
+  }
+  
   private function redirectToBoardOrPost(): void
   {
-    $url = kxEnv::Get("kx:paths:boards:path") . '/' . $this->_boardClass->board->directory;
+    $url = kxEnv::Get("kx:paths:boards:path") . '/' . $this->board->directory;
 
-    if (!$this->postData['is_reply']) {
+    if (!$this->noko) {
       $url .= '/' . kxEnv::Get('kx:pages:first');
     } else {
-      $url .= '/res/' . intval($this->request['replythread']) . '.html';
+      $url .= '/res/' . ($this->post->is_reply) ? $this->parent_post->id : $this->post->id . '.html';
     }
 
     @header('Location: ' . $url);
@@ -195,25 +303,22 @@ class public_core_post_post extends kxCmd
 
   public function exec(kxEnv $environment)
   {
-    // Before we do anything, let's check if we even have any board info
-    $this->verifyBoard($this->request['board_id']);
+    // TODO Add Doctrine transaction support
+    $this->preValidate();
+    $this->validate();
+    
+    $this->preProcess();
+    
+    $this->buildPost();
+    $this->process();
+    
+    $this->postProcess();
 
-    // Module loading time!
-    $this->setUpBoardClass();
+    $this->entityManager->flush();
 
-    // Include our posting class
-    $this->setUpPostingClass();
+    $this->redirectToBoardOrPost();
 
-    // Phew, that's over with. Let's now prepare our post for generation.
-
-    //Are we UTF-8?
-    $this->_postingClass->checkUTF8();
-
-    // Is post valid according to our board's spec?
-    if ($this->_boardClass->validPost()) {
-      // TODO Add Doctrine transaction support
-
-      // TODO Move to an image handler
+    { // TODO Move to an image handler
       // Do we have files?
       // $this->postData['files'] = isset($_FILES['imagefile']) ? $_FILES['imagefile']['name'] : '';
       // // Backwards compatability hack for dumpers that don't support multifile uploading
@@ -223,26 +328,13 @@ class public_core_post_post extends kxCmd
       //   }
       //   $this->postData['files'] = array($_FILES['imagefile']['name'][0]);
       // }
-
-      // TODO This is more "Validate the Thread ID" than "Is this a reply"
-      $this->postData['is_reply'] = $this->_postingClass->isReply($this->_boardClass->board->id);
-
-      $this->checkPostingRules();
-
-      // These two suck, it needs to be done differently
-      // $this->setThreadInfo();
-      // $this->setPostFields();
-
-      // $this->handleModPosting();
-
-      //kxFunc::checkBadUnicode($this->postData['post_fields']);
-
-      $this->_boardClass->processPost($this->postData);
-
-      $this->redirectToBoardOrPost();
-    } elseif (isset($this->request['reportpost'])) {
-      $this->reportPost();
     }
+
+
+    // TODO Readd Reporting
+    // elseif (isset($this->request['reportpost'])) {
+    //   $this->reportPost();
+    // }
   }
 
   private function reportPost(): void

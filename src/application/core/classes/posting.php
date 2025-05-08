@@ -112,35 +112,31 @@ class Posting
   /**
    * Forces anonymity for the post if the board requires it.
    *
-   * @param array $postData The data of the post being modified.
-   * @param object $board The board object containing board settings.
+   * @param \Entities\Edaha\Post $post The Post object being processed.
    */
-  public function forcedAnon(&$postData, $board)
+  public function forcedAnon(&$post)
   {
-    if ($board->board_forced_anon == 0) {
-      if ($postData['user_authority'] == 0 || $postData['user_authority'] == 3) {
-        $postData['post_fields']['name'] = '';
-      }
+    if ($post->board->forced_anononymous == 0) {
+      // TODO Add mod authority
+      // if ($postData['user_authority'] == 0 || $postData['user_authority'] == 3) {
+        $post->poster->name = '';
+      // }
     }
   }
 
   /**
    * Handles the calculation of the name and tripcode (stubbed) for a post.
    *
-   * @param array $postData The data of the post being processed.
+   * @param array $post The data of the post being processed.
    * @return array An array containing the name and tripcode.
    */
-  public function handleTripcode($postData)
+  public function handleTripcode(\Edaha\Entities\Post $post): void
   {
     $nameandtripcode = ''; //$nameandtripcode = kxFunc::calculateNameAndTripcode($postData['post_fields']['name']);
     if (is_array($nameandtripcode)) {
-      $name = $nameandtripcode[0];
-      $tripcode = $nameandtripcode[1];
-    } else {
-      $name = $postData['post_fields']['name'];
-      $tripcode = '';
+      $post->poster->name = $nameandtripcode[0];
+      $post->poster->tripcode = $nameandtripcode[1];
     }
-    return array($name, $tripcode);
   }
 
   /**
@@ -199,15 +195,15 @@ class Posting
    *
    * @param array $postData The data of the post being processed.
    */
-  public function checkEmptyReply(&$postData)
+  public function checkEmptyReply(\Edaha\Entities\Post $post)
   {
-    if ($postData['thread_info']['parent'] != 0) {
-      if ($postData['thread_info']['message'] == '' && kxEnv::Get('kx:posts:emptyreply') != '') {
-        $postData['thread_info']['message'] = kxEnv::Get('kx:posts:emptyreply');
+    if ($post->is_reply) {
+      if ($post->message == '' && kxEnv::Get('kx:posts:emptyreply') != '') {
+        $post->message = kxEnv::Get('kx:posts:emptyreply');
       }
     } else {
-      if ($postData['thread_info']['message'] == '' && kxEnv::Get('kx:posts:emptythread') != '') {
-        $postData['thread_info']['message'] = kxEnv::Get('kx:posts:emptythread');
+      if ($post->message == '' && kxEnv::Get('kx:posts:emptythread') != '') {
+        $post->message = kxEnv::Get('kx:posts:emptythread');
       }
     }
   }
@@ -218,20 +214,15 @@ class Posting
    * @param bool $isReply Indicates if the post is a reply.
    * @param int $boardId The ID of the board where the post is being made.
    */
-  public function checkPostingTime($isReply, $boardId)
+  public function checkIfPostingTooFast($post)
   {
     // Generate the query needed
-    $limit = $isReply ? $this->environment->get("kx:limits:replydelay") : kxEnv::Get("kx:limits:threaddelay");
+    $limit = $post->is_reply ? $this->environment->get("kx:limits:replydelay") : kxEnv::Get("kx:limits:threaddelay");
     $cutoff_time = date('Y-m-d H:i:s', time() - $limit);
 
-    $result = $this->db->select("posts")
-      ->condition("board_id", $boardId)
-      ->condition("ip_md5", md5($_SERVER['REMOTE_ADDR']))
-      ->condition("created_at_timestamp", $cutoff_time, ">");
-    $result = $isReply ? $result->condition("parent_post_id", 0, "!=") : $result->condition("parent_post_id", 0, "=");
-    $result = $result->countQuery()
-      ->execute()
-      ->fetchField();
+    // TODO Get count of posts from $post->poster in the last $limit seconds
+    $result = 0;
+
     if ($result > 0) {
       kxFunc::showError(_('Please wait a moment before posting again.'), _('You are currently posting faster than the configured minimum post delay allows.'));
     }
@@ -242,12 +233,12 @@ class Posting
    *
    * @param int $maxMessageLength The maximum allowed message length.
    */
-  public function checkMessageLength($maxMessageLength)
+  public function checkIfMessageTooLong($post)
   {
     // If the length of the message is greater than the board's maximum message length...
-    if (strlen($this->request['message']) > $maxMessageLength) {
+    if (strlen($post->message) > $post->board->max_message_length) {
       // Kill the script, stopping the posting process
-      kxFunc::showError(sprintf(_('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($this->request['message']), $maxMessageLength));
+      kxFunc::showError(sprintf(_('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($post->message), $post->board->max_message_length));
     }
   }
 
@@ -333,34 +324,34 @@ class Posting
   {
     // TODO Revisit filters operation
     /*$filters = $this->db->select("filters")
-  ->fields("filters")
-  ->condition("filter_type", 2, ">=")
-  ->orderBy("filter_type", "DESC")
-  ->execute()
-  ->fetchAll();
+    ->fields("filters")
+    ->condition("filter_type", 2, ">=")
+    ->orderBy("filter_type", "DESC")
+    ->execute()
+    ->fetchAll();
 
-  $reported = 0;
-  if (isset($filters) && count($filters) > 0) {
-  foreach ($filters as $filter) {
-  if ((!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
-  // They included blacklisted text in their post. What do we do?
-  if ($filter->filter_type & 8) {
-  // Ban them if they have the ban flag set on this filter
-  $punishment = unserialize($filter->filter_punishment);
-  kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
-  }
-  if ($filter->filter_type & 4) {
-  // Stop the post from happening if the delete flag is set
-  kxFunc::showError(sprintf(_('Blacklisted text ( %s ) detected.'), $filter));
-  }
-  if ($filter->filter_type & 2 && !$reported) {
-  // Report flag is set, report the post
-  $reported = 1;
-  // TODO add this later
-  }
-  }
-  }
-  }*/
+    $reported = 0;
+    if (isset($filters) && count($filters) > 0) {
+    foreach ($filters as $filter) {
+    if ((!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
+    // They included blacklisted text in their post. What do we do?
+    if ($filter->filter_type & 8) {
+    // Ban them if they have the ban flag set on this filter
+    $punishment = unserialize($filter->filter_punishment);
+    kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
+    }
+    if ($filter->filter_type & 4) {
+    // Stop the post from happening if the delete flag is set
+    kxFunc::showError(sprintf(_('Blacklisted text ( %s ) detected.'), $filter));
+    }
+    if ($filter->filter_type & 2 && !$reported) {
+    // Report flag is set, report the post
+    $reported = 1;
+    // TODO add this later
+    }
+    }
+    }
+    }*/
   }
 
   /**
@@ -430,27 +421,6 @@ class Posting
     }
 
     setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
-  }
-
-  /**
-   * Checks if the post is a sage and handles it accordingly.
-   *
-   * @param array $postData The data of the post being processed.
-   * @param object $board The board object containing board settings.
-   */
-  public function checkSage($postData, $board)
-  {
-    // If the user replied to a thread, and they weren't sage-ing it...
-    if ($postData['thread_info']['parent'] != 0 && strtolower($this->request['em']) != 'sage' /*&& unistr_to_ords($_POST['em']) != array(19979, 12370)*/) {
-      // And if the number of replies already in the thread are less than the maximum thread replies before perma-sage...
-      if ($postData['thread_info']['replies'] <= $board->board_max_replies) {
-        // Bump the thread
-        $thread = $this->entityManager->find(Edaha\Entities\Post::class, $postData['thread_info']['parent']);
-        $thread->bump();
-        // $this->entityManager->persist($thread);
-        // $this->entityManager->flush();
-      }
-    }
   }
 
   /**
@@ -571,36 +541,5 @@ class Posting
     }
 
     return $user_authority;
-  }
-
-  /**
-   * Creates a new post and saves it to the database.
-   *
-   * @param array $postData The data of the post being created.
-   * @param array $post The post data.
-   * @param array $files The files associated with the post.
-   * @param string $ip The IP address of the user making the post.
-   * @param bool $stickied Indicates if the post should be stickied.
-   * @param bool $locked Indicates if the post should be locked.
-   * @param object $board The board object containing board settings.
-   * @return int The ID of the newly created post.
-   */
-  public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board)
-  {
-    $reply_to_post = null;
-    if (isset($postData['thread_info']['parent']) and $postData['thread_info']['parent'] != 0) {
-      $reply_to_post = $this->entityManager->find(Edaha\Entities\Post::class, $postData['thread_info']['parent']);
-    }
-
-    $new_post = New Edaha\Entities\Post($board, $post['message'], $post['subject'], $reply_to_post);
-
-    $new_post->poster->name  = $post['name'];
-    $new_post->poster->email = $post['email'];
-    $new_post->poster->ip = '192.168.0.1';
-
-    $this->entityManager->persist($new_post);
-    $this->entityManager->flush();
-
-    return $new_post->id;
   }
 }

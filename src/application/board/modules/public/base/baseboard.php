@@ -83,7 +83,7 @@ abstract class public_board_base_baseboard extends kxCmd
     $this->environment->set('kx:classes:board:parse:id', new parse($environment));
   }
 
-  public function parseData(&$message)
+  public function parseData($message)
   {
 
     $message = trim($message);
@@ -91,78 +91,57 @@ abstract class public_board_base_baseboard extends kxCmd
     //var_dump($message);
     //$message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
     if (kxEnv::Get('kx:posts:makelinks')) {
-      $this->environment->get('kx:classes:board:parse:id')->makeClickable($message);
+      // $this->environment->get('kx:classes:board:parse:id')->makeClickable($message);
     }
-    $this->environment->get('kx:classes:board:parse:id')->clickableQuote($message);
-    $this->environment->get('kx:classes:board:parse:id')->coloredQuote($message);
-    $this->environment->get('kx:classes:board:parse:id')->bbCode($message);
+    // $this->environment->get('kx:classes:board:parse:id')->clickableQuote($message);
+    // $this->environment->get('kx:classes:board:parse:id')->coloredQuote($message);
+    // $this->environment->get('kx:classes:board:parse:id')->bbCode($message);
     $this->environment->get('kx:classes:board:parse:id')->wordFilter($message);
     $this->environment->get('kx:classes:board:parse:id')->checkNotEmpty($message);
     return $message;
   }
 
-  public function processPost($postData)
+  public function processPost(\Edaha\Entities\Post $post)
   {
     if (empty($this->postClass)) {
       $this->postClass = $this->environment->get('kx:classes:board:posting:id');
     }
 
-    $this->checkFields($postData);
+    $this->postClass->forcedAnon($post);
+    $this->postClass->handleTripcode($post);
+    // TODO Move to postProcess
+    // $commands = $this->postClass->checkPostCommands($postData);
+    $this->postClass->checkEmptyReply($post);
 
-    if ($this->board->board_locked == 1 && ($postData['user_authority'] != 1 && $postData['user_authority'] != 2)) {
-      kxFunc::showError(_('Sorry, this board is locked and can not be posted in.'));
+    $post->subject = substr($post->subject, 0, 74); // TODO Why? Do I care?
+    $post->message = $this->parseData($post->message);
+    
+    // TODO Move to postProcess
+    // $this->postClass->setCookies($post);
+
+    // Regenerate board pages
+    $this->regeneratePages();
+
+    // Regenerate thread pages
+    if ($post->is_thread) {
+      $this->regenerateThreads($post->id);
     } else {
-      $files = $this->doUpload($postData);
-      $this->postClass->forcedAnon($postData, $this->board);
-      $nameAndTrip = $this->postClass->handleTripcode($postData);
-      $post_passwordmd5 = ($postData['post_fields']['postpassword'] == '') ? '' : md5($postData['post_fields']['postpassword']);
-      $commands = $this->postClass->checkPostCommands($postData);
-      $this->postClass->checkEmptyReply($postData);
+      $this->regenerateThreads($post->parent->id);
+    }
 
-      $post = [];
-      $post['board'] = $this->board->board_name;
-      $post['name'] = substr($nameAndTrip[0], 0, 74);
-      $post['name_save'] = true;
-      $post['tripcode'] = $nameAndTrip[1];
-      $post['email'] = substr($postData['post_fields']['email'], 0, 74);
-      // First array is the converted form of the japanese characters meaning sage, second meaning age
-      // Needs converting
-      //$ords_email = unistr_to_ords($post_email);
-      $ords_email = [];
-      if (strtolower($this->request['em']) != 'sage' && $ords_email != [19979, 12370] && strtolower($this->request['em']) != 'age' && $ords_email != [19978, 12370] && $this->request['em'] != 'return' && $this->request['em'] != 'noko') {
-        $post['email_save'] = true;
-      } else {
-        $post['email_save'] = false;
-      }
-      $post['subject'] = substr($postData['post_fields']['subject'], 0, 74);
-      $post['message'] = $postData['thread_info']['message'];
-      if (isset($postData['thread_info']['tag'])) {
-        $post['tag'] = $postData['thread_info']['tag'];
-      }
+    {
+      // TODO Readd once PostAttachment is implemented
+      // $files = $this->doUpload($postData);
+
+      // if (isset($postData['thread_info']['tag'])) {
+      //   $post['tag'] = $postData['thread_info']['tag'];
+      // }
 
       //Needs 1.0 equivalent
       // $post = hook_process('posting', $post);
 
-      $post['post_id'] = $this->postClass->makePost($postData, $post, $files, $_SERVER['REMOTE_ADDR'], $commands['sticky'], $commands['lock'], $this->board);
-
-      $this->postClass->modPost(array_merge($postData, $post), $this->board);
-      $this->postClass->setCookies($post);
-      $this->postClass->checkSage($postData, $this->board);
-      $this->postClass->updateThreadWatch($postData, $this->board);
-
       // Trim any threads which have been pushed past the limit, or exceed the maximum age limit
       //kxExec:TrimToPageLimit($board_class->board);
-
-      // Regenerate board pages
-      $this->regeneratePages();
-      if ($postData['thread_info']['parent'] == 0) {
-        // Regenerate the thread
-        // TODO Readd once renderer objects are implemented
-        $this->regenerateThreads($post['post_id']);
-      } else {
-        // Regenerate the thread
-        $this->regenerateThreads($postData['thread_info']['parent']);
-      }
     }
   }
 
@@ -220,7 +199,7 @@ abstract class public_board_base_baseboard extends kxCmd
       // Grab our threads, stickies go first, then follow by bump time, then run through them
       //--------------------------------------------------------------------------------------------------
       $threads = $this->entityManager->getRepository(\Edaha\Entities\Post::class)
-        ->getPaginatedThreadsByBoard($this->board->id, $i, $postsperpage);
+        ->getBoardPaginatedThreads($this->board->id, $i, $postsperpage);
 
       $outThread = [];
       foreach ($threads as $thread) {

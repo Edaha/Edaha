@@ -136,7 +136,7 @@ abstract class public_board_base_baseboard extends kxCmd
     }
   }
 
-  public function postProcess(\Edaha\Entities\Post $post)
+  public function postCommit(\Edaha\Entities\Post $post)
   {
     // Regenerate board pages
     $this->regeneratePages();
@@ -152,19 +152,6 @@ abstract class public_board_base_baseboard extends kxCmd
   public function doUpload($postData)
   {
     return $this->postClass->doUpload($postData, $this->board);
-  }
-
-  public function getEmbeds()
-  {
-    $this->embeds = [];
-    $results = $this->db->select("embeds")
-      ->fields("embeds", ["embed_ext"])
-      ->execute()
-      ->fetchAll();
-    foreach ($results as $line) {
-      $this->embeds[] = $line->embed_ext;
-    }
-    return $this->embeds;
   }
 
   public function regeneratePages()
@@ -192,6 +179,21 @@ abstract class public_board_base_baseboard extends kxCmd
 
     $this->twigData['numpages'] = $totalpages;
 
+    $this->twigData['file_path'] = KX_BOARD . '/' . $this->board->directory;
+
+    // Make required folders
+    @mkdir($this->twigData['file_path'], 0777, true);
+    @mkdir($this->twigData['file_path'] . '/src/', 0777, true);
+    @mkdir($this->twigData['file_path'] . '/thumb/', 0777, true);
+    @mkdir($this->twigData['file_path'] . '/res/', 0777, true);
+
+    $this->twigData['board'] = $this->board;
+    $board_options = $this->entityManager->getRepository(\Edaha\Entities\BoardOption::class)
+      ->getOptionsByBoard($this->board->id);
+    foreach ($board_options as $option) {
+      $this->twigData['board_options'][$option['name']] = $option['value'];
+    }
+
     //-----------------------------------------
     // Run through each page
     //-----------------------------------------
@@ -207,21 +209,6 @@ abstract class public_board_base_baseboard extends kxCmd
 
       $this->twigData['threads'] = $threads;
 
-      $this->twigData['file_path'] = KX_BOARD . '/' . $this->board->directory;
-
-      // Make required folders
-      @mkdir($this->twigData['file_path'], 0777, true);
-      @mkdir($this->twigData['file_path'] . '/src/', 0777, true);
-      @mkdir($this->twigData['file_path'] . '/thumb/', 0777, true);
-      @mkdir($this->twigData['file_path'] . '/res/', 0777, true);
-
-      $this->twigData['board'] = $this->board;
-      $board_options = $this->entityManager->getRepository(\Edaha\Entities\BoardOption::class)
-        ->getOptionsByBoard($this->board->id);
-      foreach ($board_options as $option) {
-        $this->twigData['board_options'][$option['name']] = $option['value'];
-      }
-
       $this->footer(false, (microtime(true) - $executiontime_start_page));
       $this->pageHeader(0);
       $this->postBox(0);
@@ -233,64 +220,11 @@ abstract class public_board_base_baseboard extends kxCmd
       } else {
         $page = KX_BOARD . '/' . $this->board->directory . '/' . $i . '.html';
       }
-      //echo "<br />$page";
-      //die($content);
+      
       kxFunc::outputToFile($page, $content, $this->board->directory);
+      
       $i++;
     }
-  }
-
-  public function buildThread($thread)
-  {
-    return $thread;
-  }
-
-  public function getThreadRepliesToDisplay($thread)
-  {
-    if ($thread->is_stickied == 1) {
-      $thread_replies = $thread->getLastNReplies(kxEnv::Get('kx:display:stickyreplies'));
-    } else {
-      $thread_replies = $thread->getLastNReplies(kxEnv::Get('kx:display:replies'));
-    }
-    return $thread_replies;
-  }
-
-  public function getOmittedPosts(&$thread, $omitids = [])
-  {
-
-    $replycount = $this->db->select("posts");
-    $replycount->condition("board_id", $this->board->board_id)
-      ->condition("parent_post_id", $thread->post_id);
-    if ($this->board->board_type != 1) {
-      $replycount->condition("is_deleted", 0);
-    }
-    if (!empty($omitids)) {
-      $replycount->condition("post_id", $omitids, "NOT IN");
-    }
-    $replycount = $replycount->countQuery()
-      ->execute()
-      ->fetchField();
-    return $replycount;
-  }
-
-  public function getOmittedFiles(&$thread, $omitids = [])
-  {
-    //---------------------------------------------------------------------------------------------------
-    // Get the number of file-replies for this thread, minus the ones that are already being shown.
-    //----------------------------------------------------------------------------------------------------
-    $replycount = $this->db->select("posts");
-    $replycount->innerJoin("post_files", "f", "post_id = file_post AND file_board = board_id");
-    $replycount->condition("board_id", $this->board->board_id)
-      ->condition("parent_post_id", $thread->post_id)
-      ->condition("is_deleted", 0)
-      ->condition("file_md5", "", "!=");
-    if (!empty($omitids)) {
-      $replycount->condition("file_post", $omitids, "NOT IN");
-    }
-    $replycount = $replycount->countQuery()
-      ->execute()
-      ->fetchField();
-    return $replycount;
   }
 
   public function buildPost($post, $page)

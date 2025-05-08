@@ -282,12 +282,14 @@ class public_core_post_post extends kxCmd
     if (isset($this->parent_post) and !$this->sage and count($this->parent_post->replies) <= !$this->board->max_replies) {
       $this->parent_post->bump();
     }
-
-
     // TODO Set Cookies
     // TODO Modlog entries after modposting
     // TODO ThreadWatch
-    $this->_boardClass->postProcess($this->post);
+  }
+
+  private function postCommit(): void
+  {
+    $this->_boardClass->postCommit($this->post);
   }
   
   private function redirectToBoardOrPost(): void
@@ -317,6 +319,8 @@ class public_core_post_post extends kxCmd
     $this->postProcess();
 
     $this->entityManager->flush();
+
+    $this->postCommit();
 
     $this->redirectToBoardOrPost();
 

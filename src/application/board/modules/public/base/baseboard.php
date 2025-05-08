@@ -205,32 +205,8 @@ abstract class public_board_base_baseboard extends kxCmd
       $threads = $this->entityManager->getRepository(\Edaha\Entities\Post::class)
         ->getBoardPaginatedThreads($this->board->id, $i, $postsperpage);
 
-      $outThread = [];
-      foreach ($threads as $thread) {
+      $this->twigData['threads'] = $threads;
 
-        //------------------------------------------------------------------------------------------
-        // If the thread is on the page set to mark, and hasn't been marked yet, mark it
-        //------------------------------------------------------------------------------------------
-        if ($this->markThread($thread, $i)) {
-          $this->RegenerateThreads($thread->post_id);
-          // RegenerateThreads overwrites the replythread variable. Reset it here.
-          $this->twigData['replythread'] = 0;
-        }
-        // $thread = $this->buildPost($thread, true);
-        $outThread[] = $this->buildThread($thread);
-
-      }
-      if (!isset($embeds)) {
-        $embeds = $this->db->select("embeds")
-          ->fields("embeds")
-          ->execute()
-          ->fetchAll();
-        $this->twigData['embeds'] = $embeds;
-      }
-
-      $this->twigData['posts'] = $outThread;
-
-      //print_r($this->board);
       $this->twigData['file_path'] = KX_BOARD . '/' . $this->board->directory;
 
       // Make required folders
@@ -266,11 +242,6 @@ abstract class public_board_base_baseboard extends kxCmd
 
   public function buildThread($thread)
   {
-    $this->twigData['threads'][] = $thread;
-    // $thread->replies = $this->getOmittedPosts($thread, $tempPosts[1]);
-    // $thread->images = $this->getOmittedFiles($thread, $tempPosts[1]);
-    // $posts = array_reverse($tempPosts[0]);
-    // array_unshift($posts, $thread);
     return $thread;
   }
 

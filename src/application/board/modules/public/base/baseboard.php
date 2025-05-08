@@ -508,13 +508,14 @@ abstract class public_board_base_baseboard extends kxCmd
   public function markThread($thread, $i)
   {
     if ($this->board->board_mark_page > 0 && $i >= $this->board->board_mark_page) {
-      $this->db->update("posts")
-        ->fields([
-          'deleted_at_timestamp' => time() + 7200,
-        ])
-        ->condition("post_board", $this->board->board_id)
-        ->condition("post_id", $thread->post_id)
-        ->execute();
+      // TODO Move to Post class? 
+      // $this->db->update("posts")
+      //   ->fields([
+      //     'deleted_at_timestamp' => time() + 7200,
+      //   ])
+      //   ->condition("post_board", $this->board->board_id)
+      //   ->condition("post_id", $thread->post_id)
+      //   ->execute();
       return true;
     }
     return false;

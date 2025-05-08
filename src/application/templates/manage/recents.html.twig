@@ -10,7 +10,7 @@
     post_thread_id, 
     post_id
   )  %}
-  {% set point_text = ">>>%s/%s"|format(post_board, post_id) %}
+  {% set point_text = ">>>/%s/%s"|format(post_board, post_id) %}
   <a href="{{ point_href }}">{{ point_text }}</a>
 {% endmacro %}
 
@@ -55,8 +55,8 @@
       {% if section == "posts" %}
         {% for post in recent_posts %}
           <div>
-            <input type="checkbox" name="posts[]" value="{{ "%s|%s"|format(post.board_id, post.post_id) }}">
-            {{ _self.create_point_link(post.board_name, post.parent_post_id, post.post_id) }}
+            <input type="checkbox" name="posts[]" value="{{ "%s|%s"|format(post.board.id, post.id) }}">
+            {{ _self.create_point_link(post.board.directory, post.parent.id, post.id) }}
             {{ post.message|striptags|raw }}
           </div>
           <hr>

@@ -109,25 +109,17 @@ abstract class public_board_base_baseboard extends kxCmd
 
     $this->postClass->forcedAnon($post);
     $this->postClass->handleTripcode($post);
-    // TODO Move to postProcess
-    // $commands = $this->postClass->checkPostCommands($postData);
     $this->postClass->checkEmptyReply($post);
 
     $post->subject = substr($post->subject, 0, 74); // TODO Why? Do I care?
     $post->message = $this->parseData($post->message);
     
     // TODO Move to postProcess
+    // $commands = $this->postClass->checkPostCommands($postData);
     // $this->postClass->setCookies($post);
 
 
     {
-      // TODO Readd once PostAttachment is implemented
-      // $files = $this->doUpload($postData);
-
-      // if (isset($postData['thread_info']['tag'])) {
-      //   $post['tag'] = $postData['thread_info']['tag'];
-      // }
-
       //Needs 1.0 equivalent
       // $post = hook_process('posting', $post);
 

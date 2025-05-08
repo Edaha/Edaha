@@ -31,31 +31,6 @@ class Posting
     }
   }
 
-  /**
-   * Retrieves information about a thread, including the number of replies, 
-   * whether the thread is locked, and its parent post ID.
-   *
-   * @param int $boardID The ID of the board where the thread is located.
-   * @param int $threadID The ID of the thread to retrieve information for.
-   * @return array An associative array containing:
-   *               - 'replies' (int): The number of replies in the thread.
-   *               - 'locked' (int): Whether the thread is locked (default is 0).
-   *               - 'parent' (int): The parent post ID of the thread.
-   */
-  public function threadInfo($boardID, $threadID)
-  {
-    $threadData = array('replies' => 0, 'locked' => 0, 'parent' => 0);
-    $sql = $this->db->select('posts');
-    $sql->addExpression('COUNT(*)');
-    $threadData['replies'] = $sql->condition('board_id', $boardID)
-      ->condition('parent_post_id', $threadID)
-      ->condition('is_deleted', 0)
-      ->execute()
-      ->fetchField();
-    $threadData['parent'] = $threadID;
-    return $threadData;
-  }
-
   public function isReply($boardid)
   {
     /* If it appears this is a reply to a thread, and not a new thread... */
@@ -73,12 +48,6 @@ class Posting
     }
 
     return false;
-  }
-  public function checkEmbed($postData)
-  {
-    if (empty($this->request['embed']) && empty($postData['files'][0])) {
-      return false;
-    }
   }
 
   /**
@@ -315,44 +284,6 @@ class Posting
     }
   }
 
-  /**
-   * Checks if the post contains blacklisted text and takes appropriate action.
-   *
-   * @param int $boardId The ID of the board where the post is being made.
-   */
-  public function checkBlacklistedText($boardId)
-  {
-    // TODO Revisit filters operation
-    /*$filters = $this->db->select("filters")
-    ->fields("filters")
-    ->condition("filter_type", 2, ">=")
-    ->orderBy("filter_type", "DESC")
-    ->execute()
-    ->fetchAll();
-
-    $reported = 0;
-    if (isset($filters) && count($filters) > 0) {
-    foreach ($filters as $filter) {
-    if ((!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
-    // They included blacklisted text in their post. What do we do?
-    if ($filter->filter_type & 8) {
-    // Ban them if they have the ban flag set on this filter
-    $punishment = unserialize($filter->filter_punishment);
-    kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
-    }
-    if ($filter->filter_type & 4) {
-    // Stop the post from happening if the delete flag is set
-    kxFunc::showError(sprintf(_('Blacklisted text ( %s ) detected.'), $filter));
-    }
-    if ($filter->filter_type & 2 && !$reported) {
-    // Report flag is set, report the post
-    $reported = 1;
-    // TODO add this later
-    }
-    }
-    }
-    }*/
-  }
 
   /**
    * Checks if the oekaki file is valid and returns its path.

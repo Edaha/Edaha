@@ -108,23 +108,6 @@ class public_core_post_post extends kxCmd
     // $this->_postingClass->checkBannedHash($this->_boardClass->board);
   }
 
-  private function setThreadInfo(): void
-  {
-    //How many replies, is the thread locked, etc
-    if ($this->postData['is_reply']) {
-      $this->postData['thread_info'] = $this->_postingClass->threadInfo($this->environment->get('kx:classes:board:id')->board_id, $this->request['replythread']);
-    } else {
-      $this->postData['thread_info'] = array('replies' => 0, 'locked' => 0, 'parent' => 0);
-    }
-  }
-
-  private function setPostFields(): void
-  {
-      // Subject, email, etc fields need special processing
-      $this->postData['post_fields'] = $this->_postingClass->parseFields();
-      $this->postData['post_fields']['postpassword'] = isset($this->request['postpassword']) ? $this->request['postpassword'] : '';
-  }
-
   private function handleModPosting(): void
   {
     // Are we modposting?

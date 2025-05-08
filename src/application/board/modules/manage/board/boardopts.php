@@ -32,7 +32,7 @@ class manage_board_board_boardopts extends kxCmd
   private function _edit()
   {
     // $board_options = kxEnv::Get('cache:boardopts:' . $this->request['board']);
-    $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['id']);
+    $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['board_id']);
     if (is_null($board)) {
       $this->twigData['notice']['type'] = 'error';
       $this->twigData['notice']['message'] = sprintf(_("Couldn't find board /%s/."), $this->request['board']);

@@ -1,33 +1,8 @@
 <?php
-/*
- * This file is part of kusaba.
- *
- * kusaba is free software; you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
- * version.
- *
- * kusaba is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * kusaba; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- */
-/*
- * Posting module
- * Last Updated: $Date$
+use Edaha\Interfaces\PostingProcessorInterface;
 
- * @author     $Author$
-
- * @package    kusaba
- * @subpackage  board
-
- * @version    $Revision$
- *
- * @todo      Work out a system to allow modules to hook into the posting module and do their own magic at certain points during posting.
- */
+use Edaha\Entities\Board;
+use Edaha\Entities\Post;
 
 if (!defined('KUSABA_RUNNING')) {
   print "<h1>Access denied</h1>You cannot access this file directly.";
@@ -42,22 +17,22 @@ if (!defined('KUSABA_RUNNING')) {
  *
  * @todo Work out a system to allow modules to hook into the posting module and do their own magic at certain points during posting.
  */
-class public_core_post_post extends kxCmd
+class public_core_post_post extends kxCmd implements PostingProcessorInterface
 {
   protected $_boardClass;
   protected $_postingClass;
   protected $postData = array();
   
-  protected \Edaha\Entities\Board $board;
-  protected \Edaha\Entities\Post $parent_post;
-  protected \Edaha\Entities\Post $post;
+  protected Board $board;
+  protected ?Post $parent_post = null;
+  protected Post $post;
 
   protected bool $sage = false;
   protected bool $noko = false;
 
   private function verifyBoard($board_id): void
   {
-    $board = $this->entityManager->find(\Edaha\Entities\Board::class, $board_id);
+    $board = $this->entityManager->find(Board::class, $board_id);
     if (is_null($board)) {
       kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
     }
@@ -178,7 +153,7 @@ class public_core_post_post extends kxCmd
   private function validateReplyThread(): void
   {
     if ($this->request['replythread'] > 0) {
-      $this->parent_post = $this->entityManager->find(Edaha\Entities\Post::class, $this->request['replythread']);
+      $this->parent_post = $this->entityManager->find(Post::class, $this->request['replythread']);
       if ($this->parent_post == null || $this->parent_post->is_reply) {
         /* Kill the script, stopping the posting process */
         kxFunc::showError(_('Invalid thread ID.'), _('That thread may have been recently deleted.'));
@@ -208,15 +183,14 @@ class public_core_post_post extends kxCmd
     }
   }
 
-  private function preValidate(): void
+  public function preValidate(): void
   {
     // TODO Add pre-validation checks
     // $this->checkIfUserIsBannedFromSite();
   }
 
-  private function validate(): void
+  public function validate(): void
   {
-    // TODO Add validation checks
     $this->verifyBoard($this->request['board_id']);
 
     $this->setUpBoardClass();
@@ -226,7 +200,7 @@ class public_core_post_post extends kxCmd
     $this->_boardClass->validPost();
   }
 
-  private function preProcess(): void
+  public function preProcess(): void
   {
     $this->_postingClass->checkUTF8();
     // TODO shouldn't this be part of the $request object
@@ -239,14 +213,14 @@ class public_core_post_post extends kxCmd
     // $this->checkIfThreadLocked();
   }
 
-  private function buildPost(): void
+  public function buildPost(): void
   {
     // TODO This is more "Validate the Thread ID" than "Is this a reply"
     $this->validateReplyThread();
 
     $subject = isset($this->request['subject']) ? $this->request['subject'] : '';
 
-    $this->post = New \Edaha\Entities\Post($this->board, $this->request['message'], $subject, $this->parent_post);
+    $this->post = New Post($this->board, $this->request['message'], $subject, $this->parent_post);
     $this->post->poster->email = $this->request['em'];
     $this->post->poster->name = $this->request['name'];
     $this->post->deletion_password = $this->request['postpassword'];
@@ -254,13 +228,13 @@ class public_core_post_post extends kxCmd
     $this->entityManager->persist($this->post);
   }
 
-  private function process(): void
+  public function process(): void
   {
     $this->_boardClass->checkFields($this->post);
     $this->_boardClass->processPost($this->post);
   }
 
-  private function postProcess(): void
+  public function postProcess(): void
   {
     if (isset($this->parent_post) and !$this->sage and count($this->parent_post->replies) <= !$this->board->max_replies) {
       $this->parent_post->bump();
@@ -270,7 +244,7 @@ class public_core_post_post extends kxCmd
     // TODO ThreadWatch
   }
 
-  private function postCommit(): void
+  public function postCommit(): void
   {
     $this->_boardClass->postCommit($this->post);
   }

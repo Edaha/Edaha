@@ -45,7 +45,12 @@
     </select>
     <span class="desc"><a href="#" title="{% trans "The type of imageboard desired. A Normal Imageboad will feature image and extended-format posts. An Oekaki Imageboard will allow users to draw their own images for their posts. An Upload Imageboard will be styled more towards file uploads. A Text Board will allow only text posts." %}">?</a></span>
     <br>
-    
+
+    <label for="renderer">{% trans "Board Renderer" %}:</label>
+    <input type="text" name="renderer" id="renderer" value="{{ options.renderer }}">
+    <span class="desc"><a href="#" title="{% trans "The Class to be used for rendering the board." %}">?</a></span>
+    <br>
+
     <label for="uploadtype">{% trans "Embedding Type" %}</label>
     <select name="upload type" id="uploadtype">
       <option value="0"{% if options.upload_type == 0 %} selected="selected"{% endif %}>{% trans "No Embedding" %}</option>

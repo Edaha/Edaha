@@ -104,6 +104,7 @@ class manage_board_board_boardopts extends kxCmd
       'trial' => (int) isset($this->request['trial']),
       'popular' => (int) isset($this->request['popular']),
       'max_files' => (int) $this->request['max_files'],
+      'renderer' => $this->request['renderer'],
     );
 
     foreach ($board_fields as $key => $value) {

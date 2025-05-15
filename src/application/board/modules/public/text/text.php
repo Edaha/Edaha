@@ -99,20 +99,8 @@ class public_board_text_text extends public_board_base_baseboard {
     return array();
   }
 
-  public function regeneratePages() {
+  public function postCommit(\Edaha\Entities\Post $post) {
     $this->twigData['isindex'] = true;
-    parent::regeneratePages();
-    $this->buildPageAllThreads();
+    parent::postCommit($post);
   }
-
-  protected function buildPageAllThreads() {
-    $this->twigData['isindex'] = false;
-    
-    $this->twigData['posts'] = $this->entityManager->getRepository(\Edaha\Entities\Post::class)
-      ->getBoardRecentThreads($this->board->id, null);
-    
-    $content = kxTemplate::get('board/' . $this->boardType . '/txt_all_threads', $this->twigData, true);
-    
-    kxFunc::outputToFile(KX_BOARD . '/' . $this->board->directory . '/list.html', $content, $this->board->directory);
-  } 
 }

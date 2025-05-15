@@ -30,6 +30,51 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
   protected bool $sage = false;
   protected bool $noko = false;
 
+  public function exec(kxEnv $environment)
+  {
+    $this->preValidate();
+    $this->validate();
+
+    $this->entityManager->wrapInTransaction(function() {
+      $this->preProcess();
+      $this->buildPost();
+      $this->process();
+      $this->postProcess();
+    });
+    
+    $this->postCommit();
+    $this->redirectToBoardOrPost();
+
+    { // TODO Move to an image handler
+      // Do we have files?
+      // $this->postData['files'] = isset($_FILES['imagefile']) ? $_FILES['imagefile']['name'] : '';
+      // // Backwards compatability hack for dumpers that don't support multifile uploading
+      // if ($this->postData['files'] && !is_array($this->postData['files'])) {
+      //   foreach ($_FILES['imagefile'] as $key => $value) {
+      //     $_FILES['imagefile'][$key] = array($value);
+      //   }
+      //   $this->postData['files'] = array($_FILES['imagefile']['name'][0]);
+      // }
+    }
+  }
+
+  public function preValidate(): void
+  {
+    // TODO Add pre-validation checks
+    // $this->checkIfUserIsBannedFromSite();
+  }
+  
+  public function validate(): void
+  {
+    $this->verifyBoard($this->request['board_id']);
+
+    $this->setUpBoardClass();
+    $this->setUpPostingClass();
+
+    // more like valid POST, TODO better name
+    $this->_boardClass->validPost();
+  }
+
   private function verifyBoard($board_id): void
   {
     $board = $this->entityManager->find(Board::class, $board_id);
@@ -74,13 +119,39 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
     $this->environment->set('kx:classes:board:posting:id', $this->_postingClass);
   }
 
-  private function checkPostingRules(): void
+  public function preProcess(): void
   {
-    $this->_postingClass->checkIfPostingTooFast($this->post);
-    $this->_postingClass->checkIfMessageTooLong($this->post);
-    // $this->_postingClass->checkBlacklistedText($this->_boardClass->board->id);
-    // $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
-    // $this->_postingClass->checkBannedHash($this->_boardClass->board);
+    $this->_postingClass->checkUTF8();
+    // TODO shouldn't this be part of the $request object
+    //kxFunc::checkBadUnicode($this->postData['post_fields']);
+    $this->checkEmailCommands();
+
+    // TODO fix these to work as preprocessors
+    // $this->checkModPosting();
+    // $this->checkPostingRules();
+    // $this->checkIfThreadLocked();
+  }
+
+  private function checkEmailCommands(): void
+  {
+    if (isset($this->request['em'])) {
+      $email = strtolower($this->request['em']);
+      
+      // Check if used Noko/Return
+      if ($email == 'noko' || $email == 'return') {
+        $this->noko = true;
+        $this->request['email'] = '';
+      }
+
+      // TODO Support Japanese sage
+      // Reference from before:
+      //   $ords_email = unistr_to_ords($email);
+      //   'sage' = $ords_email != [19979, 12370] 
+      //   'age' && $ords_email != [19978, 12370]
+      if ($email == 'sage') {
+        $this->sage = true;
+      }
+    }
   }
 
   private function handleModPosting(): void
@@ -150,67 +221,13 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
     }
   }
 
-  private function validateReplyThread(): void
+  private function checkPostingRules(): void
   {
-    if ($this->request['replythread'] > 0) {
-      $this->parent_post = $this->entityManager->find(Post::class, $this->request['replythread']);
-      if ($this->parent_post == null || $this->parent_post->is_reply) {
-        /* Kill the script, stopping the posting process */
-        kxFunc::showError(_('Invalid thread ID.'), _('That thread may have been recently deleted.'));
-      }
-    }
-  }
-
-  private function checkEmailCommands(): void
-  {
-    if (isset($this->request['em'])) {
-      $email = strtolower($this->request['em']);
-      
-      // Check if used Noko/Return
-      if ($email == 'noko' || $email == 'return') {
-        $this->noko = true;
-        $this->request['email'] = '';
-      }
-
-      // TODO Support Japanese sage
-      // Reference from before:
-      //   $ords_email = unistr_to_ords($email);
-      //   'sage' = $ords_email != [19979, 12370] 
-      //   'age' && $ords_email != [19978, 12370]
-      if ($email == 'sage') {
-        $this->sage = true;
-      }
-    }
-  }
-
-  public function preValidate(): void
-  {
-    // TODO Add pre-validation checks
-    // $this->checkIfUserIsBannedFromSite();
-  }
-
-  public function validate(): void
-  {
-    $this->verifyBoard($this->request['board_id']);
-
-    $this->setUpBoardClass();
-    $this->setUpPostingClass();
-
-    // more like valid POST, TODO better name
-    $this->_boardClass->validPost();
-  }
-
-  public function preProcess(): void
-  {
-    $this->_postingClass->checkUTF8();
-    // TODO shouldn't this be part of the $request object
-    //kxFunc::checkBadUnicode($this->postData['post_fields']);
-    $this->checkEmailCommands();
-
-    // TODO fix these to work as preprocessors
-    // $this->checkModPosting();
-    // $this->checkPostingRules();
-    // $this->checkIfThreadLocked();
+    $this->_postingClass->checkIfPostingTooFast($this->post);
+    $this->_postingClass->checkIfMessageTooLong($this->post);
+    // $this->_postingClass->checkBlacklistedText($this->_boardClass->board->id);
+    // $this->_postingClass->checkCaptcha($this->_boardClass->board, $this->postData);
+    // $this->_postingClass->checkBannedHash($this->_boardClass->board);
   }
 
   public function buildPost(): void
@@ -226,6 +243,17 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
     $this->post->deletion_password = $this->request['postpassword'];
     
     $this->entityManager->persist($this->post);
+  }
+  
+  private function validateReplyThread(): void
+  {
+    if ($this->request['replythread'] > 0) {
+      $this->parent_post = $this->entityManager->find(Post::class, $this->request['replythread']);
+      if ($this->parent_post == null || $this->parent_post->is_reply) {
+        /* Kill the script, stopping the posting process */
+        kxFunc::showError(_('Invalid thread ID.'), _('That thread may have been recently deleted.'));
+      }
+    }
   }
 
   public function process(): void
@@ -262,34 +290,6 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
     }
 
     @header('Location: ' . $url);
-  }
-
-  public function exec(kxEnv $environment)
-  {
-    $this->preValidate();
-    $this->validate();
-
-    $this->entityManager->wrapInTransaction(function() {
-      $this->preProcess();
-      $this->buildPost();
-      $this->process();
-      $this->postProcess();
-    });
-    
-    $this->postCommit();
-    $this->redirectToBoardOrPost();
-
-    { // TODO Move to an image handler
-      // Do we have files?
-      // $this->postData['files'] = isset($_FILES['imagefile']) ? $_FILES['imagefile']['name'] : '';
-      // // Backwards compatability hack for dumpers that don't support multifile uploading
-      // if ($this->postData['files'] && !is_array($this->postData['files'])) {
-      //   foreach ($_FILES['imagefile'] as $key => $value) {
-      //     $_FILES['imagefile'][$key] = array($value);
-      //   }
-      //   $this->postData['files'] = array($_FILES['imagefile']['name'][0]);
-      // }
-    }
   }
 
   // TODO Move to a report.php

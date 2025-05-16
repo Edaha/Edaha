@@ -1,6 +1,8 @@
 <?php
+namespace Edaha\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Edaha\Types\ModuleType;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'modules')]
@@ -9,14 +11,14 @@ class Module
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
-    private ?int $id = null {
+    public ?int $id = null {
         get {
             return $this->id;
         }
     }
 
     #[ORM\Column]
-    private string $name {
+    public string $name {
         get {
             return $this->name;
         }
@@ -26,52 +28,59 @@ class Module
     }
 
     #[ORM\Column]
-    private string $application {
+    public ModuleType $type {
         get {
-            return $this->application;
+            return $this->type;
         }
         set {
-            $this->application = $value;
+            $this->type = $value;
         }
     }
 
     #[ORM\Column]
-    private string $file {
+    public string $class {
         get {
-            return $this->file;
+            return $this->class;
         }
         set {
-            $this->file = $value;
+            $this->class = $value;
         }
     }
 
     #[ORM\Column]
-    private bool $description {
+    public string $description {
         get {
             return $this->description;
         }
         set {
             $this->description = $value;
-        }
-    }
-
-    #[ORM\Column]
-    private int $position {
-        get {
-            return $this->position;
-        }
-        set {
-            $this->position = $value;
         }
     }
     
     #[ORM\Column]
-    private bool $manage {
+    public bool $is_manage {
         get {
             return $this->description;
         }
         set {
             $this->description = $value;
         }
+    }
+
+    public function __construct(
+        string $name,
+        ModuleType $type,
+        string $class,
+        string $description,
+        bool $is_manage
+    ) {
+        if (!class_exists($class)) {
+            throw new \InvalidArgumentException("Class $class does not exist.");
+        }
+        $this->name = $name;
+        $this->type = $type;
+        $this->class = $class;
+        $this->description = $description;
+        $this->is_manage = $is_manage;
     }
 }

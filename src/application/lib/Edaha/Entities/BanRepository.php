@@ -5,7 +5,7 @@ use Doctrine\ORM\EntityRepository;
 
 class BanRepository extends EntityRepository
 {
-    public function getArrayAllActiveBans($board_id)
+    public function getArrayAllActiveBans()
     {
         $dql = "SELECT ba, bo.id, bo.directory FROM \Edaha\Entities\Ban ba
                 JOIN ba.board bo

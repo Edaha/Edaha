@@ -43,6 +43,9 @@ class Module
             return $this->class;
         }
         set {
+            if (!class_exists($value)) {
+                throw new \InvalidArgumentException("Class $value does not exist.");
+            }
             $this->class = $value;
         }
     }
@@ -60,10 +63,10 @@ class Module
     #[ORM\Column]
     public bool $is_manage {
         get {
-            return $this->description;
+            return $this->is_manage;
         }
         set {
-            $this->description = $value;
+            $this->is_manage = $value;
         }
     }
 
@@ -74,9 +77,6 @@ class Module
         string $description,
         bool $is_manage
     ) {
-        if (!class_exists($class)) {
-            throw new \InvalidArgumentException("Class $class does not exist.");
-        }
         $this->name = $name;
         $this->type = $type;
         $this->class = $class;

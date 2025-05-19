@@ -26,7 +26,7 @@ class manage_board_board_board extends kxCmd
         // Vars $_GET['id']
         if ($this->onRegen()) {
           $this->twigData['notice']['type'] = 'success';
-          $this->twigData['notice']['message'] = sprintf(_('Board %s successfully regenerated!'), $this->request['id']);
+          $this->twigData['notice']['message'] = sprintf(_('Board %s successfully regenerated!'), $this->request['board_id']);
         } else {
           $this->twigData['notice']['type'] = 'error';
           $this->twigData['notice']['message'] = _('Board failed to regenerate') . ": " . $this->errorMessage;
@@ -49,41 +49,14 @@ class manage_board_board_board extends kxCmd
       return false;
     }
 
-    // TODO: Modules should be a Doctrine object
-    $board_modules = $this->db->select("modules")
-      ->fields("modules", array("module_file"))
-      ->condition("module_application", "board")
-      ->condition("module_manage", 0)
-      ->execute()
-      ->fetchCol();
-    foreach ($board_modules as $module) {
-      if ($module == $board->type) {
-        $module_to_load = $module;
-      }
+    $regenerator = new $board->renderer($board, $this->entityManager);
+    if (!($regenerator instanceof Edaha\Interfaces\RegeneratorInterface)) {
+      $this->errorMessage = sprintf(_("Couldn't find board renderer for /%s/."), $board->directory);
+      return false;
     }
 
-    // Module loading time!
-    // TODO: We should be able to replace this with an autoloader
-    $moduledir = kxFunc::getAppDir("board") . '/modules/public/' . $module_to_load . '/';
-    if (file_exists($moduledir . $module_to_load . '.php')) {
-      require_once $moduledir . $module_to_load . '.php';
-    }
-
-    // Some routine checks...
-    $className = "public_board_" . $module_to_load . "_" . $module_to_load;
-    if (class_exists($className)) {
-      $module_class = new ReflectionClass($className);
-      if ($module_class->isSubClassOf(new ReflectionClass('kxCmd'))) {
-        $this->_boardClass = $module_class->newInstance($this->environment);
-        $this->_boardClass->execute($this->environment);
-      } else {
-        $this->errorMessage = sprintf("Couldn't find module %s", $className);
-        return false;
-      }
-    }
-
-    $this->_boardClass->regeneratePages();
-    $this->_boardClass->regenerateThreads();
+    $regenerator->regenerateAllPages();
+    $regenerator->regenerateAllThreads();
     return true;
   }
 

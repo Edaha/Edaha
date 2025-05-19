@@ -2176,77 +2176,58 @@ class kxMb
 class kxBans
 {
   /* Perform a check for a ban record for a specified IP address */
-  public static function BanCheck($ip, $board = '', $force_display = false)
+  public static function BanCheck($ip, $board = '')
   {
-    return false;
+    $em = kxOrm::getEntityManager();
+
     if (!isset($_COOKIE['tc_previousip'])) {
       $_COOKIE['tc_previousip'] = '';
     }
 
-    $bans = array();
-    $results = kxDB::getinstance()->query("SELECT * FROM `" . kxEnv::Get('kx:db:prefix') . "banlist` WHERE ((`type` = '0' AND ( `ipmd5` = '" . md5($ip) . "' OR `ipmd5` = '" . md5($_COOKIE['tc_previousip']) . "' )) OR `type` = '1') AND (`expired` = 0)");
-    if (count($results) > 0) {
-      foreach ($results as $line) {
-        if (($line['type'] == 1 && strpos($ip, md5_decrypt($line['ip'], kxEnv::Get('kx:misc:randomseed'))) === 0) || $line['type'] == 0) {
-          if ($line['until'] != 0 && $line['until'] < time()) {
-            kxDB::getinstance()->exec("UPDATE `" . kxEnv::Get('kx:db:prefix') . "banlist` SET `expired` = 1 WHERE `id` = " . $line['id']);
-            $line['expired'] = 1;
-            $this->UpdateHtaccess();
-          }
-          if ($line['globalban'] != 1) {
-            if ((in_array($board, explode('|', $line['boards'])) || $board == '')) {
-              $line['appealin'] = substr(timeDiff($line['appealat'], true, 2), 0, -1);
-              $bans[] = $line;
-            }
-          } else {
-            $line['appealin'] = substr(timeDiff($line['appealat'], true, 2), 0, -1);
-            $bans[] = $line;
-          }
-        }
+    $bans = $em->getRepository('Edaha\Entities\Ban')->getActiveBansForIp($ip);
+
+    foreach ($bans as $ban) {
+      if ($ban->is_global) {
+        $relevant_bans[] = $ban;
+      } elseif (isset($board) && $ban->isBannedFromBoard($board)) {
+        $relevant_bans[] = $ban;
       }
     }
-    if (count($bans) > 0) {
-      kxDB::getinstance()->exec("END TRANSACTION");
+
+    if (count($relevant_bans) > 0) {
       echo $this->DisplayBannedMessage($bans);
       die();
-    }
-
-    if ($force_display) {
-      /* Instructed to display a page whether banned or not, so we will inform them today is their rucky day */
-      echo '<title>' . _('YOU ARE NOT BANNED!') . '</title><div align="center"><img src="' . kxEnv::Get('kx:paths:main:folder') . 'youarenotbanned.jpg"><br /><br />' . _('Unable to find record of your IP being banned.') . '</div>';
-    } else {
-      return true;
     }
   }
 
   /* Add a ip/ip range ban */
-  public static function BanUser($ip, $board_ids, $duration, $reason, $allow_read, $allow_appeal, $notes, $staff_id, $delete_all = false)
+  public static function BanUser($ip, $board_ids, $duration, $reason, $allow_read, $allow_appeal, $notes, $staff_id, $delete_all_posts = false)
   {
-    $boards = kxDb::getInstance()->select("boards")
-      ->fields("boards", ["board_id", "board_name"])
-      ->where("board_id in ( " . implode(", ", $board_ids) . " )")
-      ->execute()
-      ->fetchAllAssoc("board_id",PDO::FETCH_ASSOC);
-    $fields= [
-      'ip' => $ip,
-      'ipmd5' => md5($ip),
-      'boards' => json_encode($boards),
-      'created' => time(),
-      'expires' => time() + $duration,
-      'reason' => $reason,
-      'allow_read' => (int) $allow_read,
-      'staff_note' => $notes,
-      'created_by_staff_id' => (int) $staff_id,
-    ];
+    $em = kxOrm::getEntityManager();
 
-    $ban_query = kxDb::getInstance()->insert("banlist")
-      ->fields($fields)
-      ->execute();
+    $ban = new \Edaha\Entities\Ban(
+      ip: $ip,
+      reason: $reason,
+      allow_read: $allow_read,
+      allow_appeal: $allow_appeal,
+      expires_at: $expires_at = New DateTime('now + ' . $duration . ' seconds'),
+      staff_note: $staff_note = $notes,
+    );
 
-    if (!$proxyban && $type == 1) {
-      $this->UpdateHtaccess();
+    foreach ($board_ids as $board_id) {
+      $ban->banFromBoard($em->getRepository('Edaha\Entities\Board')->find($board_id));
     }
-    return true;
+
+    $em->persist($ban);
+
+    if ($delete_all_posts) {
+      $posts = kxOrm::getEntityManager()->getRepository('Edaha\Entities\Post')->findBy(array('ip' => $ip));
+      
+      foreach ($posts as $post) {
+        $post->delete();
+        $em->remove($post);
+      }
+    }
   }
 
   /* Return the page which will inform the user a quite unfortunate message */

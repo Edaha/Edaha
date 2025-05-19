@@ -260,6 +260,16 @@ class Post
             return $this->poster->name;
         }
     }
+
+    public function delete(): void
+    {
+        if ($this->is_thread) {
+            foreach ($this->replies as $reply) {
+                $reply->delete();
+            }
+        }
+        // TODO Iterate attachments, delete them
+    }
 }
 
 #[ORM\Embeddable]

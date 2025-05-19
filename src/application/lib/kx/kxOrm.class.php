@@ -30,8 +30,8 @@ class kxOrm
         if (self::$entityManager === null) {
             self::getEntityManager();
         }
-        $this->entityManager->persist($entity);
-        $this->entityManager->flush();
+        self::$entityManager->persist($entity);
+        self::$entityManager->flush();
     }
 
     public function removeImmediately($entity)
@@ -39,7 +39,7 @@ class kxOrm
         if (self::$entityManager === null) {
             self::getEntityManager();
         }
-        $this->entityManager->remove($entity);
-        $this->entityManager->flush();
+        self::$entityManager->remove($entity);
+        self::$entityManager->flush();
     }
 }

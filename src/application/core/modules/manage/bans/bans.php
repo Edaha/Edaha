@@ -49,18 +49,8 @@ class manage_core_bans_bans extends kxCmd {
   }
   
   private function _viewBans() {
-    $bans_query = $this->db->select("banlist")
-      ->fields("banlist")
-      ->fields("staff", ['user_name']);
-    $bans_query->innerJoin("staff", "", "created_by_staff_id = user_id");
-    $bans_query = $bans_query->orderBy("created", "DESC")
-      ->execute()
-      ->fetchAll();
-    
-    foreach ($bans_query as $ban) {
-      $ban->boards = json_decode($ban->boards, true);
-    }
-    $this->twigData['bans'] = $bans_query;
+    $bans = $this->entityManager->getRepository('Edaha\Entities\Ban')->getAllBans();
+    $this->twigData['bans'] = $bans;
     kxTemplate::output('manage/bans_view', $this->twigData);
   }
   

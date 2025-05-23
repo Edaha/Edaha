@@ -2,6 +2,9 @@ Board Management:
   - title: Add and Delete Boards
     section: board 
     url: do=board
+  - title: Manage Sections
+    section: section
+    url: do=section
 
 #  - title: Board Options
 #    section: boardopts

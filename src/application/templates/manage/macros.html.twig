@@ -57,9 +57,9 @@
 {% macro sectionlist(sections, id, selected) %}
   <label for="{{ id }}">{% trans "Section" %}:</label>
   <select name="{{ id }}" id="{{ id }}">
-    <option value="">{% trans "Hidden" %}</option>
+    <option value="0">{% trans "Hidden" %}</option>
   {% for section in sections %}
-    <option value="{{ section.id }}"{% if selected == section.id %} selected="selected"{% endif %}>{{ section.section_name }}</option>
+    <option value="{{ section.id }}"{% if selected == section.id %} selected="selected"{% endif %}>{{ section.name }}</option>
   {% endfor %}
   </select>
 {% endmacro %}

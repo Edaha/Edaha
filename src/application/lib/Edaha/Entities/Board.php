@@ -1,137 +1,148 @@
 <?php
 namespace Edaha\Entities;
 
-class Board implements EntityInterface
+use Edaha\Entities\BoardOption;
+use Edaha\Entities\Post;
+use Edaha\Entities\AttachmentType;
+
+use DateTime;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
+
+#[ORM\Entity(repositoryClass: BoardRepository::class)]
+#[ORM\Table(name: 'boards')]
+class Board
 {
-    public object $db;
-
-    public int $board_id;
-    public string $board_name;
-    protected array $options = [];
-    public array $threads = [];
-
-    public int $board_uniqueposts {
+    #[ORM\Id]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    public ?int $id = null {
         get {
-            $result = $this->db->select("posts");
-            $result->addExpression("COUNT(DISTINCT ip_md5)");
-            return $result->condition("board_id", $this->board_id)
-                ->condition("is_deleted", 0)
-                ->execute()
-                ->fetchField();
+            return $this->id;
         }
     }
 
-    public array $board_filetypes_allowed {
+    #[ORM\Column]
+    public string $name {
         get {
-            $result = $this->db->select("filetypes", "f")
-                ->fields("f", ["type_ext"]);
-            $result->innerJoin("board_filetypes", "bf", "bf.type_id = f.type_id");
-            $result->innerJoin("boards", "b", "b.board_id = bf.board_id");
-            return $result->condition("bf.board_id", $this->board_id)
-                ->orderBy("type_ext")
-                ->execute()
-                ->fetchCol();
+            return $this->name;
+        }
+        set {
+            $this->name = $value;
         }
     }
 
-    protected function __construct(int $board_id, ?object &$db = null)
+    #[ORM\Column(unique: true)]
+    public string $directory {
+        get {
+            return $this->directory;
+        }
+    }
+
+    #[ORM\Column]
+    public DateTime|null $created_at = null {
+        get {
+            return $this->created_at;
+        }
+    }
+
+    /** @var Collection<int, BoardOption> */
+    #[ORM\OneToMany(targetEntity: BoardOption::class, mappedBy:'board', cascade: ['persist'])]
+    public Collection $options {
+        get {
+            return $this->options;
+        }
+    }
+
+    /** @var Collection<int, Post> */
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy:'board', fetch: 'EXTRA_LAZY')]
+    public Collection $posts;
+
+    /** @var Collection<int, AttachmentType> */
+    #[ORM\JoinTable(name: 'boards_attachment_types')]
+    #[ORM\JoinColumn(name: 'board_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'attachment_type_id', referencedColumnName: 'id')]
+    #[ORM\ManyToMany(targetEntity: AttachmentType::class)]
+    public Collection $attachment_types {
+        get {
+            return $this->attachment_types;
+        }
+    }
+    
+    public function addAttachmentType(AttachmentType $attachmentType): void
     {
-        $this->board_id = $board_id;
-        if (!is_null($db)) $this->db = $db;
+        if (!$this->attachment_types->contains($attachmentType)) {
+            $this->attachment_types[] = $attachmentType;
+        }
+    }
+
+    public function __construct(string $name, string $directory)
+    {
+        $this->created_at = new DateTime('now');
+        $this->options = new ArrayCollection();
+        $this->posts = new ArrayCollection();
+        $this->attachment_types = new ArrayCollection();
+
+        $this->name = $name;
+        $this->directory = $directory;
+    }
+
+    private function setOption(string $name, ?string $value): void
+    {
+        // Check if the option already exists
+        $criteria = Criteria::create()
+            ->where(Criteria::expr()->eq('name', $name));
+        $existingOption = $this->options->matching($criteria)->first();
+        if ($existingOption) {
+            // Update the existing option
+            $existingOption->value = $value;
+        } else {
+            // Create a new option
+            $this->options[] = new BoardOption($this, $name, $value);
+        }
+    }
+
+    public function addPost(Post $post): void
+    {
+        $this->posts[] = $post;
+    }
+
+    public function getAllThreads(): Collection
+    {
+        $criteria = Criteria::create()
+            ->where(Criteria::expr()->eq('parent', null))
+            ->orderBy(['stickied_at' => 'DESC'])
+            ->orderBy(['created_at' => 'DESC']);
+        return $this->posts->matching($criteria);
+    }
+
+    public function getPaginatedThreads(int $page, int $perPage): Collection
+    {
+        $criteria = Criteria::create()
+            ->where(Criteria::expr()->eq('parent', null))
+            ->orderBy(['stickied_at' => 'DESC'])
+            ->orderBy(['created_at' => 'DESC'])
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+        return $this->posts->matching($criteria);
     }
 
     public function __get(string $name)
     {
-        if (array_key_exists($name, $this->options)) {
-            return $this->options[$name];
-        }
-
-        return null;
-    }
-
-    public function __set(string $name, mixed $value)
-    {
-        $this->options[$name] = $value;
-    }
-
-    protected function validate() 
-    {
-        $board_exists = $this->db->select("boards")
-            ->fields("boards")
-            ->condition("board_id", $this->board_id)
-            ->countQuery()
-            ->execute()
-            ->fetchField();
-        return ($board_exists == 1);
-    }
-
-    public function loadBoardFields()
-    {
-        $results = $this->db->select("boards")
-            ->fields("boards")
-            ->condition("board_id", $this->board_id)
-            ->execute()
-            ->fetchAssoc();
-
-        foreach ($results as $key => $value) {
-            $this->$key = $value;
+        $criteria = Criteria::create()
+            ->where(Criteria::expr()->eq('name', $name));
+        $option = $this->options->matching($criteria)->first();
+        if ($option) {
+            return $option->value;
+        } else {
+            return null;
         }
     }
 
-    public static function loadFromDb(array $identifiers, object &$db) 
-    {
-        if (!array_key_exists('board_id', $identifiers)) return null;
-
-        $board = new Board($identifiers['board_id'], $db);
-        if (!$board->validate()) return false;
-        $board->loadBoardFields();
-        return $board;
-    }
-
-    public static function loadFromDbByName(string $board_name, object &$db)
-    {
-        $board_id = $db->select("boards")
-            ->fields("boards", ['board_id'])
-            ->condition('board_name', $board_name)
-            ->execute()
-            ->fetchField();
-        
-        if ($board_id) {
-            $board = Board::loadFromDb(['board_id' => $board_id], $db);
-            return $board;
-        }
-
-        return null;
-    }
-
-    public static function loadFromAssoc(array $assoc) 
-    {
-        $post = new Board($assoc['board_id']);
-
-        foreach ($assoc as $key => $value) {
-            if (!is_null($value)) $post->$key = $value;
-        }
-        
-        return $post;
-    }
-
-    public function getAllThreads(bool $include_deleted = false)
-    {
-        $this->threads = [];
-        $results = $this->db->select("posts")
-            ->fields("posts")
-            ->condition("parent_post_id", 0)
-            ->condition("board_id", $this->board_id);
-        
-        if ($include_deleted) {
-            $results = $results->condition("is_deleted", false);
-        }
-
-        $results = $results->orderBy("post_id", "ASC")
-            ->execute();
-
-        while ($row = $results->fetchAssoc()) {
-            $this->threads[] = Thread::loadFromAssoc($row);
-        }
+    public function __set(string $name, $value): void {
+        $this->setOption($name, $value);
     }
 }

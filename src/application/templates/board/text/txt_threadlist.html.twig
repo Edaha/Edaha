@@ -2,8 +2,8 @@
 <div class="hborder">
 	<div class="head threadldiv"{% if board.board_compact_list %} style="padding: 4px;"{% endif %}>
 		<a name="menu"></a>
-		{% if not board.board_compact_list or not isindex %}
-			<table class="threads">
+	{% if not board.board_compact_list or not isindex %}
+		<table class="threads">
 			<thead>
 				<tr>
 					<th width="10%">#</th>
@@ -13,18 +13,38 @@
 				</tr>
 			</thead>
 			<tbody>
-		{% endif %}
-		{% for thread in posts %}				
+	{% endif %}
+		{% for thread in threads %}
 			{% if board.board_compact_list and isindex %}
-				<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index }}">{{ loop.index }}: </a><a href="res/{{ thread.0.post_id }}.html">{% else %}res/{{ thread.0.post_id }}.html">{{ loop.index }}: {% endif %}{{ thread.0.subject }} ({{ thread.0.replies + 1 }})</a>{% if loop.last %}{% else %} &nbsp;{% endif %}
+				<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index }}">{{ loop.index }}: </a><a href="res/{{ thread.id }}.html">{% else %}res/{{ thread.id }}.html">{{ loop.index }}: {% endif %}{{ thread.subject }} ({{ thread.replies|length + 1 }})</a>{% if loop.last %}{% else %} &nbsp;{% endif %}
 			{% else %}
-				<tr><td><a href="res/{{ thread.0.post_id }}.html">{{ loop.index }}</a></td><td><a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index - 1 }}{% else %}res/{{ thread.0.post_id }}.html{% endif %}">{{ thread.0.subject }}</a></td><td>{{ thread.0.replies + 1 }}</td><td nowrap="nowrap"><small>{{ thread.0.bumped_at_timestamp|date("d/m/y @ h:i a T") }}</small></td></tr>
+				<tr>
+					<td>
+						<a href="res/{{ thread.id }}.html">{{ loop.index }}{% if thread.is_stickied %}!{% endif %}</a>
+					</td>
+					<td>
+						<a href="{% if loop.index < kxEnv('display:txtthreads') %}#{{ loop.index - 1 }}{% else %}res/{{ thread.id }}.html{% endif %}">
+							{{ thread.subject }}
+						</a>
+					</td>
+					<td>
+						{{ thread.replies|length + 1 }}
+					</td>
+					<td nowrap="nowrap">
+						<small>{{ thread.bumped_at|date("d/m/y @ h:i a T") }}</small>
+					</td>
+				</tr>
 			{% endif %}
 		{% else %}
 			{% if board.board_compact_list and isindex %}
 				There are currently no threads to display.
 			{% else %}
-				<tr><td>N/A</td><td>There are currently no threads to display.</td><td>N/A</td><td>N/A</td></tr>
+				<tr>
+					<td>N/A</td>
+					<td>There are currently no threads to display.</td>
+					<td>N/A</td>
+					<td>N/A</td>
+				</tr>
 			{% endif %}
 		{% endfor %}
 		
@@ -41,13 +61,11 @@
 				</td></tr>
 			{% endif %}
 		{% endif %}
-		{% if not board.board_compact_list or not isindex %}
-				</tbody>
-			</table>
-		{% endif %}
+	{% if not board.board_compact_list or not isindex %}
+			</tbody>
+		</table>
+	{% endif %}
 
-		</div>
 	</div>
-</div>
 </div>
 {% endblock text_threadlist %}

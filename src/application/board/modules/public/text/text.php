@@ -49,6 +49,25 @@ class public_board_text_text extends public_board_base_baseboard {
     }
   }
 
+  public function checkFields($post) {
+    if ($post->is_reply) {
+      if (!isset($post->message) || $post->message == '') {
+        kxFunc::showError(_('A message is required for a reply.'));
+      }
+    }
+    else {
+      if (!isset($post->subject) || $post->subject == '') {
+        kxFunc::showError(_('A subject is required for a new thread.'));
+      }
+      $thread = $this->entityManager
+        ->getRepository(\Edaha\Entities\Post::class)
+        ->findOneBy(array('board' => $this->board->id, 'subject' => $post->subject, 'parent' => null));
+      if (isset($thread)) {
+        kxFunc::showError(_('Duplicate thread subject'), _('Text boards may have only one thread with a unique subject. Please pick another.'));
+      }
+    }
+  }
+
   public function coloredQuote(&$message) {
     parent::coloredQuote($message);
     // Remove the > from the quoted line if it is a text board 
@@ -75,57 +94,13 @@ class public_board_text_text extends public_board_base_baseboard {
     }
     return $this->environment->get('kx:classes:board:parse:id')->doDynamicPostLink($matches);
   }
-  
-  public function checkFields($postData) {
-    if ($postData['is_reply']) {
-      if (!$this->postClass->checkEmpty($postData)) {
-        kxFunc::showError(_('A message is required for a reply.'));
-      }
-    }
-    else {
-      $result = $this->db->select("posts")
-                         ->condition("board_id", $this->board->board_id)
-                         ->condition("is_deleted",0)
-                         ->condition("subject", substr($postData['subject'] ?? '', 0, 74))
-                         ->condition("parent_post_id", 0)
-                         ->countQuery()
-                         ->execute()
-                         ->fetchField();
-      if ($result > 0) {
-        kxFunc::showError(_('Duplicate thread subject'), _('Text boards may have only one thread with a unique subject. Please pick another.'));
-      }
-    }
-  }
 
   public function doUpload($postData) {
     return array();
   }
 
-  public function regeneratePages() {
+  public function postCommit(\Edaha\Entities\Post $post) {
     $this->twigData['isindex'] = true;
-    parent::regeneratePages();
-    $this->buildPageAllThreads();
+    parent::postCommit($post);
   }
-
-  protected function buildPageAllThreads() {
-    $this->twigData['isindex'] = false;
-    $this->twigData['posts'] = $this->db->select("posts")
-      ->fields("posts")
-      ->condition("board_id", $this->board->board_id)
-      ->condition("parent_post_id", 0)
-      ->condition("is_deleted", 0)
-      ->orderBy("is_stickied", "DESC")
-      ->orderBy("bumped_at_timestamp", "DESC")
-      ->execute()
-      ->fetchAll();
-    
-    foreach ($this->twigData['posts'] as &$thread) {
-      $thread = $this->buildPost($thread, true);
-      $thread = $this->buildThread($thread);
-    }
-
-    $content = kxTemplate::get('board/' . $this->boardType . '/txt_all_threads', $this->twigData, true);
-    
-    kxFunc::outputToFile(KX_BOARD . '/' . $this->board->board_name . '/list.html', $content, $this->board->board_name);
-  } 
 }

@@ -4,12 +4,14 @@ class Posting
   protected $environment;
   protected $db;
   protected $request;
+  protected $entityManager;
 
   public function __construct(kxEnv $environment)
   {
     $this->environment = $environment;
     $this->db = kxDB::getInstance();
     $this->request = kxEnv::$request;
+    $this->entityManager = kxOrm::getEntityManager();
   }
   public function checkUtf8()
   {
@@ -29,87 +31,89 @@ class Posting
     }
   }
 
-  public function threadInfo($boardID, $threadID)
-  {
-    $threadData = array('replies' => 0, 'locked' => 0, 'parent' => 0);
-    $sql = $this->db->select('posts');
-    $sql->addExpression('COUNT(*)');
-    $threadData['replies'] = $sql->condition('board_id', $boardID)
-      ->condition('parent_post_id', $threadID)
-      ->condition('is_deleted', 0)
-      ->execute()
-      ->fetchField();
-    $threadData['parent'] = $threadID;
-    return $threadData;
-  }
-
   public function isReply($boardid)
   {
     /* If it appears this is a reply to a thread, and not a new thread... */
     if (isset($this->request['replythread'])) {
       if ((int) $this->request['replythread'] != 0) {
         /* Check if the thread id supplied really exists */
-        $sql = $this->db->select("posts");
-        $sql->addExpression("COUNT(*)"); // Because Saz is too dumb to SQL.
-        $results = $sql->condition("board_id", $boardid)
-          ->condition("post_id", $this->request['replythread'])
-          ->condition("parent_post_id", 0)
-          ->condition("is_deleted", 0)
-          ->execute()
-          ->fetchField();
-        /* If it does... */
-        if ($results > 0) {
-          /* If it doesn't... */
-          return true;
-        } else {
+        $thread = $this->entityManager->find(Edaha\Entities\Post::class, $this->request['replythread']);
+        if ($thread == null) {
           /* Kill the script, stopping the posting process */
           kxFunc::showError(_('Invalid thread ID.'), _('That thread may have been recently deleted.'));
+        } else {
+          return true;
         }
       }
     }
 
     return false;
   }
-  public function checkEmbed($postData)
-  {
-    if (empty($this->request['embed']) && empty($postData['files'][0])) {
-      return false;
-    }
-  }
+
+  /**
+   * Checks if the post data is empty.
+   *
+   * @param array $postData The data of the post being validated.
+   * @return bool Always returns true (placeholder for future validation logic).
+   */
   public function checkEmpty($postData)
   {
-    //var_dump($postData['thread_info']['message']);
-    if (is_array($postData['files']) && empty($postData['files'][0]) && empty($postData['thread_info']['message'])) {
-      return false;
-    }
+    // TODO Move to Post Validator
+    // if (is_array($postData['files']) && empty($postData['files'][0]) && empty($postData['thread_info']['message'])) {
+    //   return false;
+    // }
     return true;
   }
+
+  /**
+   * Checks if the post contains no file (supposedly) but actually if there's no message.
+   *
+   * @param array $postData The data of the post being validated.
+   * @return bool Returns false if the message is empty, otherwise null.
+   */
   public function checkNoFile($postData)
   {
     if (empty($postData['message'])) {
       return false;
     }
   }
-  public function forcedAnon(&$postData, $board)
+
+  /**
+   * Forces anonymity for the post if the board requires it.
+   *
+   * @param \Entities\Edaha\Post $post The Post object being processed.
+   */
+  public function forcedAnon(&$post)
   {
-    if ($board->board_forced_anon == 0) {
-      if ($postData['user_authority'] == 0 || $postData['user_authority'] == 3) {
-        $postData['post_fields']['name'] = '';
-      }
+    if ($post->board->forced_anononymous == 0) {
+      // TODO Add mod authority
+      // if ($postData['user_authority'] == 0 || $postData['user_authority'] == 3) {
+        $post->poster->name = '';
+      // }
     }
   }
-  public function handleTripcode($postData)
+
+  /**
+   * Handles the calculation of the name and tripcode (stubbed) for a post.
+   *
+   * @param array $post The data of the post being processed.
+   * @return array An array containing the name and tripcode.
+   */
+  public function handleTripcode(\Edaha\Entities\Post $post): void
   {
     $nameandtripcode = ''; //$nameandtripcode = kxFunc::calculateNameAndTripcode($postData['post_fields']['name']);
     if (is_array($nameandtripcode)) {
-      $name = $nameandtripcode[0];
-      $tripcode = $nameandtripcode[1];
-    } else {
-      $name = $postData['post_fields']['name'];
-      $tripcode = '';
+      $post->poster->name = $nameandtripcode[0];
+      $post->poster->tripcode = $nameandtripcode[1];
     }
-    return array($name, $tripcode);
   }
+
+  /**
+   * Checks and processes post commands, including sticky and lock status.
+   *
+   * @param array $postData The data of the post being processed.
+   * @return array An array containing the sticky and lock status.
+   */
   public function checkPostCommands(&$postData)
   {
     $commands = $this->checkStickyAndLock($postData);
@@ -123,6 +127,14 @@ class Posting
     }
     return $commands;
   }
+
+  /**
+   * Checks if the sticky-on-post or lock-on-post commands were set
+   * and then processes the sticky and lock status of a post.
+   *
+   * @param array $postData The data of the post being processed.
+   * @return array An array containing the sticky and lock status.
+   */
   public function checkStickyAndLock($postData)
   {
     $result = array('sticky' => 0, 'lock' => 0);
@@ -146,44 +158,65 @@ class Posting
     }
     return $result;
   }
-  public function checkEmptyReply(&$postData)
+
+  /**
+   * Checks if the reply is empty and sets a default message if configured.
+   *
+   * @param array $postData The data of the post being processed.
+   */
+  public function checkEmptyReply(\Edaha\Entities\Post $post)
   {
-    if ($postData['thread_info']['parent'] != 0) {
-      if ($postData['thread_info']['message'] == '' && kxEnv::Get('kx:posts:emptyreply') != '') {
-        $postData['thread_info']['message'] = kxEnv::Get('kx:posts:emptyreply');
+    if ($post->is_reply) {
+      if ($post->message == '' && kxEnv::Get('kx:posts:emptyreply') != '') {
+        $post->message = kxEnv::Get('kx:posts:emptyreply');
       }
     } else {
-      if ($postData['thread_info']['message'] == '' && kxEnv::Get('kx:posts:emptythread') != '') {
-        $postData['thread_info']['message'] = kxEnv::Get('kx:posts:emptythread');
+      if ($post->message == '' && kxEnv::Get('kx:posts:emptythread') != '') {
+        $post->message = kxEnv::Get('kx:posts:emptythread');
       }
     }
   }
-  public function checkPostingTime($isReply, $boardId)
+
+  /**
+   * Checks if the user is posting too quickly and enforces a delay.
+   *
+   * @param bool $isReply Indicates if the post is a reply.
+   * @param int $boardId The ID of the board where the post is being made.
+   */
+  public function checkIfPostingTooFast($post)
   {
     // Generate the query needed
-    $limit = $isReply ? $this->environment->get("kx:limits:replydelay") : kxEnv::Get("kx:limits:threaddelay");
+    $limit = $post->is_reply ? $this->environment->get("kx:limits:replydelay") : kxEnv::Get("kx:limits:threaddelay");
     $cutoff_time = date('Y-m-d H:i:s', time() - $limit);
 
-    $result = $this->db->select("posts")
-      ->condition("board_id", $boardId)
-      ->condition("ip_md5", md5($_SERVER['REMOTE_ADDR']))
-      ->condition("created_at_timestamp", $cutoff_time, ">");
-    $result = $isReply ? $result->condition("parent_post_id", 0, "!=") : $result->condition("parent_post_id", 0, "=");
-    $result = $result->countQuery()
-      ->execute()
-      ->fetchField();
+    // TODO Get count of posts from $post->poster in the last $limit seconds
+    $result = 0;
+
     if ($result > 0) {
       kxFunc::showError(_('Please wait a moment before posting again.'), _('You are currently posting faster than the configured minimum post delay allows.'));
     }
   }
-  public function checkMessageLength($maxMessageLength)
+
+  /**
+   * Checks the length of the message and enforces a maximum length.
+   *
+   * @param int $maxMessageLength The maximum allowed message length.
+   */
+  public function checkIfMessageTooLong($post)
   {
     // If the length of the message is greater than the board's maximum message length...
-    if (strlen($this->request['message']) > $maxMessageLength) {
+    if (strlen($post->message) > $post->board->max_message_length) {
       // Kill the script, stopping the posting process
-      kxFunc::showError(sprintf(_('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($this->request['message']), $maxMessageLength));
+      kxFunc::showError(sprintf(_('Sorry, your message is too long. Message length: %d, maximum allowed length: %d'), strlen($post->message), $post->board->max_message_length));
     }
   }
+
+  /**
+   * Checks if the captcha is valid and verifies it.
+   *
+   * @param object $board The board object containing board settings.
+   * @param array $postData The data of the post being processed.
+   */
   public function checkCaptcha($board, $postData)
   {
     //TODO: This NEEDS to be looked to see if it can be fit somewhere better
@@ -217,6 +250,12 @@ class Posting
       }
     }
   }
+
+  /**
+   * Checks if the file hash is banned and bans the user if it is.
+   *
+   * @param object $board The board object containing board settings.
+   */
   public function checkBannedHash($board)
   {
     // Banned file hash check
@@ -244,39 +283,13 @@ class Posting
       }
     }
   }
-  public function checkBlacklistedText($boardId)
-  {
-    // TODO Revisit filters operation
-    /*$filters = $this->db->select("filters")
-  ->fields("filters")
-  ->condition("filter_type", 2, ">=")
-  ->orderBy("filter_type", "DESC")
-  ->execute()
-  ->fetchAll();
 
-  $reported = 0;
-  if (isset($filters) && count($filters) > 0) {
-  foreach ($filters as $filter) {
-  if ((!$filter->filter_boards || in_array($boardId, unserialize($filter->filter_boards))) && (!$filter->filter_regex && stripos($this->request['message'], $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $this->request['message']))) {
-  // They included blacklisted text in their post. What do we do?
-  if ($filter->filter_type & 8) {
-  // Ban them if they have the ban flag set on this filter
-  $punishment = unserialize($filter->filter_punishment);
-  kxBans::banUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, $punishment['banlength'], $filter->filter_boards, _('Posting blacklisted text.') . ' (' . $filter . ')', $this->request['message']);
-  }
-  if ($filter->filter_type & 4) {
-  // Stop the post from happening if the delete flag is set
-  kxFunc::showError(sprintf(_('Blacklisted text ( %s ) detected.'), $filter));
-  }
-  if ($filter->filter_type & 2 && !$reported) {
-  // Report flag is set, report the post
-  $reported = 1;
-  // TODO add this later
-  }
-  }
-  }
-  }*/
-  }
+
+  /**
+   * Checks if the oekaki file is valid and returns its path.
+   *
+   * @return string|bool The path to the oekaki file if valid, false otherwise.
+   */
   public function checkOekaki()
   {
     // If oekaki seems to be in the url...
@@ -291,6 +304,8 @@ class Posting
 
     return false;
   }
+
+
   public function getPostTag()
   {
     /* Check for and parse tags if one was provided, and they are enabled */
@@ -300,6 +315,13 @@ class Posting
     }
     return false;
   }
+
+  /**
+   * Checks if the post is a modpost and logs it.
+   *
+   * @param array $post The post data.
+   * @param object $board The board object containing board settings.
+   */
   public function modPost($post, $board)
   {
     if ($post['user_authority'] > 0 && $post['user_authority'] != 3) {
@@ -313,6 +335,12 @@ class Posting
       management_addlogentry($modpost_message, 1, md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed')));
     }
   }
+
+  /**
+   * Sets cookies for the post data.
+   *
+   * @param array $post The post data.
+   */
   public function setCookies($post)
   {
     if ($post['name_save'] && isset($this->request['name'])) {
@@ -325,21 +353,13 @@ class Posting
 
     setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
   }
-  public function checkSage($postData, $board)
-  {
-    // If the user replied to a thread, and they weren't sage-ing it...
-    if ($postData['thread_info']['parent'] != 0 && strtolower($this->request['em']) != 'sage' /*&& unistr_to_ords($_POST['em']) != array(19979, 12370)*/) {
-      // And if the number of replies already in the thread are less than the maximum thread replies before perma-sage...
-      if ($postData['thread_info']['replies'] <= $board->board_max_replies) {
-        // Bump the thread
-        $this->db->update("posts")
-          ->fields(array("bumped_at_timestamp" => date('Y-m-d H:i:s')))
-          ->condition("board_id", $board->board_id)
-          ->condition("post_id", $postData['thread_info']['parent'])
-          ->execute();
-      }
-    }
-  }
+
+  /**
+   * Updates the thread watch status for the user.
+   *
+   * @param array $postData The data of the post being processed.
+   * @param object $board The board object containing board settings.
+   */
   public function updateThreadWatch($postData, $board)
   {
     // If the user replied to a thread he is watching, update it so it doesn't count his reply as unread
@@ -372,6 +392,14 @@ class Posting
       }
     }
   }
+
+  /**
+   * Handles the upload of files and images for the post.
+   *
+   * @param array $postData The data of the post being processed.
+   * @param object $board The board object containing board settings.
+   * @return array An array of uploaded files.
+   */
   public function doUpload(&$postData, $board)
   {
     $uploadClass = $this->environment->get('kx:classes:board:upload:id');
@@ -398,6 +426,12 @@ class Posting
     }
     return $uploadClass->files;
   }
+
+  /**
+   * Parses the fields from the request data and returns them as an array.
+   *
+   * @return array An associative array containing the parsed fields: name, email, and subject.
+   */
   public function parseFields()
   {
     /* Fetch and process the name, email, and subject fields from the post data */
@@ -412,6 +446,12 @@ class Posting
 
     return array("name" => $post_name, "email" => $post_email, "subject" => $post_subject);
   }
+
+  /**
+   * Checks if the user has mod or admin authority based on the provided password.
+   *
+   * @return int The authority level of the user (0 = no authority, 1 = admin, 2 = mod).
+   */
   public function userAuthority()
   {
     $user_authority = 0;
@@ -432,72 +472,5 @@ class Posting
     }
 
     return $user_authority;
-  }
-  public function makePost($postData, $post, $files, $ip, $stickied, $locked, $board)
-  {
-
-    $timeStamp = date('Y-m-d H:i:s', time());
-    $id = $this->db->insert("posts")
-      ->fields(array(
-        'parent_post_id' => $postData['thread_info']['parent'],
-        'board_id' => $board->board_id,
-        'name' => $post['name'],
-        'tripcode' => $post['tripcode'],
-        'email' => $post['email'],
-        'subject' => $post['subject'],
-        'message' => $post['message'],
-        'password' => $postData['post_fields']['postpassword'],
-        'created_at_timestamp' => $timeStamp,
-        'bumped_at_timestamp' => $timeStamp,
-        'ip' => kxFunc::encryptMD5($ip, kxEnv::Get('kx:misc:randomseed')),
-        'ip_md5' => md5($ip),
-        'authority' => $postData['user_authority_display'],
-        'tag' => isset($post['tag']) ? $post['tag'] : '',
-        'is_stickied' => $stickied,
-        'is_locked' => $locked,
-      ))
-      ->execute();
-
-    if (!$id || kxEnv::Get('kx:db:type') == 'sqlite') {
-      // Non-mysql installs don't return the insert ID after insertion, we need to manually get it.
-      $id = $this->db->select("posts")
-        ->fields("posts", array("post_id"))
-        ->condition("board_id", $board->board_id)
-        ->condition("created_at_timestamp", $timeStamp)
-        ->condition("ip_md5", md5($ip))
-        ->range(0, 1)
-        ->execute()
-        ->fetchField();
-    }
-
-    if ($id == 1 && $board->board_start > 1) {
-      $this->db->update("posts")
-        ->fields(array("id" => $board->board_start))
-        ->condition("board_id", $board->board_id)
-        ->execute();
-      $id = $board->board_start;
-    }
-
-    if (!empty($files)) {
-      foreach ($files as $file) {
-        $this->db->insert("post_files")
-          ->fields(array(
-            'file_post' => $id,
-            'file_board' => $board->board_id,
-            'file_md5' => $file['file_md5'],
-            'file_name' => $file['file_name'],
-            'file_type' => substr($file['file_type'], 1),
-            'file_original' => mb_convert_encoding($file['original_file_name'], 'ASCII', 'UTF-8'),
-            'file_size' => $file['file_size'],
-            'file_size_formatted' => /*kxFunc::convertBytes($file['file_size'])*/$file['file_size'],
-            'file_image_width' => $file['image_w'],
-            'file_image_height' => $file['image_h'],
-            'file_thumb_width' => $file['thumb_w'],
-            'file_thumb_height' => $file['thumb_h'],
-          ))
-          ->execute();
-      }
-    }
-    return $id;
   }
 }

@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+// bin/doctrine
+require __DIR__ . '/../vendor/autoload.php';
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+
+DEFINE('KX_ROOT', '../src/application/lib');
+require __DIR__ . '/../src/application/lib/kx/kxOrm.class.php';
+
+// Adjust this path to your actual bootstrap.php
+
+ConsoleRunner::run(
+    new SingleManagerProvider(kxOrm::getEntityManager())
+);

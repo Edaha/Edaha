@@ -23,153 +23,196 @@
 
 {% include "board/text/txt_threadlist.html.twig" %}
 {% include "board/text/post_box.html.twig" %}
+{% for thread in threads %}
+	{% set thread_post_counter = 1 %}
+	<div class="border">
+		<div class="thread">
+			<a name="{{ thread.id }}"></a>
+		{% if loop.last %}
+			<span class="navlinks">
+				<a href="#{{ loop.length - 1 }}">&uarr;</a>&nbsp;
+				<a href="#0">&darr;</a>&nbsp;
+				<a href="#menu">&#9632;</a>
+			</span>
+		{% else %}
+			<span class="navlinks">
+				<a href="#{{ loop.length - 1}}">&uarr;</a>&nbsp;
+				<a href="#{{ loop.index }}">&darr;</a>&nbsp;
+				<a href="#menu">&#9632;</a>
+			</span>
+		{% endif %}
+			<h2>
+				<a href="res/{{ thread.id }}.html">{{ thread.subject }}</a>
+				<span class="replies">({{ thread.replies|length }})</span>
+			</h2>
 
-{% for thread in posts %}
-	{% for post in thread %}
-		{% if post.parent_post_id == 0 %}
-			<div class="border">
-				<div class="thread">
-				<a name="{{ post.post_id }}"></a>
-		{% endif %}
-		{% if post.parent_post_id == 0 %}
-			{% if loop.parent.loop.last %}
-							<span class="navlinks">
-								<a href="#{{ loop.length - 1 }}">&uarr;</a>&nbsp;
-								<a href="#0">&darr;</a>&nbsp;
-								<a href="#menu">&#9632;</a>
-							</span>
-			{% else %}
-							<span class="navlinks">
-								<a href="#{{ loop.length - 1}}">&uarr;</a>&nbsp;
-								<a href="#{{ loop.parent.loop.index }}">&darr;</a>&nbsp;
-								<a href="#menu">&#9632;</a>
-							</span>
-			{% endif %}
-		{% endif %}
-		
-		{% if post.parent_post_id == 0 %}
-		<h2>
-			<a href="res/{{ post.post_id }}.html">{{ post.subject }}</a>
-			<span class="replies">({{ post.replies + loop.length - 1 }})</span></h2>
-		{% endif %}
-		
-		{% if loop.parent.loop.index % 2 == 0 %}
+		{% if loop.index % 2 == 0 %}
 			<div class="post even">
 		{% else %}
 			<div class="post odd">
 		{% endif %}
+
+				<h3>
+					<span class="postnum">
+						<a href="javascript:quote(1, 'post{{ thread.id }}');">1</a>
+						<a href="{{ kxEnv("paths:boards:path") }}/{{ board.directory }}/res/{{ thread.id }}.html#1">.</a>
+					</span>
+
+					<span class="postinfo">
+						Name: 
+						<span class="postername">
+							{% if thread.poster.email != '' and board_options.anonymous == 1 %}
+								<a href="mailto:{{ thread.poster.email }}">
+							{% endif %}
+							{% if thread.poster.name == '' and thread.tripcode == '' %}
+								{{ board_options.anonymous }}
+							{% elseif thread.poster.name == '' and thread.tripcode != '' %}
+							{% else %}
+								{{ thread.poster.name }}
+							{% endif %}
+							{% if thread.poster.email != '' and board_options.anonymous != '' %}
+								</a>
+							{% endif %}
+						</span>
+
+						{% if thread.poster.tripcode != '' %}
+						<span class="postertrip">!{{ thread.poster.tripcode }}</span>
+						{% endif %}
+
+						@ {{ thread.created_at|date("d/m/Y H:i") }}
+						
+						{% if board_options.show_id %}
+						ID: {{ post.ipmd5|slice(0,5) }}
+						{% endif %}
+
+						<span id="dnb-{{ board.directory }}-{{ thread.id }}-y"></span>
+						<span class="id"></span>
+					</span>
+				</h3>
+
+				<blockquote>
+					{{ thread.message }}
+				</blockquote>
+			</div>
+
+	{% set replies_to_show = (thread.is_stickied) ? kxEnv("display:stickyreplies") : kxEnv("display:replies") %}
+	{% set omitted_reply_count = (thread.replies|length > replies_to_show) ? thread.replies|length - replies_to_show : 0 %}
+	
+	{% if omitted_reply_count > 0 %}
+		<span class="omitted">
+			{{ omitted_reply_count }} more replies omitted.
+		</span>
+	{% endif %}
+	{% for post in thread.getLastNReplies( replies_to_show ) %}
+		{% set thread_post_counter = 1 + omitted_reply_count + loop.index %}
 		<h3>
-		
 			<span class="postnum">
-			{% if post.parent_post_id == 0 %}
-				<a href="javascript:quote(1, 'post{{ post.post_id }}');">1</a>
-				<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ post.post_id }}.html#1">.</a>
-			{% else %}
-				<a href="javascript:quote({{ 1 + post.replies + loop.index }}, 'post{{ post.post_id }}');">{{ 1 + post.replies + loop.index }}</a>
-				<a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/res/{{ post.parent_post_id }}.html#{{ 1 + post.replies + loop.index }}">.</a>
-			{% endif %}
+				<a href="javascript:quote({{ thread_post_counter }}, 'post{{ post.id }}');">{{ thread_post_counter }}</a>
+				<a href="{{ kxEnv("paths:boards:path") }}/{{ board.directory }}/res/{{ thread.id }}.html#{{ thread_post_counter }}">.</a>
 			</span>
 			<span class="postinfo">
-			Name: 
-			<span class="postername">
-			{% if post.email != '' and board.board_anonymous == 1 %}
-				<a href="mailto:{{ post.email }}">
-			{% endif %}
-			{% if post.name == '' and post.tripcode == '' %}
-				{{ board.board_anonymous }}
-			{% elseif post.name == '' and post.tripcode != '' %}
-			{% else %}
-				{{ post.name }}
-			{% endif %}
-			{% if post.email != '' and board.board_anonymous != '' %}
-			  </a>
-			{% endif %}
+				Name: 
+				<span class="postername">
+					{% if post.poster.email != '' and board_options.anonymous == 1 %}
+						<a href="mailto:{{ post.poster.email }}">
+					{% endif %}
+					{% if post.poster.name == '' and post.poster.tripcode == '' %}
+						{{ board_options.anonymous }}
+					{% elseif post.poster.name == '' and post.poster.tripcode != '' %}
+					{% else %}
+						{{ post.poster.name }}
+					{% endif %}
+					{% if post.poster.email != '' and board_options.anonymous != '' %}
+						</a>
+					{% endif %}
+				</span>
+				{% if post.poster.tripcode != '' %}
+					<span class="postertrip">!{{ post.poster.tripcode }}</span>
+				{% endif %}
 
-			</span>
-			{% if post.tripcode != '' %}
-			  <span class="postertrip">!{{ post.tripcode }}</span>
-			{% endif %}
-			@ {{ post.timestamp_formatted }}
-			{% if board.board_show_id %}
-			  ID: {{ post.ipmd5|slice(0,5) }}
-			{% endif %}
-			<span id="dnb-{{ board.board_name }}-{{ post.post_id }}-{% if post.parent_post_id == 0 %}y{% else %}n{% endif %}"></span>
+				@ {{ post.created_at|date("d/m/Y H:i") }}
+				
+				{% if board.show_id %}
+					ID: {{ post.poster.ipmd5|slice(0,5) }}
+				{% endif %}
+			<span id="dnb-{{ board.directory }}-{{ post.id }}-n"></span>
 			<span class="id"></span>
 			</span>
-			</h3>
-			<blockquote>
-				{{ post.message }}
-			</blockquote>
-			</div>
-			{% if loop.last %}
-				<form name="post{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}" id="post{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post" {% if board.board_enablecaptcha == 1 %}onsubmit="return checkcaptcha('post{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}');"{% endif %}>
-				<input type="hidden" name="board" value="{{ board.board_name }}" />
-				<input type="hidden" name="replythread" value="{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}" />
-				<input name="email" size="25" value="" style="display: none;" />
-				<table class="postform">
+		</h3>
+
+		<blockquote>
+			{{ post.message }}
+		</blockquote>
+	{% endfor %}
+	
+		<form name="post{{ thread.id }}" id="post{{ thread.id }}" action="{{ kxEnv("paths:script:path") }}/index.php?app=core&module=post&section=post" method="post" {% if board_options.enablecaptcha == 1 %}onsubmit="return checkcaptcha('post{{ thread.id }}');"{% endif %}>
+			<input type="hidden" name="board_id" value="{{ board.id }}" />
+			<input type="hidden" name="replythread" value="{{ thread.id }}" />
+			<input name="email" size="25" value="" style="display: none;" />
+			<table class="postform">
 				<tr>
-					{% if board.board_forcedanon != 1 %}
-						<td class="label">
-							<label>Name:</label>
-						</td>
-						<td>
-							<input name="name" size="25" maxlength="75" />
-						</td>
-					{% endif %}
+				{% if board_options.forcedanon != 1 %}
+					<td class="label">
+						<label>Name:</label>
+					</td>
+					<td>
+						<input name="name" size="25" maxlength="75" />
+					</td>
+				{% endif %}
 					<td class="label">
 						<label>Email:</label>
 					</td>
 					<td>
 						<input name="em" size="25" maxlength="75" />
 					</td>
-					{% if board.board_forcedanon != 1 %}
-						<td>
-							<input type="submit" name="submit" value="Reply" class="submit" />
-							<a href="#" onclick="toggleOptions('{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}', 'post{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}', '{{ board.board_name }}');return false;">More...</a>
-						</td>
-					</tr>
-					<tr>
-					{% endif %} 
-
-					{% if board.board_enablecaptcha == 1 %}
-						<td class="label"><label for="captcha">Captcha:</label></td>
-						<td>
-							<a href="#" onclick="javascript:document.getElementById('captchaimage').src = '{{ kxEnv("paths:script:path") }}/captcha.php?' + Math.random();return false;">
-							<img id="captchaimage" src="{{ kxEnv("paths:script:path") }}/captcha.php" border="0" width="90" height="30" alt="Captcha image" />
-							</a>&nbsp;
-							<input type="text" id="captcha" name="captcha" size="8" maxlength="6" />
-						</td>
-					{% endif %}
-					{% if (board.board_forcedanon == 1 and board.board_enablecaptcha != 1) or board.board_forcedanon != 1 %}
-						<td class="label">
-							<label>Password:</label>
-						</td>
-						<td>
-							<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
-						</td>
-					{% endif %} 
-					{% if board.board_forcedanon == 1 %}
-						<td>
-							<input type="submit" name="submit" value="Reply" class="submit" />
-							<a href="#" onclick="toggleOptions('{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}', 'post{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}', '{{ board.board_name }}');return false;">More...</a>
-						</td>
-						{% if board.board_enablecaptcha == 1 %}
-						</tr>
-							<tr>
-								<td class="label">
-									<label>Password:</label>
-								</td>
-								<td>
-									<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
-								</td>
-						{% endif %}
-					{% endif %}
+				{% if board_options.forcedanon != 1 %}
+					<td>
+						<input type="submit" name="submit" value="Reply" class="submit" />
+						<a href="#" onclick="toggleOptions('{{ thread.id }}', 'post{{ thread.id }}', '{{ board.directory }}');return false;">More...</a>
+					</td>
 				</tr>
-				<tr style="display: none;" id="opt{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}"><td></td></tr>
+				<tr>
+				{% endif %} 
+
+				{% if board_options.enablecaptcha == 1 %}
+					<td class="label"><label for="captcha">Captcha:</label></td>
+					<td>
+						<a href="#" onclick="javascript:document.getElementById('captchaimage').src = '{{ kxEnv("paths:script:path") }}/captcha.php?' + Math.random();return false;">
+						<img id="captchaimage" src="{{ kxEnv("paths:script:path") }}/captcha.php" border="0" width="90" height="30" alt="Captcha image" />
+						</a>&nbsp;
+						<input type="text" id="captcha" name="captcha" size="8" maxlength="6" />
+					</td>
+				{% endif %}
+				{% if (board_options.forcedanon == 1 and board_options.enablecaptcha != 1) or board_options.forcedanon != 1 %}
+					<td class="label">
+						<label>Password:</label>
+					</td>
+					<td>
+						<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
+					</td>
+				{% endif %} 
+				{% if board_options.forcedanon == 1 %}
+					<td>
+						<input type="submit" name="submit" value="Reply" class="submit" />
+						<a href="#" onclick="toggleOptions('{{ thread.id }}', 'post{{ thread.id }}', '{{ board.directory }}');return false;">More...</a>
+					</td>
+			{% if board_options.enablecaptcha == 1 %}
+				</tr>
+				<tr>
+					<td class="label">
+						<label>Password:</label>
+					</td>
+					<td>
+						<input type="password" name="postpassword" size="8" accesskey="p" maxlength="75" />
+					</td>
+				{% endif %}
+			{% endif %}
+				</tr>
+				<tr style="display: none;" id="opt{{ thread.id }}"><td></td></tr>
 				<tr>
 					<td class="postfieldleft">
 						<span class="postnum">
-							{{ post.replies + 2 }}
+							{{ thread_post_counter + 1 }}
 						</span>
 					</td>
 					<td colspan="4">
@@ -177,15 +220,15 @@
 					</td>
 				</tr>
 			</table>
-			<div id="preview{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}"></div>
-				</form>
-				<script type="text/javascript"><!--
-					set_inputs('post{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}');
-				//--></script>
-				</div></div>
-			{% endif %}
-	{% endfor %}
-
+			<div id="preview{{ thread.id }}"></div>
+		</form>
+		<script type="text/javascript"><!--
+			set_inputs('post{{ thread.id }}');
+		//--></script>
+	</div>
+</div>
+</div>
+</div>
 {% endfor %}
 
 {% endblock boardcontent %}

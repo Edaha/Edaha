@@ -10,11 +10,30 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 
+#[ORM\Entity]
+#[ORM\Table(name: 'sections')]
 class Section
 {
+    #[ORM\Id]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    public ?int $id = null {
+        get {
+            return $this->id;
+        }
+    }
+
+    #[ORM\Column(unique: true)]
     public string $name;
+
+    #[ORM\Column]
     public bool $is_hidden;
+
+    #[ORM\Column]
     public DateTime $created_at;
+    
+    #[ORM\OneToMany(targetEntity: Board::class, mappedBy: 'section', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'section_id', referencedColumnName: 'id')]
     public Collection $boards;
 
     public function __construct(string $name, bool $hidden)

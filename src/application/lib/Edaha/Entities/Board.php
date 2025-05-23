@@ -73,6 +73,8 @@ class Board
         }
     }
 
+    #[ORM\ManyToOne(targetEntity: Section::class, inversedBy: 'boards')]
+    #[ORM\JoinColumn(name: 'section_id', referencedColumnName: 'id')]
     public ?Section $section = null {
         get {
             return $this->section;

@@ -4,6 +4,7 @@ namespace Edaha\Entities;
 use Edaha\Entities\BoardOption;
 use Edaha\Entities\Post;
 use Edaha\Entities\AttachmentType;
+use Edaha\Entities\Section;
 
 use DateTime;
 
@@ -69,6 +70,15 @@ class Board
     public Collection $attachment_types {
         get {
             return $this->attachment_types;
+        }
+    }
+
+    public ?Section $section = null {
+        get {
+            return $this->section;
+        }
+        set {
+            $this->section = $value;
         }
     }
     

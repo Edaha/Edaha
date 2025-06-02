@@ -24,7 +24,7 @@
       <h3>Recent Posts</h3>
       <ul>
       {% for post in recentposts %}
-        <li><a class="ref|{{ post.board_name }}|{% if post.parent_post_id == 0 %}{{ post.post_id }}{% else %}{{ post.parent_post_id }}{% endif %}|{{ post.post_id }}" href="{{ kxEnv("paths:main:path") }}/{{ post.board_name }}/res/{% if post.parent_post_id == 0 %}{{ post.post_id }}.html{% else %}{{ post.parent_post_id }}.html#{{ post.post_id }}{% endif %}">&gt;&gt;&gt;/{{ post.board_name }}/{{ post.post_id }}</a> - {{ post.message|striptags|u.truncate(60, '...', false)|raw }}<br /></li>
+        <li><a class="ref|{{ post.board.name }}|{% if post.parent == 0 %}{{ post.id }}{% else %}{{ post.parent.id }}{% endif %}|{{ post.id }}" href="{{ kxEnv("paths:main:path") }}/{{ post.board.name }}/res/{% if post.parent == 0 %}{{ post.id }}.html{% else %}{{ post.parent.id }}.html#{{ post.id }}{% endif %}">&gt;&gt;&gt;/{{ post.board.name }}/{{ post.id }}</a> - {{ post.message|striptags|u.truncate(60, '...', false)|raw }}<br /></li>
       {% endfor %}
       </ul>
     </section>
@@ -54,13 +54,13 @@
     
 {% for item in entries %}
     <article>
-      <h4 id="id{{ item.entry_id }}">
-        <span class="newssub">{{ item.entry_subject }} {% if _get.p == '' %} by {% if item.entry_email != '' %} <a href="mailto:{{ item.entry_email }}">{% endif %} {{ item.entry_name }} {% if item.entry_email != '' %} </a>{% endif %}  - {{ item.entry_time|date("d/m/y @ h:i a T") }} {% endif %} </span>
-        <a class="permalink" href="#id{{ item.entry_id }}">#</a>
+      <h4 id="id{{ item.id }}">
+        <span class="newssub">{{ item.subject }} {% if _get.p == '' %} by {% if item.email != '' %} <a href="mailto:{{ item.email }}">{% endif %} {{ item.name }} {% if item.email != '' %} </a>{% endif %}  - {{ item.created_at|date("d/m/y @ h:i a T") }} {% endif %} </span>
+        <a class="permalink" href="#id{{ item.id }}">#</a>
       </h4>
       
       <p>
-        {{ item.entry_message }}
+        {{ item.message }}
       </p>
     </article>
 {% endfor %} 
@@ -83,11 +83,11 @@
     
 {% for section in sections %}
     <article>
-      <h4><span class="section_toggle" onclick="kusaba.toggle(this, '{{ section.section_abbreviation }}');">&nbsp;{% if section.section_hidden == 1 %}&#43;{% else %}&minus;{% endif %}&nbsp;</span>{{ section.section_name }}</h4>
+      <h4><span class="section_toggle" onclick="kusaba.toggle(this, 'section_{{ section.id }}');">&nbsp;{% if section.is_hidden == 1 %}&#43;{% else %}&minus;{% endif %}&nbsp;</span>{{ section.name }}</h4>
       
-      <ul {% if section.section_hidden == 1 %} style="display: none;"{% endif %}id="{{ section.section_abbreviation }}">
+      <ul {% if section.is_hidden %} style="display: none;"{% endif %}id="section_{{ section.id }}">
 {% for board in section.boards %}
-        <li><a href="{{ kxEnv("paths:boards:path") }}/{{ board.board_name }}/" title="{{ kxEnv("site:name") }} - {{ board.board_desc }}">&bull; {{ board.board_desc }}</a></li>
+        <li><a href="{{ kxEnv("paths:boards:path") }}/{{ board.directory }}/" title="{{ kxEnv("site:name") }} - {{ board.name }}">&bull; {{ board.name }}</a></li>
 {% else %}
         <li>No boards</li>
 {% endfor %}
@@ -110,7 +110,7 @@
     {% for section in sections %}
       [
     {% for board in section.boards %}
-      <a title="{{board.board_desc}}" href="{{ kxEnv("paths:boards:path") }}/{{board.board_name}}/">{{board.board_name}}</a>{% if not loop.last %} / {% endif %}
+      <a title="{{board.name}}" href="{{ kxEnv("paths:boards:path") }}/{{board.directory}}/">{{board.name}}</a>{% if not loop.last %} / {% endif %}
     {% endfor %}
        ]
     {% endfor %}

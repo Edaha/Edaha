@@ -1,0 +1,33 @@
+{% import "manage/macros.html.twig" as macros %}
+
+{% extends "manage/wrapper.html.twig" %}
+
+{% block heading %}{% trans "Frontpage Management" %}{% endblock %}
+
+{% block managecontent %}
+<table>
+  <thead>
+    <tr>
+      <th>{% trans "Page Name" %}</th>
+      <th>{% trans "Entries" %}</th>
+      <th>{% trans "Edit controls" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for board in frontpage_section.boards %}
+    <tr>
+      <td>{{ board.name }}</td>
+      <td>{{ board.posts.count }}</td>
+      <td>
+        [ 
+          <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=frontpage_manage&amp;action=manage&amp;board_id={{ board.id }}">{% trans "Manage Entries" %}</a>
+        ] 
+        [ 
+          <a href="{{ base_url }}app=core&amp;module=site&amp;section=front&amp;do=frontpage&amp;action=del&amp;id={{ board.id }}">{% trans "Delete" %}</a>
+        ]
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

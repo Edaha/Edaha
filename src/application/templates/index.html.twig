@@ -55,7 +55,7 @@
 {% for item in entries %}
     <article>
       <h4 id="id{{ item.id }}">
-        <span class="newssub">{{ item.subject }} {% if _get.p == '' %} by {% if item.email != '' %} <a href="mailto:{{ item.email }}">{% endif %} {{ item.name }} {% if item.email != '' %} </a>{% endif %}  - {{ item.created_at|date("d/m/y @ h:i a T") }} {% endif %} </span>
+        <span class="newssub">{{ item.subject }} {% if _get.p == '' %} by {% if item.poster.email != '' %} <a href="mailto:{{ item.poster.email }}">{% endif %} {{ item.poster.name }} {% if item.poster.email != '' %} </a>{% endif %}  - {{ item.created_at|date("d/m/y @ h:i a T") }} {% endif %} </span>
         <a class="permalink" href="#id{{ item.id }}">#</a>
       </h4>
       
@@ -67,7 +67,7 @@
     
 {% if _get.view == '' %}
     <footer>
-  {% for i in 0..pages %}
+  {% for i in 1..pages %}
       [ {% if _get.page != i %}<a href="{{ kxEnv("paths:main:path") }}/index.php?page={{ i }}">{% endif %}{{ i }}{% if _get.page != i %}</a>{% endif %} ]
   {% endfor %}
     </footer>

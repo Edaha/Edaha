@@ -167,6 +167,8 @@ class manage_core_site_front extends kxCmd
             if (! $post) {
                 throw new Exception('Post not found');
             }
+            $post->message = $this->request['message'];
+            $post->subject = $this->request['subject'];
         } else {
             $post = New Post(
                 $this->board,
@@ -188,7 +190,7 @@ class manage_core_site_front extends kxCmd
 
         if ($this->request['edit'] == "") {
             // New post
-            $this->twigData['notice'] = _('Entry successfully added.');
+            $this->twigData['notice']['message'] = _('Entry successfully added.');
             logging::addLogEntry(
                 kxFunc::getManageUser()['user_name'],
                 sprintf('Created new post on %s', $this->board->name),
@@ -196,41 +198,35 @@ class manage_core_site_front extends kxCmd
             );
         } else {
             // Update post
-            $this->twigData['notice'] = _('Entry successfully edited.');
+            $this->twigData['notice']['message'] = _('Entry successfully edited.');
             logging::addLogEntry(
                 kxFunc::getManageUser()['user_name'],
                 sprintf('Edited entry post %s on %s', $post->id, $this->board->name),
                 __CLASS__
             );
         }
-        $this->twigData['notice_type'] = 'success';
+        $this->twigData['notice']['type'] = 'success';
     }
 
     private function _edit()
     {
-        if ($this->request['do'] == 'news') {
-            $type = 0;
-        } else if ($this->request['do'] == 'faq') {
-            $type = 1;
-        } else if ($this->request['do'] == 'rules') {
-            $type = 2;
-        }
-        $this->twigData['entry'] = $this->db->select("front")
-            ->fields("front")
-            ->condition("entry_type", $type)
-            ->condition("entry_id", $this->request['id'])
-            ->orderBy("entry_id", "DESC")
-            ->execute()
-            ->fetchAssoc();
+        $entry = $this->entityManager->getRepository(Post::class)
+            ->find($this->request['id']);
+        
+        $this->twigData['entry'] = $entry;
     }
 
     private function _del()
     {
-        $this->db->delete("front")
-            ->condition("entry_id", $this->request['id'])
-            ->execute();
-        $this->twigData['notice_type'] = 'success';
-        $this->twigData['notice']      = _('Entry successfully deleted.');
+        $post = $this->entityManager->getRepository(Post::class)->find($this->request['id']);
+        if (! $post) {
+            throw new Exception('Post not found');
+        }
+        $this->entityManager->remove($post);
+        $this->entityManager->flush();
+
+        $this->twigData['notice']['type']    = 'success';
+        $this->twigData['notice']['message'] = _('Entry successfully deleted.');
         logging::addLogEntry(
             kxFunc::getManageUser()['user_name'],
             sprintf('Deleted %s entry', $this->request['do']),

@@ -144,6 +144,10 @@ class Board
 
     public function __get(string $name)
     {
+        // Doctrine does some magic with properties that end up skipping the setter/getter hooks, so we need to check for those first.
+        if (property_exists($this, $name)) {
+            return $this->$name;
+        }
         $criteria = Criteria::create()
             ->where(Criteria::expr()->eq('name', $name));
         $option = $this->options->matching($criteria)->first();
@@ -155,6 +159,10 @@ class Board
     }
 
     public function __set(string $name, $value): void {
-        $this->setOption($name, $value);
+        if (property_exists($this, $name)) {
+            $this->$name = $value;
+        } else {
+            $this->setOption($name, $value);
+        }
     }
 }

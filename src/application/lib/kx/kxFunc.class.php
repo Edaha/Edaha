@@ -2186,6 +2186,7 @@ class kxBans
 
     $bans = $em->getRepository('Edaha\Entities\Ban')->getActiveBansForIp($ip);
 
+    $relevant_bans = [];
     foreach ($bans as $ban) {
       if ($ban->is_global) {
         $relevant_bans[] = $ban;

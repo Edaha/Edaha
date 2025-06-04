@@ -14,6 +14,10 @@ Site Management:
   - title: Rules Entries
     section: front
     url: do=rules
+
+  - title: Manage Frontpage
+    section: front
+    url: do=frontpage
     
   - title: Edit Embeds
     section: embeds

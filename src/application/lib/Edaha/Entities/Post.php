@@ -131,10 +131,14 @@ class Post
     #[ORM\Embedded(class: Poster::class)]
     public Poster $poster;
 
-    #[ORM\Column]
-    public string $deletion_password {
+    #[ORM\Column(nullable: true)]
+    public ?string $deletion_password = null {
         set {
-            $this->deletion_password = password_hash($value, PASSWORD_DEFAULT);
+            if($value === null || $value === '') {
+                $this->deletion_password = null;
+            } else {
+                $this->deletion_password = password_hash($value, PASSWORD_DEFAULT);
+            }
         }
     }
 

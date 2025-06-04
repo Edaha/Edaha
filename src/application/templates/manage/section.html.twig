@@ -1,0 +1,36 @@
+{% import "manage/macros.html.twig" as macros %}
+
+{% extends "manage/wrapper.html.twig" %}
+
+{% block heading %}{% trans "Manage Sections" %}{% endblock %}
+
+{% block managecontent %}  
+  <p>
+    <form action="{{ base_url }}app=board&amp;module=board&amp;section=section&amp;do=add" method="post">
+      {{ 
+        macros.manageform("section", "Add Section", true,
+          { 
+            'Section Name' : 
+            { 
+              'id' : 'name',
+              'type' : 'text', 
+              'desc' : "The section name.",
+              'value' : entry.name,
+            },
+            'Hidden?' : 
+            { 
+              'id' : 'hidden',
+              'type' : 'checkbox_single', 
+              'desc' : "Is this section hidden?",
+              'value' : entry.is_hidden,
+            },
+          }
+        ) 
+      }}
+    </form>
+  </p>
+
+  {% for section in sections %}
+    {{ section.name }}
+  {% endfor %}
+{% endblock %}

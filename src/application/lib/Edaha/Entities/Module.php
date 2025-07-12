@@ -43,9 +43,9 @@ class Module
             return $this->class;
         }
         set {
-            if (!class_exists($value)) {
-                throw new \InvalidArgumentException("Class $value does not exist.");
-            }
+            // if (!class_exists($value)) {
+            //     throw new \InvalidArgumentException("Class $value does not exist.");
+            // }
             $this->class = $value;
         }
     }

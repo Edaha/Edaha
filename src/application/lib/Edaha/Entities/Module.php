@@ -4,7 +4,7 @@ namespace Edaha\Entities;
 use Doctrine\ORM\Mapping as ORM;
 use Edaha\Types\ModuleType;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ModuleRepository::class)]
 #[ORM\Table(name: 'modules')]
 class Module
 {

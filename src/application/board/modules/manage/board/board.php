@@ -71,10 +71,7 @@ class manage_board_board_board extends kxCmd
 
     $this->twigData['boards'] = $boards_doctrine;
 
-    $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->findBy([
-      'type' => 'board',
-      'is_manage' => false
-    ]);
+    $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->getBoardModules();
     if (empty($board_types)) {
       $this->twigData['notice']['type'] = 'error';
       $this->twigData['notice']['message'] = _('No board types found. Please install board modules.');

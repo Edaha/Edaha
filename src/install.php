@@ -20,7 +20,7 @@ if (isset($_POST['install'])) {
           </form>';
 }
 
-function installModule($em, $moduleName, $moduleType, $moduleClass, $moduleDescription) {
+function installModule($em, $moduleName, $moduleType, $moduleClass, $moduleDescription, $isManage = false) {
     // Check if the module already exists
     $existingModule = $em->getRepository(Module::class)->findOneBy(['name' => $moduleName]);
     if ($existingModule) {
@@ -33,7 +33,7 @@ function installModule($em, $moduleName, $moduleType, $moduleClass, $moduleDescr
         ModuleType::from($moduleType),
         $moduleClass,
         $moduleDescription,
-        false // Assuming is_manage is false for installation
+        $isManage // Assuming is_manage is false for installation
     );
 
     try {
@@ -46,17 +46,16 @@ function installModule($em, $moduleName, $moduleType, $moduleClass, $moduleDescr
 }
 
 function installModules($em) {
-    installModule($em, 'Staff', 'core', 'staff', 'Staff Configuration');
-    installModule($em, 'Image Board', 'board', 'image', 'Generator for an image-type board');
-    installModule($em, 'Oekaki Board', 'board', 'oekaki', 'Generator for an oekaki-type board');
-    installModule($em, 'Upload Board', 'board', 'upload', 'Generator for an upload-type board');
-    installModule($em, 'Text Board', 'board', 'text', 'Generator for a text board');
-    installModule($em, 'Site', 'core', 'site', 'Manage the Site Configuration');
-    installModule($em, 'Index', 'core', 'index', 'Handles the front page features (news, faq, etc)');
-    installModule($em, 'Bans', 'core', 'bans', 'Provides functionality for adding and editing bans.');
-    installModule($em, 'Board', 'board', 'board', 'Allows setting of board options');
-    installModule($em, 'Filters', 'board', 'filter', 'Provides filtering options');
-    installModule($em, 'Attachment Options', 'board', 'attachments', 'Provides tools for adding, editing, and removing available post attachments.');
+    installModule($em, 'Staff', 'core', 'staff', 'Staff Configuration', true);
+    installModule($em, 'Image Board', 'board', 'image', 'Generator for an image-type board', false);
+    installModule($em, 'Text Board', 'board', 'text', 'Generator for a text board', false);
+    installModule($em, 'Site', 'core', 'site', 'Manage the Site Configuration', true);
+    installModule($em, 'Index', 'core', 'index', 'Handles the front page features (news, faq, etc)', false);
+    installModule($em, 'Bans', 'core', 'bans', 'Provides functionality for adding and editing bans.', true);
+    installModule($em, 'Board', 'board', 'board', 'Allows setting of board options', true);
+    installModule($em, 'Filters', 'board', 'filter', 'Provides filtering options', true);
+    installModule($em, 'Attachment Options', 'board', 'attachments', 'Provides tools for adding, editing, and removing available post attachments.', true);
+    installModule($em, 'Module Management', 'core', 'modules', 'Provides tools for managing modules.', true);
 }
 
 function addBoards($em) {

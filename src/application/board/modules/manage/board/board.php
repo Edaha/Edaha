@@ -1,5 +1,9 @@
 <?php
 
+use Edaha\Entities\Board;
+use Edaha\Entities\Module;
+use Edaha\Types\ModuleType;
+
 class manage_board_board_board extends kxCmd
 {
   /**
@@ -67,17 +71,19 @@ class manage_board_board_board extends kxCmd
 
     $this->twigData['boards'] = $boards_doctrine;
 
-    $board_types_query = $this->db->select("modules")
-      ->fields("modules", ["module_file", "module_name"])
-      ->condition("module_application", "board")
-      ->condition("module_manage", 0)
-      ->execute()
-      ->fetchAll();
-
+    $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->findBy([
+      'type' => 'board',
+      'is_manage' => false
+    ]);
+    if (empty($board_types)) {
+      $this->twigData['notice']['type'] = 'error';
+      $this->twigData['notice']['message'] = _('No board types found. Please install board modules.');
+      return;
+    }
     $this->twigData['board_types'] = array();
-    foreach ($board_types_query as $type) {
-      $this->twigData['board_types'][$type->module_name] = [
-        'value' => $type->module_file,
+    foreach ($board_types as $type) {
+      $this->twigData['board_types'][$type->name] = [
+        'value' => $type->class,
       ];
     }
 

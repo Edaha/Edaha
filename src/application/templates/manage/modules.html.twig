@@ -1,0 +1,86 @@
+{% import "manage/macros.html.twig" as macros %}
+
+{% extends "manage/wrapper.html.twig" %}
+
+{% block heading %}{% trans "Module Management" %}{% endblock %}
+
+{% block managecontent %}
+
+  
+<form action="{{ base_url }}app=core&amp;module=modules&amp;do=add&amp;action=post" method="post">
+  {{ 
+    macros.manageform("modules", "Add Module", true,
+      { 
+        'Name' : 
+        { 
+          'id' : 'name',
+          'type' : 'text', 
+          'desc' : "The Module's friendly name, e.g. 'Module Management'",
+          'value' : current_module.name,
+        },
+        'Description' :
+        { 
+          'id' : 'description',
+          'type' : 'text',
+          'desc' : "The Module's description, e.g. 'Manage Edaha's installed modules'",
+          'value' : current_module.description 
+        },
+        'Type' :
+        { 
+          'id' : 'type',
+          'type' : 'select',
+          'value' : current_module.type,
+          'options': {
+            'core': 'Core',
+            'board': 'Board',
+            'board_regenerator': 'Board Regenerator',
+            'board_renderer': 'Board Renderer',
+            'site': 'Site',
+          }
+        },
+        'Class'  :
+        { 
+          'id' : 'class',
+          'type' : 'text',
+          'desc': "The fully-qualified class name, e.g. 'Edaha\\Modules\\Manage\\Module'",
+          'value' : current_module.class,
+        },
+        'Is Management Module':
+        {
+          'id': 'board_type',
+          'type': 'checkbox_single',
+          'desc': 'If this module is a management module, it will be listed in the management section of the site.',
+          'selected': current_module.board_type,
+        }
+      }
+    ) 
+  }}
+</form>
+<br />
+<fieldset id="modules">
+  <legend>{% trans 'Modules' %}</legend>
+  <table class="stats">
+    <col class="col1" /><col class="col2" /><col class="col2" />
+    <tr>
+      <th>{% trans 'Name' %}</th>
+      <th>{% trans 'Description' %}</th>
+      <th>{% trans 'Type' %}</th>
+      <th>{% trans 'Class' %}</th>
+      <th>{% trans 'Actions' %}</th>
+    </tr>
+  {% for module in modules %}
+    <tr>
+      <td>{{ module.name }}</td>
+      <td>{{ module.description }}</td>
+      <td>{{ module.type }}</td>
+      <td>{{ module.class }}</td>
+      <td>
+        <a href="{{ base_url }}app=site&amp;module=modules&amp;section=modules&amp;action=del&amp;id={{ module.id }}">
+          Delete
+        </a>
+      </td>
+    </tr>
+  {% endfor %}
+  </table>
+</fieldset>
+{% endblock %}

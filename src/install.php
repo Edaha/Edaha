@@ -61,7 +61,10 @@ function installModules($em) {
 function addBoards($em) {
     $boards = [
         ['name' => 'Image Board', 'directory' => 'image'],
-        ['name' => 'Text Board', 'directory' => 'text']
+        ['name' => 'Text Board', 'directory' => 'text'],
+        ['name' => 'News', 'directory' => 'frontpage_news'],
+        ['name' => 'FAQ', 'directory' => 'frontpage_faq'],
+        ['name' => 'Rules', 'directory' => 'frontpage_rules'],
     ];
 
     foreach ($boards as $boardData) {

@@ -30,10 +30,38 @@ class ModuleRepository extends EntityRepository
         $query = $this->getEntityManager()->createQuery($dql);
         return $query->getResult();
     }
+
     public function getCoreModules()
     {
         $dql = "SELECT m FROM \Edaha\Entities\Module m
                 WHERE m.type = 'core' AND m.is_manage = false
+                ORDER BY m.name ASC";
+        $query = $this->getEntityManager()->createQuery($dql);
+        return $query->getResult();
+    }
+
+    public function getPostPreprocessorModules()
+    {
+        $dql = "SELECT m FROM \Edaha\Entities\Module m
+                WHERE m.type = 'post_preprocessor' AND m.is_manage = false
+                ORDER BY m.name ASC";
+        $query = $this->getEntityManager()->createQuery($dql);
+        return $query->getResult();
+    }
+
+    public function getPostProcessorModules()
+    {
+        $dql = "SELECT m FROM \Edaha\Entities\Module m
+                WHERE m.type = 'post_processor' AND m.is_manage = false
+                ORDER BY m.name ASC";
+        $query = $this->getEntityManager()->createQuery($dql);
+        return $query->getResult();
+    }
+
+    public function getPostPostprocessorModules()
+    {
+        $dql = "SELECT m FROM \Edaha\Entities\Module m
+                WHERE m.type = 'post_postprocessor' AND m.is_manage = false
                 ORDER BY m.name ASC";
         $query = $this->getEntityManager()->createQuery($dql);
         return $query->getResult();

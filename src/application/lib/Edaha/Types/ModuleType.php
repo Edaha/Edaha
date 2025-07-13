@@ -7,4 +7,7 @@ enum ModuleType: string
     case BoardType = 'board';
     case BoardRegenerator = 'board_regenerator';
     case BoardRenderer = 'board_renderer';
+    case PostPreProcessor = 'post_preprocessor';
+    case PostProcessor = 'post_processor';
+    case PostPostProcessor = 'post_postprocessor';
 }

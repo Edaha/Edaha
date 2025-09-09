@@ -10,4 +10,8 @@ enum ModuleType: string
     case PostPreProcessor = 'post_preprocessor';
     case PostProcessor = 'post_processor';
     case PostPostProcessor = 'post_postprocessor';
+
+    public function toString(): string {
+        return $this->value;
+    }
 }

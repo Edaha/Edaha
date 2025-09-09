@@ -29,7 +29,7 @@
         { 
           'id' : 'type',
           'type' : 'select',
-          'value' : current_module.type,
+          'value' : current_module.type.toString(),
           'options': {
             'core': 'Core',
             'board': 'Board',
@@ -72,7 +72,7 @@
     <tr>
       <td>{{ module.name }}</td>
       <td>{{ module.description }}</td>
-      <td>{{ module.type }}</td>
+      <td>{{ module.type.toString() }}</td>
       <td>{{ module.class }}</td>
       <td>
         <a href="{{ base_url }}app=site&amp;module=modules&amp;section=modules&amp;action=del&amp;id={{ module.id }}">

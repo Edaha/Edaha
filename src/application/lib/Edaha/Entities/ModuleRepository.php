@@ -7,8 +7,8 @@ class ModuleRepository extends EntityRepository
 {
     public function getAllModules()
     {
-        $dql = "SELECT m FROM \Edaha\Entities\Board m
-                ORDER BY m.created_at DESC";
+        $dql = "SELECT m FROM \Edaha\Entities\Module m
+                ORDER BY m.installed_at DESC";
         $query = $this->getEntityManager()->createQuery($dql);
         return $query->getResult();
     }

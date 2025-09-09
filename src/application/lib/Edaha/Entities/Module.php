@@ -4,6 +4,8 @@ namespace Edaha\Entities;
 use Doctrine\ORM\Mapping as ORM;
 use Edaha\Types\ModuleType;
 
+use DateTime;
+
 #[ORM\Entity(repositoryClass: ModuleRepository::class)]
 #[ORM\Table(name: 'modules')]
 class Module
@@ -69,6 +71,13 @@ class Module
             $this->is_manage = $value;
         }
     }
+    
+    #[ORM\Column]
+    public DateTime|null $installed_at = null {
+        get {
+            return $this->installed_at;
+        }
+    }
 
     public function __construct(
         string $name,
@@ -82,5 +91,6 @@ class Module
         $this->class = $class;
         $this->description = $description;
         $this->is_manage = $is_manage;
+        $this->installed_at = new DateTime('now');
     }
 }

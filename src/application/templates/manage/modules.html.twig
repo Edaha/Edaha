@@ -28,15 +28,8 @@
         'Type' :
         { 
           'id' : 'type',
-          'type' : 'select',
+          'type' : 'text',
           'value' : current_module.type.toString(),
-          'options': {
-            'core': 'Core',
-            'board': 'Board',
-            'board_regenerator': 'Board Regenerator',
-            'board_renderer': 'Board Renderer',
-            'site': 'Site',
-          }
         },
         'Class'  :
         { 
@@ -66,6 +59,8 @@
       <th>{% trans 'Description' %}</th>
       <th>{% trans 'Type' %}</th>
       <th>{% trans 'Class' %}</th>
+      <th>{% trans 'Management?' %}</th>
+      <th>{% trans 'Installed At' %}</th>
       <th>{% trans 'Actions' %}</th>
     </tr>
   {% for module in modules %}
@@ -74,6 +69,8 @@
       <td>{{ module.description }}</td>
       <td>{{ module.type.toString() }}</td>
       <td>{{ module.class }}</td>
+      <td>{{ module.is_management_module ? 'Yes' : 'No' }}</td>
+      <td>{{ module.installed_at|date("Y-m-d H:i") }}</td>
       <td>
         <a href="{{ base_url }}app=site&amp;module=modules&amp;section=modules&amp;action=del&amp;id={{ module.id }}">
           Delete

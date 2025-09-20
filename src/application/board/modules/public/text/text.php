@@ -1,38 +1,10 @@
 <?php
-/*
- * This file is part of kusaba.
- *
- * kusaba is free software; you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
- * version.
- *
- * kusaba is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *  
- * You should have received a copy of the GNU General Public License along with
- * kusaba; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- */
-/*
- * Section for building an text-type imageboard
- * Last Updated: $Date$
- 
- * @author 		$Author$
-
- * @package		kusaba
- * @subpackage	board
-
- * @version		$Revision$
- *
- */
- 
 if (!defined('KUSABA_RUNNING'))
 {
   print "<h1>Access denied</h1>You cannot access this file directly.";
   die();
 }
+use \Edaha\Entities\Post;
 
 class public_board_text_text extends public_board_base_baseboard {
   public $boardType = 'text';
@@ -60,7 +32,7 @@ class public_board_text_text extends public_board_base_baseboard {
         kxFunc::showError(_('A subject is required for a new thread.'));
       }
       $thread = $this->entityManager
-        ->getRepository(\Edaha\Entities\Post::class)
+        ->getRepository(Post::class)
         ->findOneBy(array('board' => $this->board->id, 'subject' => $post->subject, 'parent' => null));
       if (isset($thread)) {
         kxFunc::showError(_('Duplicate thread subject'), _('Text boards may have only one thread with a unique subject. Please pick another.'));
@@ -99,7 +71,7 @@ class public_board_text_text extends public_board_base_baseboard {
     return array();
   }
 
-  public function postCommit(\Edaha\Entities\Post $post) {
+  public function postCommit(Post $post) {
     $this->twigData['isindex'] = true;
     parent::postCommit($post);
   }

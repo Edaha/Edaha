@@ -85,13 +85,9 @@ class kxCmdResolv {
             }
             else {
                 // Get the first module in the DB
-                $module = kxDB::getInstance()->select("modules")
-                    ->fields("modules", array("module_file"))
-                    ->condition("module_application", KX_CURRENT_APP)
-                    ->condition("module_manage", IN_MANAGE)
-                    ->orderBy("module_position")
-                    ->execute()
-                    ->fetchField();
+                $module = kxOrm::getEntityManager()->getRepository('Edaha\Entities\Module')
+                    ->getCoreModules();
+                $module = $module ? $module[0]->class : 'index';
             }
         }
         $moduledir  = kxFunc::getAppDir( KX_CURRENT_APP ) . '/modules/' . self::$class_dir . '/' . $module . '/';

@@ -151,19 +151,13 @@ class kxTemplate {
                 throw new Exception('No template found ' . $tpl .'.html.twig from ' . self::$template_dir, E_USER_ERROR);
             }
         }
+
         if (IN_MANAGE && kxEnv::$current_module != 'login') {
             self::_buildMenu();
 		}
-        //echo "<h2>Pre-merge</h2>";
-		//var_dump(self::$data);
+        
         $data = array_merge(self::$data,$data);
-		//echo "<h2>Post-merge</h2>";
-		//var_dump($data);
-		// $template=self::$instance->loadTemplate($tpl);
 		$template=self::$instance->load($tpl);
-        //echo "<pre>";
-		//print_r($template);
-		//echo "</pre>";
 		$template->display($data);
     }
     
@@ -174,8 +168,7 @@ class kxTemplate {
             
             if(file_exists(self::$template_dir . $tpl . '.html.twig')){
                 $tpl = $tpl . '.html.twig';
-            }
-            else{
+            } else {
                 throw new Exception('No template found ' . $tpl .'.html.twig from ' . self::$template_dir, E_USER_ERROR);
             }
         }
@@ -185,17 +178,11 @@ class kxTemplate {
 		}
         $data = array_merge(self::$data,$data);
 		
-        //echo "<pre>";
-		//print_r(self::$data);
-		//echo "</pre>";
         if (IN_MANAGE && kxEnv::$current_module != 'login' && !$bypassManageCheck) {
             return "";
         }
 		
 		$template=self::$instance->load($tpl);
-        //echo "<pre>";
-		//print_r($template);
-		//echo "</pre>";
 		return $template->render($data);
     }
     
@@ -207,25 +194,18 @@ class kxTemplate {
     private static function _buildMenu() {
         $app = KX_CURRENT_APP;
         if (KX_CURRENT_APP == 'core' && !isset(kxEnv::$request['module']) && !isset(kxEnv::$request['app'])) {
-            $modules = Array(Array('module_file' => 'index'));
+            $modules = Array((object) Array('class' => 'index'));
         }
         else {
-            $modules = kxDB::getinstance()->select("modules", null, array('fetch' => PDO::FETCH_ASSOC))
-                ->fields("modules", array("module_name", "module_file"))
-                ->condition("module_application", $app)
-                ->condition("module_manage", 1)
-                ->orderBy("module_position")
-                ->execute()
-                ->fetchAll();
+            $modules = kxOrm::getEntityManager()->getRepository('Edaha\Entities\Module')
+                ->getManagementModules();
         }
-		//print_r($modules);
         foreach ($modules as $module) {
-            $_file = kxFunc::getAppDir( $app ) . "/modules/manage/" . $module['module_file'] . '/menu.yml';
-			//echo "<p>Getting menu from {$_file}</p>";
+            $_file = kxFunc::getAppDir( $app ) . "/modules/manage/" . $module->class . '/menu.yml';
             if (file_exists($_file)) {
-                $menu[$module['module_file']] = kxYml::loadFile($_file);
+                $menu[$module->class] = kxYml::loadFile($_file);
                 self::assign('menu', $menu);
-                self::assign('module', $module['module_file']);
+                self::assign('module', $module->class);
             }
         }
     }

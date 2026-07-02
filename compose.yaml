@@ -23,7 +23,7 @@ services:
           path: ./src
           target: /var/www/html
   db:
-    image: mysql
+    image: docker.io/library/mysql
     restart: always
     volumes:
       - db-data:/var/lib/mysql

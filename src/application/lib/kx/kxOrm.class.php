@@ -14,6 +14,7 @@ class kxOrm
                 paths: [ __DIR__ . '/../Edaha/Entities'],
                 isDevMode: true,
             );
+            $config->enableNativeLazyObjects(true);
 
             $connection = DriverManager::getConnection([
                 'driver' => 'pdo_sqlite',

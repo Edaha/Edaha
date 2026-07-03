@@ -7,6 +7,14 @@ class kxOrm
 {
     public static ?EntityManager $entityManager = null;
     
+    private static function getSqliteConnectionParams(): array
+    {
+        return [
+            'driver' => 'pdo_sqlite',
+            'path' => realpath(__DIR__ . '/db.sqlite'),
+        ];
+    }
+
     public static function getEntityManager(): EntityManager
     {
         if (self::$entityManager === null) {
@@ -16,10 +24,8 @@ class kxOrm
             );
             $config->enableNativeLazyObjects(true);
 
-            $connection = DriverManager::getConnection([
-                'driver' => 'pdo_sqlite',
-                'path' => __DIR__ . '/db.sqlite',
-            ], $config);
+            $connectionParams = self::getSqliteConnectionParams();
+            $connection = DriverManager::getConnection($connectionParams, $config);
 
             self::$entityManager = new EntityManager($connection, $config);
         }

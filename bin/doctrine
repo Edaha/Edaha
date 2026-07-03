@@ -1,12 +1,10 @@
 #!/usr/bin/env php
 <?php
 // bin/doctrine
-require realpath(__DIR__ . '/../vendor/autoload.php');
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
 
-DEFINE('KX_ROOT', realpath(__DIR__ . '/../src/'));
-require KX_ROOT . '/application/lib/kx/kxOrm.class.php';
+require realpath(__DIR__ . '/../src/init.php');
 
 ConsoleRunner::run(
     new SingleManagerProvider(kxOrm::getEntityManager())

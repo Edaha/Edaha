@@ -14,7 +14,7 @@ all:
         memory: false
 
       mysql:
-        host: db
+        host: mysql-db
         port: 3306
         dbname: edaha
         user: edaha
@@ -22,7 +22,7 @@ all:
         persistent: false    
       
       pgsql:
-        host: db
+        host: pgsql-db
         port: 5432
         dbname: edaha
         user: edaha

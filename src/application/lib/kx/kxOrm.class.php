@@ -11,7 +11,31 @@ class kxOrm
     {
         return [
             'driver' => 'pdo_sqlite',
-            'path' => KX_ROOT . '/db.sqlite',
+            'path' => KX_ROOT . '/' . kxEnv::Get('kx:db:sqlite:dbname', 'db') . '.sqlite',
+        ];
+    }
+
+    private static function getMysqlConnectionParams(): array
+    {
+        return [
+            'driver' => 'pdo_mysql',
+            'host' => kxEnv::Get('kx:db:mysql:host'),
+            'port' => kxEnv::Get('kx:db:mysql:port'),
+            'dbname' => kxEnv::Get('kx:db:mysql:dbname'),
+            'user' => kxEnv::Get('kx:db:mysql:user'),
+            'password' => kxEnv::Get('kx:db:mysql:password'),
+        ];
+    }
+
+    private static function getPgsqlConnectionParams(): array
+    {
+        return [
+            'driver' => 'pdo_pgsql',
+            'host' => kxEnv::Get('kx:db:pgsql:host'),
+            'port' => kxEnv::Get('kx:db:pgsql:port'),
+            'dbname' => kxEnv::Get('kx:db:pgsql:dbname'),
+            'user' => kxEnv::Get('kx:db:pgsql:user'),
+            'password' => kxEnv::Get('kx:db:pgsql:password'),
         ];
     }
 
@@ -24,7 +48,13 @@ class kxOrm
             );
             $config->enableNativeLazyObjects(true);
 
-            $connectionParams = self::getSqliteConnectionParams();
+            $connectionParams = match (kxEnv::Get('kx:db:adapter')) {
+                'pdo_sqlite' => self::getSqliteConnectionParams(),
+                'pdo_mysql' => self::getMysqlConnectionParams(),
+                'pdo_pgsql' => self::getPgsqlConnectionParams(),
+                default => throw new InvalidArgumentException('Unsupported database adapter')
+            };
+            
             $connection = DriverManager::getConnection($connectionParams, $config);
 
             self::$entityManager = new EntityManager($connection, $config);

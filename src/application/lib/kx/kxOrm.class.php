@@ -11,7 +11,7 @@ class kxOrm
     {
         return [
             'driver' => 'pdo_sqlite',
-            'path' => realpath(__DIR__ . '/db.sqlite'),
+            'path' => KX_ROOT . '/db.sqlite',
         ];
     }
 
@@ -19,7 +19,7 @@ class kxOrm
     {
         if (self::$entityManager === null) {
             $config = ORMSetup::createAttributeMetadataConfiguration(
-                paths: [ __DIR__ . '/../Edaha/Entities'],
+                paths: [ KX_ROOT . '/application/lib/Edaha/Entities'],
                 isDevMode: true,
             );
             $config->enableNativeLazyObjects(true);

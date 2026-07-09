@@ -1,5 +1,8 @@
 <?php
 
+use Edaha\Entities\User;
+use Edaha\Entities\UserSession;
+
 class manage_core_login_login extends kxCmd
 {
   public function exec(kxEnv $environment)
@@ -14,7 +17,7 @@ class manage_core_login_login extends kxCmd
         $this->loginValidate();
         break;
       case 'logout':
-        $this->logOut();
+        // $this->logOut();
         break;
     }
   }
@@ -27,12 +30,6 @@ class manage_core_login_login extends kxCmd
    */
   public function showForm($message = "")
   {
-
-    // Kill all old sessions
-    $this->db->delete("manage_sessions")
-      ->condition("session_last_action", time() - 60 * 60, "<")
-      ->execute();
-
     $query_string_clean = kxFunc::cleanInputVal(urldecode($_SERVER['QUERY_STRING']));
     // So we can tack that on to the URL afterwards, we get rid of $amp;
     $query_string_clean = str_replace('&amp;', '&', $query_string_clean);
@@ -49,123 +46,52 @@ class manage_core_login_login extends kxCmd
     exit();
   }
   /* Check login names and create session if user/pass is correct */
-  public function loginValidate()
+  private function loginValidate()
   {
+    $user = $this->entityManager->getRepository('\Edaha\Entities\User')->findOneBy([
+      'username'=> $this->request['username']
+    ]);
 
-    // Remove old login attempts
-    $this->db->delete("loginattempts")
-      ->condition("attempt_time", time() - 1200, "<")
-      ->execute();
-    // Are we locked out still?
-    $results = $this->db->select("loginattempts")
-      ->fields("loginattempts", array("attempt_ip"))
-      ->condition("attempt_ip", $_SERVER['REMOTE_ADDR'])
-      ->execute()
-      ->fetchAll();
-    if (count($results) > 5) {
-      kxFunc::showError(_('System lockout'), _('Sorry, because of your numerous failed logins, you have been locked out from logging in for 20 minutes. Please wait and then try again.'));
-    } else {
-      // Find users with the username supplied to us
-      $results = $this->db->select("staff")
-        ->fields("staff", array("user_id", "user_name", "user_password", "user_salt"))
-        ->condition("user_name", $this->request['username'])
-        ->execute()
-        ->fetchAll();
-      if (count($results) > 0) {
-        $success = false;
-        $hashed = password_hash($this->request['password'], PASSWORD_BCRYPT);
-        if (md5($this->request['password'] . $results[0]->user_salt) == trim($results[0]->user_password)) {
-          $success = true;
-          // Update the user's password to use bcrypt instead
-          $this->db->update("staff")
-            ->fields([
-              'user_password' => password_hash($this->request['password'], PASSWORD_BCRYPT),
-              'user_salt' => ''
-            ])
-            ->condition('user_name', $this->request['username'])
-            ->execute();
-        } elseif (password_verify($this->request['password'], $results[0]->user_password)) {
-          $success = true;
-        }
-
-        if ($success) {
-          // Let's make our session
-          $session_id = md5(uniqid(microtime()));
-          $this->request['sid'] = $session_id;
-
-          // Delete any sessions that already exist for this user
-          $this->db->delete("manage_sessions")
-            ->condition("session_staff_id", $results[0]->user_id)
-            ->execute();
-
-          // Insert our new values
-          $this->db->insert("manage_sessions")
-            ->fields(array(
-              'session_id' => $session_id,
-              'session_ip' => $_SERVER['REMOTE_ADDR'],
-              'session_staff_id' => $results[0]->user_id,
-              'session_location' => "index",
-              'session_log_in_time' => time(),
-              'session_last_action' => time(),
-              'session_url' => "",
-            ))
-            ->execute();
-
-          // Set the cookies so ajax functions will load
-          $this->SetModerationCookies();
-
-          logging::addLogEntry(
-            $this->request['username'],
-            'Logged in',
-            __CLASS__
-          );
-
-          // Let's figure out where we need to go
-          $whereto = "";
-
-          // Unfiltered on purpose
-          if ($_POST['qstring']) {
-            print $_POST['qstring'] . '<br>';
-            $whereto = stripslashes($_POST['qstring']);
-            $whereto = str_replace(kxEnv::Get('kx:paths:script:path'), "", $whereto);
-            $whereto = str_ireplace("?manage.php", "", $whereto);
-            $whereto = ltrim($whereto, '?');
-            $whereto = preg_replace("/sid=(\w){32}/", "", $whereto);
-            $whereto = str_replace(array('old_&', 'old_&amp;'), "", $whereto);
-            $whereto = str_replace("module=login", "", $whereto);
-            $whereto = str_replace("section=login", "", $whereto);
-            $whereto = str_replace("do=login-validate", "", $whereto);
-            $whereto = str_replace('&amp;', '&', $whereto);
-            $whereto = preg_replace("/&{1,}/", "&", $whereto);
-          }
-          $url = kxEnv::Get('kx:paths:script:path') . kxEnv::Get('kx:paths:script:folder') . '/manage.php?sid=' . $session_id . '&' . $whereto;
-          if (!empty($_COOKIE['use_frames'])) {
-            $twigData['url'] = $url;
-            kxTemplate::output("manage/frames", $twigData);
-          } else {
-            kxFunc::doRedirect($url, true);
-          }
-          exit();
-        } else {
-          $this->db->insert("loginattempts")
-            ->fields(array(
-              'attempt_name' => $this->request['username'],
-              'attempt_ip' => $_SERVER['REMOTE_ADDR'],
-              'attempt_time' => time(),
-            ))
-            ->execute();
-          $this->showForm(_('Incorrect username/password.'));
-        }
+    if (empty($user)) {
+      $this->showForm("Invalid username/password");
+    } elseif ($user->checkLogin($this->request['password'])) {
+      if (session_status() == PHP_SESSION_ACTIVE) {
+        session_regenerate_id();
       } else {
-        $this->db->insert("loginattempts")
-          ->fields(array(
-            'attempt_name' => $this->request['username'],
-            'attempt_ip' => $_SERVER['REMOTE_ADDR'],
-            'attempt_time' => time(),
-          ))
-          ->execute();
-        $this->showForm(_('Incorrect username/password.'));
+        session_start();
+        session_create_id($user->username);
       }
+
+      $user_session = new UserSession($user, session_id());
+      $this->entityManager->persist($user_session);
+      $this->entityManager->flush();
+      
+      $this->request['sid'] = $user_session->sid;
+
+      // Let's figure out where we need to go
+      $whereto = "";
+
+      // Unfiltered on purpose
+      if ($_POST['qstring']) {
+        print $_POST['qstring'] . '<br>';
+        $whereto = stripslashes($_POST['qstring']);
+        $whereto = str_replace(kxEnv::Get('kx:paths:script:path'), "", $whereto);
+        $whereto = str_ireplace("?manage.php", "", $whereto);
+        $whereto = ltrim($whereto, '?');
+        $whereto = preg_replace("/sid=(\w){32}/", "", $whereto);
+        $whereto = str_replace(array('old_&', 'old_&amp;'), "", $whereto);
+        $whereto = str_replace("module=login", "", $whereto);
+        $whereto = str_replace("section=login", "", $whereto);
+        $whereto = str_replace("do=login-validate", "", $whereto);
+        $whereto = str_replace('&amp;', '&', $whereto);
+        $whereto = preg_replace("/&{1,}/", "&", $whereto);
+      }
+      $url = kxEnv::Get('kx:paths:script:path') . kxEnv::Get('kx:paths:script:folder') . '/manage.php?sid=' . $user_session->sid . '&' . $whereto;
+      
+      kxFunc::doRedirect($url, true);
+      exit();
+    } else {
+      $this->showForm("Invalid username/password");
     }
   }
   /* Set mod cookies for boards */

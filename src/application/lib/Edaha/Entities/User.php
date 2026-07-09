@@ -39,13 +39,13 @@ class User
         }
     }
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     public ?DateTime $last_logged_in_at = null;
 
     #[ORM\Column]
     public int $failed_logins = 0;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     public ?DateTime $last_failed_login_at = null;
 
     public bool $is_locked {

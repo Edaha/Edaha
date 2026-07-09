@@ -442,45 +442,29 @@ class kxFunc
       return false;
     } else {
       // So far so good, let's check it
-      $session_data = kxDB::getInstance()->select("manage_sessions")
-        ->fields("manage_sessions")
-        ->condition("session_id", $_session)
-        ->execute()
-        ->fetchAll();
-      if (empty($session_data[0]->session_id)) {
+      $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
+        'sid'=> kxEnv::$request['sid']
+      ]);
+
+      if (empty($session_data)) {
         // No session found
-        return false;
-      } else if (empty($session_data[0]->session_staff_id)) {
-        // No staffer assigned to that sid
         return false;
       } else {
         // Alright! Looks good so far. let's do some triple and quadruple checking though.
 
-        // Check if the user ID is valid
-        $userid = kxDB::getInstance()->select("staff")
-          ->fields("staff", array("user_id"))
-          ->condition("user_id", $session_data[0]->session_staff_id)
-          ->execute()
-          ->fetchField();
-
-        if (!$userid) {
-          // Welp...
-          return false;
-        }
-
         // Now, we'll check the IP address to see if it matches the stored one.
-        $first_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $session_data[0]->session_ip);
-        $second_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $_SERVER['REMOTE_ADDR']);
+        // $first_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $session_data[0]->session_ip);
+        // $second_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $_SERVER['REMOTE_ADDR']);
 
-        if ($first_ip != $second_ip) {
-          // Man you just can't win today can you?
-          return false;
-        }
+        // if ($first_ip != $second_ip) {
+        //   // Man you just can't win today can you?
+        //   return false;
+        // }
         // Okay, last one I promise. Is our session expired?
-        if ($session_data[0]->session_last_action < (time() - 60 * 60)) {
-          // Argh!!
-          return false;
-        }
+        // if ($session_data[0]->session_last_action < (time() - 60 * 60)) {
+        //   // Argh!!
+        //   return false;
+        // }
 
         // Congratulations!
         return true;
@@ -495,16 +479,13 @@ class kxFunc
   public static function getManageUser(): ?array
   {
     if (kxFunc::getManageSession()) {
-      $_session = kxEnv::$request['sid'];
+      $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
+        'sid'=> kxEnv::$request['sid']
+      ]);
 
-      $session_data = kxDB::getInstance()->select("manage_sessions");
-      $session_data->innerJoin("staff", "", "session_staff_id = user_id");
-      $session_data = $session_data->fields("staff", ["user_id", "user_name"])
-        ->condition("session_id", $_session)
-        ->execute()
-        ->fetchAssoc();
-
-      return $session_data;
+      return [
+        'user_name' => $session_data->user->username
+      ];
     }
   }
 

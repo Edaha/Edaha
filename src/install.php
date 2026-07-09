@@ -6,15 +6,17 @@ use Edaha\Entities\Module;
 use Edaha\Types\ModuleType;
 use Edaha\Entities\Board;
 use Edaha\Entities\Section;
+use Edaha\Entities\User;
 
 $em = kxOrm::getEntityManager();
 
 if (isset($_POST['install'])) {
     installModules($em);
     addBoards($em);
+    addUsers($em);
     echo "Installation completed successfully.";
 } else {
-    echo '<form method="post">
+    echo 'fuckin a <form method="post">
             <input type="hidden" name="install" value="1">
             <button type="submit">Install</button>
           </form>';
@@ -74,6 +76,27 @@ function addBoards($em) {
         echo "Adding board: " . $boardData['name'] . "<br>";
         $board = new Board($boardData['name'], $boardData['directory']);
         $em->persist($board);
+    }
+    $em->flush();
+}
+
+function addUsers($em) {
+    $users = [
+        [
+            'username' => 'edaha',
+            'password' => 'edaha'
+        ]
+    ];
+
+    foreach ($users as $user) {
+        $existingUser = $em->getRepository(User::class)->findOneBy(['username'=> $user['username']]);
+        if ($existingUser) {
+            echo 'User '. $user['username'] . ' already exists. Skipping.<br>';
+            continue;
+        }
+        echo 'Adding user: ' . $user['username'] . '<br>';
+        $user = new User($user['username'], $user['password']);
+        $em->persist($user);
     }
     $em->flush();
 }

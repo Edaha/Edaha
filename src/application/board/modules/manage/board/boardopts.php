@@ -50,7 +50,7 @@ class manage_board_board_boardopts extends kxCmd
             $this->twigData['options'][$option->name] = $option->value;
         }
 
-        $this->twigData['filetypes'] = kxEnv::get('cache:attachments:filetypes');
+        $this->twigData['filetypes'] = []; // kxEnv::get('cache:attachments:filetypes');
         
         $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->getBoardModules();
         if (empty($board_types)) {

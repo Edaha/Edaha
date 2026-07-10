@@ -245,15 +245,16 @@ class kxFunc
   public static function checkMD5($md5, $boardid)
   {
 
-    $matches = kxDB::getinstance()->select("posts");
-    $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = board_id");
-    $matches = $matches->fields("posts", array("post_id", "parent_post_id"))
-      ->condition("board_id", $boardid)
-      ->condition("is_deleted", 0)
-      ->condition("file_md5", $md5)
-      ->range(0, 1)
-      ->execute()
-      ->fetchAll();
+    // $matches = kxDB::getinstance()->select("posts");
+    // $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = board_id");
+    // $matches = $matches->fields("posts", array("post_id", "parent_post_id"))
+    //   ->condition("board_id", $boardid)
+    //   ->condition("is_deleted", 0)
+    //   ->condition("file_md5", $md5)
+    //   ->range(0, 1)
+    //   ->execute()
+    //   ->fetchAll();
+    $matches = [];
     if (count($matches) > 0) {
       $real_parentid = ($matches[0]->parent_post_id == 0) ? $matches[0]->post_id : $matches[0]->parent_post_id;
       return array($real_parentid, $matches[0]->post_id);
@@ -330,12 +331,13 @@ class kxFunc
   public static function getFileTypeInfo($filetype)
   {
 
-    $results = kxDB::getinstance()->select("filetypes")
-      ->fields("filetypes", array("type_image", "type_image_width", "type_image_height"))
-      ->condition("type_ext", $filetype)
-      ->range(0, 1)
-      ->execute()
-      ->fetchAll();
+    // $results = kxDB::getinstance()->select("filetypes")
+    //   ->fields("filetypes", array("type_image", "type_image_width", "type_image_height"))
+    //   ->condition("type_ext", $filetype)
+    //   ->range(0, 1)
+    //   ->execute()
+    //   ->fetchAll();
+    $results = [];
     if (count($results) > 0) {
       foreach ($results as $line) {
         return array($line->type_image, $line->type_image_width, $line->type_image_height);
@@ -505,49 +507,50 @@ class kxFunc
 
   public static function fullBoardList()
   {
-    $sections = kxDB::getInstance()->select("sections")
-      ->fields("sections")
-      ->orderBy("section_order")
-      ->execute()
-      ->fetchAll();
+    // $sections = kxDB::getInstance()->select("sections")
+    //   ->fields("sections")
+    //   ->orderBy("section_order")
+    //   ->execute()
+    //   ->fetchAll();
 
-    $boards = kxDB::getInstance()->select("boards")
-      ->fields("boards", array('board_id', 'board_desc'))
-      ->where("board_section = ?")
-      ->orderBy("board_order")
-      ->build();
+    // $boards = kxDB::getInstance()->select("boards")
+    //   ->fields("boards", array('board_id', 'board_desc'))
+    //   ->where("board_section = ?")
+    //   ->orderBy("board_order")
+    //   ->build();
 
-    // Add boards to an array within their section
-    foreach ($sections as &$section) {
-      $boards->execute(array($section->id));
-      $section->boards = $boards->fetchAll();
-    }
+    // // Add boards to an array within their section
+    // foreach ($sections as &$section) {
+    //   $boards->execute(array($section->id));
+    //   $section->boards = $boards->fetchAll();
+    // }
 
-    // Prepend boards with no section
-    $boards->execute(array(0));
-    return (array_merge($boards->fetchAll(), $sections));
+    // // Prepend boards with no section
+    // $boards->execute(array(0));
+    // return (array_merge($boards->fetchAll(), $sections));
+    return [];
   }
 
   public static function visibleBoardList()
   {
-    $sections = kxDB::getInstance()->select("sections")
-      ->fields("sections")
-      ->orderBy("section_order")
-      ->execute()
-      ->fetchAll();
+    // $sections = kxDB::getInstance()->select("sections")
+    //   ->fields("sections")
+    //   ->orderBy("section_order")
+    //   ->execute()
+    //   ->fetchAll();
 
-    $boards = kxDB::getInstance()->select("boards")
-      ->fields("boards", array('board_id', 'board_desc', 'board_name'))
-      ->where("board_section = ?")
-      ->orderBy("board_order")
-      ->build();
+    // $boards = kxDB::getInstance()->select("boards")
+    //   ->fields("boards", array('board_id', 'board_desc', 'board_name'))
+    //   ->where("board_section = ?")
+    //   ->orderBy("board_order")
+    //   ->build();
 
-    // Add boards to an array within their section
-    foreach ($sections as &$section) {
-      $boards->execute(array($section->id));
-      $section->boards = $boards->fetchAll();
-    }
-
+    // // Add boards to an array within their section
+    // foreach ($sections as &$section) {
+    //   $boards->execute(array($section->id));
+    //   $section->boards = $boards->fetchAll();
+    // }
+    $sections = [];
     return ($sections);
   }
 }

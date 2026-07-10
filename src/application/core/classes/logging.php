@@ -19,22 +19,22 @@ class logging
     $fields['entry'] = $log_entry;
     $fields['source_module'] = $source;
     $fields['timestamp'] = time();
-    $modlog = kxDB::getInstance()->insert("modlog")
-      ->fields($fields)
-      ->execute();
+    // $modlog = kxDB::getInstance()->insert("modlog")
+    //   ->fields($fields)
+    //   ->execute();
   }
   public static function addReport($board_id, $post_ids, $reason)
   {
     foreach ($post_ids as $post_id) {
-      kxDb::getInstance()->insert("reports")
-        ->fields([
-          'board_id' => (int) $board_id,
-          'post_id' => (int) $post_id,
-          'timestamp' => time(),
-          'ip' => $_SERVER['REMOTE_ADDR'],
-          'reason' => $reason,
-        ])
-        ->execute();
+      // kxDb::getInstance()->insert("reports")
+      //   ->fields([
+      //     'board_id' => (int) $board_id,
+      //     'post_id' => (int) $post_id,
+      //     'timestamp' => time(),
+      //     'ip' => $_SERVER['REMOTE_ADDR'],
+      //     'reason' => $reason,
+      //   ])
+      //   ->execute();
     }
   }
 }

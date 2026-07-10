@@ -66,33 +66,33 @@ class manage_board_filter_filter extends kxCmd {
     
     try {
       if ($this->request['do'] == 'add') {
-        $filter_id = $this->db->insert("filters")
-                              ->fields($fields)
-                              ->execute();
+        // $filter_id = $this->db->insert("filters")
+        //                       ->fields($fields)
+        //                       ->execute();
         
       } else {
         kxForm::addRule('id', 'numeric')
               ->check();
         
-        $this->db->update("filters")
-                 ->fields($fields)
-                 ->condition("filter_id", $this->request['id'])
-                 ->execute();
-        // Clear the board entries to be replaced later in the function
-        $this->db->delete("board_filters")
-                 ->condition("filter_id", $this->request['id'])
-                 ->execute();
+        // $this->db->update("filters")
+        //          ->fields($fields)
+        //          ->condition("filter_id", $this->request['id'])
+        //          ->execute();
+        // // Clear the board entries to be replaced later in the function
+        // $this->db->delete("board_filters")
+        //          ->condition("filter_id", $this->request['id'])
+        //          ->execute();
         
       }
       
       
       foreach ($this->request['filter_boards'] as $board) {
-        $this->db->insert("board_filters")
-                 ->fields(array(
-                                'board_id'  => $board,
-                                'filter_id' => ($this->request['do'] == 'add') ? $filter_id : $this->request['id']
-                                ))
-                 ->execute();
+        // $this->db->insert("board_filters")
+        //          ->fields(array(
+        //                         'board_id'  => $board,
+        //                         'filter_id' => ($this->request['do'] == 'add') ? $filter_id : $this->request['id']
+        //                         ))
+        //          ->execute();
       }
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
@@ -129,12 +129,12 @@ class manage_board_filter_filter extends kxCmd {
           ->check();
           
     try {
-      $this->db->delete("filters")
-               ->condition("filter_id", $this->request['id'])
-               ->execute();
-      $this->db->delete("board_filters")
-               ->condition("filter_id", $this->request['id'])
-               ->execute();
+      // $this->db->delete("filters")
+      //          ->condition("filter_id", $this->request['id'])
+      //          ->execute();
+      // $this->db->delete("board_filters")
+      //          ->condition("filter_id", $this->request['id'])
+      //          ->execute();
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
       $this->twigData['notice']['message'] = _('An error occured: ') . $e->getMessage();
@@ -155,22 +155,22 @@ class manage_board_filter_filter extends kxCmd {
   }
   
   private function _recacheFilters() {
-    $filters = $this->db->select("filters")
-                    ->fields("filters")
-                    ->orderBy("filter_id")
-                    ->execute()
-                    ->fetchAll();
+    // $filters = $this->db->select("filters")
+    //                 ->fields("filters")
+    //                 ->orderBy("filter_id")
+    //                 ->execute()
+    //                 ->fetchAll();
    
-    $fetch_boards = $this->db->select("board_filters");
-    $fetch_boards->innerJoin("boards", "", "board_filters.board_id = boards.board_id");
-    $fetch_boards = $fetch_boards->fields("boards", array('board_name'))
-                                 ->where("filter_id = ?")
-                                 ->build();
-    foreach ($filters as $filter) {
-      $fetch_boards->execute(array($filter->filter_id));
-      $filter->filter_boards = $fetch_boards->fetchCol();
-    }
+    // $fetch_boards = $this->db->select("board_filters");
+    // $fetch_boards->innerJoin("boards", "", "board_filters.board_id = boards.board_id");
+    // $fetch_boards = $fetch_boards->fields("boards", array('board_name'))
+    //                              ->where("filter_id = ?")
+    //                              ->build();
+    // foreach ($filters as $filter) {
+    //   $fetch_boards->execute(array($filter->filter_id));
+    //   $filter->filter_boards = $fetch_boards->fetchCol();
+    // }
     
-    kxEnv::set('cache:filters:wordfilters', $filters);
+    // kxEnv::set('cache:filters:wordfilters', $filters);
   }
 }

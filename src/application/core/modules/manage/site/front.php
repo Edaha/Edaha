@@ -123,34 +123,34 @@ class manage_core_site_front extends kxCmd
 
     private function _news()
     {
-        $this->twigData['entries'] = $this->db->select("front")
-            ->fields("front")
-            ->condition("entry_type", 0)
-            ->orderBy("entry_time", "DESC")
-            ->execute()
-            ->fetchAll();
+        // $this->twigData['entries'] = $this->db->select("front")
+        //     ->fields("front")
+        //     ->condition("entry_type", 0)
+        //     ->orderBy("entry_time", "DESC")
+        //     ->execute()
+        //     ->fetchAll();
         kxTemplate::output("manage/news", $this->twigData);
     }
 
     private function _faq()
     {
-        $this->twigData['entries'] = $this->db->select("front")
-            ->fields("front")
-            ->condition("entry_type", 1)
-            ->orderBy("entry_order", "ASC")
-            ->execute()
-            ->fetchAll();
+        // $this->twigData['entries'] = $this->db->select("front")
+        //     ->fields("front")
+        //     ->condition("entry_type", 1)
+        //     ->orderBy("entry_order", "ASC")
+        //     ->execute()
+        //     ->fetchAll();
         kxTemplate::output("manage/faq", $this->twigData);
     }
 
     private function _rules()
     {
-        $this->twigData['entries'] = $this->db->select("front")
-            ->fields("front")
-            ->condition("entry_type", 2)
-            ->orderBy("entry_order", "ASC")
-            ->execute()
-            ->fetchAll();
+        // $this->twigData['entries'] = $this->db->select("front")
+        //     ->fields("front")
+        //     ->condition("entry_type", 2)
+        //     ->orderBy("entry_order", "ASC")
+        //     ->execute()
+        //     ->fetchAll();
         kxTemplate::output("manage/rules", $this->twigData);
     }
 

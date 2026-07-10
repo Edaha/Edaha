@@ -91,12 +91,12 @@ class Parse
 
   public function doStaticPostLink($matches)
   {
-    $result = $this->db->select("posts")
-      ->fields("posts", array("parent_post_id"))
-      ->condition("board_id", $this->environment->get('kx:classes:board:id')->board_id)
-      ->condition("post_id", $matches[1])
-      ->execute()
-      ->fetchField();
+    // $result = $this->db->select("posts")
+    //   ->fields("posts", array("parent_post_id"))
+    //   ->condition("board_id", $this->environment->get('kx:classes:board:id')->board_id)
+    //   ->condition("post_id", $matches[1])
+    //   ->execute()
+    //   ->fetchField();
 
     if ($result === '0') {
       $realID = $matches[1];
@@ -136,20 +136,20 @@ class Parse
   }
   public function interboardQuoteCheck($matches)
   {
-    $board = $this->db->select("boards")
-      ->fields("boards", array("board_id", "board_type"))
-      ->condition("board_name", $matches[1])
-      ->execute()
-      ->fetch();
-
+    // $board = $this->db->select("boards")
+    //   ->fields("boards", array("board_id", "board_type"))
+    //   ->condition("board_name", $matches[1])
+    //   ->execute()
+    //   ->fetch();
+    $board = false;
     if ($board !== false) {
-      $thread = $this->db->select("posts")
-        ->fields("posts", array("parent_post_id"))
-        ->condition("board_id", $board->board_id)
-        ->condition("post_id", $matches[2])
-        ->execute()
-        ->fetchField();
-
+      // $thread = $this->db->select("posts")
+      //   ->fields("posts", array("parent_post_id"))
+      //   ->condition("board_id", $board->board_id)
+      //   ->condition("post_id", $matches[2])
+      //   ->execute()
+      //   ->fetchField();
+      $thread = false;
       if ($thread !== false) {
         if ($thread == 0) {
           $realid = $matches[2];

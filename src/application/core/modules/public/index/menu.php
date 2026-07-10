@@ -65,28 +65,29 @@ class public_core_index_menu extends kxCmd {
 		$twigData['file'] = $file;
 
 		$sections = Array();
-    $boardsExist = $this->db->select("boards")
-                            ->fields("boards")
-                            ->countQuery()
-                            ->execute()
-                            ->fetchField();
+    // $boardsExist = $this->db->select("boards")
+    //                         ->fields("boards")
+    //                         ->countQuery()
+    //                         ->execute()
+    //                         ->fetchField();
+    $boardsExists = false;
 		if ($boardsExist) {
-      $sections = $this->db->select("sections")
-                           ->fields("sections")
-                           ->orderBy("section_order")
-                           ->execute()
-                           ->fetchAll();
-      $results = $this->db->select("boards")
-                          ->fields("boards", array("board_order", "board_name", "board_desc", "board_locked", "board_trial", "board_popular"))
-                          ->where("section = ?")
-                          ->orderBy("board_order")
-                          ->orderBy("board_name")
-                          ->build();
-			foreach($sections AS $key=>$section) {
-				$results->execute(array($section['id']));
-				$boards = $results->fetchAll();
-        $sections[$key]['boards'] = $boards;
-			}
+      // $sections = $this->db->select("sections")
+      //                      ->fields("sections")
+      //                      ->orderBy("section_order")
+      //                      ->execute()
+      //                      ->fetchAll();
+      // $results = $this->db->select("boards")
+      //                     ->fields("boards", array("board_order", "board_name", "board_desc", "board_locked", "board_trial", "board_popular"))
+      //                     ->where("section = ?")
+      //                     ->orderBy("board_order")
+      //                     ->orderBy("board_name")
+      //                     ->build();
+			// foreach($sections AS $key=>$section) {
+			// 	$results->execute(array($section['id']));
+			// 	$boards = $results->fetchAll();
+      //   $sections[$key]['boards'] = $boards;
+			// }
 		}
 		$twigData['boards'] = $sections;
 

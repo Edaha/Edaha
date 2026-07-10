@@ -131,15 +131,20 @@ class manage_board_board_board extends kxCmd
 
   private function _del()
   {
-    $this->db->delete("boards")
-      ->condition("board_name", $this->request['board'])
-      ->execute();
-    $this->twigData['notice']['type'] = 'success';
-    $this->twigData['notice']['message'] = _('Board successfully deleted.');
-    logging::addLogEntry(
-      kxFunc::getManageUser()['user_name'],
-      sprintf('Deleted board /%s/', $this->request['board']),
-      __CLASS__
-    );
+    $board = $this->entityManager->getRepository('\Edaha\Entities\Board')->findOneBy(['directory' => $this->request['name']]);
+    if ($board) {
+        $this->entityManager->remove($board);
+        $this->entityManager->flush();
+        $this->twigData['notice']['type'] = 'success';
+        $this->twigData['notice']['message'] = _('Board successfully deleted.');
+        logging::addLogEntry(
+          kxFunc::getManageUser()['user_name'],
+          sprintf('Deleted board /%s/', $this->request['board']),
+          __CLASS__
+        );
+    } else {
+        $this->twigData['notice']['type'] = 'error';
+        $this->twigData['notice']['message'] = _('Unknown board.');
+    }
   }
 }

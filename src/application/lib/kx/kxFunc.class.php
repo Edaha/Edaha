@@ -2232,7 +2232,8 @@ class kxBans
     $htaccess_contents_preserve = substr($htaccess_contents, 0, strpos($htaccess_contents, '## !KU_BANS:') + 12) . "\n";
 
     $htaccess_contents_bans_iplist = '';
-    $results = $kx_db->GetAll("SELECT `ip` FROM `" . kxEnv::Get('kx:db:prefix') . "banlist` WHERE `allowread` = 0 AND `type` = 0 AND (`expired` =  1) ORDER BY `ip` ASC");
+    // $results = $kx_db->GetAll("SELECT `ip` FROM `" . kxEnv::Get('kx:db:prefix') . "banlist` WHERE `allowread` = 0 AND `type` = 0 AND (`expired` =  1) ORDER BY `ip` ASC");
+    $results = [];
     if (count($results) > 0) {
       $htaccess_contents_bans_iplist .= 'RewriteCond %{REMOTE_ADDR} (';
       foreach ($results as $line) {

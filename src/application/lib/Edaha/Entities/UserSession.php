@@ -1,10 +1,6 @@
 <?php
+
 namespace Edaha\Entities;
-
-use Edaha\Entities\User;
-
-use DateTime;
-use DateInterval;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,7 +11,11 @@ class UserSession
     #[ORM\Id]
     #[ORM\Column]
     #[ORM\GeneratedValue]
-    private ?int $id;
+    public ?int $id {
+        get {
+            return $this->id;
+        }
+    }
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
@@ -25,31 +25,31 @@ class UserSession
     public string $sid;
 
     #[ORM\Column]
-    public DateTime $logged_in_at {
+    public \DateTime $logged_in_at {
         get {
             return $this->logged_in_at;
         }
     }
 
     #[ORM\Column]
-    public DateTime $last_activity_at;
+    public \DateTime $last_activity_at;
 
     public bool $is_active {
         get {
-            return new DateTime() < $this->last_activity_at?->add(DateInterval::createFromDateString('60 minutes'));
+            return new \DateTime() < $this->last_activity_at?->add(\DateInterval::createFromDateString('60 minutes'));
         }
     }
 
-    public function __construct(User $user, String $sid)
+    public function __construct(User $user, string $sid)
     {
         $this->user = $user;
         $this->sid = $sid;
-        $this->logged_in_at = new DateTime();
+        $this->logged_in_at = new \DateTime();
         $this->last_activity_at = $this->logged_in_at;
     }
 
     public function newActivity(): void
     {
-        $this->last_activity_at = new DateTime();
+        $this->last_activity_at = new \DateTime();
     }
 }

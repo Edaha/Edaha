@@ -50,7 +50,7 @@ class manage_board_board_boardopts extends kxCmd
             $this->twigData['options'][$option->name] = $option->value;
         }
 
-        $this->twigData['filetypes'] = kxEnv::get('cache:attachments:filetypes');
+        $this->twigData['filetypes'] = []; // kxEnv::get('cache:attachments:filetypes');
         
         $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->getBoardModules();
         if (empty($board_types)) {
@@ -159,22 +159,18 @@ class manage_board_board_boardopts extends kxCmd
     public function recacheBoardOptions()
     {
         // Get the requested board's options
-        $recache_board_options = $this->db->select("boards")
-            ->fields("boards")
-            ->condition("board_name", $this->request['board'])
-            ->execute()
-            ->fetchAll();
-        // Get its associated filetypes
-        $recache_board_options[0]->board_filetypes = $this->db->select("board_filetypes")
-            ->fields("board_filetypes", ['type_id'])
-            ->condition("board_id", $recache_board_options[0]->board_id)
-            ->execute()
-            ->fetchCol();
-        /*echo 'recache:<br><pre>';
-    print_r($recache_board_options);
-    echo '</pre>';
-    die();*/
-        // And cache them
-        kxEnv::set('cache:boardopts:' . $this->request['board'], $recache_board_options);
+        // $recache_board_options = $this->db->select("boards")
+        //     ->fields("boards")
+        //     ->condition("board_name", $this->request['board'])
+        //     ->execute()
+        //     ->fetchAll();
+        // // Get its associated filetypes
+        // $recache_board_options[0]->board_filetypes = $this->db->select("board_filetypes")
+        //     ->fields("board_filetypes", ['type_id'])
+        //     ->condition("board_id", $recache_board_options[0]->board_id)
+        //     ->execute()
+        //     ->fetchCol();
+        // // And cache them
+        // kxEnv::set('cache:boardopts:' . $this->request['board'], $recache_board_options);
     }
 }

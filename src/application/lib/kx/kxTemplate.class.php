@@ -93,12 +93,7 @@ class kxTemplate {
  
                 // Get our manage username
                 if (isset(kxEnv::$request['sid'])) {
-                  $result = kxDB::getinstance()->select('staff')
-                                               ->fields('staff', array('user_name'));
-                  $result->innerJoin("manage_sessions", "ms", "ms.session_staff_id = staff.user_id");
-                  self::assign('name', $result->condition('session_id', kxEnv::$request['sid'])
-                                               ->execute()
-                                               ->fetchField());                
+                  self::assign('name', kxFunc::getManageUser()['user_name']);                
                 }
                 
             }// else {

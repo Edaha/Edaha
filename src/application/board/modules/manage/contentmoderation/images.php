@@ -24,18 +24,18 @@ class manage_board_contentmoderation_images extends kxCmd
 
   private function _show()
   {
-    $this->twigData['recent_images'] = $this->db->select("post_files")
-      ->fields("post_files", ["file_post", "file_board", "file_name", "file_type", "file_thumb_width", "file_thumb_height"])
-      ->fields("boards", ["board_id", "board_name"])
-      ->fields("posts", ["created_at_timestamp", "parent_post_id"]);
-    $this->twigData['recent_images']->innerJoin("boards", "", "file_board = board_id");
-    $this->twigData['recent_images']->innerJoin("posts", "", "file_post = post_id");
-    $this->twigData['recent_images'] = $this->twigData['recent_images']->condition("is_deleted", 0)
-      ->condition("file_reviewed", 0)
-      ->orderBy("created_at_timestamp", "DESC")
-      ->range(0, 100)
-      ->execute()
-      ->fetchAll();
+    // $this->twigData['recent_images'] = $this->db->select("post_files")
+    //   ->fields("post_files", ["file_post", "file_board", "file_name", "file_type", "file_thumb_width", "file_thumb_height"])
+    //   ->fields("boards", ["board_id", "board_name"])
+    //   ->fields("posts", ["created_at_timestamp", "parent_post_id"]);
+    // $this->twigData['recent_images']->innerJoin("boards", "", "file_board = board_id");
+    // $this->twigData['recent_images']->innerJoin("posts", "", "file_post = post_id");
+    // $this->twigData['recent_images'] = $this->twigData['recent_images']->condition("is_deleted", 0)
+    //   ->condition("file_reviewed", 0)
+    //   ->orderBy("created_at_timestamp", "DESC")
+    //   ->range(0, 100)
+    //   ->execute()
+    //   ->fetchAll();
     
     kxTemplate::output('manage/recents', $this->twigData);
   }
@@ -54,13 +54,13 @@ class manage_board_contentmoderation_images extends kxCmd
         $file_board = explode('|', $file)[0];
         $file_post = explode('|', $file)[1];
         $file_name = explode('|', $file)[2];
-        $process_query = $this->db->update("post_files")
-          ->fields($fields)
-          ->condition("file_board", $file_board)
-          ->condition("file_post", $file_post)
-          ->condition("file_name", $file_name)
-          ->execute();
-        $reviewed_count = $reviewed_count + $process_query;
+        // $process_query = $this->db->update("post_files")
+        //   ->fields($fields)
+        //   ->condition("file_board", $file_board)
+        //   ->condition("file_post", $file_post)
+        //   ->condition("file_name", $file_name)
+        //   ->execute();
+        // $reviewed_count = $reviewed_count + $process_query;
       }
 
       $log_message = "Approved %d files";

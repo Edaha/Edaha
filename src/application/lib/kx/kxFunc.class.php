@@ -245,15 +245,16 @@ class kxFunc
   public static function checkMD5($md5, $boardid)
   {
 
-    $matches = kxDB::getinstance()->select("posts");
-    $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = board_id");
-    $matches = $matches->fields("posts", array("post_id", "parent_post_id"))
-      ->condition("board_id", $boardid)
-      ->condition("is_deleted", 0)
-      ->condition("file_md5", $md5)
-      ->range(0, 1)
-      ->execute()
-      ->fetchAll();
+    // $matches = kxDB::getinstance()->select("posts");
+    // $matches->innerJoin("post_files", "", "file_post = post_id AND file_board = board_id");
+    // $matches = $matches->fields("posts", array("post_id", "parent_post_id"))
+    //   ->condition("board_id", $boardid)
+    //   ->condition("is_deleted", 0)
+    //   ->condition("file_md5", $md5)
+    //   ->range(0, 1)
+    //   ->execute()
+    //   ->fetchAll();
+    $matches = [];
     if (count($matches) > 0) {
       $real_parentid = ($matches[0]->parent_post_id == 0) ? $matches[0]->post_id : $matches[0]->parent_post_id;
       return array($real_parentid, $matches[0]->post_id);
@@ -330,12 +331,13 @@ class kxFunc
   public static function getFileTypeInfo($filetype)
   {
 
-    $results = kxDB::getinstance()->select("filetypes")
-      ->fields("filetypes", array("type_image", "type_image_width", "type_image_height"))
-      ->condition("type_ext", $filetype)
-      ->range(0, 1)
-      ->execute()
-      ->fetchAll();
+    // $results = kxDB::getinstance()->select("filetypes")
+    //   ->fields("filetypes", array("type_image", "type_image_width", "type_image_height"))
+    //   ->condition("type_ext", $filetype)
+    //   ->range(0, 1)
+    //   ->execute()
+    //   ->fetchAll();
+    $results = [];
     if (count($results) > 0) {
       foreach ($results as $line) {
         return array($line->type_image, $line->type_image_width, $line->type_image_height);
@@ -442,45 +444,29 @@ class kxFunc
       return false;
     } else {
       // So far so good, let's check it
-      $session_data = kxDB::getInstance()->select("manage_sessions")
-        ->fields("manage_sessions")
-        ->condition("session_id", $_session)
-        ->execute()
-        ->fetchAll();
-      if (empty($session_data[0]->session_id)) {
+      $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
+        'sid'=> kxEnv::$request['sid']
+      ]);
+
+      if (empty($session_data)) {
         // No session found
-        return false;
-      } else if (empty($session_data[0]->session_staff_id)) {
-        // No staffer assigned to that sid
         return false;
       } else {
         // Alright! Looks good so far. let's do some triple and quadruple checking though.
 
-        // Check if the user ID is valid
-        $userid = kxDB::getInstance()->select("staff")
-          ->fields("staff", array("user_id"))
-          ->condition("user_id", $session_data[0]->session_staff_id)
-          ->execute()
-          ->fetchField();
-
-        if (!$userid) {
-          // Welp...
-          return false;
-        }
-
         // Now, we'll check the IP address to see if it matches the stored one.
-        $first_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $session_data[0]->session_ip);
-        $second_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $_SERVER['REMOTE_ADDR']);
+        // $first_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $session_data[0]->session_ip);
+        // $second_ip = preg_replace("/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/", "\\1.\\2.\\3", $_SERVER['REMOTE_ADDR']);
 
-        if ($first_ip != $second_ip) {
-          // Man you just can't win today can you?
-          return false;
-        }
+        // if ($first_ip != $second_ip) {
+        //   // Man you just can't win today can you?
+        //   return false;
+        // }
         // Okay, last one I promise. Is our session expired?
-        if ($session_data[0]->session_last_action < (time() - 60 * 60)) {
-          // Argh!!
-          return false;
-        }
+        // if ($session_data[0]->session_last_action < (time() - 60 * 60)) {
+        //   // Argh!!
+        //   return false;
+        // }
 
         // Congratulations!
         return true;
@@ -495,16 +481,13 @@ class kxFunc
   public static function getManageUser(): ?array
   {
     if (kxFunc::getManageSession()) {
-      $_session = kxEnv::$request['sid'];
+      $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
+        'sid'=> kxEnv::$request['sid']
+      ]);
 
-      $session_data = kxDB::getInstance()->select("manage_sessions");
-      $session_data->innerJoin("staff", "", "session_staff_id = user_id");
-      $session_data = $session_data->fields("staff", ["user_id", "user_name"])
-        ->condition("session_id", $_session)
-        ->execute()
-        ->fetchAssoc();
-
-      return $session_data;
+      return [
+        'user_name' => $session_data->user->username
+      ];
     }
   }
 
@@ -524,49 +507,50 @@ class kxFunc
 
   public static function fullBoardList()
   {
-    $sections = kxDB::getInstance()->select("sections")
-      ->fields("sections")
-      ->orderBy("section_order")
-      ->execute()
-      ->fetchAll();
+    // $sections = kxDB::getInstance()->select("sections")
+    //   ->fields("sections")
+    //   ->orderBy("section_order")
+    //   ->execute()
+    //   ->fetchAll();
 
-    $boards = kxDB::getInstance()->select("boards")
-      ->fields("boards", array('board_id', 'board_desc'))
-      ->where("board_section = ?")
-      ->orderBy("board_order")
-      ->build();
+    // $boards = kxDB::getInstance()->select("boards")
+    //   ->fields("boards", array('board_id', 'board_desc'))
+    //   ->where("board_section = ?")
+    //   ->orderBy("board_order")
+    //   ->build();
 
-    // Add boards to an array within their section
-    foreach ($sections as &$section) {
-      $boards->execute(array($section->id));
-      $section->boards = $boards->fetchAll();
-    }
+    // // Add boards to an array within their section
+    // foreach ($sections as &$section) {
+    //   $boards->execute(array($section->id));
+    //   $section->boards = $boards->fetchAll();
+    // }
 
-    // Prepend boards with no section
-    $boards->execute(array(0));
-    return (array_merge($boards->fetchAll(), $sections));
+    // // Prepend boards with no section
+    // $boards->execute(array(0));
+    // return (array_merge($boards->fetchAll(), $sections));
+    return [];
   }
 
   public static function visibleBoardList()
   {
-    $sections = kxDB::getInstance()->select("sections")
-      ->fields("sections")
-      ->orderBy("section_order")
-      ->execute()
-      ->fetchAll();
+    // $sections = kxDB::getInstance()->select("sections")
+    //   ->fields("sections")
+    //   ->orderBy("section_order")
+    //   ->execute()
+    //   ->fetchAll();
 
-    $boards = kxDB::getInstance()->select("boards")
-      ->fields("boards", array('board_id', 'board_desc', 'board_name'))
-      ->where("board_section = ?")
-      ->orderBy("board_order")
-      ->build();
+    // $boards = kxDB::getInstance()->select("boards")
+    //   ->fields("boards", array('board_id', 'board_desc', 'board_name'))
+    //   ->where("board_section = ?")
+    //   ->orderBy("board_order")
+    //   ->build();
 
-    // Add boards to an array within their section
-    foreach ($sections as &$section) {
-      $boards->execute(array($section->id));
-      $section->boards = $boards->fetchAll();
-    }
-
+    // // Add boards to an array within their section
+    // foreach ($sections as &$section) {
+    //   $boards->execute(array($section->id));
+    //   $section->boards = $boards->fetchAll();
+    // }
+    $sections = [];
     return ($sections);
   }
 }
@@ -2251,7 +2235,8 @@ class kxBans
     $htaccess_contents_preserve = substr($htaccess_contents, 0, strpos($htaccess_contents, '## !KU_BANS:') + 12) . "\n";
 
     $htaccess_contents_bans_iplist = '';
-    $results = $kx_db->GetAll("SELECT `ip` FROM `" . kxEnv::Get('kx:db:prefix') . "banlist` WHERE `allowread` = 0 AND `type` = 0 AND (`expired` =  1) ORDER BY `ip` ASC");
+    // $results = $kx_db->GetAll("SELECT `ip` FROM `" . kxEnv::Get('kx:db:prefix') . "banlist` WHERE `allowread` = 0 AND `type` = 0 AND (`expired` =  1) ORDER BY `ip` ASC");
+    $results = [];
     if (count($results) > 0) {
       $htaccess_contents_bans_iplist .= 'RewriteCond %{REMOTE_ADDR} (';
       foreach ($results as $line) {

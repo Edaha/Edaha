@@ -18,21 +18,21 @@ class manage_core_index_statgraphs extends kxCmd {
   }
   
   private function _graphData($period = 1) {
-    $boards = $this->db->select("boards")
-                   ->fields("boards", array("board_id", "board_name"))
-                   ->execute()
-                   ->fetchAll();
+    // $boards = $this->db->select("boards")
+    //                ->fields("boards", array("board_id", "board_name"))
+    //                ->execute()
+    //                ->fetchAll();
     
-    $postsperboard = $this->db->select("posts")
-                              ->fields("posts")
-                              ->where("board_id = ? AND created_at_timestamp >= ?")
-                              ->countQuery()
-                              ->build();
-    $period = time() - (86400 * $period);
-    foreach ($boards as $board) {
-      $postsperboard->execute(array($board->board_id, $period));
-      $values[] = array($board->board_name, (int) current($postsperboard->fetchCol()));
-    }
+    // $postsperboard = $this->db->select("posts")
+    //                           ->fields("posts")
+    //                           ->where("board_id = ? AND created_at_timestamp >= ?")
+    //                           ->countQuery()
+    //                           ->build();
+    // $period = time() - (86400 * $period);
+    // foreach ($boards as $board) {
+    //   $postsperboard->execute(array($board->board_id, $period));
+    //   $values[] = array($board->board_name, (int) current($postsperboard->fetchCol()));
+    // }
     
     // Array with the needed column information
     $columns = array(

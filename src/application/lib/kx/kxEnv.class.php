@@ -100,7 +100,7 @@ class kxEnv
     kxEnv::$current_section = kxFunc::alphaNum(kxEnv::$current_section);
 
     // Load the cache
-    self::$cache = kxCache::instance();
+    // self::$cache = kxCache::instance();
   }
 
   private static function mergeWrapper($base, $next)

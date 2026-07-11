@@ -54,15 +54,15 @@ class manage_board_attachments_filetypes extends kxCmd {
     try {
       if ($this->request['do'] == 'add') {
         // New entry
-        $this->db->insert("filetypes")
-                 ->fields($fields)
-                 ->execute();
+        // $this->db->insert("filetypes")
+        //          ->fields($fields)
+        //          ->execute();
       } else {
         // Modifying old
-        $this->db->update("filetypes")
-                 ->fields($fields)
-                 ->condition('type_id', $this->request['id'])
-                 ->execute();
+        // $this->db->update("filetypes")
+        //          ->fields($fields)
+        //          ->condition('type_id', $this->request['id'])
+        //          ->execute();
       }
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
@@ -90,12 +90,12 @@ class manage_board_attachments_filetypes extends kxCmd {
           ->check();
     
     try {
-      $this->db->delete("filetypes")
-               ->condition("type_id", $this->request['id'])
-               ->execute();
-      $this->db->delete("board_filetypes")
-               ->condition("type_id", $this->request['id'])
-               ->execute();
+      // $this->db->delete("filetypes")
+      //          ->condition("type_id", $this->request['id'])
+      //          ->execute();
+      // $this->db->delete("board_filetypes")
+      //          ->condition("type_id", $this->request['id'])
+      //          ->execute();
     } catch (Exception $e) {
       $this->twigData['notice']['type'] = 'error';
       $this->twigData['notice']['message'] = _('An error occured: ') . $e->getMessage();
@@ -114,23 +114,21 @@ class manage_board_attachments_filetypes extends kxCmd {
     kxForm::addRule('id', 'numeric')
           ->check();
     
-    $this->twigData['filetype'] = $this->db->select("filetypes")
-                                           ->fields("filetypes")
-                                           ->condition('type_id', $this->request['id'])
-                                           ->execute()
-                                           ->fetch();
+    $this->twigData['filetype'] = []; // $this->db->select("filetypes")
+                                          //  ->fields("filetypes")
+                                          //  ->condition('type_id', $this->request['id'])
+                                          //  ->execute()
+                                          //  ->fetch();
   }
   
   public function recacheFiletypes() {
     // Get all the filetypes...
-    $recache_filetypes = $this->db->select("filetypes")
-                                  ->fields("filetypes")
-                                  ->orderBy("type_id")
-                                  ->execute()
-                                  ->fetchAll();
-    /*echo '<pre>';
-    print_r($recache_filetypes);
-    echo '</pre>';*/
+    $recache_filetypes = []; // $this->db->select("filetypes")
+                                  // ->fields("filetypes")
+                                  // ->orderBy("type_id")
+                                  // ->execute()
+                                  // ->fetchAll();
+                                  
     // Cache them
     kxEnv::set('cache:attachments:filetypes', $recache_filetypes);
     

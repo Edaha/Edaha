@@ -97,21 +97,21 @@ class manage_core_site_config extends kxCmd
   private function _loadOptions()
   {
     if (!isset($this->config_groups)) {
-      $this->config_groups = $this->db->select("config_groups")
-        ->fields("config_groups")
-        ->orderBy("group_id")
-        ->execute()
-        ->fetchAll();
+      // $this->config_groups = $this->db->select("config_groups")
+      //   ->fields("config_groups")
+      //   ->orderBy("group_id")
+      //   ->execute()
+      //   ->fetchAll();
 
-      $options = $this->db->select("configuration")
-        ->fields("configuration")
-        ->where("config_group = ?")
-        ->build();
+      // $options = $this->db->select("configuration")
+      //   ->fields("configuration")
+      //   ->where("config_group = ?")
+      //   ->build();
 
-      foreach ($this->config_groups as $group) {
-        $options->execute(array($group->group_id));
-        $group->options = $options->fetchAll();
-      }
+      // foreach ($this->config_groups as $group) {
+      //   $options->execute(array($group->group_id));
+      //   $group->options = $options->fetchAll();
+      // }
     }
   }
 }

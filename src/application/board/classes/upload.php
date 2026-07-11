@@ -156,14 +156,16 @@ class Upload
           $this->files[$i]['image_h'] = $imageDim[1];
         }
 
-        $filetype_forcethumb = $this->db->select("filetypes");
-        $filetype_forcethumb->innerJoin("board_filetypes", "bf", "filetypes.type_id = bf.type_id");
-        $filetype_forcethumb->innerJoin("boards", "b", "b.board_id = bf.board_id");
-        $filetype_forcethumb = $filetype_forcethumb->fields("filetypes", array("type_force_thumb"))
-          ->condition("filetypes.type_ext", substr($this->files[$i]['file_type'], 1))
-          ->condition("board_name", $boardData->board_name)
-          ->execute()
-          ->fetchField();
+        // $filetype_forcethumb = $this->db->select("filetypes");
+        // $filetype_forcethumb->innerJoin("board_filetypes", "bf", "filetypes.type_id = bf.type_id");
+        // $filetype_forcethumb->innerJoin("boards", "b", "b.board_id = bf.board_id");
+        // $filetype_forcethumb = $filetype_forcethumb->fields("filetypes", array("type_force_thumb"))
+        //   ->condition("filetypes.type_ext", substr($this->files[$i]['file_type'], 1))
+        //   ->condition("board_name", $boardData->board_name)
+        //   ->execute()
+        //   ->fetchField();
+
+        $filetype_forcethumb = null;
 
         if (isset($filetype_forcethumb)) {
           if ($filetype_forcethumb == 1) {
@@ -213,11 +215,12 @@ class Upload
             }
           } else {
             /* Fetch the mime requirement for this special filetype */
-            $filetype_required_mime = $this->db->select("filetypes")
-              ->fields("filetypes", ["type_mime"])
-              ->condition("type_ext", substr($this->files[$i]['file_type'], 1))
-              ->execute()
-              ->fetchField();
+            // $filetype_required_mime = $this->db->select("filetypes")
+            //   ->fields("filetypes", ["type_mime"])
+            //   ->condition("type_ext", substr($this->files[$i]['file_type'], 1))
+            //   ->execute()
+            //   ->fetchField();
+            $filetype_required_mime = '';
             // Filename cleanup.
             $this->files[$i]['file_name'] = htmlspecialchars_decode($this->files[$i]['file_name'], ENT_QUOTES);
             $this->files[$i]['file_name'] = stripslashes($this->files[$i]['file_name']);
@@ -318,10 +321,11 @@ class Upload
 
         if ($video_id != '' && strpos($video_id, '@') == false && strpos($video_id, '&') == false) {
 
-          $embeds = $this->db->select("embeds")
-            ->fields("embeds")
-            ->execute()
-            ->fetchAll();
+          // $embeds = $this->db->select("embeds")
+          //   ->fields("embeds")
+          //   ->execute()
+          //   ->fetchAll();
+          $embeds = [];
           $worked = false;
           foreach ($embeds as $line) {
             if ((strtolower($this->request['embedtype']) == strtolower($line->embed_name)) && in_array($line->embed_ext, explode(',', $boardData->board_embeds_allowed))) {
@@ -335,15 +339,16 @@ class Upload
             kxFunc::showError(_('Invalid video type.'));
           }
 
-          $results = $this->db->select("post_files")
-            ->fields("post_files")
-            ->innerJoin("posts", "", "board_id = file_board AND post_id = file_post")
-            ->condition("file_board", $boardData->board_id)
-            ->condition("file_name", $video_id)
-            ->condition("is_deleted", 0)
-            ->countQuery()
-            ->execute()
-            ->fetch();
+          // $results = $this->db->select("post_files")
+          //   ->fields("post_files")
+          //   ->innerJoin("posts", "", "board_id = file_board AND post_id = file_post")
+          //   ->condition("file_board", $boardData->board_id)
+          //   ->condition("file_name", $video_id)
+          //   ->condition("is_deleted", 0)
+          //   ->countQuery()
+          //   ->execute()
+          //   ->fetch();
+          $results = null;
           if (!$results) {
             $video_check = kxFunc::check_link($videourl_start . $video_id);
             switch ($video_check[1]) {
@@ -368,15 +373,17 @@ class Upload
             }
             $this->isvideo = true;
           } else {
-            $results = $this->db->select("post_files");
-            $results->innerJoin("posts", "", "board_id = file_board AND post_id = file_post");
-            $results = $results->fields("posts", array("post_id", "parent_post_id"))
-              ->condition("file_board", $boardData->board_id)
-              ->condition("file_name", $video_id)
-              ->condition("is_deleted", 0)
-              ->range(0, 1)
-              ->execute()
-              ->fetchAll();
+            // $results = $this->db->select("post_files");
+            // $results->innerJoin("posts", "", "board_id = file_board AND post_id = file_post");
+            // $results = $results->fields("posts", array("post_id", "parent_post_id"))
+            //   ->condition("file_board", $boardData->board_id)
+            //   ->condition("file_name", $video_id)
+            //   ->condition("is_deleted", 0)
+            //   ->range(0, 1)
+            //   ->execute()
+            //   ->fetchAll();
+
+            $results = [];
 
             foreach ($results as $line) {
               $real_threadid = ($line->parent_post_id == 0) ? $line->post_id : $line->parent_post_id;

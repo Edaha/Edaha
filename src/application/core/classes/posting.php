@@ -149,11 +149,11 @@ class Posting
         $fields['locked'] = 1;
       }
       if ($fields) {
-        $this->db->update("posts")
-          ->fields($fields)
-          ->condition("board_id", $this->board->board_id)
-          ->condition("post_id", $postData['thread_info']['parent'])
-          ->execute();
+        // $this->db->update("posts")
+        //   ->fields($fields)
+        //   ->condition("board_id", $this->board->board_id)
+        //   ->condition("post_id", $postData['thread_info']['parent'])
+        //   ->execute();
       }
     }
     return $result;
@@ -261,19 +261,19 @@ class Posting
     // Banned file hash check
     if (isset($_FILES['imagefile'])) {
       if ($_FILES['imagefile']['name'][0] != '') {
-        $results = $this->db->select("bannedhashes")
-          ->fields("bannedhashes", array("banduration", "description"))
-          ->where("md5 = ?")
-          ->range(0, 1)
-          ->build();
+        // $results = $this->db->select("bannedhashes")
+        //   ->fields("bannedhashes", array("banduration", "description"))
+        //   ->where("md5 = ?")
+        //   ->range(0, 1)
+        //   ->build();
         for ($i = 0; $i < $board->board_max_files; $i++) {
           if (isset($_FILES['imagefile']['tmp_name'][$i]) && $_FILES['imagefile']['tmp_name'][$i]) {
-            $results->execute(array(md5_file($_FILES['imagefile']['tmp_name'][$i])));
-            if (count($results->fetchAll()) > 0) {
-              kxBans::banUser($_SERVER['REMOTE_ADDR'], 'SERVER', '1', $results[0]->banduration, '', 'Posting a banned file.<br />' . $results[0]->description, '', 0, 0, 1);
-              kxBans::banCheck($_SERVER['REMOTE_ADDR'], $board->board_name);
-              exit;
-            }
+            // $results->execute(array(md5_file($_FILES['imagefile']['tmp_name'][$i])));
+            // if (count($results->fetchAll()) > 0) {
+            //   kxBans::banUser($_SERVER['REMOTE_ADDR'], 'SERVER', '1', $results[0]->banduration, '', 'Posting a banned file.<br />' . $results[0]->description, '', 0, 0, 1);
+            //   kxBans::banCheck($_SERVER['REMOTE_ADDR'], $board->board_name);
+            //   exit;
+            // }
           } else {
             // The file didn't get uploaded, or no file after the previous was uploaded.
             // Either way, break the loop, if there's a problem, upload class will take care of it.
@@ -364,32 +364,32 @@ class Posting
   {
     // If the user replied to a thread he is watching, update it so it doesn't count his reply as unread
     if (kxEnv::Get('ku:extras:watchthreads') && $postData['thread_info']['parent'] != 0) {
-      $viewing_thread_is_watched = $this->db->select("watchedthreads")
-        ->fields(array("watchedthreads"))
-        ->countQuery()
-        ->condition("watch_ip", $_SERVER['REMOTE_ADDR'])
-        ->condition("watch_board", $board->board_name)
-        ->condition("watch_thread", $postData['thread_info']['parent'] != 0)
-        ->execute()
-        ->fetchField();
-      if ($viewing_thread_is_watched[0] > 0) {
-        $newestreplyid = $this->db->select("posts")
-          ->fields("posts", array("post_id"))
-          ->condition("board_id", $board->board_id)
-          ->condition("is_deleted", 0)
-          ->condition("parent_post_id", $postData['thread_info']['parent'])
-          ->orderBy("post_id", "DESC")
-          ->range(0, 1)
-          ->execute()
-          ->fetchField();
+      // $viewing_thread_is_watched = $this->db->select("watchedthreads")
+      //   ->fields(array("watchedthreads"))
+      //   ->countQuery()
+      //   ->condition("watch_ip", $_SERVER['REMOTE_ADDR'])
+      //   ->condition("watch_board", $board->board_name)
+      //   ->condition("watch_thread", $postData['thread_info']['parent'] != 0)
+      //   ->execute()
+      //   ->fetchField();
+      // if ($viewing_thread_is_watched[0] > 0) {
+      //   $newestreplyid = $this->db->select("posts")
+      //     ->fields("posts", array("post_id"))
+      //     ->condition("board_id", $board->board_id)
+      //     ->condition("is_deleted", 0)
+      //     ->condition("parent_post_id", $postData['thread_info']['parent'])
+      //     ->orderBy("post_id", "DESC")
+      //     ->range(0, 1)
+      //     ->execute()
+      //     ->fetchField();
 
-        $this->db->update("watchedthreads")
-          ->fields(array("watch_last_id_seen" => $newestreplyid))
-          ->condition("watch_ip", $_SERVER['REMOTE_ADDR'])
-          ->condition("watch_board", $board->board_name)
-          ->condition("watch_thread", $postData['thread_info']['parent'])
-          ->execute();
-      }
+      //   $this->db->update("watchedthreads")
+      //     ->fields(array("watch_last_id_seen" => $newestreplyid))
+      //     ->condition("watch_ip", $_SERVER['REMOTE_ADDR'])
+      //     ->condition("watch_board", $board->board_name)
+      //     ->condition("watch_thread", $postData['thread_info']['parent'])
+      //     ->execute();
+      // }
     }
   }
 
@@ -458,8 +458,9 @@ class Posting
 
     if (isset($this->request['modpassword'])) {
 
-      $results = $kx_db->GetAll("SELECT `type`, `boards` FROM `" . kxEnv::Get('kx:db:prefix') . "staff` WHERE `username` = '" . md5_decrypt($_POST['modpassword'], kxEnv::Get('kx:misc:randomseed')) . "' LIMIT 1");
+      // $results = $kx_db->GetAll("SELECT `type`, `boards` FROM `" . kxEnv::Get('kx:db:prefix') . "staff` WHERE `username` = '" . md5_decrypt($_POST['modpassword'], kxEnv::Get('kx:misc:randomseed')) . "' LIMIT 1");
 
+      $results = [];
       if (count($results) > 0) {
         if ($results[0][0] == 1) {
           $user_authority = 1; // admin

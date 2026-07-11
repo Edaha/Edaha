@@ -61,10 +61,10 @@ class manage_board_contentmoderation_posts extends kxCmd
         $where_clauses[] = '(board_id = ' . $board_id . ' and post_id in (' . implode(',', $posts) . '))';
       }
 
-      $process_query = $this->db->update("posts")
-        ->fields($fields)
-        ->where(implode(" or ", $where_clauses))
-        ->execute();
+      // $process_query = $this->db->update("posts")
+      //   ->fields($fields)
+      //   ->where(implode(" or ", $where_clauses))
+      //   ->execute();
     }
 
     if ($this->request['action'] == 'delete') {

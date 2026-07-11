@@ -6,10 +6,40 @@ all:
     charset: utf-8
     db:
       dsn: 'mysql:host=db;dbname=edaha;charset=utf8mb4'
+
+      adapter: pdo_sqlite
+
+      sqlite:
+        dbname: edaha
+        memory: false
+
+      mysql:
+        host: mysql-db
+        port: 3306
+        dbname: edaha
+        user: edaha
+        password: edaha
+        persistent: false    
+      
+      pgsql:
+        host: pgsql-db
+        port: 5432
+        dbname: edaha
+        user: edaha
+        password: edaha
+        persistent: false
+      
+      user: edaha
       username: edaha
       password: edaha
-      prefix: 
+      host: db
+      port: 
+      dbname:
       persistent: false
+      prefix: 
+      sqlite_memory: 
+      
+
     site:
       name: Edaha
       slogan: '<em>slogan!</em>'

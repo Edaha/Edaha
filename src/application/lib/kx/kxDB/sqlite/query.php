@@ -1,4 +1,5 @@
 <?php
+
 // $Id$
 
 /**
@@ -8,6 +9,7 @@
 
 /**
  * @ingroup database
+ *
  * @{
  */
 
@@ -18,36 +20,36 @@
  *   INSERT INTO table DEFAULT VALUES
  * for degenerated "default only" queries.
  */
-class InsertQuery_sqlite extends InsertQuery {
+class InsertQuery_sqlite extends InsertQuery
+{
+    public function __toString()
+    {
+        // Create a comments string to prepend to the query.
+        $comments = (!empty($this->comments)) ? '/* '.implode('; ', $this->comments).' */ ' : '';
 
-  public function execute() {
-    if (!$this->preExecute()) {
-      return NULL;
-    }
-    if (count($this->insertFields)) {
-      return parent::execute();
-    }
-    else {
-      return $this->connection->query('INSERT INTO {' . $this->table . '} DEFAULT VALUES', array(), $this->queryOptions);
-    }
-  }
+        // Produce as many generic placeholders as necessary.
+        $placeholders = array_fill(0, count($this->insertFields), '?');
 
-  public function __toString() {
-    // Create a comments string to prepend to the query.
-    $comments = (!empty($this->comments)) ? '/* ' . implode('; ', $this->comments) . ' */ ' : '';
+        // If we're selecting from a SelectQuery, finish building the query and
+        // pass it back, as any remaining options are irrelevant.
+        if (!empty($this->fromQuery)) {
+            return $comments.'INSERT INTO {'.$this->table.'} ('.implode(', ', $this->insertFields).') '.$this->fromQuery;
+        }
 
-    // Produce as many generic placeholders as necessary.
-    $placeholders = array_fill(0, count($this->insertFields), '?');
-
-    // If we're selecting from a SelectQuery, finish building the query and
-    // pass it back, as any remaining options are irrelevant.
-    if (!empty($this->fromQuery)) {
-      return $comments . 'INSERT INTO {' . $this->table . '} (' . implode(', ', $this->insertFields) . ') ' . $this->fromQuery;
+        return $comments.'INSERT INTO {'.$this->table.'} ('.implode(', ', $this->insertFields).') VALUES ('.implode(', ', $placeholders).')';
     }
 
-    return $comments . 'INSERT INTO {' . $this->table . '} (' . implode(', ', $this->insertFields) . ') VALUES (' . implode(', ', $placeholders) . ')';
-  }
+    public function execute()
+    {
+        if (!$this->preExecute()) {
+            return null;
+        }
+        if (count($this->insertFields)) {
+            return parent::execute();
+        }
 
+        return $this->connection->query('INSERT INTO {'.$this->table.'} DEFAULT VALUES', [], $this->queryOptions);
+    }
 }
 
 /**
@@ -62,60 +64,60 @@ class InsertQuery_sqlite extends InsertQuery {
  * will become:
  *   UPDATE test SET name = 'newname' WHERE tid = 1 AND name <> 'newname'
  */
-class UpdateQuery_sqlite extends UpdateQuery {
-  /**
-   * Helper function that removes the fields that are already in a condition.
-   *
-   * @param $fields
-   *   The fields.
-   * @param QueryConditionInterface $condition
-   *   A database condition.
-   */
-  protected function removeFieldsInCondition(&$fields, QueryConditionInterface $condition) {
-    foreach ($condition->conditions() as $child_condition) {
-      if ($child_condition['field'] instanceof QueryConditionInterface) {
-        $this->removeFieldsInCondition($fields, $child_condition['field']);
-      }
-      else {
-        unset($fields[$child_condition['field']]);
-      }
-    }
-  }
+class UpdateQuery_sqlite extends UpdateQuery
+{
+    public function execute()
+    {
+        if (!empty($this->queryOptions['sqlite_return_matched_rows'])) {
+            return parent::execute();
+        }
 
-  public function execute() {
-    if (!empty($this->queryOptions['sqlite_return_matched_rows'])) {
-      return parent::execute();
+        // Get the fields used in the update query, and remove those that are already
+        // in the condition.
+        $fields = $this->expressionFields + $this->fields;
+        $this->removeFieldsInCondition($fields, $this->condition);
+
+        // Add the inverse of the fields to the condition.
+        $condition = new DatabaseCondition('OR');
+        foreach ($fields as $field => $data) {
+            if (is_array($data)) {
+                // The field is an expression.
+                $condition->where($field.' <> '.$data['expression']);
+                $condition->isNull($field);
+            } elseif (!isset($data)) {
+                // The field will be set to NULL.
+                $condition->isNull($field);
+            } else {
+                $condition->condition($field, $data, '<>');
+                $condition->isNull($field);
+            }
+        }
+        if (count($condition)) {
+            $condition->compile($this->connection, $this);
+            $this->condition->where((string) $condition, $condition->arguments());
+        }
+
+        return parent::execute();
     }
 
-    // Get the fields used in the update query, and remove those that are already
-    // in the condition.
-    $fields = $this->expressionFields + $this->fields;
-    $this->removeFieldsInCondition($fields, $this->condition);
-
-    // Add the inverse of the fields to the condition.
-    $condition = new DatabaseCondition('OR');
-    foreach ($fields as $field => $data) {
-      if (is_array($data)) {
-        // The field is an expression.
-        $condition->where($field . ' <> ' . $data['expression']);
-        $condition->isNull($field);
-      }
-      elseif (!isset($data)) {
-        // The field will be set to NULL.
-        $condition->isNull($field);
-      }
-      else {
-        $condition->condition($field, $data, '<>');
-        $condition->isNull($field);
-      }
+    /**
+     * Helper function that removes the fields that are already in a condition.
+     *
+     * @param                         $fields
+     *                                          The fields
+     * @param QueryConditionInterface $condition
+     *                                           A database condition
+     */
+    protected function removeFieldsInCondition(&$fields, QueryConditionInterface $condition)
+    {
+        foreach ($condition->conditions() as $child_condition) {
+            if ($child_condition['field'] instanceof QueryConditionInterface) {
+                $this->removeFieldsInCondition($fields, $child_condition['field']);
+            } else {
+                unset($fields[$child_condition['field']]);
+            }
+        }
     }
-    if (count($condition)) {
-      $condition->compile($this->connection, $this);
-      $this->condition->where((string) $condition, $condition->arguments());
-    }
-    return parent::execute();
-  }
-
 }
 
 /**
@@ -128,17 +130,19 @@ class UpdateQuery_sqlite extends UpdateQuery {
  * Prior to SQLite 3.6.5, SQLite does not return the actual number of rows deleted
  * by that optimized "truncate" optimization.
  */
-class DeleteQuery_sqlite extends DeleteQuery {
-  public function execute() {
-    if (!count($this->condition)) {
-      $total_rows = $this->connection->query('SELECT COUNT(*) FROM {' . $this->connection->escapeTable($this->table) . '}')->fetchField();
-      parent::execute();
-      return $total_rows;
+class DeleteQuery_sqlite extends DeleteQuery
+{
+    public function execute()
+    {
+        if (!count($this->condition)) {
+            $total_rows = $this->connection->query('SELECT COUNT(*) FROM {'.$this->connection->escapeTable($this->table).'}')->fetchField();
+            parent::execute();
+
+            return $total_rows;
+        }
+
+        return parent::execute();
     }
-    else {
-      return parent::execute();
-    }
-  }
 }
 
 /**
@@ -147,15 +151,15 @@ class DeleteQuery_sqlite extends DeleteQuery {
  * SQLite doesn't support TRUNCATE, but a DELETE query with no condition has
  * exactly the effect (it is implemented by DROPing the table).
  */
-class TruncateQuery_sqlite extends TruncateQuery {
-  public function __toString() {
-    // Create a comments string to prepend to the query.
-    $comments = (!empty($this->comments)) ? '/* ' . implode('; ', $this->comments) . ' */ ' : '';
+class TruncateQuery_sqlite extends TruncateQuery
+{
+    public function __toString()
+    {
+        // Create a comments string to prepend to the query.
+        $comments = (!empty($this->comments)) ? '/* '.implode('; ', $this->comments).' */ ' : '';
 
-    return $comments . 'DELETE FROM {' . $this->connection->escapeTable($this->table) . '} ';
-  }
+        return $comments.'DELETE FROM {'.$this->connection->escapeTable($this->table).'} ';
+    }
 }
 
-/**
- * @} End of "ingroup database".
- */
+// @} End of "ingroup database".

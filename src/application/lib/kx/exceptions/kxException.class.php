@@ -1,3 +1,3 @@
 <?php
 
-class kxException extends Exception { }
+class kxException extends Exception {}

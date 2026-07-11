@@ -1,4 +1,3 @@
 <?php
 
-class kxDBException extends kxException {
-}
+class kxDBException extends kxException {}

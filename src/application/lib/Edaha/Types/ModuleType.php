@@ -1,4 +1,5 @@
 <?php
+
 namespace Edaha\Types;
 
 enum ModuleType: string
@@ -16,11 +17,13 @@ enum ModuleType: string
     case Core = 'core'; // Examples: index.php, post.php, manage.php
     case BoardType = 'board'; // ImageBoard, TextBoard, OekakiBoard, etc.
     case BoardRenderer = 'board_renderer';
+    case BoardRegenerator = 'board_regenerator';
     case PostPreProcessor = 'post_preprocessor';
     case PostProcessor = 'post_processor';
     case PostPostProcessor = 'post_postprocessor';
 
-    public function toString(): string {
+    public function toString(): string
+    {
         return $this->value;
     }
 }

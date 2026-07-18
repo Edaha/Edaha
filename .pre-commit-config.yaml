@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: php-cs-fixer
+        name: PHP-CS-Fixer (local)
+        entry: vendor/bin/php-cs-fixer fix
+        language: system
+        files: \.php$

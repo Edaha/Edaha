@@ -6,9 +6,7 @@ Edaha is a modular, object oriented image BBS software written in PHP, written u
 
 ## Code Formatting Rules
 
-Just use [PSR-12](https://www.php-fig.org/psr/psr-12/). Go a step further and declare return types on methods if you remember to. 
-
-## Local Development
+Follow the latest [PER Coding Style](https://www.php-fig.org/per/coding-style/). The repo is set up to use [pre-commit](https://pre-commit.com/) and includes [.pre-commit-config.yaml]() to automatically run php-cs-fixer (after you've run `composer install`, as it expects to find it in a `vendor/` folder at the project's root).
 
 ### Starting the local development environment
 

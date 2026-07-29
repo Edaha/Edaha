@@ -49,6 +49,9 @@ By priority:
   - [ ] Post Moderation
   - [ ] Attachment Moderation
 
+- Management
+  - [ ] Have to come up with something not so tedious for management pages
+
 - Board types
   - [ ] Textboard
   - [ ] Imageboard

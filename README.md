@@ -37,9 +37,9 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Repo Layout
 
-/.vscode: Xdebug configuration for use with the Xdebug VS Code Extension
-/bin: The Doctrine Console plus simple bash scripts for common commands. [Read the docs](https://www.doctrine-project.org/projects/doctrine-bundle/en/3.2/doctrine-console.html)
-/docker: Configuration files used for the development containers
-/ref: Currently just scratch design work that may or may not accurately reflect implementation
-/src: The primary application
-/tests: Self-explanatory
+- /.vscode: Xdebug configuration for use with the Xdebug VS Code Extension
+- /bin: The Doctrine Console plus simple bash scripts for common commands. [Read the docs](https://www.doctrine-project.org/projects/doctrine-bundle/en/3.2/doctrine-console.html)
+- /docker: Configuration files used for the development containers
+- /ref: Currently just scratch design work that may or may not accurately reflect implementation
+- /src: The primary application
+- /tests: Self-explanatory

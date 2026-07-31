@@ -1,4 +1,5 @@
 <?php
+
 namespace Edaha\Entities;
 
 use Doctrine\ORM\Mapping as ORM;

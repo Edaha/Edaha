@@ -1,10 +1,8 @@
 <?php
+
 namespace Edaha\Entities;
-use Edaha\Entities\Post;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'post_attachments')]
@@ -33,7 +31,7 @@ class PostAttachment
             return $this->path;
         }
     }
-        
+
     #[ORM\Column]
     public string $file_name {
         get {
@@ -63,7 +61,7 @@ class PostAttachment
 
         $this->file = new \SplFileInfo($path);
         $this->path = $this->file->getRealPath();
-        $this->file_name =  $this->file->getFileName();
+        $this->file_name = $this->file->getFileName();
         $this->original_name = $this->file->getFileName();
         $this->md5_hash = md5_file($path);
     }

@@ -1,4 +1,5 @@
 <?php
+
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
@@ -6,12 +7,54 @@ use Doctrine\ORM\ORMSetup;
 class kxOrm
 {
     public static ?EntityManager $entityManager = null;
-    
+
+    public static function getEntityManager(): EntityManager
+    {
+        if (null === self::$entityManager) {
+            $config = ORMSetup::createAttributeMetadataConfiguration(
+                paths: [KX_ROOT.'/application/lib/Edaha/Entities'],
+                isDevMode: true,
+            );
+            $config->enableNativeLazyObjects(true);
+
+            $connectionParams = match (kxEnv::Get('kx:db:adapter')) {
+                'pdo_sqlite' => self::getSqliteConnectionParams(),
+                'pdo_mysql' => self::getMysqlConnectionParams(),
+                'pdo_pgsql' => self::getPgsqlConnectionParams(),
+                default => throw new InvalidArgumentException('Unsupported database adapter')
+            };
+
+            $connection = DriverManager::getConnection($connectionParams, $config);
+
+            self::$entityManager = new EntityManager($connection, $config);
+        }
+
+        return self::$entityManager;
+    }
+
+    public static function persistImmediately($entity)
+    {
+        if (null === self::$entityManager) {
+            self::getEntityManager();
+        }
+        self::$entityManager->persist($entity);
+        self::$entityManager->flush();
+    }
+
+    public function removeImmediately($entity)
+    {
+        if (null === self::$entityManager) {
+            self::getEntityManager();
+        }
+        self::$entityManager->remove($entity);
+        self::$entityManager->flush();
+    }
+
     private static function getSqliteConnectionParams(): array
     {
         return [
             'driver' => 'pdo_sqlite',
-            'path' => KX_ROOT . '/' . kxEnv::Get('kx:db:sqlite:dbname', 'db') . '.sqlite',
+            'path' => KX_ROOT.'/'.kxEnv::Get('kx:db:sqlite:dbname', 'db').'.sqlite',
         ];
     }
 
@@ -37,46 +80,5 @@ class kxOrm
             'user' => kxEnv::Get('kx:db:pgsql:user'),
             'password' => kxEnv::Get('kx:db:pgsql:password'),
         ];
-    }
-
-    public static function getEntityManager(): EntityManager
-    {
-        if (self::$entityManager === null) {
-            $config = ORMSetup::createAttributeMetadataConfiguration(
-                paths: [ KX_ROOT . '/application/lib/Edaha/Entities'],
-                isDevMode: true,
-            );
-            $config->enableNativeLazyObjects(true);
-
-            $connectionParams = match (kxEnv::Get('kx:db:adapter')) {
-                'pdo_sqlite' => self::getSqliteConnectionParams(),
-                'pdo_mysql' => self::getMysqlConnectionParams(),
-                'pdo_pgsql' => self::getPgsqlConnectionParams(),
-                default => throw new InvalidArgumentException('Unsupported database adapter')
-            };
-            
-            $connection = DriverManager::getConnection($connectionParams, $config);
-
-            self::$entityManager = new EntityManager($connection, $config);
-        }
-        return self::$entityManager;
-    }
-
-    public static function persistImmediately($entity)
-    {
-        if (self::$entityManager === null) {
-            self::getEntityManager();
-        }
-        self::$entityManager->persist($entity);
-        self::$entityManager->flush();
-    }
-
-    public function removeImmediately($entity)
-    {
-        if (self::$entityManager === null) {
-            self::getEntityManager();
-        }
-        self::$entityManager->remove($entity);
-        self::$entityManager->flush();
     }
 }

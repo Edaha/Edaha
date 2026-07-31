@@ -1,6 +1,7 @@
 <?php
+
 namespace Edaha\Interfaces;
-use Edaha\Entities\Board;
+
 use Edaha\Entities\Post;
 
 interface RegeneratorInterface

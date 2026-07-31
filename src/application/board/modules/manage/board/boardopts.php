@@ -1,15 +1,13 @@
 <?php
 
-use Edaha\Entities\Section;
 use Edaha\Entities\Board;
-use Edaha\Entities\BoardOption;
 
 class manage_board_board_boardopts extends kxCmd
 {
     /**
-     * Arguments eventually being sent to twig
+     * Arguments eventually being sent to twig.
      *
-     * @var Array()
+     * @var array()
      */
     protected $twigData;
 
@@ -18,142 +16,22 @@ class manage_board_board_boardopts extends kxCmd
         switch ($this->request['do']) {
             case 'edit':
                 $this->_edit();
+
                 break;
 
             case 'post':
                 $this->_update();
+
                 break;
 
             default:
-                //there's a problem
-                die();
+                // there's a problem
+                exit;
+
                 break;
         }
 
-        kxTemplate::output("manage/boardopts", $this->twigData);
-    }
-
-    private function _edit()
-    {
-        // $board_options = kxEnv::Get('cache:boardopts:' . $this->request['board']);
-        $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['board_id']);
-        if (is_null($board)) {
-            $this->twigData['notice']['type']    = 'error';
-            $this->twigData['notice']['message'] = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
-            return;
-        }
-
-        $this->twigData['board'] = $board;
-        $this->twigData['sections'] = $this->entityManager->getRepository('\Edaha\Entities\Section')->findAll();
-
-        foreach ($board->options as $option) {
-            $this->twigData['options'][$option->name] = $option->value;
-        }
-
-        $this->twigData['filetypes'] = []; // kxEnv::get('cache:attachments:filetypes');
-        
-        $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->getBoardModules();
-        if (empty($board_types)) {
-            $this->twigData['notice']['type'] = 'error';
-            $this->twigData['notice']['message'] = _('No board types found. Please install board modules.');
-        return;
-        }
-        $this->twigData['board_types'] = array();
-        foreach ($board_types as $type) {
-            $this->twigData['board_types'][$type->name] = [
-                'value' => $type->class,
-        ];
-        }
-    }
-
-    private function _update()
-    {
-        // A few checks to ensure a valid submission
-        kxForm::addRule('id', 'numeric')
-            ->addRule('board', 'required')
-            ->check();
-
-        $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['id']);
-
-        if (is_null($board)) {
-            $this->twigData['notice']['type']    = 'error';
-            $this->twigData['notice']['message'] = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
-            return;
-        }
-
-        $board_fields = [
-            'name'               => $this->request['title'],
-            'locale'             => $this->request['locale'],
-            'type'               => $this->request['type'],
-            'upload_type'        => (int) $this->request['upload_type'],
-            // 'board_section'      => (int) $this->request['board_section'],
-            'order'              => (int) $this->request['order'],
-            'header_image'       => $this->request['header_image'],
-            'include_header'     => $this->request['include_header'],
-            'anonymous'          => $this->request['anonymous'],
-            // TODO: Add this to the template
-            'default_style'      => 'edaha',
-            'allowed_embeds'     => '',
-            'max_upload_size'    => (int) $this->request['max_upload_size'],
-            'max_message_length' => (int) $this->request['max_message_length'],
-            'max_pages'          => (int) $this->request['max_pages'],
-            'max_age'            => (int) $this->request['max_age'],
-            'mark_page'          => (int) $this->request['mark_page'],
-            'max_replies'        => (int) $this->request['max_replies'],
-            'locked'             => (int) isset($this->request['locked']),
-            'show_id'            => (int) isset($this->request['show_id']),
-            'compact_list'       => (int) isset($this->request['compact_list']),
-            'reporting'          => (int) isset($this->request['reporting']),
-            'captcha'            => (int) isset($this->request['captcha']),
-            'archiving'          => (int) isset($this->request['archiving']),
-            'catalog'            => (int) isset($this->request['catalog']),
-            'no_file'            => (int) isset($this->request['no_file']),
-            'redirect_to_thread' => (int) isset($this->request['redirect_to_thread']),
-            'forced_anon'        => (int) isset($this->request['forced_anon']),
-            'trial'              => (int) isset($this->request['trial']),
-            'popular'            => (int) isset($this->request['popular']),
-            'max_files'          => (int) $this->request['max_files'],
-            'renderer'           => $this->request['renderer'],
-        ];
-
-        foreach ($board_fields as $key => $value) {
-            if ($value != $board->$key) {
-                $board->$key = $value;
-            }
-        }
-
-        if ($this->request['board_section'] != $board->section->id) {
-            if ($this->request['board_section'] == 0) {
-                $board->section->removeBoard($board);
-            } else {
-                $section = $this->entityManager->find('\Edaha\Entities\Section', $this->request['board_section']);
-                if (is_null($section)) {
-                    // TODO This should probably throw an exception so we can properly rollback the $board
-                    $this->twigData['notice']['type']    = 'error';
-                    $this->twigData['notice']['message'] = sprintf(_("Couldn't find section /%s/."), $this->request['section']);
-                    return;
-                }
-                $section->addBoard($board);
-            }
-        }
-
-        $this->entityManager->persist($board);
-        $this->entityManager->flush();
-
-        // TODO: Filetypes (Attachments) object
-        // Clear previous filetype settings
-        // Add new filetypes
-
-        $this->twigData['boardredirect']     = true;
-        $this->twigData['notice']['type']    = 'success';
-        $this->twigData['notice']['message'] = _('Board updated. Redirecting...');
-        logging::addLogEntry(
-            kxFunc::getManageUser()['user_name'],
-            sprintf('Edited board /%s/', $this->request['board']),
-            __CLASS__
-        );
-        // TODO Update the cache
-        // $this->recacheBoardOptions();
+        kxTemplate::output('manage/boardopts', $this->twigData);
     }
 
     public function recacheBoardOptions()
@@ -172,5 +50,133 @@ class manage_board_board_boardopts extends kxCmd
         //     ->fetchCol();
         // // And cache them
         // kxEnv::set('cache:boardopts:' . $this->request['board'], $recache_board_options);
+    }
+
+    private function _edit()
+    {
+        // $board_options = kxEnv::Get('cache:boardopts:' . $this->request['board']);
+        $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['board_id']);
+        if (is_null($board)) {
+            $this->twigData['notice']['type'] = 'error';
+            $this->twigData['notice']['message'] = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
+
+            return;
+        }
+
+        $this->twigData['board'] = $board;
+        $this->twigData['sections'] = $this->entityManager->getRepository('\Edaha\Entities\Section')->findAll();
+
+        foreach ($board->options as $option) {
+            $this->twigData['options'][$option->name] = $option->value;
+        }
+
+        $this->twigData['filetypes'] = []; // kxEnv::get('cache:attachments:filetypes');
+
+        $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->getBoardModules();
+        if (empty($board_types)) {
+            $this->twigData['notice']['type'] = 'error';
+            $this->twigData['notice']['message'] = _('No board types found. Please install board modules.');
+
+            return;
+        }
+        $this->twigData['board_types'] = [];
+        foreach ($board_types as $type) {
+            $this->twigData['board_types'][$type->name] = [
+                'value' => $type->class,
+            ];
+        }
+    }
+
+    private function _update()
+    {
+        // A few checks to ensure a valid submission
+        kxForm::addRule('id', 'numeric')
+            ->addRule('board', 'required')
+            ->check()
+        ;
+
+        $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['id']);
+
+        if (is_null($board)) {
+            $this->twigData['notice']['type'] = 'error';
+            $this->twigData['notice']['message'] = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
+
+            return;
+        }
+
+        $board_fields = [
+            'name' => $this->request['title'],
+            'locale' => $this->request['locale'],
+            'type' => $this->request['type'],
+            'upload_type' => (int) $this->request['upload_type'],
+            // 'board_section'      => (int) $this->request['board_section'],
+            'order' => (int) $this->request['order'],
+            'header_image' => $this->request['header_image'],
+            'include_header' => $this->request['include_header'],
+            'anonymous' => $this->request['anonymous'],
+            // TODO: Add this to the template
+            'default_style' => 'edaha',
+            'allowed_embeds' => '',
+            'max_upload_size' => (int) $this->request['max_upload_size'],
+            'max_message_length' => (int) $this->request['max_message_length'],
+            'max_pages' => (int) $this->request['max_pages'],
+            'max_age' => (int) $this->request['max_age'],
+            'mark_page' => (int) $this->request['mark_page'],
+            'max_replies' => (int) $this->request['max_replies'],
+            'locked' => (int) isset($this->request['locked']),
+            'show_id' => (int) isset($this->request['show_id']),
+            'compact_list' => (int) isset($this->request['compact_list']),
+            'reporting' => (int) isset($this->request['reporting']),
+            'captcha' => (int) isset($this->request['captcha']),
+            'archiving' => (int) isset($this->request['archiving']),
+            'catalog' => (int) isset($this->request['catalog']),
+            'no_file' => (int) isset($this->request['no_file']),
+            'redirect_to_thread' => (int) isset($this->request['redirect_to_thread']),
+            'forced_anon' => (int) isset($this->request['forced_anon']),
+            'trial' => (int) isset($this->request['trial']),
+            'popular' => (int) isset($this->request['popular']),
+            'max_files' => (int) $this->request['max_files'],
+            'renderer' => $this->request['renderer'],
+        ];
+
+        foreach ($board_fields as $key => $value) {
+            if ($value != $board->{$key}) {
+                $board->{$key} = $value;
+            }
+        }
+
+        if ($this->request['board_section'] != $board->section->id) {
+            if (0 == $this->request['board_section']) {
+                $board->section->removeBoard($board);
+            } else {
+                $section = $this->entityManager->find('\Edaha\Entities\Section', $this->request['board_section']);
+                if (is_null($section)) {
+                    // TODO This should probably throw an exception so we can properly rollback the $board
+                    $this->twigData['notice']['type'] = 'error';
+                    $this->twigData['notice']['message'] = sprintf(_("Couldn't find section /%s/."), $this->request['section']);
+
+                    return;
+                }
+                $section->addBoard($board);
+            }
+        }
+
+        $this->entityManager->persist($board);
+        $this->entityManager->flush();
+
+        // TODO: Filetypes (Attachments) object
+        // Clear previous filetype settings
+        // Add new filetypes
+
+        $this->twigData['boardredirect'] = true;
+        $this->twigData['notice']['type'] = 'success';
+        $this->twigData['notice']['message'] = _('Board updated. Redirecting...');
+        logging::addLogEntry(
+            kxFunc::getManageUser()['user_name'],
+            sprintf('Edited board /%s/', $this->request['board']),
+            __CLASS__
+        );
+        // TODO Update the cache
+        // $this->recacheBoardOptions();
     }
 }

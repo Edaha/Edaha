@@ -4,27 +4,33 @@ use Edaha\Entities\Section;
 
 class manage_board_board_section extends kxCmd
 {
+    public $errorMessage = '';
+
     /**
-     * Arguments eventually being sent to twig
+     * Arguments eventually being sent to twig.
      *
-     * @var Array()
+     * @var array()
      */
     protected $twigData;
-
-    public $errorMessage = '';
 
     public function exec(kxEnv $environment)
     {
         switch ($this->request['do']) {
             case 'add':
                 $this->_add();
+
                 break;
+
             case 'edit':
                 $this->_edit();
+
                 break;
+
             case 'delete':
                 $this->_delete();
+
                 break;
+
             default:
                 break;
         }
@@ -36,7 +42,7 @@ class manage_board_board_section extends kxCmd
     {
         $this->twigData['sections'] = $this->entityManager->getRepository(Section::class)->findAll();
 
-        kxTemplate::output("manage/section", $this->twigData);
+        kxTemplate::output('manage/section', $this->twigData);
     }
 
     private function _add()

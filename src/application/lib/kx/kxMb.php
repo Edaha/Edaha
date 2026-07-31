@@ -1,4 +1,7 @@
 <?php
+
+namespace kx;
+
 /**
  * Multibyte text processors
  */

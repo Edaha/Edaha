@@ -1,5 +1,7 @@
 <?php
 
+use kx\kxEnv;
+
 // Stub
 class logging
 {

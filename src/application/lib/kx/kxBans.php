@@ -1,6 +1,10 @@
 <?php
 
+namespace kx;
+
+use Datetime;
 use Edaha\Entities\Ban;
+use kx\kxTemplate;
 
 class kxBans
 {
@@ -25,7 +29,7 @@ class kxBans
         }
 
         if (count($relevant_bans) > 0) {
-            echo $this->DisplayBannedMessage($bans);
+            echo self::DisplayBannedMessage($bans);
 
             exit;
         }

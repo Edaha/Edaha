@@ -1,5 +1,7 @@
 <?php
 
+namespace kx;
+
 /*
  * Static functions that don't fit anywhere else
  */

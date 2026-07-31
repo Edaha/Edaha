@@ -2,6 +2,10 @@
 
 use Edaha\Entities\Board;
 use Edaha\Entities\Post;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxFunc;
+
 
 /*
  * Base board (that other board types should extend)

@@ -1,6 +1,10 @@
 <?php
 
 use Edaha\Entities\Post;
+use kx\kxOrm;
+use kx\kxEnv;
+use kx\kxFunc;
+
 
 class Posting
 {
@@ -12,7 +16,6 @@ class Posting
     public function __construct(kxEnv $environment)
     {
         $this->environment = $environment;
-        $this->db = kxDB::getInstance();
         $this->request = kxEnv::$request;
         $this->entityManager = kxOrm::getEntityManager();
     }

@@ -1,4 +1,7 @@
-<?php
+<?
+
+use kx\kxCmd\kxCmdResolv;
+use kx\kxEnv;
 
 define('IN_MANAGE', false);
 

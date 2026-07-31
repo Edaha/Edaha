@@ -2,6 +2,10 @@
 
 use Edaha\Entities\User;
 use Edaha\Entities\UserSession;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxFunc;
+use kx\kxTemplate;
 
 class manage_core_login_login extends kxCmd
 {

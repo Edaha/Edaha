@@ -1,5 +1,9 @@
 <?php
 
+namespace kx;
+
+use kx\kxYml;
+
 class kxEnv
 {
     public static $current_application = '';

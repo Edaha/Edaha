@@ -1,5 +1,10 @@
 <?php
 
+namespace kx\kxCmd;
+
+use kx\kxEnv;
+use kx\kxOrm;
+
 abstract class kxCmd
 {
     /**

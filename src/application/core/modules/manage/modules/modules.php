@@ -5,6 +5,9 @@
  */
 
 use Edaha\Entities\Module;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxTemplate;
 
 class manage_core_modules_modules extends kxCmd
 {

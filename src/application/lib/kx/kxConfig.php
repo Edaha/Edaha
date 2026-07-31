@@ -1,6 +1,8 @@
 <?php
 
-class kxConfig implements ArrayAccess
+namespace kx;
+
+class kxConfig implements \ArrayAccess
 {
     private $container = [];
 

@@ -1,5 +1,7 @@
 <?php
 
+namespace kx;
+
 /*
  * This library is a modified version of ConvertCharset.class.php provided by Mikolaj Jedrzejak.
  */

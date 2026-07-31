@@ -1,5 +1,7 @@
 <?php
 
+namespace kx;
+
 class kxAutoload
 {
     private static $instances = [];

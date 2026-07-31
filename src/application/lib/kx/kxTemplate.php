@@ -1,5 +1,8 @@
 <?php
 
+namespace kx;
+
+use Exception;
 use jblond\TwigTrans\Translation;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
@@ -124,8 +127,8 @@ class kxTemplate
         } else {
             throw new Exception('No template found '.$name.'.html.twig from '.self::$template_dir, E_USER_ERROR);
         }
-        if (!self::$instance->getLoader() instanceof Twig_Loader_Filesystem) {
-            self::$instance->setLoader(new Twig_Loader_Filesystem(self::$template_dir));
+        if (!self::$instance->getLoader() instanceof FilesystemLoader) {
+            self::$instance->setLoader(new FilesystemLoader(self::$template_dir));
         }
 
         return self::$instance->loadTemplate($file);

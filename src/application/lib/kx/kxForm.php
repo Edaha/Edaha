@@ -1,5 +1,9 @@
 <?php
 
+namespace kx;
+
+use kx\Exceptions\kxException;
+
 /*
  * Functions for validating form inputs
  */

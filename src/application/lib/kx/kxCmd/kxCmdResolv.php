@@ -1,5 +1,14 @@
 <?php
 
+namespace kx\kxCmd;
+
+use kx\Exceptions\kxException;
+use kx\kxBans;
+use kx\kxEnv;
+use kx\kxFunc;
+use kx\kxOrm;
+use ReflectionClass;
+
 /**
  * kxCmdResolv
  * Takes incoming data and parses it.
@@ -20,7 +29,7 @@ class kxCmdResolv
      */
     public function __construct()
     {
-        self::$baseCmd = new ReflectionClass('kxCmd');
+        self::$baseCmd = new ReflectionClass(kxCmd::class);
         self::$defaultCmd = new kxCmd_default();
         self::$class_dir = (IN_MANAGE) ? 'manage' : 'public';
     }
@@ -72,8 +81,8 @@ class kxCmdResolv
         }
 
         // Load the logging class here because we'll probably need it anyway in pretty much any manage function
-        require_once kxFunc::getAppDir('core').'/classes/logging.php';
-        $environment->set('kx:classes:core:logging:id', new logging($environment));
+        // require_once kxFunc::getAppDir('core').'/classes/logging.php';
+        // $environment->set('kx:classes:core:logging:id', new logging($environment));
 
         // Are we in manage?
         if (IN_MANAGE) {
@@ -85,7 +94,7 @@ class kxCmdResolv
                 kxEnv::$current_module = 'login';
 
                 require_once kxFunc::getAppDir('core').'/modules/manage/login/login.php';
-                $login = new manage_core_login_login($environment);
+                $login = new \manage_core_login_login($environment);
                 $login->execute($environment);
 
                 exit;

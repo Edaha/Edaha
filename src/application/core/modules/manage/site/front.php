@@ -14,6 +14,11 @@
 use Edaha\Entities\Board;
 use Edaha\Entities\Post;
 use Edaha\Entities\Section;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxForm;
+use kx\kxFunc;
+use kx\kxTemplate;
 
 class manage_core_site_front extends kxCmd
 {

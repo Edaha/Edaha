@@ -3,6 +3,9 @@
 use Edaha\Entities\Board;
 use Edaha\Entities\Post;
 use Edaha\Interfaces\PostingProcessorInterface;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxFunc;
 
 if (!defined('KUSABA_RUNNING')) {
     echo '<h1>Access denied</h1>You cannot access this file directly.';

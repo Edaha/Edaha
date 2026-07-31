@@ -1,5 +1,8 @@
 <?php
 
+use kx\kxEnv;
+use kx\kxFunc;
+
 /*
  * This file is part of kusaba.
  *
@@ -37,7 +40,6 @@ class Upload
     public function __construct(kxEnv $environment)
     {
         $this->environment = $environment;
-        $this->db = kxDB::getInstance();
         $this->request = kxEnv::$request;
     }
 

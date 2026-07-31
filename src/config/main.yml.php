@@ -7,8 +7,6 @@ all:
   kx:
     charset: utf-8
     db:
-      dsn: 'mysql:host=mysql-db;dbname=edaha;charset=utf8mb4'
-
       adapter: pdo_sqlite
 
       sqlite:

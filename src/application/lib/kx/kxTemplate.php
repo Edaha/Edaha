@@ -87,8 +87,8 @@ class kxTemplate
                 self::$data['current_app'] = '';
                 if (KX_CURRENT_APP == 'core') {
                     // Load up some variables for tabbing/menu purposes
-                    if (isset(kxEnv::$request['app'])) {
-                        self::$data['current_app'] = kxEnv::$request['app'];
+                    if (kxEnv::$request->get('app') != '') {
+                        self::$data['current_app'] = kxEnv::$request->get('app');
                     }
                 } elseif (KX_CURRENT_APP == 'board') {
                     if ('posts' == kxEnv::$current_module) {
@@ -98,16 +98,14 @@ class kxTemplate
                     }
                 }
 
-                $baseurl = kxEnv::Get('kx:paths:main:path').'/manage.php?sid='.(kxEnv::$request['sid'] ?? '').'&';
+                $baseurl = kxEnv::Get('kx:paths:main:path').'/manage.php?sid='.(session_id()).'&';
                 self::$data['base_url'] = $baseurl;
 
                 // Get our manage username
-                if (isset(kxEnv::$request['sid'])) {
+                if (kxEnv::$request->get('sid') != '') {
                     self::assign('name', kxFunc::getManageUser()['user_name']);
                 }
-            }// else {
-            //	die('Not IN_MANAGE!');
-            // }
+            }
         }
     }
 
@@ -203,7 +201,7 @@ class kxTemplate
     private static function _buildMenu()
     {
         $app = KX_CURRENT_APP;
-        if (KX_CURRENT_APP == 'core' && !isset(kxEnv::$request['module']) && !isset(kxEnv::$request['app'])) {
+        if (KX_CURRENT_APP == 'core' && kxEnv::$request->get('module') != '' && kxEnv::$request->get('app') != '') {
             $modules = [(object) ['class' => 'index']];
         } else {
             $modules = kxOrm::getEntityManager()->getRepository('Edaha\Entities\Module')

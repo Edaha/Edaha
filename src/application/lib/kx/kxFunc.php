@@ -9,144 +9,6 @@ namespace kx;
 class kxFunc
 {
     /**
-     * Cleans input.
-     *
-     * @param  array   Input data
-     * @param  int           Iteration
-     * @param mixed $data
-     * @param mixed $i
-     *
-     * @return array Cleaned data
-     */
-    public static function cleaninput(&$data, $i = 0)
-    {
-        // Don't parse arrays deeper than 10, as it's most likely someone trying to crash PHP
-        if ($i > 10) {
-            return;
-        }
-
-        foreach ($data as $k => $v) {
-            if (is_array($v)) {
-                self::cleaninput($data[$k], ++$i);
-            } else {
-                // Decimal places. Script kiddies might think they can try to access files outside the board
-                $v = str_replace('&#46;&#46;/', '../', $v);
-
-                // This litte bugger changes the formatting to be right-to-left, like on a hebrew locale.
-                $v = str_replace('&#8238;', '', $v);
-
-                // Null byte characters can mess with formatting as well, so we remove them
-                $v = str_replace("\x00", '', $v);
-                $v = str_replace(chr('0'), '', $v);
-                $v = str_replace("\0", '', $v);
-
-                $data[$k] = $v;
-            }
-        }
-    }
-
-    /**
-     * Recursively cleans keys and values and
-     * inserts them into the input array.
-     *
-     * @param  mixed    Input data
-     * @param  array    Parsed data
-     * @param  int    Iteration
-     * @param mixed $data
-     * @param mixed $input
-     * @param mixed $i
-     *
-     * @return array Cleaned data
-     */
-    public static function parseinput(&$data, $input = [], $i = 0)
-    {
-        if ($i > 10) {
-            return $input;
-        }
-
-        foreach ($data as $k => $v) {
-            if (is_array($v)) {
-                $input[$k] = self::parseinput($data[$k], [], $i++);
-            } else {
-                $k = self::cleanInputKey($k);
-                $v = self::cleanInputVal($v, false);
-
-                $input[$k] = $v;
-            }
-        }
-
-        return $input;
-    }
-
-    /**
-     * Clean up input key.
-     *
-     * @param  string    Key name
-     * @param mixed $key
-     *
-     * @return string Cleaned key name
-     */
-    public static function cleanInputKey($key)
-    {
-        if ('' == $key) {
-            return '';
-        }
-
-        $key = htmlspecialchars(urldecode($key));
-        $key = str_replace('..', '', $key);
-        $key = preg_replace('/\\_\\_(.+?)\\_\\_/', '', $key);
-
-        return preg_replace('/^([\\w\\.\\-\\_]+)$/', '$1', $key);
-    }
-
-    /**
-     * Clean up input data.
-     *
-     * @param  string    Input
-     * @param mixed $txt
-     *
-     * @return string Cleaned Input
-     */
-    public static function cleanInputVal($txt)
-    {
-        if (empty($txt)) {
-            return '';
-        }
-
-        $search = ['&#032;',
-            "\r\n", "\n\r", "\r",
-            '&',
-            '<!--',
-            '-->',
-            '<',
-            '>',
-            "\n",
-            '"',
-            '<script',
-            '$',
-            '!',
-            "'"];
-        $replace = [' ',
-            "\n", "\n", "\n",
-            '&amp;',
-            '&#60;&#33;--',
-            '--&#62;',
-            '&lt;',
-            '&gt;',
-            "<br />\n",
-            '&quot;',
-            '&#60;script',
-            '&#036;',
-            '&#33;',
-            '&#39;'];
-        $txt = str_replace($search, $replace, $txt);
-
-        $txt = preg_replace('/&amp;#([0-9]+);/s', '&#\\1;', $txt);
-
-        return preg_replace('/&#(\\d+?)([^\\d;])/i', '&#\\1;\\2', $txt);
-    }
-
-    /**
      * Returns only alphanumeric characters.
      *
      * @param  string    Input String
@@ -438,15 +300,9 @@ class kxFunc
 
     public static function getManageSession()
     {
-        $_session = (isset(kxEnv::$request['sid'])) ? kxEnv::$request['sid'] : '';
-
-        // Do we have a session at all?
-        if (!$_session) {
-            return false;
-        }
         // So far so good, let's check it
         $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
-            'sid' => kxEnv::$request['sid'],
+            'sid' => kxEnv::$request->get('sid')
         ]);
 
         if (empty($session_data)) {
@@ -480,12 +336,14 @@ class kxFunc
     {
         if (kxFunc::getManageSession()) {
             $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
-                'sid' => kxEnv::$request['sid'],
+                'sid' => kxEnv::$request->get('sid'),
             ]);
 
             return [
                 'user_name' => $session_data->user->username,
             ];
+        } else {
+            return [];
         }
     }
 

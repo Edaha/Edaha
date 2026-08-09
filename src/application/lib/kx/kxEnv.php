@@ -2,6 +2,7 @@
 
 namespace kx;
 
+use kx\kxRequest;
 use kx\kxYml;
 
 class kxEnv
@@ -10,7 +11,7 @@ class kxEnv
     public static $current_module = '';
     public static $current_section = '';
 
-    public static $request = ['act' => '', 'do' => '', 'action' => ''];
+    public static ?kxRequest $request;
 
     protected static $_coreConfig = [];
     protected static $_appConfig = [];
@@ -18,7 +19,7 @@ class kxEnv
     private static $instance;
     private static $cache;
 
-    private $environment;
+    private string $environment;
     private $configuration;
 
     private function __construct($environment, $configuration)
@@ -65,35 +66,25 @@ class kxEnv
             ]));
         }
 
-        // Clean up all of our input (cookies, get/post requests, etc)
-        kxFunc::cleanInput($_GET);
-        kxFunc::cleanInput($_POST);
-        kxFunc::cleanInput($_COOKIE);
-        kxFunc::cleanInput($_REQUEST);
-
-        // Okay NOW let's  parse our input
-        $input = kxFunc::parseInput($_GET, []);
-
-        // Allow $_POST to overwrite $_GET
-        self::$request = kxFunc::parseInput($_POST, $input) + self::$request;
+        self::$request = kxRequest::getInstance();
 
         // Grab our app
-        $_application = preg_replace('/[^a-zA-Z0-9\\-\\_]/', '', isset($_REQUEST['app']) && trim($_REQUEST['app']) ? $_REQUEST['app'] : 'core');
+        $_application = preg_replace(
+            '/[^a-zA-Z0-9\\-\\_]/',
+            '',
+            isset(self::$request->get['app']) && trim(self::$request->get['app']) ? self::$request->get['app'] : 'core'
+        );
 
         // Make sure we get (hopefully) a string
-        if (is_array($_application)) {
+        if (\is_array($_application)) {
             $_application = array_shift($_application);
         }
 
         define('KX_CURRENT_APP', $_application);
 
-        kxEnv::$current_application = KX_CURRENT_APP;
-        kxEnv::$current_module = (isset(self::$request['module'])) ? self::$request['module'] : '';
-        kxEnv::$current_section = (isset(self::$request['section'])) ? self::$request['section'] : '';
-
-        // Cleanup
-        kxEnv::$current_module = kxFunc::alphaNum(kxEnv::$current_module);
-        kxEnv::$current_section = kxFunc::alphaNum(kxEnv::$current_section);
+        self::$current_application = KX_CURRENT_APP;
+        self::$current_module = isset(self::$request->get['module']) ? kxFunc::alphaNum(self::$request->get['module']): '';
+        self::$current_section = isset(self::$request->get['section']) ? kxFunc::alphaNum(self::$request->get['section']) : '';
 
         // Load the cache
         // self::$cache = kxCache::instance();

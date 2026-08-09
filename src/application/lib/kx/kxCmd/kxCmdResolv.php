@@ -57,7 +57,7 @@ class kxCmdResolv
         $section = kxEnv::$current_section;
         // No module?
         if (!$module) {
-            if (IN_MANAGE && !isset(kxEnv::$request['app'])) {
+            if (IN_MANAGE && kxEnv::$request->get('app') == '') {
                 $module = 'index';
             } else {
                 // Get the first module in the DB
@@ -87,10 +87,17 @@ class kxCmdResolv
         // Are we in manage?
         if (IN_MANAGE) {
             $validSession = kxFunc::getManageSession();
-            if ((!isset($environment::$request['module']) || (isset($environment::$request['module']) && 'login' != $environment::$request['module'])) && (!$validSession)) {
+            if (
+                (
+                    $environment::$request->get('module') == ''
+                    || (
+                        $environment::$request->get('module') != ''
+                        && 'login' != $environment::$request->get('module')
+                    )
+                ) 
+                && (!$validSession)) {
                 // Force login if we have an invalid session
 
-                $environment::$request['module'] = 'login';
                 kxEnv::$current_module = 'login';
 
                 require_once kxFunc::getAppDir('core').'/modules/manage/login/login.php';

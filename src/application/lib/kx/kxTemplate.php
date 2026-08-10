@@ -2,7 +2,6 @@
 
 namespace kx;
 
-use Exception;
 use jblond\TwigTrans\Translation;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
@@ -13,68 +12,26 @@ use Twig\TwigFunction;
 
 class kxTemplate
 {
-    // Manage sidebar menu extras
-    public static $menu_extra = '';
-    private static $template_dir;
-    private static $debug_flag = false;
+    private static string $template_dir;
 
-    private static $data = [];
-    private static $instance;
+    private static array $data = [];
 
-    // Manage wrapper
-    private static $manage;
+    private static Environment $instance;
 
     private function __construct() {}
 
-    public static function init($template_dir = null, $compiled_dir = null, $cache_dir = null)
+    public static function init(?string $template_dir = null, ?string $cache_dir = null)
     {
-        if (null == self::$instance) {
-            // echo "<p>init() called!</p>";
-            if (null != $template_dir) {
-                self::$template_dir = $template_dir;
-            } else {
-                self::$template_dir = KX_ROOT.kxEnv::get('kx:templates:dir');
-            }
-            // $loader = new Twig_Loader_Filesystem(self::$template_dir);
-            $loader = new FilesystemLoader(self::$template_dir);
+        if (!isset(self::$instance)) {
+            self::$template_dir = $template_dir ?? KX_ROOT.kxEnv::get('kx:templates:dir');
 
-            if (null == $cache_dir) {
-                $cache_dir = KX_ROOT.kxEnv::get('kx:templates:cachedir');
-            }
-            self::$instance = new Environment($loader, [
-                'cache' => $cache_dir,
-                'auto_reload' => true,
-                'debug' => true,
-            ]);
-            // Load our extensions
-            // self::$instance->addExtension(new Twig_Extensions_Extension_I18n());
-            // self::$instance->addExtension(new Twig_Extensions_Extension_kxEnv());
-            // self::$instance->addExtension(new Twig_Extensions_Extension_DateFormat());
-            // self::$instance->addExtension(new Twig_Extensions_Extension_Text());
-            // self::$instance->addExtension(new Twig_Extensions_Extension_Round());
-            // self::$instance->addExtension(new Twig_Extensions_Extension_Strip());
-            // self::$instance->addExtension(new Twig_Extensions_Extension_Debug());
-            // self::$instance->addExtension(new Twig_Extensions_Extension_PHP());
-
-            // Add twig functions
-            $function = new TwigFunction('kxEnv', function ($string) {
-                return kxEnv::get('kx:'.$string);
-            });
-
-            self::$instance->addFunction($function);
-
-            $filter = new TwigFilter(
-                'trans',
-                function ($context, $string) {
-                    return Translation::transGetText($string, $context);
-                },
-                ['needs_context' => true]
+            self::createInstance(
+                $cache_dir ?: KX_ROOT.kxEnv::get('kx:templates:cachedir')
             );
-            self::$instance->addFilter($filter);
-            // TODO Only include when set to debug
-            self::$instance->addExtension(new DebugExtension());
-            self::$instance->addExtension(new StringExtension());
-            self::$instance->addExtension(new Translation());
+
+            self::addFunctions();
+            self::addFilters();
+            self::addExtensions();
 
             // Supply Twig with our GET/POST variables
             self::$data['_get'] = $_GET;
@@ -87,7 +44,7 @@ class kxTemplate
                 self::$data['current_app'] = '';
                 if (KX_CURRENT_APP == 'core') {
                     // Load up some variables for tabbing/menu purposes
-                    if (kxEnv::$request->get('app') != '') {
+                    if ('' != kxEnv::$request->get('app')) {
                         self::$data['current_app'] = kxEnv::$request->get('app');
                     }
                 } elseif (KX_CURRENT_APP == 'board') {
@@ -98,11 +55,11 @@ class kxTemplate
                     }
                 }
 
-                $baseurl = kxEnv::Get('kx:paths:main:path').'/manage.php?sid='.(session_id()).'&';
+                $baseurl = kxEnv::Get('kx:paths:main:path').'/manage.php?sid='.session_id().'&';
                 self::$data['base_url'] = $baseurl;
 
                 // Get our manage username
-                if (kxEnv::$request->get('sid') != '') {
+                if ('' != kxEnv::$request->get('sid')) {
                     self::assign('name', kxFunc::getManageUser()['user_name']);
                 }
             }
@@ -110,51 +67,17 @@ class kxTemplate
     }
 
     // check if a template exists
-    public static function templateExists($name)
+    public static function templateExists(string $filename): bool
     {
-        return file_exists(self::$template_dir.$name.'.html.twig');
-    }
-
-    // create a template from a template file name
-    public static function templateFromFile($name)
-    {
-        self::init();
-
-        if (file_exists(self::$template_dir.$name.'.html.twig')) {
-            $file = $name.'.html.twig';
-        } else {
-            throw new Exception('No template found '.$name.'.html.twig from '.self::$template_dir, E_USER_ERROR);
-        }
-        if (!self::$instance->getLoader() instanceof FilesystemLoader) {
-            self::$instance->setLoader(new FilesystemLoader(self::$template_dir));
-        }
-
-        return self::$instance->loadTemplate($file);
-    }
-
-    // create a template from a template as a string, great for loading
-    // templates from a database
-    public static function templateFromString($template)
-    {
-        self::init();
-
-        if (!self::$instance->getLoader() instanceof Twig_Loader_String) {
-            self::$instance->setLoader(new Twig_Loader_String());
-        }
-
-        return self::$instance->loadTemplate($template);
+        return file_exists(self::$template_dir.$filename.'.html.twig');
     }
 
     // outputs a template
-    public static function output($tpl, $data = [])
+    public static function output(string $tpl, array $data = []): void
     {
         self::init();
-        if (is_string($tpl)) {
-            if (file_exists(self::$template_dir.$tpl.'.html.twig')) {
-                $tpl = $tpl.'.html.twig';
-            } else {
-                throw new Exception('No template found '.$tpl.'.html.twig from '.self::$template_dir, E_USER_ERROR);
-            }
+        if (!self::templateExists($tpl)) {
+            throw new \Exception('No template found '.$tpl.'.html.twig from '.self::$template_dir, E_USER_ERROR);
         }
 
         if (IN_MANAGE && 'login' != kxEnv::$current_module) {
@@ -162,7 +85,7 @@ class kxTemplate
         }
 
         $data = array_merge(self::$data, $data);
-        $template = self::$instance->load($tpl);
+        $template = self::$instance->load("{$tpl}.html.twig");
         $template->display($data);
     }
 
@@ -170,12 +93,8 @@ class kxTemplate
     public static function get($tpl, $data = [], $bypassManageCheck = false)
     {
         self::init();
-        if (is_string($tpl)) {
-            if (file_exists(self::$template_dir.$tpl.'.html.twig')) {
-                $tpl = $tpl.'.html.twig';
-            } else {
-                throw new Exception('No template found '.$tpl.'.html.twig from '.self::$template_dir, E_USER_ERROR);
-            }
+        if (!self::templateExists($tpl)) {
+            throw new \Exception('No template found '.$tpl.'.html.twig from '.self::$template_dir, E_USER_ERROR);
         }
 
         if (IN_MANAGE && 'login' != kxEnv::$current_module) {
@@ -187,7 +106,7 @@ class kxTemplate
             return '';
         }
 
-        $template = self::$instance->load($tpl);
+        $template = self::$instance->load("{$tpl}.html.twig");
 
         return $template->render($data);
     }
@@ -198,10 +117,46 @@ class kxTemplate
         self::$data[$name] = $value;
     }
 
+    private static function createInstance(string $cache_dir)
+    {
+        $loader = new FilesystemLoader(self::$template_dir);
+
+        self::$instance = new Environment($loader, [
+            'cache' => $cache_dir,
+            'auto_reload' => true,
+            'debug' => true,
+        ]);
+    }
+
+    private static function addFunctions()
+    {
+        self::$instance->addFunction(new TwigFunction('kxEnv', function ($string) {
+            return kxEnv::get('kx:'.$string);
+        }));
+    }
+
+    private static function addFilters()
+    {
+        self::$instance->addFilter(new TwigFilter(
+            'trans',
+            function ($context, $string) {
+                return Translation::transGetText($string, $context);
+            },
+            ['needs_context' => true]
+        ));
+    }
+
+    private static function addExtensions()
+    {
+        self::$instance->addExtension(new DebugExtension());
+        self::$instance->addExtension(new StringExtension());
+        self::$instance->addExtension(new Translation());
+    }
+
     private static function _buildMenu()
     {
         $app = KX_CURRENT_APP;
-        if (KX_CURRENT_APP == 'core' && kxEnv::$request->get('module') != '' && kxEnv::$request->get('app') != '') {
+        if (KX_CURRENT_APP == 'core' && '' != kxEnv::$request->get('module') && '' != kxEnv::$request->get('app')) {
             $modules = [(object) ['class' => 'index']];
         } else {
             $modules = kxOrm::getEntityManager()->getRepository('Edaha\Entities\Module')

@@ -2,9 +2,6 @@
 
 namespace kx;
 
-use kx\kxRequest;
-use kx\kxYml;
-
 class kxEnv
 {
     public static $current_application = '';
@@ -70,9 +67,9 @@ class kxEnv
 
         // Grab our app
         $_application = preg_replace(
-            '/[^a-zA-Z0-9\\-\\_]/',
+            '/[^a-zA-Z0-9\-\_]/',
             '',
-            isset(self::$request->get['app']) && trim(self::$request->get['app']) ? self::$request->get['app'] : 'core'
+            '' != self::$request->get('app') ? self::$request->get('app') : 'core'
         );
 
         // Make sure we get (hopefully) a string
@@ -83,8 +80,8 @@ class kxEnv
         define('KX_CURRENT_APP', $_application);
 
         self::$current_application = KX_CURRENT_APP;
-        self::$current_module = isset(self::$request->get['module']) ? kxFunc::alphaNum(self::$request->get['module']): '';
-        self::$current_section = isset(self::$request->get['section']) ? kxFunc::alphaNum(self::$request->get['section']) : '';
+        self::$current_module = self::$request->get('module') ? kxFunc::alphaNum(self::$request->get('module')) : '';
+        self::$current_section = self::$request->get('section') ? kxFunc::alphaNum(self::$request->get('section')) : '';
 
         // Load the cache
         // self::$cache = kxCache::instance();

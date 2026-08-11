@@ -12,13 +12,7 @@ class manage_core_login_login extends kxCmd
     public function exec(kxEnv $environment)
     {
         // Wat do????
-        switch ($this->request['do']) {
-            case 'login':
-            default:
-                $this->showForm();
-
-                break;
-
+        switch ($this->request->get('do')) {
             case 'login-validate':
                 $this->loginValidate();
 
@@ -26,6 +20,12 @@ class manage_core_login_login extends kxCmd
 
             case 'logout':
                 // $this->logOut();
+                break;
+
+            case 'login':
+            default:
+                $this->showForm();
+
                 break;
         }
     }
@@ -37,7 +37,7 @@ class manage_core_login_login extends kxCmd
      */
     public function showForm($message = '')
     {
-        $query_string_clean = kxFunc::cleanInputVal(urldecode($_SERVER['QUERY_STRING']));
+        $query_string_clean = $this->request->server('QUERY_STRING');
         // So we can tack that on to the URL afterwards, we get rid of $amp;
         $query_string_clean = str_replace('&amp;', '&', $query_string_clean);
         // Save the old session ID, just in case
@@ -58,7 +58,7 @@ class manage_core_login_login extends kxCmd
     public function SetModerationCookies()
     {
         // Stub
-         /*
+        /*
   if (isset($_SESSION['manageusername'])) {
   $results = $kx_db->GetAll("SELECT HIGH_PRIORITY `boards` FROM `" . kxEnv::Get('kx:db:prefix') . "staff` WHERE `username` = " . $kx_db->qstr($_SESSION['manageusername']) . " LIMIT 1");
   if ($this->CurrentUserIsAdministrator() || $results[0][0] == 'allboards') {
@@ -75,12 +75,12 @@ class manage_core_login_login extends kxCmd
     private function loginValidate()
     {
         $user = $this->entityManager->getRepository('\Edaha\Entities\User')->findOneBy([
-            'username' => $this->request['username'],
+            'username' => $this->request->post('username'),
         ]);
 
         if (empty($user)) {
             $this->showForm('Invalid username/password');
-        } elseif ($user->checkLogin($this->request['password'])) {
+        } elseif ($user->checkLogin($this->request->post('password'))) {
             if (PHP_SESSION_ACTIVE == session_status()) {
                 session_regenerate_id();
             } else {
@@ -92,8 +92,6 @@ class manage_core_login_login extends kxCmd
             $this->entityManager->persist($user_session);
             $this->entityManager->flush();
 
-            $this->request['sid'] = $user_session->sid;
-
             // Let's figure out where we need to go
             $whereto = '';
 
@@ -104,7 +102,7 @@ class manage_core_login_login extends kxCmd
                 $whereto = str_replace(kxEnv::Get('kx:paths:script:path'), '', $whereto);
                 $whereto = str_ireplace('?manage.php', '', $whereto);
                 $whereto = ltrim($whereto, '?');
-                $whereto = preg_replace('/sid=(\\w){32}/', '', $whereto);
+                $whereto = preg_replace('/sid=(\w){32}/', '', $whereto);
                 $whereto = str_replace(['old_&', 'old_&amp;'], '', $whereto);
                 $whereto = str_replace('module=login', '', $whereto);
                 $whereto = str_replace('section=login', '', $whereto);

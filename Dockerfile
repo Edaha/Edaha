@@ -83,6 +83,7 @@ RUN apt-get update \
         libwebp-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_mysql gettext gd
+RUN a2enmod rewrite
 COPY ./src /var/www/html
 COPY ./docker/apache/httpd.conf /etc/apache2/apache2.conf
 RUN chown -R www-data:www-data /var/www

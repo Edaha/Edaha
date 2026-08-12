@@ -37,6 +37,9 @@ class public_core_index_news extends kxCmd
 
     public function exec(kxEnv $environment)
     {
+        $this->twigData['view'] = $this->request->get('view');
+        $this->twigData['page'] = $this->request->get('page');
+        $this->twigData['p'] = $this->request->get('p');
         if (isset($this->request['view'])) {
             switch ($this->request['view']) {
                 case 'faq':

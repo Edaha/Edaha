@@ -40,6 +40,10 @@ class manage_core_staff_staff extends kxCmd
      */
     public function exec(kxEnv $environment)
     {
+        $this->twigData['do'] = $this->request->get('do');
+        $this->twigData['view'] = $this->request->get('view');
+        $this->twigData['act'] = $this->request->get('act');
+
         switch ((isset($_GET['do'])) ? $_GET['do'] : '') {
             case 'groups':
                 break;

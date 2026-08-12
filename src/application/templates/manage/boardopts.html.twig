@@ -12,7 +12,7 @@
 
 {% block managecontent %}
 
-{% if _get.do == 'edit' %}
+{% if do == 'edit' %}
 <form action="{{ base_url }}app=board&amp;module=board&amp;section=boardopts&amp;do=post&amp;id={{ board.id }}" method="post">
   <fieldset id="board_properties">
     <input type="hidden" name="board" value="{{ board.id }}">

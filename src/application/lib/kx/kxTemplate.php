@@ -85,8 +85,6 @@ class kxTemplate
 
     private static function initializeData(): void
     {
-        self::$data['_get'] = $_GET;
-        self::$data['_post'] = $_POST;
         self::$data['locale'] = kxEnv::Get('kx:misc:locale');
 
         if (IN_MANAGE) {

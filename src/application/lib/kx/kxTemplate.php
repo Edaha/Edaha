@@ -20,7 +20,7 @@ class kxTemplate
 
     private function __construct() {}
 
-    public static function init(?string $template_dir = null, ?string $cache_dir = null)
+    public static function init(?string $template_dir = null, ?string $cache_dir = null): void
     {
         if (!isset(self::$instance)) {
             self::$template_dir = $template_dir ?? KX_ROOT.kxEnv::get('kx:templates:dir');
@@ -90,7 +90,7 @@ class kxTemplate
     }
 
     // returns a string of the parsed and processed template
-    public static function get($tpl, $data = [], $bypassManageCheck = false)
+    public static function get($tpl, $data = [], $bypassManageCheck = false): string
     {
         self::init();
         if (!self::templateExists($tpl)) {
@@ -111,13 +111,13 @@ class kxTemplate
         return $template->render($data);
     }
 
-    public static function assign($name, $value)
+    public static function assign($name, $value): void
     {
         self::init();
         self::$data[$name] = $value;
     }
 
-    private static function createInstance(string $cache_dir)
+    private static function createInstance(string $cache_dir): void
     {
         $loader = new FilesystemLoader(self::$template_dir);
 
@@ -128,14 +128,14 @@ class kxTemplate
         ]);
     }
 
-    private static function addFunctions()
+    private static function addFunctions(): void
     {
         self::$instance->addFunction(new TwigFunction('kxEnv', function ($string) {
             return kxEnv::get('kx:'.$string);
         }));
     }
 
-    private static function addFilters()
+    private static function addFilters(): void
     {
         self::$instance->addFilter(new TwigFilter(
             'trans',
@@ -146,14 +146,14 @@ class kxTemplate
         ));
     }
 
-    private static function addExtensions()
+    private static function addExtensions(): void
     {
         self::$instance->addExtension(new DebugExtension());
         self::$instance->addExtension(new StringExtension());
         self::$instance->addExtension(new Translation());
     }
 
-    private static function _buildMenu()
+    private static function _buildMenu(): void
     {
         $app = KX_CURRENT_APP;
         if (KX_CURRENT_APP == 'core' && '' != kxEnv::$request->get('module') && '' != kxEnv::$request->get('app')) {

@@ -3,6 +3,9 @@
 use Edaha\Entities\Board;
 use Edaha\Entities\Post;
 use Edaha\Entities\Section;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxTemplate;
 
 /*
  * Section for building the news page

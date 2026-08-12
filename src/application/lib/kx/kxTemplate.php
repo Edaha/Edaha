@@ -7,6 +7,7 @@ use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Extra\String\StringExtension;
 use Twig\Loader\FilesystemLoader;
+use Twig\TemplateWrapper;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
@@ -36,26 +37,15 @@ class kxTemplate
         }
     }
 
-    // check if a template exists
-    public static function templateExists(string $filename): bool
-    {
-        return file_exists(self::$template_dir.$filename.'.html.twig');
-    }
-
     // outputs a template
     public static function output(string $tpl, array $data = []): void
     {
         self::init();
-        if (!self::templateExists($tpl)) {
-            throw new \Exception('No template found '.$tpl.'.html.twig from '.self::$template_dir, E_USER_ERROR);
-        }
-
+        $template = self::loadTemplate($tpl);
         if (IN_MANAGE && 'login' != kxEnv::$current_module) {
             self::_buildMenu();
         }
-
-        $data = array_merge(self::$data, $data);
-        $template = self::$instance->load("{$tpl}.html.twig");
+        $data = \array_merge(self::$data, $data);
         $template->display($data);
     }
 
@@ -63,20 +53,11 @@ class kxTemplate
     public static function get($tpl, $data = [], $bypassManageCheck = false): string
     {
         self::init();
-        if (!self::templateExists($tpl)) {
-            throw new \Exception('No template found '.$tpl.'.html.twig from '.self::$template_dir, E_USER_ERROR);
-        }
-
+        $template = self::loadTemplate($tpl);
         if (IN_MANAGE && 'login' != kxEnv::$current_module) {
             self::_buildMenu();
         }
-        $data = array_merge(self::$data, $data);
-
-        if (IN_MANAGE && 'login' != kxEnv::$current_module && !$bypassManageCheck) {
-            return '';
-        }
-
-        $template = self::$instance->load("{$tpl}.html.twig");
+        $data = \array_merge(self::$data, $data);
 
         return $template->render($data);
     }
@@ -85,6 +66,21 @@ class kxTemplate
     {
         self::init();
         self::$data[$name] = $value;
+    }
+
+    // check if a template exists
+    private static function templateExists(string $filename): bool
+    {
+        return file_exists(self::$template_dir.$filename.'.html.twig');
+    }
+
+    private static function loadTemplate(string $tpl): TemplateWrapper
+    {
+        if (!self::templateExists($tpl)) {
+            throw new \Exception('No template found '.$tpl.'.html.twig from '.self::$template_dir, E_USER_ERROR);
+        }
+
+        return self::$instance->load("{$tpl}.html.twig");
     }
 
     private static function initializeData(): void

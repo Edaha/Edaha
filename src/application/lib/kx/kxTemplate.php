@@ -21,22 +21,6 @@ class kxTemplate
 
     private function __construct() {}
 
-    public static function init(?string $template_dir = null, ?string $cache_dir = null): void
-    {
-        if (!isset(self::$instance)) {
-            self::$template_dir = $template_dir ?? KX_ROOT.kxEnv::get('kx:templates:dir');
-
-            self::createInstance(
-                $cache_dir ?: KX_ROOT.kxEnv::get('kx:templates:cachedir')
-            );
-
-            self::addFunctions();
-            self::addFilters();
-            self::addExtensions();
-            self::initializeData();
-        }
-    }
-
     // outputs a template
     public static function output(string $tpl, array $data = []): void
     {
@@ -66,6 +50,22 @@ class kxTemplate
     {
         self::init();
         self::$data[$name] = $value;
+    }
+
+    private static function init(?string $template_dir = null, ?string $cache_dir = null): void
+    {
+        if (!isset(self::$instance)) {
+            self::$template_dir = $template_dir ?? KX_ROOT.kxEnv::get('kx:templates:dir');
+
+            self::createInstance(
+                $cache_dir ?: KX_ROOT.kxEnv::get('kx:templates:cachedir')
+            );
+
+            self::addFunctions();
+            self::addFilters();
+            self::addExtensions();
+            self::initializeData();
+        }
     }
 
     // check if a template exists

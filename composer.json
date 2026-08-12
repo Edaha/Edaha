@@ -16,7 +16,10 @@
     },
 
     "autoload": {
-        "psr-4": {"Edaha\\": "application/lib/Edaha"}
+        "psr-4": {
+            "Edaha\\": "application/lib/Edaha",
+            "kx\\": "application/lib/kx"
+        }
     },
     "config": {
         "platform": {

@@ -1,5 +1,11 @@
 <?php
 
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxFunc;
+use kx\kxTemplate;
+use kx\kxYml;
+
 class manage_core_site_config extends kxCmd
 {
     /**

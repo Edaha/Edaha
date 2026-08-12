@@ -3,9 +3,6 @@
 .buildpath
 .project
 
-# VS Code settings
-.vscode
-
 #Test site's pull script
 pull.php
 *.bak

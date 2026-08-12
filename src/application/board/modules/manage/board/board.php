@@ -2,6 +2,12 @@
 
 use Edaha\Entities\Board;
 use Edaha\Interfaces\RegeneratorInterface;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxForm;
+use kx\kxFunc;
+use kx\kxTemplate;
+
 
 class manage_board_board_board extends kxCmd
 {

@@ -8,6 +8,7 @@ use Edaha\Entities\Board;
 use Edaha\Entities\Module;
 use Edaha\Entities\User;
 use Edaha\Types\ModuleType;
+use kx\kxOrm;
 
 $em = kxOrm::getEntityManager();
 

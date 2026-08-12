@@ -1,5 +1,7 @@
 <?php
 
+use kx\kxFunc;
+
 /*
  * This file is part of kusaba.
  *

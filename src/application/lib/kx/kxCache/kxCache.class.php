@@ -1,5 +1,8 @@
 <?php
 
+use kx\kxEnv;
+use kx\kxFunc;
+
 class kxCache
 {
     /**
@@ -195,12 +198,13 @@ class kxCache
 
         if (!empty($caches)) {
             // If we still have anything leftover (or aren't using an alternate cache), let's try using the database cache
-            $dbCaches = kxDB::getInstance()->select('cache')
-                ->fields('cache')
-                ->condition('cache_path', $caches)
-                ->execute()
-                ->fetchAll()
-            ;
+            $dbCaches = [];
+            // kxDB::getInstance()->select('cache')
+            //     ->fields('cache')
+            //     ->condition('cache_path', $caches)
+            //     ->execute()
+            //     ->fetchAll()
+            // ;
 
             foreach ($dbCaches as $cache) {
                 // Array or what?
@@ -411,17 +415,17 @@ class kxCache
 
             // Now update the database
             // Merge does an update if the key exists, otherwise, it inserts
-            kxDB::getInstance()->merge('cache')
-                ->key(['cache_path' => implode(':', $path)])
-                ->fields(
-                    [
-                        'cache_array' => intval(is_array($value)),
-                        'cache_value' => is_array($value) ? serialize($value) : $value,
-                        'cache_updated' => time(),
-                    ]
-                )
-                ->execute()
-            ;
+            // kxDB::getInstance()->merge('cache')
+            //     ->key(['cache_path' => implode(':', $path)])
+            //     ->fields(
+            //         [
+            //             'cache_array' => intval(is_array($value)),
+            //             'cache_value' => is_array($value) ? serialize($value) : $value,
+            //             'cache_updated' => time(),
+            //         ]
+            //     )
+            //     ->execute()
+            // ;
 
             return $return;
         }

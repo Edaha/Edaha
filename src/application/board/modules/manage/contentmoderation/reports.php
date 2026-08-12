@@ -1,5 +1,10 @@
 <?php
 
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxFunc;
+use kx\kxTemplate;
+
 class manage_board_contentmoderation_reports extends kxCmd
 {
     /**

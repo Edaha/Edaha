@@ -1,5 +1,11 @@
 <?php
 
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxForm;
+use kx\kxFunc;
+use kx\kxTemplate;
+
 /*
  * This file is part of kusaba.
  *

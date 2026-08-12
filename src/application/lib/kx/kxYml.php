@@ -1,5 +1,9 @@
 <?php
 
+namespace kx;
+
+use \Spyc;
+
 class kxYml
 {
     private static $useSpyc = true;

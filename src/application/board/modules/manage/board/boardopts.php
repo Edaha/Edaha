@@ -1,6 +1,11 @@
 <?php
 
-use Edaha\Entities\Board;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxForm;
+use kx\kxFunc;
+use kx\kxTemplate;
+
 
 class manage_board_board_boardopts extends kxCmd
 {

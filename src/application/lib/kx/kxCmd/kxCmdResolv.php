@@ -1,32 +1,13 @@
 <?php
 
-/*
- * This file is part of kusaba.
- *
- * kusaba is free software; you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
- * version.
- *
- * kusaba is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * kusaba; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- */
-/*
- * Primary command controller
- * Last Updated: $Date$
+namespace kx\kxCmd;
 
- * @author 		$Author$
-
- * @package		kusaba
-
- * @version		$Revision$
- *
- */
+use kx\Exceptions\kxException;
+use kx\kxBans;
+use kx\kxEnv;
+use kx\kxFunc;
+use kx\kxOrm;
+use ReflectionClass;
 
 /**
  * kxCmdResolv
@@ -48,7 +29,7 @@ class kxCmdResolv
      */
     public function __construct()
     {
-        self::$baseCmd = new ReflectionClass('kxCmd');
+        self::$baseCmd = new ReflectionClass(kxCmd::class);
         self::$defaultCmd = new kxCmd_default();
         self::$class_dir = (IN_MANAGE) ? 'manage' : 'public';
     }
@@ -76,7 +57,7 @@ class kxCmdResolv
         $section = kxEnv::$current_section;
         // No module?
         if (!$module) {
-            if (IN_MANAGE && !isset(kxEnv::$request['app'])) {
+            if (IN_MANAGE && kxEnv::$request->get('app') == '') {
                 $module = 'index';
             } else {
                 // Get the first module in the DB
@@ -100,20 +81,27 @@ class kxCmdResolv
         }
 
         // Load the logging class here because we'll probably need it anyway in pretty much any manage function
-        require_once kxFunc::getAppDir('core').'/classes/logging.php';
-        $environment->set('kx:classes:core:logging:id', new logging($environment));
+        // require_once kxFunc::getAppDir('core').'/classes/logging.php';
+        // $environment->set('kx:classes:core:logging:id', new logging($environment));
 
         // Are we in manage?
         if (IN_MANAGE) {
             $validSession = kxFunc::getManageSession();
-            if ((!isset($environment::$request['module']) || (isset($environment::$request['module']) && 'login' != $environment::$request['module'])) && (!$validSession)) {
+            if (
+                (
+                    $environment::$request->get('module') == ''
+                    || (
+                        $environment::$request->get('module') != ''
+                        && 'login' != $environment::$request->get('module')
+                    )
+                ) 
+                && (!$validSession)) {
                 // Force login if we have an invalid session
 
-                $environment::$request['module'] = 'login';
                 kxEnv::$current_module = 'login';
 
                 require_once kxFunc::getAppDir('core').'/modules/manage/login/login.php';
-                $login = new manage_core_login_login($environment);
+                $login = new \manage_core_login_login($environment);
                 $login->execute($environment);
 
                 exit;
@@ -147,89 +135,5 @@ class kxCmdResolv
 
         // If we somehow made it here, let's just use the default command
         return clone self::$defaultCmd;
-    }
-}
-
-abstract class kxCmd
-{
-    /**
-     * Environment Shortcuts.
-     *
-     * @var object
-     */
-    protected $environment;
-
-    /**
-     * kxDB instance.
-     *
-     * @var object
-     */
-    protected $db;
-
-    /**
-     * kxOrm instance.
-     *
-     * @var object
-     */
-    protected $entityManager;
-
-    /**
-     * The request infortmation.
-     *
-     * @var object
-     */
-    protected $request;
-
-    /**
-     * Constructor.
-     */
-    final public function __construct() {}
-
-    /**
-     * Make shortcuts for kxEnv and kxDB.
-     *
-     * @param	object	kxEnv reference
-     */
-    public function makeRegistryShortcuts(kxEnv $environment)
-    {
-        $this->environment = $environment;
-        $this->db = kxDB::getinstance();
-        $this->request = kxEnv::$request;
-        $this->entityManager = kxOrm::getEntityManager();
-    }
-
-    /**
-     * Wrapper for makeRegistryShortcuts() and exec().
-     *
-     * @param	object	kxEnv reference
-     */
-    public function execute(kxEnv $environment)
-    {
-        $this->makeRegistryShortcuts($environment);
-        $this->exec($environment);
-    }
-
-    /**
-     * Do execute method (must be overriden).
-     *
-     * @param	object	kxEnv reference
-     */
-    abstract protected function exec(kxEnv $environment);
-}
-
-/**
- * kxCmd_default
- * For if we don't have a valid command, just load the index.
- */
-class kxCmd_default extends kxCmd
-{
-    /**
-     * Do execute method.
-     *
-     * @param	object	kxCmd reference
-     */
-    protected function exec(kxEnv $environment)
-    {
-        @header('Location: '.kxEnv::Get('kx:paths:main:path').kxEnv::Get('kx:paths:main:folder'));
     }
 }

@@ -1,5 +1,9 @@
 <?php
 
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxTemplate;
+
 class manage_core_lookfeel_lookfeel extends kxCmd
 {
     public function exec(kxEnv $environment)

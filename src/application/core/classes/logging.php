@@ -1,5 +1,7 @@
 <?php
 
+use kx\kxEnv;
+
 // Stub
 class logging
 {
@@ -10,7 +12,6 @@ class logging
     public function __construct(kxEnv $environment)
     {
         $this->environment = $environment;
-        $this->db = kxDB::getInstance();
         $this->request = kxEnv::$request;
     }
 

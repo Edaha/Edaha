@@ -34,6 +34,7 @@ class manage_board_attachments_filetypes extends kxCmd
 
                 break;
         }
+        $this->twigData['do'] = $this->request->get('do');
         $this->_filetypes();
     }
 

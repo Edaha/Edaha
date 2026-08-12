@@ -3,6 +3,9 @@
 use Edaha\Entities\Board;
 use Edaha\Entities\Post;
 use Edaha\Entities\Section;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxTemplate;
 
 /*
  * Section for building the news page
@@ -34,6 +37,9 @@ class public_core_index_news extends kxCmd
 
     public function exec(kxEnv $environment)
     {
+        $this->twigData['view'] = $this->request->get('view');
+        $this->twigData['page'] = $this->request->get('page');
+        $this->twigData['p'] = $this->request->get('p');
         if (isset($this->request['view'])) {
             switch ($this->request['view']) {
                 case 'faq':

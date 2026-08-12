@@ -6,6 +6,9 @@ use Edaha\Entities\Board;
 use Edaha\Entities\BoardOption;
 use Edaha\Entities\Post;
 use Edaha\Interfaces\RegeneratorInterface;
+use kx\kxEnv;
+use kx\kxFunc;
+use kx\kxTemplate;
 
 class BoardRegenerator implements RegeneratorInterface
 {
@@ -37,7 +40,7 @@ class BoardRegenerator implements RegeneratorInterface
         }
 
         $count_of_posts = count($this->board->posts);
-        $count_of_pages = \kxFunc::pageCount($this->board->type, $count_of_posts - 1) - 1;
+        $count_of_pages = kxFunc::pageCount($this->board->type, $count_of_posts - 1) - 1;
 
         // If no posts, $totalpages==-2, which causes the board to not regen.
         if ($count_of_pages < 0) {
@@ -67,15 +70,15 @@ class BoardRegenerator implements RegeneratorInterface
 
         $this->footer(false, microtime(true) - $executiontime_start_page);
 
-        $content = \kxTemplate::get('board/'.$this->board->type.'/board_page', $this->twigData, true);
+        $content = kxTemplate::get('board/'.$this->board->type.'/board_page', $this->twigData, true);
 
         if (0 == $page) {
-            $page = KX_BOARD.'/'.$this->board->directory.'/'.\kxEnv::Get('kx:pages:first');
+            $page = KX_BOARD.'/'.$this->board->directory.'/'.kxEnv::Get('kx:pages:first');
         } else {
             $page = KX_BOARD.'/'.$this->board->directory.'/'.$page.'.html';
         }
 
-        \kxFunc::outputToFile($page, $content, $this->board->directory);
+        kxFunc::outputToFile($page, $content, $this->board->directory);
     }
 
     public function regenerateAllThreads(): void
@@ -106,10 +109,10 @@ class BoardRegenerator implements RegeneratorInterface
         $this->twigData['replycount'] = count($thread->replies) - 1;
         $this->footer(false, microtime(true) - $executiontime_start_thread);
 
-        $content = \kxTemplate::get('board/'.$this->board->type.'/thread', $this->twigData, true);
-        \kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.'/res/'.$thread->id.'.html', $content, $this->board->directory);
+        $content = kxTemplate::get('board/'.$this->board->type.'/thread', $this->twigData, true);
+        kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.'/res/'.$thread->id.'.html', $content, $this->board->directory);
 
-        if (\kxEnv::Get('kx:extras:firstlast')) {
+        if (kxEnv::Get('kx:extras:firstlast')) {
             $this->regenerateThreadPageFirst100($thread);
             $this->regenerateThreadPageLast50($thread);
         }
@@ -130,16 +133,16 @@ class BoardRegenerator implements RegeneratorInterface
     {
         $this->twigData['title'] = '';
 
-        if (\kxEnv::Get('kx:pages:dirtitle')) {
+        if (kxEnv::Get('kx:pages:dirtitle')) {
             $this->twigData['title'] .= '/'.$this->board->directory.'/ - ';
         }
         $this->twigData['title'] .= $this->board->name;
 
-        $this->twigData['htmloptions'] = (('he' == \kxEnv::Get('kx:misc:locale') && empty($this->board->locale)) || 'he' == $this->board->locale) ? ' dir="rtl"' : '';
+        $this->twigData['htmloptions'] = (('he' == kxEnv::Get('kx:misc:locale') && empty($this->board->locale)) || 'he' == $this->board->locale) ? ' dir="rtl"' : '';
         $this->twigData['locale'] = $this->board->locale;
         $this->twigData['board'] = $this->board;
 
-        $this->twigData['boardlist'] = \kxFunc::visibleBoardList();
+        $this->twigData['boardlist'] = kxFunc::visibleBoardList();
         $this->twigData['replythread'] = $replythread;
     }
 
@@ -152,9 +155,9 @@ class BoardRegenerator implements RegeneratorInterface
      */
     protected function postBox($replythread = 0)
     {
-        if (\kxEnv::Get('kx:extras:blotter')) {
-            $this->twigData['blotter'] = \kxFunc::getBlotter();
-            $this->twigData['blotter_updated'] = \kxFunc::getBlotterLastUpdated();
+        if (kxEnv::Get('kx:extras:blotter')) {
+            $this->twigData['blotter'] = kxFunc::getBlotter();
+            $this->twigData['blotter_updated'] = kxFunc::getBlotterLastUpdated();
         }
     }
 
@@ -184,8 +187,8 @@ class BoardRegenerator implements RegeneratorInterface
         $lastBit = '-100';
         $this->twigData['modifier'] = 'first100';
 
-        $content = \kxTemplate::get('board/'.$this->board->type.'/thread', $this->twigData, true);
-        \kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.$this->archive_dir.'/res/'.$thread->id.$lastBit.'.html', $content, $this->board->directory);
+        $content = kxTemplate::get('board/'.$this->board->type.'/thread', $this->twigData, true);
+        kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.$this->archive_dir.'/res/'.$thread->id.$lastBit.'.html', $content, $this->board->directory);
     }
 
     protected function regenerateThreadPageLast50(Post $thread): void
@@ -196,8 +199,8 @@ class BoardRegenerator implements RegeneratorInterface
         $lastBit = '+50';
         $this->twigData['modifier'] = 'last50';
 
-        $content = \kxTemplate::get('board/'.$this->board->type.'/thread', $this->twigData, true);
-        \kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.$this->archive_dir.'/res/'.$thread->id.$lastBit.'.html', $content, $this->board->directory);
+        $content = kxTemplate::get('board/'.$this->board->type.'/thread', $this->twigData, true);
+        kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.$this->archive_dir.'/res/'.$thread->id.$lastBit.'.html', $content, $this->board->directory);
     }
 
     private function makeBoardFolders(string $directory): void

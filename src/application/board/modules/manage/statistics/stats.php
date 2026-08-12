@@ -12,6 +12,7 @@ class manage_board_statistics_stats extends kxCmd
         if (!isset($this->request['time'])) {
             $this->request['time'] = 24;
         }
+        $this->twigData['time'] = $this->request->post('time', 24);
         // $boards = $this->db->select("boards")
         //                    ->fields("boards")
         //                    ->execute()

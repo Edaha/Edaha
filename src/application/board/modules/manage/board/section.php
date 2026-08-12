@@ -1,6 +1,9 @@
 <?php
 
 use Edaha\Entities\Section;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxTemplate;
 
 class manage_board_board_section extends kxCmd
 {

@@ -37,6 +37,7 @@ class manage_board_filter_filter extends kxCmd
             default:
                 break;
         }
+        $this->twigData['do'] = $this->request->get('do');
         $this->_showFilters();
     }
 

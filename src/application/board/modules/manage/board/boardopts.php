@@ -6,7 +6,6 @@ use kx\kxForm;
 use kx\kxFunc;
 use kx\kxTemplate;
 
-
 class manage_board_board_boardopts extends kxCmd
 {
     /**
@@ -35,7 +34,7 @@ class manage_board_board_boardopts extends kxCmd
 
                 break;
         }
-
+        $this->twigData['do'] = $this->request->get('do');
         kxTemplate::output('manage/boardopts', $this->twigData);
     }
 

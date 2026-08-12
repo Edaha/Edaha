@@ -6,7 +6,7 @@
 
 {% block managecontent %}
 
-<form action="{{ base_url }}app=board&amp;module=attachments&amp;section=filetypes&amp;do={% if _get.do != 'edit' %}add{% else %}edit-post&amp;id={{ filetype.type_id }}{% endif %}" method="post">
+<form action="{{ base_url }}app=board&amp;module=attachments&amp;section=filetypes&amp;do={% if do != 'edit' %}add{% else %}edit-post&amp;id={{ filetype.type_id }}{% endif %}" method="post">
   {{ macros.manageform("filetype", "Add Filetype", true,
                         { 'File Extension' : { 'id' : 'ext', 'type' : 'text', 'desc' : "The extension of the file.",  'value' : filetype.type_ext } ,
                           'MIME Type' : { 'id' : 'mime', 'type' : 'text', 'desc' : "The MIME type of the uploaded file.", 'value' : filetype.type_mime } ,

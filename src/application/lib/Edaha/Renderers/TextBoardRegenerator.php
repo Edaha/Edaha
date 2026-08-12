@@ -3,6 +3,8 @@
 namespace Edaha\Renderers;
 
 use Edaha\Entities\Post;
+use kx\kxFunc;
+use kx\kxTemplate;
 
 class TextBoardRegenerator extends BoardRegenerator
 {
@@ -20,8 +22,8 @@ class TextBoardRegenerator extends BoardRegenerator
             ->getBoardRecentThreads($this->board->id, null)
         ;
 
-        $content = \kxTemplate::get('board/'.$this->board->type.'/txt_all_threads', $this->twigData, true);
+        $content = kxTemplate::get('board/'.$this->board->type.'/txt_all_threads', $this->twigData, true);
 
-        \kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.'/list.html', $content, $this->board->directory);
+        kxFunc::outputToFile(KX_BOARD.'/'.$this->board->directory.'/list.html', $content, $this->board->directory);
     }
 }

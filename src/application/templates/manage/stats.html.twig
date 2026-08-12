@@ -5,11 +5,11 @@
 {% block managecontent %}
   <form  method="post">
         <select name="time">
-          <option {% if _post.time is not defined or _post.time == 24 %}selected=selected {% endif %}value="24">Today (24h)</option>
-          <option {% if _post.time == 168 %}selected=selected {% endif %}value="168">Past 7 days</option>
-          <option {% if _post.time == 720 %}selected=selected {% endif %}value="720">Past 30 days</option>
-          <option {% if _post.time == 8760 %}selected=selected {% endif %}value="8760">Past Year</option>
-          <option {% if _post.time is defined and _post.time == 0 %}selected=selected {% endif %}value="0">All time</option>
+          <option {% if time is not defined or time == 24 %}selected=selected {% endif %}value="24">Today (24h)</option>
+          <option {% if time == 168 %}selected=selected {% endif %}value="168">Past 7 days</option>
+          <option {% if time == 720 %}selected=selected {% endif %}value="720">Past 30 days</option>
+          <option {% if time == 8760 %}selected=selected {% endif %}value="8760">Past Year</option>
+          <option {% if time is defined and time == 0 %}selected=selected {% endif %}value="0">All time</option>
         </select>
         <input type="submit" name="Submit">
   </form>

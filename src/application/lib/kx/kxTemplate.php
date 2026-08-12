@@ -32,37 +32,7 @@ class kxTemplate
             self::addFunctions();
             self::addFilters();
             self::addExtensions();
-
-            // Supply Twig with our GET/POST variables
-            self::$data['_get'] = $_GET;
-            self::$data['_post'] = $_POST;
-
-            // Supply Twig with the default locale
-            self::$data['locale'] = kxEnv::Get('kx:misc:locale');
-            // Are we in manage? Load up the manage wrapper
-            if (IN_MANAGE) {
-                self::$data['current_app'] = '';
-                if (KX_CURRENT_APP == 'core') {
-                    // Load up some variables for tabbing/menu purposes
-                    if ('' != kxEnv::$request->get('app')) {
-                        self::$data['current_app'] = kxEnv::$request->get('app');
-                    }
-                } elseif (KX_CURRENT_APP == 'board') {
-                    if ('posts' == kxEnv::$current_module) {
-                        self::$data['current_app'] = 'posts';
-                    } else {
-                        self::$data['current_app'] = 'board';
-                    }
-                }
-
-                $baseurl = kxEnv::Get('kx:paths:main:path').'/manage.php?sid='.session_id().'&';
-                self::$data['base_url'] = $baseurl;
-
-                // Get our manage username
-                if ('' != kxEnv::$request->get('sid')) {
-                    self::assign('name', kxFunc::getManageUser()['user_name']);
-                }
-            }
+            self::initializeData();
         }
     }
 
@@ -115,6 +85,29 @@ class kxTemplate
     {
         self::init();
         self::$data[$name] = $value;
+    }
+
+    private static function initializeData(): void
+    {
+        self::$data['_get'] = $_GET;
+        self::$data['_post'] = $_POST;
+        self::$data['locale'] = kxEnv::Get('kx:misc:locale');
+
+        if (IN_MANAGE) {
+            self::$data['current_app'] = '';
+            self::$data['current_app'] = match (KX_CURRENT_APP) {
+                'core' => kxEnv::$request->get('app'),
+                'board' => 'posts' == kxEnv::$current_module ? 'posts' : 'board',
+            };
+
+            $baseurl = kxEnv::Get('kx:paths:main:path').'/manage.php?sid='.session_id().'&';
+            self::$data['base_url'] = $baseurl;
+
+            // Get our manage username
+            if ('' != kxEnv::$request->get('sid')) {
+                self::assign('name', kxFunc::getManageUser()['user_name']);
+            }
+        }
     }
 
     private static function createInstance(string $cache_dir): void

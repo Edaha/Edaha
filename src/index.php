@@ -1,9 +1,9 @@
-<?
+<?php
 
 use kx\kxCmd\kxCmdResolv;
 use kx\kxEnv;
 
-define('IN_MANAGE', false);
+const IN_MANAGE = false;
 
 include 'init.php';
 

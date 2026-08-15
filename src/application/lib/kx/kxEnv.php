@@ -13,19 +13,22 @@ class kxEnv
     protected static $_coreConfig = [];
     protected static $_appConfig = [];
 
-    private static $instance;
+    private static kxEnv $instance;
     private static $cache;
 
     private string $environment;
-    private $configuration;
+    private kxConfig $configuration;
 
-    private function __construct($environment, $configuration)
+    private function __construct(string $environment, kxConfig $configuration)
     {
         $this->environment = $environment;
         $this->configuration = $configuration;
     }
 
-    public static function getInstance()
+    /**
+     * Get the kxEnv instance if it exists.
+     */
+    public static function getInstance(): ?kxEnv
     {
         if (!self::$instance instanceof self) {
             return;
@@ -34,7 +37,13 @@ class kxEnv
         return self::$instance;
     }
 
-    public static function initialize($environment, $configdir)
+    /**
+     * Set up the environment.
+     *
+     * @param string $environment The name of the environment (e.g. 'dev', 'prod')
+     * @param string $configdir   The directory storing the configuration YAML
+     */
+    public static function initialize(string $environment, string $configdir): void
     {
         if (self::$instance instanceof self) {
             return;
@@ -90,7 +99,7 @@ class kxEnv
     /**
      * Loads kx core configuration class.
      */
-    public static function loadCoreConfig()
+    public static function loadCoreConfig(): void
     {
         if (!(isset(self::$_coreConfig['core_config_class']) and is_object(self::$_coreConfig['core_config_class']))) {
             self::$_coreConfig['core_config_class'] = new coreConfig();
@@ -99,16 +108,14 @@ class kxEnv
 
     /**
      * Loads data from kx core config.
-     *
-     * @param mixed $type
      */
-    public static function fetchCoreConfig($type)
+    public static function fetchCoreConfig(string $type): coreConfig
     {
-        if (!isset(self::$_coreConfig[$type]) || !is_array(self::$_coreConfig[$type])) {
+        if (!isset(self::$_coreConfig[$type]) || !\is_array(self::$_coreConfig[$type])) {
             self::loadCoreConfig();
             $return = self::$_coreConfig['core_config_class']->fetchCaches();
-            self::$_coreConfig['cache'] = is_array($return['caches']) ? $return['caches'] : [];
-            self::$_coreConfig['cachetoload'] = is_array($return['cachetoload']) ? $return['cachetoload'] : [];
+            self::$_coreConfig['cache'] = \is_array($return['caches']) ? $return['caches'] : [];
+            self::$_coreConfig['cachetoload'] = \is_array($return['cachetoload']) ? $return['cachetoload'] : [];
         }
 
         return self::$_coreConfig[$type];
@@ -117,10 +124,9 @@ class kxEnv
     /**
      * Loads the configuration for an application.
      *
-     * @param string App directory
-     * @param mixed $app
+     * @param string $app The name of the application
      */
-    public static function loadAppConfig($app)
+    public static function loadAppConfig(string $app): void
     {
         $CACHE = $LOAD = [];
 
@@ -139,23 +145,27 @@ class kxEnv
     /**
      * Fetches apps core variable data.
      *
-     * @param   string  App dir
-     * @param   string  Type of variable to return
-     * @param mixed $app
-     * @param mixed $type
+     * @param string $app  App dir
+     * @param string $type Type of variable to return ('cache' or 'cachetoload')
      *
-     * @return string Core variable
+     * @return array The app configuration
      */
-    public static function fetchAppConfig($app, $type)
+    public static function fetchAppConfig(string $app, string $type): array
     {
-        if (!isset(self::$_appConfig[$app][$type]) or !is_array(self::$_appConfig[$app][$type])) {
+        if (!isset(self::$_appConfig[$app][$type]) or !\is_array(self::$_appConfig[$app][$type])) {
             self::loadAppConfig($app);
         }
 
         return self::$_appConfig[$app][$type] ?? [];
     }
 
-    public static function get($path = null, $default = null)
+    /**
+     * Get a specific configuration value.
+     *
+     * @param ?string $path    The path of the configuration value to return
+     * @param mixed   $default The value to return if the configuration is not found
+     */
+    public static function get(?string $path = null, mixed $default = null): mixed
     {
         // Shortcut for getting stuff from the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {
@@ -166,12 +176,21 @@ class kxEnv
         return self::getInstance()->getConfig()->get($path, $default);
     }
 
-    public static function dumpConfig()
+    /**
+     * Get the configuration of the environment.
+     */
+    public static function dumpConfig(): kxConfig
     {
         return self::getInstance()->getConfig();
     }
 
-    public static function set($path, $value)
+    /**
+     * Set a configuration key to a specific volume.
+     *
+     * @param string $path  The configuration key to set
+     * @param mixed  $value The value to set the configuration key to
+     */
+    public static function set(string $path, mixed $value)
     {
         // Shortcut for setting the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {
@@ -180,27 +199,49 @@ class kxEnv
         self::getInstance()->getConfig()->set($path, $value);
     }
 
-    private function getConfig()
+    /**
+     * Get the environment's configuration.
+     */
+    private function getConfig(): kxConfig
     {
         return $this->configuration;
     }
 
-    private function getCache()
+    /**
+     * Get the environment's cache object.
+     */
+    private function getCache(): mixed
     {
         return self::$cache;
     }
 
-    private static function mergeWrapper($base, $next)
+    /**
+     * Wrapper for array_merge_recursive that should actually be an anonymous function.
+     *
+     * @param mixed $base
+     * @param mixed $next
+     */
+    private static function mergeWrapper($base, $next): array
     {
-        return array_merge_recursive(is_null($base) ? [] : $base, $next);
+        return array_merge_recursive(\is_null($base) ? [] : $base, $next);
     }
 
-    private static function getConfigFiles($configdir)
+    /**
+     * Get an array containing the paths of all config files.
+     *
+     * @return bool|string[]
+     */
+    private static function getConfigFiles(string $configdir): array|bool
     {
         return glob($configdir.'/*.yml.php');
     }
 
-    private static function loadConfigFile($configfile)
+    /**
+     * Load a configuration file into an array.
+     *
+     * @param string $configfile The path of the configuraton file
+     */
+    private static function loadConfigFile(string $configfile): array
     {
         if (self::isCached($configfile)) {
             return self::loadCached($configfile);
@@ -209,7 +250,14 @@ class kxEnv
         return kxYml::loadFile($configfile);
     }
 
-    private static function isCached($configfile)
+    /**
+     * Do nothing lol.
+     *
+     * @param string $configfile The configuration file to get false about
+     *
+     * @return bool Always false
+     */
+    private static function isCached(string $configfile): bool
     {
         return false;
     }

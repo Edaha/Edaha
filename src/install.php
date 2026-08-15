@@ -2,7 +2,7 @@
 
 const IN_MANAGE = false;
 
-include 'init.php';
+require 'init.php';
 
 use Edaha\Entities\Board;
 use Edaha\Entities\Module;

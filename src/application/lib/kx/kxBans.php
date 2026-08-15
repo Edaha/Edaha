@@ -2,14 +2,17 @@
 
 namespace kx;
 
-use Datetime;
 use Edaha\Entities\Ban;
-use kx\kxTemplate;
 
+/**
+ * Class for handling bans and ban function, but probably should be consolidated with the Edaha Bans object.
+ */
 class kxBans
 {
-    // Perform a check for a ban record for a specified IP address
-    public static function BanCheck($ip, $board = '')
+    /**
+     * Check if an IP is banned and display the Banned page if so.
+     */
+    public static function BanCheck(string $ip, string $board = ''): void
     {
         $em = kxOrm::getEntityManager();
 
@@ -35,8 +38,14 @@ class kxBans
         }
     }
 
-    // Add a ip/ip range ban
-    public static function BanUser($ip, $board_ids, $duration, $reason, $allow_read, $allow_appeal, $notes, $staff_id, $delete_all_posts = false)
+    /**
+     * Ban a user from a board (or boards) and optionally delete every post of theirs.
+     *
+     * @param int $duration     In secods
+     * @param int $allow_read   true lets them read the board but not post, False prevents them from reading and posting
+     * @param int $allow_appeal true lets them submit an appeal from the ban page
+     */
+    public static function BanUser(string $ip, array $board_ids, int $duration, string $reason, int $allow_read, int $allow_appeal, string $notes, int $staff_id, int $delete_all_posts = false): void
     {
         $em = kxOrm::getEntityManager();
 
@@ -45,7 +54,7 @@ class kxBans
             reason: $reason,
             allow_read: $allow_read,
             allow_appeal: $allow_appeal,
-            expires_at: $expires_at = new DateTime('now + '.$duration.' seconds'),
+            expires_at: $expires_at = new \DateTime('now + '.$duration.' seconds'),
             staff_note: $staff_note = $notes,
         );
 
@@ -65,7 +74,10 @@ class kxBans
         }
     }
 
-    public static function UpdateHtaccess()
+    /**
+     * Apache-only, implements read bans at the .htaccess level.
+     */
+    public static function UpdateHtaccess(): void
     {
         $htaccess_contents = file_get_contents(KX_BOARD.'.htaccess');
         $htaccess_contents_preserve = substr($htaccess_contents, 0, strpos($htaccess_contents, '## !KU_BANS:') + 12)."\n";
@@ -92,8 +104,13 @@ class kxBans
         file_put_contents(KX_BOARD.'.htaccess', $htaccess_contents_new);
     }
 
-    // Return the page which will inform the user a quite unfortunate message
-    private static function DisplayBannedMessage($bans, $board = '')
+    /**
+     * Return the page which will inform the user a quite unfortunate message.
+     *
+     * @param array  $bans  Array of Ban objects
+     * @param string $board Unused lol
+     */
+    private static function DisplayBannedMessage(array $bans, string $board = '')
     {
         // Set a cookie with the users current IP address in case they use a proxy to attempt to make another post
         setcookie('tc_previousip', $_SERVER['REMOTE_ADDR'], time() + 604800, kxEnv::Get('kx:paths:boards:folder'));

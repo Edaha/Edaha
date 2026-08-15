@@ -2,6 +2,9 @@
 
 namespace kx;
 
+/**
+ * Autoloader class that seems completely superseded by PSR-4 and composer.
+ */
 class kxAutoload
 {
     private static $instances = [];
@@ -64,7 +67,7 @@ class kxAutoload
         return self::searchRepository($class, $this->repository, $this->options);
     }
 
-    public static function searchRepository($class, $path, $options = [])
+    private static function searchRepository($class, $path, $options = [])
     {
         $glob_pattern = array_key_exists('glob', $options) ? $options['glob'] : '*';
 

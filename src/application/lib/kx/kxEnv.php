@@ -97,16 +97,6 @@ class kxEnv
     }
 
     /**
-     * Loads kx core configuration class.
-     */
-    public static function loadCoreConfig(): void
-    {
-        if (!(isset(self::$_coreConfig['core_config_class']) and is_object(self::$_coreConfig['core_config_class']))) {
-            self::$_coreConfig['core_config_class'] = new coreConfig();
-        }
-    }
-
-    /**
      * Loads data from kx core config.
      */
     public static function fetchCoreConfig(string $type): coreConfig
@@ -119,27 +109,6 @@ class kxEnv
         }
 
         return self::$_coreConfig[$type];
-    }
-
-    /**
-     * Loads the configuration for an application.
-     *
-     * @param string $app The name of the application
-     */
-    public static function loadAppConfig(string $app): void
-    {
-        $CACHE = $LOAD = [];
-
-        if (!isset(self::$_appConfig[$app])) {
-            $file = kxFunc::getAppDir($app).'/appConfig.php';
-
-            if (is_file($file)) {
-                require $file;
-
-                self::$_appConfig[$app]['cache'] = $CACHE;
-                self::$_appConfig[$app]['cachetoload'] = $LOAD;
-            }
-        }
     }
 
     /**
@@ -197,6 +166,37 @@ class kxEnv
             return self::getInstance()->getCache()->set($path, $value);
         }
         self::getInstance()->getConfig()->set($path, $value);
+    }
+
+    /**
+     * Loads kx core configuration class.
+     */
+    private static function loadCoreConfig(): void
+    {
+        if (!(isset(self::$_coreConfig['core_config_class']) and is_object(self::$_coreConfig['core_config_class']))) {
+            self::$_coreConfig['core_config_class'] = new coreConfig();
+        }
+    }
+
+    /**
+     * Loads the configuration for an application.
+     *
+     * @param string $app The name of the application
+     */
+    private static function loadAppConfig(string $app): void
+    {
+        $CACHE = $LOAD = [];
+
+        if (!isset(self::$_appConfig[$app])) {
+            $file = kxFunc::getAppDir($app).'/appConfig.php';
+
+            if (is_file($file)) {
+                require $file;
+
+                self::$_appConfig[$app]['cache'] = $CACHE;
+                self::$_appConfig[$app]['cachetoload'] = $LOAD;
+            }
+        }
     }
 
     /**

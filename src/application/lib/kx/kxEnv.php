@@ -49,48 +49,10 @@ class kxEnv
             return;
         }
 
-        $configuration = [];
-
-        // Load config
-        foreach (self::getConfigFiles($configdir) as $configfile) {
-            $configuration = array_merge_recursive(array_reduce(
-                array_intersect_key(
-                    self::loadConfigFile($configfile),
-                    array_flip(['all', $environment])
-                ),
-                [self::class, 'mergeWrapper']
-            ), $configuration);
-        }
-
-        // Set our instance, load kxConfig
-        self::$instance = new self($environment, new kxConfig($configuration));
-
-        // Add any classes we want added to the autoloader.
-        foreach (kxEnv::get('kx:autoload:load') as $repo => $opts) {
-            kxEnv::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
-                'prefix' => $opts['prefix'],
-            ]));
-        }
-
+        self::createInstance($environment, $configdir);
+        self::setupAutoloader();
         self::$request = kxRequest::getInstance();
-
-        // Grab our app
-        $_application = preg_replace(
-            '/[^a-zA-Z0-9\-\_]/',
-            '',
-            '' != self::$request->get('app') ? self::$request->get('app') : 'core'
-        );
-
-        // Make sure we get (hopefully) a string
-        if (\is_array($_application)) {
-            $_application = array_shift($_application);
-        }
-
-        define('KX_CURRENT_APP', $_application);
-
-        self::$current_application = KX_CURRENT_APP;
-        self::$current_module = self::$request->get('module') ? kxFunc::alphaNum(self::$request->get('module')) : '';
-        self::$current_section = self::$request->get('section') ? kxFunc::alphaNum(self::$request->get('section')) : '';
+        self::setContextVariables();
 
         // Load the cache
         // self::$cache = kxCache::instance();
@@ -166,6 +128,56 @@ class kxEnv
             return self::getInstance()->getCache()->set($path, $value);
         }
         self::getInstance()->getConfig()->set($path, $value);
+    }
+
+    private static function createInstance(string $environment, string $config_path): void
+    {
+        $configuration = [];
+
+        // Load config
+        foreach (self::getConfigFiles($config_path) as $configfile) {
+            $configuration = array_merge_recursive(array_reduce(
+                array_intersect_key(
+                    self::loadConfigFile($configfile),
+                    array_flip(['all', $environment])
+                ),
+                [self::class, 'mergeWrapper']
+            ), $configuration);
+        }
+
+        // Set our instance, load kxConfig
+        self::$instance = new self($environment, new kxConfig($configuration));
+    }
+
+    private static function setupAutoloader(): void
+    {
+        // Add any classes we want added to the autoloader.
+        foreach (kxEnv::get('kx:autoload:load') as $repo => $opts) {
+            kxEnv::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
+                'prefix' => $opts['prefix'],
+            ]));
+        }
+    }
+
+    private static function setContextVariables(): void
+    {
+        // Grab our app
+        $_application = preg_replace(
+            '/[^a-zA-Z0-9\-\_]/',
+            '',
+            '' != self::$request->get('app') ? self::$request->get('app') : 'core'
+        );
+
+        // Make sure we get (hopefully) a string
+        if (\is_array($_application)) {
+            $_application = array_shift($_application);
+        }
+
+        define('KX_CURRENT_APP', $_application);
+
+        self::$current_application = KX_CURRENT_APP;
+        self::$current_module = self::$request->get('module') ? kxFunc::alphaNum(self::$request->get('module')) : '';
+        self::$current_section = self::$request->get('section') ? kxFunc::alphaNum(self::$request->get('section')) : '';
     }
 
     /**

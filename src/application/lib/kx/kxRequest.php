@@ -4,6 +4,12 @@ namespace kx;
 
 class kxRequest
 {
+    /**
+     * Used as an upper limit in parseInput to avoid traversing overly-deep arrays.
+     *
+     * @var int
+     */
+    private const int MAX_ARRAY_DEPTH = 10;
     private static ?kxRequest $instance;
     private array $get = [] {
         set => self::parseInput($value);
@@ -20,20 +26,6 @@ class kxRequest
         set => $value;
     }
 
-    public function get(string $property, string $fallback = ''): string
-    {
-        return $this->get[$property] ?? $fallback;
-    }
-
-    public function post(string $property, string $fallback = ''): string
-    {
-        return $this->post[$property] ?? $fallback;
-    }
-    public function server(string $property, string $fallback = ''): string
-    {
-        return $this->server[$property] ?? $fallback;
-    }
-
     private function __construct()
     {
         $this->get = $_GET;
@@ -42,23 +34,49 @@ class kxRequest
         $this->server = $_SERVER;
     }
 
+    /**
+     * Return a $_GET parameter.
+     */
+    public function get(string $property, string $fallback = ''): string
+    {
+        return $this->get[$property] ?? $fallback;
+    }
+
+    /**
+     * Return a $_POST parameter.
+     */
+    public function post(string $property, string $fallback = ''): string
+    {
+        return $this->post[$property] ?? $fallback;
+    }
+
+    /**
+     * Return a value from $_SERVER.
+     */
+    public function server(string $property, string $fallback = ''): string
+    {
+        return $this->server[$property] ?? $fallback;
+    }
+
+    /**
+     * Get the instance of kxRequest.
+     */
     public static function getInstance(): kxRequest
     {
         if (!isset(self::$instance)) {
             self::$instance = new kxRequest();
         }
+
         return self::$instance;
     }
-
-    private const int MAX_ARRAY_DEPTH = 10;
 
     /**
      * Recursively cleans keys and values and
      * inserts them into the input array.
      *
-     * @param array $data   Input data
-     * @param array $input  Array to merge into
-     * @param int $i        Iteration
+     * @param array $data  Input data
+     * @param array $input Array to merge into
+     * @param int   $i     Iteration
      *
      * @return array Cleaned data
      */
@@ -83,14 +101,9 @@ class kxRequest
     }
 
     /**
-     * Clean up input key.
-     *
-     * @param  string    Key name
-     * @param mixed $key
-     *
-     * @return string Cleaned key name
+     * Clean up $key by decoding URL-encoded values, removing special characters.
      */
-    private static function cleanInputKey($key): string
+    private static function cleanInputKey(string $key): string
     {
         if ('' == $key) {
             return '';
@@ -98,20 +111,15 @@ class kxRequest
 
         $key = htmlspecialchars(urldecode($key));
         $key = str_replace('..', '', $key);
-        $key = preg_replace('/\\_\\_(.+?)\\_\\_/', '', $key);
+        $key = preg_replace('/\_\_(.+?)\_\_/', '', $key);
 
-        return preg_replace('/^([\\w\\.\\-\\_]+)$/', '$1', $key);
+        return preg_replace('/^([\w\.\-\_]+)$/', '$1', $key);
     }
 
     /**
-     * Clean up input data.
-     *
-     * @param  string    Input
-     * @param mixed $txt
-     *
-     * @return string Cleaned Input
+     * Clean up the string $txt by removing potentially harmful input.
      */
-    private static function cleanInputVal($txt): string
+    private static function cleanInputVal(string $txt): string
     {
         if (empty($txt)) {
             return '';
@@ -156,8 +164,8 @@ class kxRequest
             '&#39;'];
         $txt = str_replace($search, $replace, $txt);
 
-        $txt = preg_replace('/&amp;#([0-9]+);/s', '&#\\1;', $txt);
+        $txt = preg_replace('/&amp;#([0-9]+);/s', '&#\1;', $txt);
 
-        return preg_replace('/&#(\\d+?)([^\\d;])/i', '&#\\1;\\2', $txt);
+        return preg_replace('/&#(\d+?)([^\d;])/i', '&#\1;\2', $txt);
     }
 }

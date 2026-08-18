@@ -2,42 +2,31 @@
 
 namespace kx;
 
-/*
- * Static functions that don't fit anywhere else
- */
+// Static functions that don't fit anywhere else
 
 class kxFunc
 {
     /**
      * Returns only alphanumeric characters.
      *
-     * @param  string    Input String
-     * @param  string    Additional characters
-     * @param mixed $txt
-     * @param mixed $extra
-     *
-     * @return string Parsed string
+     * @param string $txt   The string to clean up
+     * @param string $extra Additional characters to exclude
      */
-    public static function alphanum($txt, $extra = '')
+    public static function alphanum(string $txt, string $extra = ''): string
     {
         if ($extra) {
             $extra = preg_quote($extra, '/');
         }
 
-        return preg_replace('/[^a-zA-Z0-9\\-\\_'.$extra.']/', '', $txt);
+        return preg_replace('/[^a-zA-Z0-9\-\_'.$extra.']/', '', $txt);
     }
 
     /**
      * Generates a path for an application, with module if applicable.
      *
-     * @param  string    application
-     * @param  string    module (optional)
-     * @param mixed $app
-     * @param mixed $module
-     *
-     * @return mixed Directory to app or module (or false if error)
+     * @return bool|string Directory to app or module (or false if error)
      */
-    public static function getAppDir($app, $module = '')
+    public static function getAppDir(string $app, string $module = ''): bool|string
     {
         if (empty($app) || !is_string($app)) {
             return false;
@@ -53,8 +42,10 @@ class kxFunc
         return $appFolder;
     }
 
-    // Depending on the configuration, use either a meta refresh or a direct header
-    public static function doRedirect($url, $ispost = false, $file = '')
+    /**
+     * Perform a redirect using either a meta refresh or a direct header.
+     */
+    public static function doRedirect(string $url, bool $ispost = false, string $file = ''): void
     {
         $headermethod = true;
 
@@ -77,7 +68,10 @@ class kxFunc
         }
     }
 
-    public static function showError($errormsg, $extended = '')
+    /**
+     * Display an error page and kill the script.
+     */
+    public static function showError(string $errormsg, string $extended = ''): never
     {
         $twigData['styles'] = explode(':', kxEnv::Get('kx:css:sitestyles'));
         $twigData['errormsg'] = $errormsg;
@@ -164,7 +158,7 @@ class kxFunc
      *
      * @return int Number of pages required
      */
-    public static function pageCount($boardtype, $numposts)
+    public static function pageCount(int $boardtype, int $numposts): int
     {
         if (1 == $boardtype) {
             return floor($numposts / kxEnv::Get('kx:display:txtthreads'));
@@ -183,7 +177,7 @@ class kxFunc
      *
      * @return array Filetype image, width, and height
      */
-    public static function getFileTypeInfo($filetype)
+    public static function getFileTypeInfo(string $filetype): array
     {
         // $results = kxDB::getinstance()->select("filetypes")
         //   ->fields("filetypes", array("type_image", "type_image_width", "type_image_height"))
@@ -203,7 +197,17 @@ class kxFunc
     }
 
     #[MigrateToTwig]
-    public static function formatDate($timestamp, $type = 'post', $locale = 'en', $email = '')
+    /**
+     * Formats a timestamp into a readable date representation, hyperlinking the email if needed.
+     *
+     * This belongs completely in Twig and templates
+     *
+     * @param mixed $timestamp
+     * @param mixed $type
+     * @param mixed $locale
+     * @param mixed $email
+     */
+    public static function formatDate($timestamp, $type = 'post', $locale = 'en', $email = ''): string
     {
         $output = '';
         if ('' != $email) {
@@ -274,7 +278,10 @@ class kxFunc
         return $output.date('y/m/d(D)H:i', $timestamp).(('' != $email) ? ('</a>') : (''));
     }
 
-    public static function formatJapaneseNumbers($input)
+    /**
+     * Replaces regular ASCII numbers with fullwidth representations.
+     */
+    public static function formatJapaneseNumbers(string $input): array|string|null
     {
         $patterns = ['/1/', '/2/', '/3/', '/4/', '/5/', '/6/', '/7/', '/8/', '/9/', '/0/'];
         $replace = ['１', '２', '３', '４', '５', '６', '７', '８', '９', '０'];
@@ -282,27 +289,37 @@ class kxFunc
         return preg_replace($patterns, $replace, $input);
     }
 
-    /* <3 coda for this wonderful snippet
-    print $contents to $filename by using a temporary file and renaming it */
-    public static function outputToFile($filename, $contents, $board)
+    /**
+     * print $contents to $filename by using a temporary file and renaming it.
+     *
+     * <3 coda for this wonderful snippet
+     *
+     * @param string $output_path The file to write
+     * @param string $contents    The contents of the file to write
+     * @param string $board       The board we're writing for
+     */
+    public static function outputToFile(string $output_path, string $contents, string $board): void
     {
         $tempfile = tempnam(KX_BOARD.'/'.$board.'/res', 'tmp'); // Create the temporary file
         $fp = fopen($tempfile, 'w');
         fwrite($fp, $contents);
         fclose($fp);
         // If we aren't able to use the rename function, try the alternate method
-        if (!@rename($tempfile, $filename)) {
-            copy($tempfile, $filename);
+        if (!@rename($tempfile, $output_path)) {
+            copy($tempfile, $output_path);
             unlink($tempfile);
         }
-        chmod($filename, 0o664); // it was created 0600
+        chmod($output_path, 0o664); // it was created 0600
     }
 
-    public static function getManageSession()
+    /**
+     * Checks if we have a valid Session.
+     */
+    public static function getManageSession(): bool
     {
         // So far so good, let's check it
         $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
-            'sid' => kxEnv::$request->get('sid')
+            'sid' => kxEnv::$request->get('sid'),
         ]);
 
         if (empty($session_data)) {
@@ -342,12 +359,20 @@ class kxFunc
             return [
                 'user_name' => $session_data->user->username,
             ];
-        } else {
-            return [];
         }
+
+        return [];
     }
 
-    public static function ConvertBytes($bytes)
+    /**
+     * Returns a filesize formatted to the largest whole unit.
+     *
+     * Examples:
+     *   ConvertBytes(1) => "1B"
+     *   ConvertBytes(1024) => "1KB"
+     *   ConvertBytes(1536) => "1.5KB"
+     */
+    public static function ConvertBytes(int $bytes): string
     {
         // Thanks to an anonymous user for this
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -361,7 +386,14 @@ class kxFunc
         return round($bytes, 2).$units[$exponent]; // return the rounded fraction (with 2 decimals) and what unit it relates to
     }
 
-    public static function fullBoardList()
+    /**
+     * Returns an array of arrays, where all boards are grouped by their Section.
+     *
+     * This probably will go away and be replaced with a BoardRepository method
+     *
+     * @return array right now only returns an empty array
+     */
+    public static function fullBoardList(): array
     {
         // $sections = kxDB::getInstance()->select("sections")
         //   ->fields("sections")
@@ -387,7 +419,12 @@ class kxFunc
         return [];
     }
 
-    public static function visibleBoardList()
+    /**
+     * Returns an array of arrays similar to fullBoardList, but this time only boards marked as visible.
+     *
+     * @return array Right now only an empty array
+     */
+    public static function visibleBoardList(): array
     {
         // $sections = kxDB::getInstance()->select("sections")
         //   ->fields("sections")

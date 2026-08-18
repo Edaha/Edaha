@@ -21,7 +21,12 @@ class kxTemplate
 
     private function __construct() {}
 
-    // outputs a template
+    /**
+     * Immediately outputs a template to the client for display.
+     *
+     * @param string $tpl  The template to render
+     * @param array  $data Data to be passed to the template (in addition to any set in the kxTemplate $data)
+     */
     public static function output(string $tpl, array $data = []): void
     {
         self::init();
@@ -33,8 +38,10 @@ class kxTemplate
         $template->display($data);
     }
 
-    // returns a string of the parsed and processed template
-    public static function get($tpl, $data = [], $bypassManageCheck = false): string
+    /**
+     * Renders a template and returns its generated HTML as a string.
+     */
+    public static function get(string $tpl, array $data = [], bool $bypassManageCheck = false): string
     {
         self::init();
         $template = self::loadTemplate($tpl);
@@ -46,12 +53,18 @@ class kxTemplate
         return $template->render($data);
     }
 
-    public static function assign($name, $value): void
+    /**
+     * Sets the static $data[$name] = $value.
+     */
+    public static function assign(string $name, mixed $value): void
     {
         self::init();
         self::$data[$name] = $value;
     }
 
+    /**
+     * Initializes the kxRequest instance and static variables.
+     */
     private static function init(?string $template_dir = null, ?string $cache_dir = null): void
     {
         if (!isset(self::$instance)) {
@@ -68,12 +81,19 @@ class kxTemplate
         }
     }
 
-    // check if a template exists
+    /**
+     * Check if a template exists.
+     */
     private static function templateExists(string $filename): bool
     {
         return file_exists(self::$template_dir.$filename.'.html.twig');
     }
 
+    /**
+     * Loads a template and returns its Twig\TemplateWrapper object.
+     *
+     * @throws \Exception
+     */
     private static function loadTemplate(string $tpl): TemplateWrapper
     {
         if (!self::templateExists($tpl)) {
@@ -83,6 +103,9 @@ class kxTemplate
         return self::$instance->load("{$tpl}.html.twig");
     }
 
+    /**
+     * Initializes the static $data.
+     */
     private static function initializeData(): void
     {
         self::$data['locale'] = kxEnv::Get('kx:misc:locale');
@@ -104,6 +127,9 @@ class kxTemplate
         }
     }
 
+    /**
+     * Creates the Twig\Environment instance.
+     */
     private static function createInstance(string $cache_dir): void
     {
         $loader = new FilesystemLoader(self::$template_dir);
@@ -115,6 +141,9 @@ class kxTemplate
         ]);
     }
 
+    /**
+     * Registers custom functions to be used by Twig templates.
+     */
     private static function addFunctions(): void
     {
         self::$instance->addFunction(new TwigFunction('kxEnv', function ($string) {
@@ -122,6 +151,9 @@ class kxTemplate
         }));
     }
 
+    /**
+     * Registers custom filters to be used by Twig templates.
+     */
     private static function addFilters(): void
     {
         self::$instance->addFilter(new TwigFilter(
@@ -133,6 +165,9 @@ class kxTemplate
         ));
     }
 
+    /**
+     * Registers Twig Extensions in the environment.
+     */
     private static function addExtensions(): void
     {
         self::$instance->addExtension(new DebugExtension());
@@ -140,6 +175,9 @@ class kxTemplate
         self::$instance->addExtension(new Translation());
     }
 
+    /**
+     * Builds the data needed for rendering the menu.
+     */
     private static function _buildMenu(): void
     {
         $app = KX_CURRENT_APP;

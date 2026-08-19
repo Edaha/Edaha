@@ -20,24 +20,37 @@ class kxCmdResolv
      *
      * @var string
      */
-    private static $baseCmd;
-    private static $defaultCmd;
-    private static $class_dir = 'public';
+    /**
+     * baseCmd holds the lowest-level class that our "Command" extends.
+     *
+     * __construct() sets this to new ReflectionClass(kxCmd::class)
+     */
+    private static \ReflectionClass $baseCmd;
 
     /**
-     * Constructor.
+     * $defaultCmd is the fallback handler in case we aren't able to load a valid command for the request.
      */
-    public function __construct()
+    private static kxCmd $defaultCmd;
+
+    /**
+     * The directory within the application's modules path that our Command Class lives in.
+     */
+    private static string $class_dir = 'public';
+
+    /**
+     * Initiates our static class variables $baseCmd, $defaultCmd, $class_dir.
+     */
+    private function __construct()
     {
-        self::$baseCmd = new ReflectionClass(kxCmd::class);
+        self::$baseCmd = new \ReflectionClass(kxCmd::class);
         self::$defaultCmd = new kxCmd_default();
         self::$class_dir = (IN_MANAGE) ? 'manage' : 'public';
     }
 
     /**
-     * Constructor.
+     * Takes our environment, gets the command from it, and executes the command.
      */
-    public static function run(kxEnv $environment)
+    public static function run(kxEnv $environment): void
     {
         $instance = new kxCmdResolv();
         $cmd = $instance->getCmd($environment);
@@ -46,18 +59,14 @@ class kxCmdResolv
 
     /**
      * Retreive our command.
-     *
-     * @param	object		kxEnv reference
-     *
-     * @return object
      */
-    public function getCmd(kxEnv $environment)
+    public function getCmd(kxEnv $environment): kxCmd
     {
         $module = kxEnv::$current_module;
         $section = kxEnv::$current_section;
         // No module?
         if (!$module) {
-            if (IN_MANAGE && kxEnv::$request->get('app') == '') {
+            if (IN_MANAGE && '' == kxEnv::$request->get('app')) {
                 $module = 'index';
             } else {
                 // Get the first module in the DB
@@ -89,12 +98,12 @@ class kxCmdResolv
             $validSession = kxFunc::getManageSession();
             if (
                 (
-                    $environment::$request->get('module') == ''
+                    '' == $environment::$request->get('module')
                     || (
-                        $environment::$request->get('module') != ''
+                        '' != $environment::$request->get('module')
                         && 'login' != $environment::$request->get('module')
                     )
-                ) 
+                )
                 && (!$validSession)) {
                 // Force login if we have an invalid session
 
@@ -124,7 +133,7 @@ class kxCmdResolv
         }
 
         if (class_exists($className)) {
-            $cmd_class = new ReflectionClass($className);
+            $cmd_class = new \ReflectionClass($className);
 
             if ($cmd_class->isSubClassOf(self::$baseCmd)) {
                 return $cmd_class->newInstance();

@@ -62,11 +62,41 @@ class kxCmdResolv
      */
     public function getCmd(kxEnv $environment): kxCmd
     {
-        $module = kxEnv::$current_module;
-        $section = kxEnv::$current_section;
+        $module = self::getModule($environment);
+        $moduledir = kxFunc::getAppDir(KX_CURRENT_APP).'/modules/'.self::$class_dir.'/'.$module.'/';
+
+        $section = self::getSection($environment, $moduledir);
+
+        self::checkManageSession($environment);
+
+        self::checkBan($environment, $module, $section);
+
+        self::requireSection($moduledir, $section);
+
+        $className = self::buildCommandClassName(self::$class_dir, KX_CURRENT_APP, $module, $section);
+        if (class_exists($className)) {
+            $cmd_class = new \ReflectionClass($className);
+
+            if ($cmd_class->isSubClassOf(self::$baseCmd)) {
+                return $cmd_class->newInstance();
+            }
+
+            throw new kxException("{$section} in {$module} does not exist!");
+        }
+
+        // If we somehow made it here, let's just use the default command
+        return clone self::$defaultCmd;
+    }
+
+    /**
+     * Gets and returns the name of the current module, falling back to a default if needed.
+     */
+    private function getModule(kxEnv $environment): string
+    {
+        $module = $environment::$current_module;
         // No module?
         if (!$module) {
-            if (IN_MANAGE && '' == kxEnv::$request->get('app')) {
+            if (IN_MANAGE && '' == $environment::$request->get('app')) {
                 $module = 'index';
             } else {
                 // Get the first module in the DB
@@ -76,24 +106,35 @@ class kxCmdResolv
                 $module = $module ? $module[0]->class : 'index';
             }
         }
-        $moduledir = kxFunc::getAppDir(KX_CURRENT_APP).'/modules/'.self::$class_dir.'/'.$module.'/';
-        // No section?
+
+        return $module;
+    }
+
+    /**
+     * Returns the name of the section, and includes the module's default_section.php if needed.
+     */
+    private static function getSection(kxEnv $environment, string $module_path): string
+    {
+        $section = $environment::$current_section;
         if (!$section) {
-            if (file_exists($moduledir.'default_section.php')) {
+            if (file_exists($module_path.'default_section.php')) {
                 $defaultSection = '';
 
-                require $moduledir.'default_section.php';
+                require $module_path.'default_section.php';
                 if ($defaultSection) {
                     $section = $defaultSection;
                 }
             }
         }
 
-        // Load the logging class here because we'll probably need it anyway in pretty much any manage function
-        // require_once kxFunc::getAppDir('core').'/classes/logging.php';
-        // $environment->set('kx:classes:core:logging:id', new logging($environment));
+        return $section;
+    }
 
-        // Are we in manage?
+    /**
+     * If we're in manage, checks if there's a valid manage session and forces login if not.
+     */
+    private static function checkManageSession(kxEnv $environment): void
+    {
         if (IN_MANAGE) {
             $validSession = kxFunc::getManageSession();
             if (
@@ -107,42 +148,45 @@ class kxCmdResolv
                 && (!$validSession)) {
                 // Force login if we have an invalid session
 
-                kxEnv::$current_module = 'login';
+                $environment::$current_module = 'login';
 
                 require_once kxFunc::getAppDir('core').'/modules/manage/login/login.php';
-                $login = new \manage_core_login_login($environment);
+                $login = new \manage_core_login_login();
                 $login->execute($environment);
 
                 exit;
             }
         }
+    }
 
-        // Ban check ( may as well do it here before we do any further processing)
+    /**
+     * Checks if the user is banned, if we're viewing a board.
+     */
+    private static function checkBan(kxEnv $environment, string $module, string $section): void
+    {
         $boardName = '';
         if (KX_CURRENT_APP == 'core' && 'post' == $module && 'post' == $section) {
-            if (isset($environment->request, $environment->request['board'])) {
-                $boardName = $environment->{$request}['board'];
+            if (isset($environment->request)) {
+                $boardName = $environment::$request->get('board');
             }
         }
 
         kxBans::banCheck($_SERVER['REMOTE_ADDR'], $boardName);
+    }
 
-        $className = self::$class_dir.'_'.KX_CURRENT_APP.'_'.$module.'_'.$section;
-        if (file_exists($moduledir.$section.'.php')) {
-            require_once $moduledir.$section.'.php';
+    /**
+     * Requires the class defined by the module path.
+     */
+    private static function requireSection(string $module_path, string $section): void
+    {
+        $full_path = "{$module_path}{$section}.php";
+        if (file_exists($full_path)) {
+            require_once $full_path;
         }
+    }
 
-        if (class_exists($className)) {
-            $cmd_class = new \ReflectionClass($className);
-
-            if ($cmd_class->isSubClassOf(self::$baseCmd)) {
-                return $cmd_class->newInstance();
-            }
-
-            throw new kxException("{$section} in {$module} does not exist!");
-        }
-
-        // If we somehow made it here, let's just use the default command
-        return clone self::$defaultCmd;
+    private static function buildCommandClassName(string $path, string $app, string $module, string $section): string
+    {
+        return "{$path}_{$app}_{$module}_{$section}";
     }
 }

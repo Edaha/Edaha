@@ -16,11 +16,6 @@ use ReflectionClass;
 class kxCmdResolv
 {
     /**
-     * Important strings.
-     *
-     * @var string
-     */
-    /**
      * baseCmd holds the lowest-level class that our "Command" extends.
      *
      * __construct() sets this to new ReflectionClass(kxCmd::class)

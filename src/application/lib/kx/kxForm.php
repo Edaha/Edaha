@@ -4,25 +4,19 @@ namespace kx;
 
 use kx\Exceptions\kxException;
 
-/*
- * Functions for validating form inputs
- */
+// Functions for validating form inputs
 class kxForm
 {
     /**
      * Array to hold field names.
-     *
-     * @var array
      */
-    public static $values = [];
+    public static array $values = [];
 
     /**
      * Array to hold rulesets.
-     *
-     * @var array
      */
-    public static $rules = [];
-    private static $instance;
+    public static array $rules = [];
+    private static kxForm $instance;
 
     /**
      * Sets the class instance and form values.
@@ -32,7 +26,7 @@ class kxForm
      *
      * @return object kxForm
      */
-    public static function validate($data)
+    public static function validate($data): kxForm
     {
         if (empty(self::$instance)) {
             self::$instance = new self();
@@ -51,14 +45,14 @@ class kxForm
      * @param string    Rule name
      * @param bool   Expected result
      * @param string    Comparison value
-     * @param mixed $key
-     * @param mixed $rule
-     * @param mixed $expected
-     * @param mixed $compare
+     * @param string $key      The name of the request field
+     * @param string $rule     The type of rule to enforce (required, numeric, value)
+     * @param bool   $expected huh
+     * @param string $compare  For value checks, what it's compared to
      *
      * @return object kxForm
      */
-    public static function addRule($key, $rule, $expected = true, $compare = '')
+    public static function addRule(string $key, string $rule, bool $expected = true, string $compare = ''): kxForm
     {
         if (empty(self::$instance)) {
             self::validate(kxEnv::$request);
@@ -71,7 +65,7 @@ class kxForm
     /**
      * Calls checkRules for each ruleset.
      */
-    public static function check()
+    public static function check(): void
     {
         try {
             foreach (self::$rules as $key => $value) {
@@ -88,12 +82,10 @@ class kxForm
      * Applies the rulesets to the data,
      * errors out if they don't match.
      *
-     * @param string    Input field
-     * @param array     Ruleset array
      * @param mixed $input
      * @param mixed $rules
      */
-    private static function _checkRules($input, $rules)
+    private static function _checkRules($input, $rules): void
     {
         foreach ($rules as $check => $ruleset) {
             switch ($check) {
@@ -126,11 +118,8 @@ class kxForm
 
     /**
      * Determines if a required value exists.
-     *
-     * @param string    Input field
-     * @param mixed $value
      */
-    private static function _checkRequired($value)
+    private static function _checkRequired(string $value): bool
     {
         if (array_key_exists($value, self::$values) && !empty(self::$values[$value])) {
             return true;

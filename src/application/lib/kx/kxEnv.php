@@ -121,7 +121,7 @@ class kxEnv
      * @param string $path  The configuration key to set
      * @param mixed  $value The value to set the configuration key to
      */
-    public static function set(string $path, mixed $value)
+    public static function set(string $path, mixed $value): void
     {
         // Shortcut for setting the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {

@@ -110,7 +110,7 @@ class kxBans
      * @param array  $bans  Array of Ban objects
      * @param string $board Unused lol
      */
-    private static function DisplayBannedMessage(array $bans, string $board = '')
+    private static function DisplayBannedMessage(array $bans, string $board = ''): string
     {
         // Set a cookie with the users current IP address in case they use a proxy to attempt to make another post
         setcookie('tc_previousip', $_SERVER['REMOTE_ADDR'], time() + 604800, kxEnv::Get('kx:paths:boards:folder'));

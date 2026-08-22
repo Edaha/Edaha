@@ -31,7 +31,7 @@ class kxEnv
     public static function getInstance(): ?kxEnv
     {
         if (!self::$instance instanceof self) {
-            return;
+            return null;
         }
 
         return self::$instance;
@@ -45,7 +45,7 @@ class kxEnv
      */
     public static function initialize(string $environment, string $configdir): void
     {
-        if (self::$instance instanceof self) {
+        if (isset(self::$instance) && self::$instance instanceof self) {
             return;
         }
 
@@ -125,7 +125,7 @@ class kxEnv
     {
         // Shortcut for setting the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {
-            return self::getInstance()->getCache()->set($path, $value);
+            self::getInstance()->getCache()->set($path, $value);
         }
         self::getInstance()->getConfig()->set($path, $value);
     }

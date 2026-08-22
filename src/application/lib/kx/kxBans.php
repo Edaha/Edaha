@@ -45,7 +45,7 @@ class kxBans
      * @param int $allow_read   true lets them read the board but not post, False prevents them from reading and posting
      * @param int $allow_appeal true lets them submit an appeal from the ban page
      */
-    public static function BanUser(string $ip, array $board_ids, int $duration, string $reason, int $allow_read, int $allow_appeal, string $notes, int $staff_id, int $delete_all_posts = false): void
+    public static function BanUser(string $ip, array $board_ids, int $duration, string $reason, int $allow_read, int $allow_appeal, string $notes, int $staff_id, bool $delete_all_posts = false): void
     {
         $em = kxOrm::getEntityManager();
 

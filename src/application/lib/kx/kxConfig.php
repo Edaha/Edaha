@@ -23,7 +23,7 @@ class kxConfig implements \ArrayAccess
     /**
      * Works down the array keyed by $path to set $value.
      */
-    public function setRecursive(array $path, mixed $value): array
+    public function setRecursive(array $path, mixed $value): array|string
     {
         if (!count($path)) {
             return $value;
@@ -83,7 +83,7 @@ class kxConfig implements \ArrayAccess
     /**
      * Traverses $root via $path to return the configuration value.
      */
-    public function getRecursive(array $root, array $path = [], mixed $default = null): mixed
+    public function getRecursive(array|string $root, array $path = [], mixed $default = null): mixed
     {
         if (is_null($root)) {
             return $default;

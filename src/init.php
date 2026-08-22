@@ -2,7 +2,7 @@
 
 use kx\kxEnv;
 
-const KX_ROOT = realpath(dirname(__FILE__));
+const KX_ROOT = __DIR__;
 const KX_BOARD = KX_ROOT;
 const KX_SCRIPT = KX_ROOT;
 const KX_LIB = KX_ROOT.'/application/lib/kx';

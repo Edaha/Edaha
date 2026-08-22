@@ -40,8 +40,8 @@ class public_core_index_news extends kxCmd
         $this->twigData['view'] = $this->request->get('view');
         $this->twigData['page'] = $this->request->get('page');
         $this->twigData['p'] = $this->request->get('p');
-        if (isset($this->request['view'])) {
-            switch ($this->request['view']) {
+        if ('' != $this->request->get('view')) {
+            switch ($this->request->get('view')) {
                 case 'faq':
                     $type = 1;
 
@@ -53,13 +53,13 @@ class public_core_index_news extends kxCmd
                     break;
             }
         } else {
-            $this->request['view'] = 'news';
+            // $this->request->get('view') = 'news';
             $type = 0;
         }
         $this->twigData['styles'] = explode(':', kxEnv::Get('kx:css:sitestyles'));
 
         $front_board = $this->entityManager->getRepository(Board::class)
-            ->findOneBy(['directory' => 'frontpage_'.$this->request['view']])
+            ->findOneBy(['directory' => 'frontpage_'.$this->request->get('view')])
         ;
         if (!$front_board) {
             exit;

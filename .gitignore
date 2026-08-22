@@ -13,3 +13,4 @@ vendor/
 *.sqlite
 
 .php-cs-fixer.cache
+.phpdoc/

@@ -11,13 +11,19 @@ class kxConfig implements \ArrayAccess
         $this->container = $data;
     }
 
-    public function set($path, &$value)
+    /**
+     * Set the configuration keyed by $path to $value.
+     */
+    public function set(string $path, mixed &$value): void
     {
         $newValue = self::setRecursive(explode(':', $path), $value);
         $this->container = self::mergeRecursive($this->container, $newValue);
     }
 
-    public function setRecursive(array $path, $value)
+    /**
+     * Works down the array keyed by $path to set $value.
+     */
+    public function setRecursive(array $path, mixed $value): array
     {
         if (!count($path)) {
             return $value;
@@ -48,10 +54,8 @@ class kxConfig implements \ArrayAccess
      * @param mixed $array2
      *
      * @author daniel@danielsmedegaardbuus.dk
-     *
-     * @return array
      */
-    public function &mergeRecursive(array &$array1, &$array2 = null)
+    public function &mergeRecursive(array &$array1, &$array2 = null): array
     {
         $merged = $array1;
 
@@ -68,12 +72,18 @@ class kxConfig implements \ArrayAccess
         return $merged;
     }
 
-    public function get($path = null, $default = null)
+    /**
+     * Get the config value stored at $path.
+     */
+    public function get(?string $path = null, mixed $default = null): mixed
     {
         return $this->getRecursive($this->container, strlen($path) ? explode(':', $path) : [], $default);
     }
 
-    public function getRecursive($root, $path = [], $default = null)
+    /**
+     * Traverses $root via $path to return the configuration value.
+     */
+    public function getRecursive(array $root, array $path = [], mixed $default = null): mixed
     {
         if (is_null($root)) {
             return $default;

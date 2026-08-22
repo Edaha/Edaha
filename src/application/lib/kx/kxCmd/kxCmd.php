@@ -2,38 +2,26 @@
 
 namespace kx\kxCmd;
 
+use Doctrine\Orm\EntityManager;
 use kx\kxEnv;
 use kx\kxOrm;
+use kx\kxRequest;
 
+/**
+ * The prototype for "pages" within the application.
+ */
 abstract class kxCmd
 {
-    /**
-     * Environment Shortcuts.
-     *
-     * @var object
-     */
-    protected $environment;
+    protected kxEnv $environment;
 
     /**
-     * kxDB instance.
-     *
-     * @var object
+     * TODO Delete.
      */
     protected $db;
 
-    /**
-     * kxOrm instance.
-     *
-     * @var object
-     */
-    protected $entityManager;
+    protected EntityManager $entityManager;
 
-    /**
-     * The request infortmation.
-     *
-     * @var object
-     */
-    protected $request;
+    protected kxRequest $request;
 
     /**
      * Constructor.
@@ -42,22 +30,18 @@ abstract class kxCmd
 
     /**
      * Make shortcuts for kxEnv and kxDB.
-     *
-     * @param	object	kxEnv reference
      */
-    public function makeRegistryShortcuts(kxEnv $environment)
+    public function makeRegistryShortcuts(kxEnv $environment): void
     {
         $this->environment = $environment;
-        $this->request = kxEnv::$request;
+        $this->request = $environment::$request;
         $this->entityManager = kxOrm::getEntityManager();
     }
 
     /**
      * Wrapper for makeRegistryShortcuts() and exec().
-     *
-     * @param	object	kxEnv reference
      */
-    public function execute(kxEnv $environment)
+    public function execute(kxEnv $environment): void
     {
         $this->makeRegistryShortcuts($environment);
         $this->exec($environment);
@@ -65,8 +49,6 @@ abstract class kxCmd
 
     /**
      * Do execute method (must be overriden).
-     *
-     * @param	object	kxEnv reference
      */
     abstract protected function exec(kxEnv $environment);
 }

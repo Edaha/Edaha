@@ -131,21 +131,8 @@ class kxEnv
 
     private static function createInstance(string $environment, string $config_path): void
     {
-        $configuration = [];
-
-        // Load config
-        foreach (self::getConfigFiles($config_path) as $configfile) {
-            $configuration = array_merge_recursive(array_reduce(
-                array_intersect_key(
-                    self::loadConfigFile($configfile),
-                    array_flip(['all', $environment])
-                ),
-                [self::class, 'mergeWrapper']
-            ), $configuration);
-        }
-
         // Set our instance, load kxConfig
-        self::$instance = new self($environment, new kxConfig($configuration));
+        self::$instance = new self($environment, kxConfig::loadConfigFromDirectory($environment, $config_path));
     }
 
     private static function setupAutoloader(): void
@@ -224,52 +211,5 @@ class kxEnv
     private function getCache(): mixed
     {
         return self::$cache;
-    }
-
-    /**
-     * Wrapper for array_merge_recursive that should actually be an anonymous function.
-     *
-     * @param mixed $base
-     * @param mixed $next
-     */
-    private static function mergeWrapper($base, $next): array
-    {
-        return array_merge_recursive(\is_null($base) ? [] : $base, $next);
-    }
-
-    /**
-     * Get an array containing the paths of all config files.
-     *
-     * @return bool|string[]
-     */
-    private static function getConfigFiles(string $configdir): array|bool
-    {
-        return glob($configdir.'/*.yml.php');
-    }
-
-    /**
-     * Load a configuration file into an array.
-     *
-     * @param string $configfile The path of the configuraton file
-     */
-    private static function loadConfigFile(string $configfile): array
-    {
-        if (self::isCached($configfile)) {
-            return self::loadCached($configfile);
-        }
-
-        return kxYml::loadFile($configfile);
-    }
-
-    /**
-     * Do nothing lol.
-     *
-     * @param string $configfile The configuration file to get false about
-     *
-     * @return bool Always false
-     */
-    private static function isCached(string $configfile): bool
-    {
-        return false;
     }
 }

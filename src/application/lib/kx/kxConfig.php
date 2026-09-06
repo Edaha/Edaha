@@ -33,46 +33,6 @@ class kxConfig implements \ArrayAccess
     }
 
     /**
-     * array_merge_recursive does indeed merge arrays, but it converts values with duplicate
-     * keys to arrays rather than overwriting the value in the first array with the duplicate
-     * value in the second array, as array_merge does. I.e., with array_merge_recursive,
-     * this happens (documented behavior):
-     *
-     * array_merge_recursive(array('key' => 'org value'), array('key' => 'new value'));
-     *     => array('key' => array('org value', 'new value'));
-     *
-     * array_merge_recursive_distinct does not change the datatypes of the values in the arrays.
-     * Matching keys' values in the second array overwrite those in the first array, as is the
-     * case with array_merge, i.e.:
-     *
-     * array_merge_recursive_distinct(array('key' => 'org value'), array('key' => 'new value'));
-     *     => array('key' => 'new value');
-     *
-     * Parameters are passed by reference, though only for performance reasons. They're not
-     * altered by this function.
-     *
-     * @param mixed $array2
-     *
-     * @author daniel@danielsmedegaardbuus.dk
-     */
-    public function &mergeRecursive(array &$array1, &$array2 = null): array
-    {
-        $merged = $array1;
-
-        if (is_array($array2)) {
-            foreach ($array2 as $key => $val) {
-                if (is_array($array2[$key])) {
-                    $merged[$key] = (isset($merged[$key]) && is_array($merged[$key])) ? self::mergeRecursive($merged[$key], $array2[$key]) : $array2[$key];
-                } else {
-                    $merged[$key] = $val;
-                }
-            }
-        }
-
-        return $merged;
-    }
-
-    /**
      * Get the config value stored at $path.
      */
     public function get(?string $path = null, mixed $default = null): mixed
@@ -126,6 +86,111 @@ class kxConfig implements \ArrayAccess
         unset($this->container[$offset]);
     }
     // }}}
+
+    public static function loadConfigFromDirectory(string $environment, string $config_path): kxConfig
+    {
+        $configuration = [];
+
+        // Load config
+        foreach (self::getConfigFiles($config_path) as $configfile) {
+            $configuration = array_merge_recursive(array_reduce(
+                array_intersect_key(
+                    self::loadConfigFile($configfile),
+                    array_flip(['all', $environment])
+                ),
+                [self::class, 'mergeWrapper']
+            ), $configuration);
+        }
+
+        return new self($configuration);
+    }
+
+    /**
+     * array_merge_recursive does indeed merge arrays, but it converts values with duplicate
+     * keys to arrays rather than overwriting the value in the first array with the duplicate
+     * value in the second array, as array_merge does. I.e., with array_merge_recursive,
+     * this happens (documented behavior):
+     *
+     * array_merge_recursive(array('key' => 'org value'), array('key' => 'new value'));
+     *     => array('key' => array('org value', 'new value'));
+     *
+     * array_merge_recursive_distinct does not change the datatypes of the values in the arrays.
+     * Matching keys' values in the second array overwrite those in the first array, as is the
+     * case with array_merge, i.e.:
+     *
+     * array_merge_recursive_distinct(array('key' => 'org value'), array('key' => 'new value'));
+     *     => array('key' => 'new value');
+     *
+     * Parameters are passed by reference, though only for performance reasons. They're not
+     * altered by this function.
+     *
+     * @param mixed $array2
+     *
+     * @author daniel@danielsmedegaardbuus.dk
+     */
+    private static function &mergeRecursive(array &$array1, &$array2 = null): array
+    {
+        $merged = $array1;
+
+        if (is_array($array2)) {
+            foreach ($array2 as $key => $val) {
+                if (is_array($array2[$key])) {
+                    $merged[$key] = (isset($merged[$key]) && is_array($merged[$key])) ? self::mergeRecursive($merged[$key], $array2[$key]) : $array2[$key];
+                } else {
+                    $merged[$key] = $val;
+                }
+            }
+        }
+
+        return $merged;
+    }
+
+    /**
+     * Wrapper for array_merge_recursive that should actually be an anonymous function.
+     *
+     * @param mixed $base
+     * @param mixed $next
+     */
+    private static function mergeWrapper($base, $next): array
+    {
+        return array_merge_recursive(\is_null($base) ? [] : $base, $next);
+    }
+
+    /**
+     * Get an array containing the paths of all config files.
+     *
+     * @return bool|string[]
+     */
+    private static function getConfigFiles(string $configdir): array|bool
+    {
+        return glob($configdir.'/*.yml.php');
+    }
+
+    /**
+     * Load a configuration file into an array.
+     *
+     * @param string $configfile The path of the configuraton file
+     */
+    private static function loadConfigFile(string $configfile): array
+    {
+        if (self::isCached($configfile)) {
+            return self::loadCached($configfile);
+        }
+
+        return kxYml::loadFile($configfile);
+    }
+
+    /**
+     * Do nothing lol.
+     *
+     * @param string $configfile The configuration file to get false about
+     *
+     * @return bool Always false
+     */
+    private static function isCached(string $configfile): bool
+    {
+        return false;
+    }
 }
 
 class coreConfig

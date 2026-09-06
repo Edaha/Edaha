@@ -16,11 +16,10 @@ class kxEnv
     private static kxEnv $instance;
     private static $cache;
 
-    private string $environment;
-    private kxConfig $configuration;
-
-    private function __construct(string $environment, kxConfig $configuration)
-    {
+    private function __construct(
+        private string $environment,
+        private kxConfig $configuration
+    ) {
         $this->environment = $environment;
         $this->configuration = $configuration;
     }

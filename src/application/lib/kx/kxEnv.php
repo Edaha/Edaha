@@ -138,8 +138,8 @@ class kxEnv
     private static function setupAutoloader(): void
     {
         // Add any classes we want added to the autoloader.
-        foreach (kxEnv::get('kx:autoload:load') as $repo => $opts) {
-            kxEnv::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
+        foreach (self::get('kx:autoload:load') as $repo => $opts) {
+            self::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
                 'prefix' => $opts['prefix'],
             ]));
         }

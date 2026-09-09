@@ -34,7 +34,7 @@ abstract class kxCmd
     public function makeRegistryShortcuts(kxEnv $environment): void
     {
         $this->environment = $environment;
-        $this->request = $environment::$request;
+        $this->request = $environment->request;
         $this->entityManager = kxOrm::getEntityManager();
     }
 

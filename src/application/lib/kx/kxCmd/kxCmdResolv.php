@@ -88,10 +88,10 @@ class kxCmdResolv
      */
     private function getModule(kxEnv $environment): string
     {
-        $module = $environment::$current_module;
+        $module = $environment->current_module;
         // No module?
         if (!$module) {
-            if (IN_MANAGE && '' == $environment::$request->get('app')) {
+            if (IN_MANAGE && '' == $environment->request->get('app')) {
                 $module = 'index';
             } else {
                 // Get the first module in the DB
@@ -110,7 +110,7 @@ class kxCmdResolv
      */
     private static function getSection(kxEnv $environment, string $module_path): string
     {
-        $section = $environment::$current_section;
+        $section = $environment->current_section;
         if (!$section) {
             if (file_exists($module_path.'default_section.php')) {
                 $defaultSection = '';
@@ -134,16 +134,16 @@ class kxCmdResolv
             $validSession = kxFunc::getManageSession();
             if (
                 (
-                    '' == $environment::$request->get('module')
+                    '' == $environment->request->get('module')
                     || (
-                        '' != $environment::$request->get('module')
-                        && 'login' != $environment::$request->get('module')
+                        '' != $environment->request->get('module')
+                        && 'login' != $environment->request->get('module')
                     )
                 )
                 && (!$validSession)) {
                 // Force login if we have an invalid session
 
-                $environment::$current_module = 'login';
+                $environment->current_module = 'login';
 
                 require_once kxFunc::getAppDir('core').'/modules/manage/login/login.php';
                 $login = new \manage_core_login_login();

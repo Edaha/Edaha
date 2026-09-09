@@ -8,7 +8,13 @@ use Edaha\Entities\Board;
 use Edaha\Entities\Module;
 use Edaha\Entities\User;
 use Edaha\Types\ModuleType;
+use kx\kxEnv;
 use kx\kxOrm;
+
+kxEnv::initialize(
+    KX_ENVIRONMENT,
+    KX_ROOT.'/config'
+);
 
 $em = kxOrm::getEntityManager();
 

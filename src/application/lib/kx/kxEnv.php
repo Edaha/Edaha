@@ -2,25 +2,27 @@
 
 namespace kx;
 
+use kx\Exceptions\kxException;
+
 class kxEnv
 {
-    public static $current_application = '';
-    public static $current_module = '';
-    public static $current_section = '';
+    public string $current_application = '';
+    public string $current_module = '';
+    public string $current_section = '';
 
-    public static ?kxRequest $request;
+    public ?kxRequest $request;
 
     protected static $_coreConfig = [];
     protected static $_appConfig = [];
 
-    private static kxEnv $instance;
+    private static self $instance;
     private static $cache;
 
     private function __construct(
-        private string $environment,
+        private string $environment_name,
         private kxConfig $configuration
     ) {
-        $this->environment = $environment;
+        $this->environment_name = $environment_name;
         $this->configuration = $configuration;
     }
 
@@ -29,8 +31,8 @@ class kxEnv
      */
     public static function getInstance(): ?kxEnv
     {
-        if (!self::$instance instanceof self) {
-            return null;
+        if (!isset(self::$instance) || !self::$instance instanceof self) {
+            throw new kxException('kxEnv has not been instantiated.');
         }
 
         return self::$instance;
@@ -40,21 +42,26 @@ class kxEnv
      * Set up the environment.
      *
      * @param string $environment The name of the environment (e.g. 'dev', 'prod')
-     * @param string $configdir   The directory storing the configuration YAML
+     * @param string $config_path The directory storing the configuration YAML
      */
-    public static function initialize(string $environment, string $configdir): void
+    public static function initialize(string $environment, string $config_path): self
     {
         if (isset(self::$instance) && self::$instance instanceof self) {
-            return;
+            throw new kxException('Cannot re-initialize kxEnv.');
         }
 
-        self::createInstance($environment, $configdir);
-        self::setupAutoloader();
-        self::$request = kxRequest::getInstance();
-        self::setContextVariables();
+        self::$instance = new self(
+            $environment,
+            kxConfig::loadConfigFromDirectory($environment, $config_path)
+        );
+
+        self::$instance->request = kxRequest::getInstance();
+        self::$instance->setContextVariables();
 
         // Load the cache
         // self::$cache = kxCache::instance();
+
+        return self::$instance;
     }
 
     /**
@@ -129,29 +136,23 @@ class kxEnv
         self::getInstance()->getConfig()->set($path, $value);
     }
 
-    private static function createInstance(string $environment, string $config_path): void
-    {
-        // Set our instance, load kxConfig
-        self::$instance = new self($environment, kxConfig::loadConfigFromDirectory($environment, $config_path));
-    }
+    // private static function setupAutoloader(): void
+    // {
+    //     // Add any classes we want added to the autoloader.
+    //     foreach (self::get('kx:autoload:load') as $repo => $opts) {
+    //         self::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
+    //             'prefix' => $opts['prefix'],
+    //         ]));
+    //     }
+    // }
 
-    private static function setupAutoloader(): void
-    {
-        // Add any classes we want added to the autoloader.
-        foreach (self::get('kx:autoload:load') as $repo => $opts) {
-            self::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
-                'prefix' => $opts['prefix'],
-            ]));
-        }
-    }
-
-    private static function setContextVariables(): void
+    private function setContextVariables(): void
     {
         // Grab our app
         $_application = preg_replace(
             '/[^a-zA-Z0-9\-\_]/',
             '',
-            '' != self::$request->get('app') ? self::$request->get('app') : 'core'
+            '' != $this->request->get('app') ? $this->request->get('app') : 'core'
         );
 
         // Make sure we get (hopefully) a string
@@ -161,9 +162,9 @@ class kxEnv
 
         define('KX_CURRENT_APP', $_application);
 
-        self::$current_application = KX_CURRENT_APP;
-        self::$current_module = self::$request->get('module') ? kxFunc::alphaNum(self::$request->get('module')) : '';
-        self::$current_section = self::$request->get('section') ? kxFunc::alphaNum(self::$request->get('section')) : '';
+        $this->current_application = KX_CURRENT_APP;
+        $this->current_module = $this->request->get('module') ? kxFunc::alphaNum($this->request->get('module')) : '';
+        $this->current_section = $this->request->get('section') ? kxFunc::alphaNum($this->request->get('section')) : '';
     }
 
     /**

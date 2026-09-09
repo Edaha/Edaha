@@ -31,7 +31,7 @@ class kxTemplate
     {
         self::init();
         $template = self::loadTemplate($tpl);
-        if (IN_MANAGE && 'login' != kxEnv::$current_module) {
+        if (IN_MANAGE && 'login' != kxEnv::getInstance()->current_module) {
             self::_buildMenu();
         }
         $data = \array_merge(self::$data, $data);
@@ -111,17 +111,13 @@ class kxTemplate
         self::$data['locale'] = kxEnv::Get('kx:misc:locale');
 
         if (IN_MANAGE) {
-            self::$data['current_app'] = '';
-            self::$data['current_app'] = match (KX_CURRENT_APP) {
-                'core' => kxEnv::$request->get('app'),
-                'board' => 'posts' == kxEnv::$current_module ? 'posts' : 'board',
-            };
+            self::$data['current_app'] = kxEnv::getInstance()->current_application;
 
             $baseurl = kxEnv::Get('kx:paths:main:path').'/manage.php?sid='.session_id().'&';
             self::$data['base_url'] = $baseurl;
 
             // Get our manage username
-            if ('' != kxEnv::$request->get('sid')) {
+            if ('' != kxEnv::getInstance()->request->get('sid')) {
                 self::assign('name', kxFunc::getManageUser()['user_name']);
             }
         }
@@ -181,7 +177,7 @@ class kxTemplate
     private static function _buildMenu(): void
     {
         $app = KX_CURRENT_APP;
-        if (KX_CURRENT_APP == 'core' && '' != kxEnv::$request->get('module') && '' != kxEnv::$request->get('app')) {
+        if (KX_CURRENT_APP == 'core' && '' != kxEnv::getInstance()->request->get('module') && '' != kxEnv::$request->get('app')) {
             $modules = [(object) ['class' => 'index']];
         } else {
             $modules = kxOrm::getEntityManager()->getRepository('Edaha\Entities\Module')

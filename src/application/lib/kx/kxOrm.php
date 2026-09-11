@@ -2,37 +2,78 @@
 
 namespace kx;
 
-use InvalidArgumentException;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use kx\Exceptions\kxException;
+use kx\Interfaces\ConfigInterface;
 
 class kxOrm
 {
+    public const array SUPPORTED_ADAPTERS = [
+        'pdo_sqlite',
+        'pdo_mysql',
+        'pdo_pgsql',
+    ];
+
+    public static string $adapter = '' {
+        set {
+            if (!\in_array($value, self::SUPPORTED_ADAPTERS)) {
+                throw new kxException("Unsupported adapter: {$value}.");
+            }
+            if ('' != self::$adapter) {
+                throw new kxException('Cannot modify kxOrm adapter after initialization.');
+            }
+            self::$adapter = $value;
+        }
+    }
+
     public static ?EntityManager $entityManager = null;
+    private static ?self $instance = null;
 
-    public static function getEntityManager(): EntityManager
-    {
-        if (null === self::$entityManager) {
-            $config = ORMSetup::createAttributeMetadataConfiguration(
-                paths: [KX_ROOT.'/application/lib/Edaha/Entities'],
-                isDevMode: true,
-            );
-            $config->enableNativeLazyObjects(true);
-
-            $connectionParams = match (kxEnv::Get('kx:db:adapter')) {
+    private static array $connectionParams {
+        get {
+            return match (self::$adapter) {
                 'pdo_sqlite' => self::getSqliteConnectionParams(),
                 'pdo_mysql' => self::getMysqlConnectionParams(),
                 'pdo_pgsql' => self::getPgsqlConnectionParams(),
-                default => throw new InvalidArgumentException('Unsupported database adapter')
+                default => throw new kxException('Unsupported adapter.')
             };
+        }
+    }
 
-            $connection = DriverManager::getConnection($connectionParams, $config);
+    private static ConfigInterface $config;
 
-            self::$entityManager = new EntityManager($connection, $config);
+    public static function getEntityManager(): EntityManager
+    {
+        if (!isset(self::$instance)) {
+            throw new kxException('kxOrm has not been initialized.');
+        }
+
+        if (null === self::$entityManager) {
+            $doctrine_config = ORMSetup::createAttributeMetadataConfiguration(
+                paths: [KX_ROOT.'/application/lib/Edaha/Entities'],
+                isDevMode: true,
+            );
+            $doctrine_config->enableNativeLazyObjects(true);
+
+            $connection = DriverManager::getConnection(self::$connectionParams, $doctrine_config);
+
+            self::$entityManager = new EntityManager($connection, $doctrine_config);
         }
 
         return self::$entityManager;
+    }
+
+    public static function initialize(ConfigInterface $config): void
+    {
+        if (isset(self::$instance)) {
+            throw new kxException('Cannot re-initialize kxOrm.');
+        }
+
+        self::$config = $config;
+        self::loadAdapter();
+        self::$instance = new self();
     }
 
     public static function persistImmediately($entity)
@@ -53,11 +94,16 @@ class kxOrm
         self::$entityManager->flush();
     }
 
+    private static function loadAdapter(): void
+    {
+        self::$adapter = self::$config->get('kx:db:adapter', 'sqlite');
+    }
+
     private static function getSqliteConnectionParams(): array
     {
         return [
             'driver' => 'pdo_sqlite',
-            'path' => KX_ROOT.'/'.kxEnv::Get('kx:db:sqlite:dbname', 'db').'.sqlite',
+            'path' => KX_ROOT.'/'.self::$config->get('kx:db:sqlite:dbname', 'edaha').'.sqlite',
         ];
     }
 
@@ -65,11 +111,11 @@ class kxOrm
     {
         return [
             'driver' => 'pdo_mysql',
-            'host' => kxEnv::Get('kx:db:mysql:host'),
-            'port' => kxEnv::Get('kx:db:mysql:port'),
-            'dbname' => kxEnv::Get('kx:db:mysql:dbname'),
-            'user' => kxEnv::Get('kx:db:mysql:user'),
-            'password' => kxEnv::Get('kx:db:mysql:password'),
+            'host' => self::$config->get('kx:db:mysql:host', 'localhost'),
+            'port' => self::$config->get('kx:db:mysql:port', 3306),
+            'dbname' => self::$config->get('kx:db:mysql:dbname', 'edaha'),
+            'user' => self::$config->get('kx:db:mysql:user', 'edaha'),
+            'password' => self::$config->get('kx:db:mysql:password', 'edaha'),
         ];
     }
 
@@ -77,11 +123,11 @@ class kxOrm
     {
         return [
             'driver' => 'pdo_pgsql',
-            'host' => kxEnv::Get('kx:db:pgsql:host'),
-            'port' => kxEnv::Get('kx:db:pgsql:port'),
-            'dbname' => kxEnv::Get('kx:db:pgsql:dbname'),
-            'user' => kxEnv::Get('kx:db:pgsql:user'),
-            'password' => kxEnv::Get('kx:db:pgsql:password'),
+            'host' => self::$config->get('kx:db:pgsql:host', 'localhost'),
+            'port' => self::$config->get('kx:db:pgsql:port', 5432),
+            'dbname' => self::$config->get('kx:db:pgsql:dbname', 'edaha'),
+            'user' => self::$config->get('kx:db:pgsql:user', 'edaha'),
+            'password' => self::$config->get('kx:db:pgsql:password', 'edaha'),
         ];
     }
 }

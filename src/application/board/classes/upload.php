@@ -2,6 +2,7 @@
 
 use kx\kxEnv;
 use kx\kxFunc;
+use kx\kxRequest;
 
 /*
  * This file is part of kusaba.
@@ -33,14 +34,12 @@ class Upload
     public $file_thumb_cat_location = [];
     public $isreply = false;
     public $isvideo = false;
-    protected $environment;
-    protected $db;
-    protected $request;
+    protected kxRequest $request;
 
-    public function __construct(kxEnv $environment)
-    {
-        $this->environment = $environment;
-        $this->request = kxEnv::$request;
+    public function __construct(
+        protected kxEnv $environment
+    ) {
+        $this->request = $environment->request;
     }
 
     public function HandleUpload($postData, $boardData)
@@ -159,7 +158,7 @@ class Upload
                     foreach ($this->file_location as $location) {
                         unlink($location);
                     }
-                    kxFunc::showError(_('Duplicate file entry detected.'), sprintf(_('Already posted %shere%s.'), '<a href="'.kxEnv::Get('kx:paths:boards:path').'/'.$boardData->board_name.'/res/'.$exists_thread[0].'.html#'.$exists_thread[1].'">', '</a>'));
+                    kxFunc::showError(_('Duplicate file entry detected.'), sprintf(_('Already posted %shere%s.'), '<a href="'.$this->environment->get('kx:paths:boards:path').'/'.$boardData->board_name.'/res/'.$exists_thread[0].'.html#'.$exists_thread[1].'">', '</a>'));
                 }
                 /* removed for now
                 if (strtolower($this->files[$i]['file_type']) == 'svg') {
@@ -203,13 +202,13 @@ class Upload
                         chmod($this->file_location[$i], 0o644);
 
                         if ($file_size[$i] == filesize($this->file_location[$i])) {
-                            if ((!$postData['is_reply'] && ($this->files[$i]['image_w'] > kxEnv::Get('kx:images:thumbw') || $this->files[$i]['image_h'] > kxEnv::Get('kx:images:thumbh'))) || ($postData['is_reply'] && ($this->files[$i]['image_w'] > kxEnv::Get('kx:images:replythumbw') || $this->files[$i]['image_h'] > kxEnv::Get('kx:images:replythumbh')))) {
+                            if ((!$postData['is_reply'] && ($this->files[$i]['image_w'] > $this->environment->get('kx:images:thumbw') || $this->files[$i]['image_h'] > $this->environment->get('kx:images:thumbh'))) || ($postData['is_reply'] && ($this->files[$i]['image_w'] > $this->environment->get('kx:images:replythumbw') || $this->files[$i]['image_h'] > $this->environment->get('kx:images:replythumbh')))) {
                                 if (!$postData['is_reply']) {
-                                    if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_location[$i], kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
+                                    if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_location[$i], $this->environment->get('kx:images:thumbw'), $this->environment->get('kx:images:thumbh'))) {
                                         kxFunc::showError(_('Could not create thumbnail.'));
                                     }
                                 } else {
-                                    if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_location[$i], kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
+                                    if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_location[$i], $this->environment->get('kx:images:replythumbw'), $this->environment->get('kx:images:replythumbh'))) {
                                         kxFunc::showError(_('Could not create thumbnail.'));
                                     }
                                 }
@@ -218,7 +217,7 @@ class Upload
                                     kxFunc::showError(_('Could not create thumbnail.'));
                                 }
                             }
-                            if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_cat_location[$i], kxEnv::Get('kx:images:catthumbw'), kxEnv::Get('kx:images:catthumbh'))) {
+                            if (!$this->createThumbnail($this->file_location[$i], $this->file_thumb_cat_location[$i], $this->environment->get('kx:images:catthumbw'), $this->environment->get('kx:images:catthumbh'))) {
                                 kxFunc::showError(_('Could not create thumbnail.'));
                             }
                             $imageDim_thumb = getimagesize($this->file_thumb_location[$i]);
@@ -277,11 +276,11 @@ class Upload
                                 }
                                 $this->file_thumb_location[$i] = KX_BOARD.'/'.$boardData->board_name.'/thumb/'.$this->files[$i]['file_name'].'s'.$ext;
                                 if (!$postData['is_reply']) {
-                                    if (!$this->createThumbnail($this->file_location[$i].'.tmp', $this->file_thumb_location[$i], kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
+                                    if (!$this->createThumbnail($this->file_location[$i].'.tmp', $this->file_thumb_location[$i], $this->environment->get('kx:images:thumbw'), $this->environment->get('kx:images:thumbh'))) {
                                         kxFunc::showError(_('Could not create thumbnail.'));
                                     }
                                 } else {
-                                    if (!$this->createThumbnail($this->file_location[$i].'.tmp', $this->file_thumb_location[$i], kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
+                                    if (!$this->createThumbnail($this->file_location[$i].'.tmp', $this->file_thumb_location[$i], $this->environment->get('kx:images:replythumbw'), $this->environment->get('kx:images:replythumbh'))) {
                                         kxFunc::showError(_('Could not create thumbnail.'));
                                     }
                                 }
@@ -408,7 +407,7 @@ class Upload
 
                         foreach ($results as $line) {
                             $real_threadid = (0 == $line->parent_post_id) ? $line->post_id : $line->parent_post_id;
-                            kxFunc::showError(sprintf(_('That video ID has already been posted %shere%s.'), '<a href="'.kxEnv::Get('kx:paths:boards:folder').'/'.$boardData->board_id.'/res/'.$real_threadid.'.html#'.$line->parent_post_id.'">', '</a>'));
+                            kxFunc::showError(sprintf(_('That video ID has already been posted %shere%s.'), '<a href="'.$this->environment->get('kx:paths:boards:folder').'/'.$boardData->board_id.'/res/'.$real_threadid.'.html#'.$line->parent_post_id.'">', '</a>'));
                         }
                     }
                 } else {
@@ -444,15 +443,15 @@ class Upload
   $thumbpath = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[0]['file_name'] . 's' . $this->files[0]['file_type'];
   $thumbpath_cat = KX_BOARD . '/' . $boardData->board_name . '/thumb/' . $this->files[0]['file_name'] . 'c' . $this->files[0]['file_type'];
   if (
-  (!$postData['is_reply'] && ($this->files[0]['image_w'] > kxEnv::Get('kx:images:thumbw') || $this->files[0]['image_h'] > kxEnv::Get('kx:images:thumbh'))) ||
-  ($postData['is_reply'] && ($this->files[0]['image_w'] > kxEnv::Get('kx:images:replythumbw') || $this->files[0]['image_h'] > kxEnv::Get('kx:images:replythumbh')))
+  (!$postData['is_reply'] && ($this->files[0]['image_w'] > $this->environment->get('kx:images:thumbw') || $this->files[0]['image_h'] > $this->environment->get('kx:images:thumbh'))) ||
+  ($postData['is_reply'] && ($this->files[0]['image_w'] > $this->environment->get('kx:images:replythumbw') || $this->files[0]['image_h'] > $this->environment->get('kx:images:replythumbh')))
   ) {
   if (!$postData['is_reply']) {
-  if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:thumbw'), kxEnv::Get('kx:images:thumbh'))) {
+  if (!$this->createThumbnail($postData['oekaki'], $thumbpath, $this->environment->get('kx:images:thumbw'), $this->environment->get('kx:images:thumbh'))) {
   kxFunc::showError(_('Could not create thumbnail.'));
   }
   } else {
-  if (!$this->createThumbnail($postData['oekaki'], $thumbpath, kxEnv::Get('kx:images:replythumbw'), kxEnv::Get('kx:images:replythumbh'))) {
+  if (!$this->createThumbnail($postData['oekaki'], $thumbpath, $this->environment->get('kx:images:replythumbw'), $this->environment->get('kx:images:replythumbh'))) {
   kxFunc::showError(_('Could not create thumbnail.'));
   }
   }
@@ -461,7 +460,7 @@ class Upload
   kxFunc::showError(_('Could not create thumbnail.'));
   }
   }
-  if (!$this->createThumbnail($postData['oekaki'], $thumbpath_cat, kxEnv::Get('kx:images:catthumbw'), kxEnv::Get('kx:images:catthumbh'))) {
+  if (!$this->createThumbnail($postData['oekaki'], $thumbpath_cat, $this->environment->get('kx:images:catthumbw'), $this->environment->get('kx:images:catthumbh'))) {
   kxFunc::showError(_('Could not create thumbnail.'));
   }
 
@@ -485,9 +484,9 @@ class Upload
      */
     public function createThumbnail($source, $destination, $new_w, $new_h)
     {
-        if ('imagemagick' == kxEnv::Get('kx:images:method')) {
+        if ('imagemagick' == $this->environment->get('kx:images:method')) {
             $convert = 'convert '.escapeshellarg($source);
-            if (!kxEnv::Get('kx:images:animated')) {
+            if (!$this->environment->get('kx:images:animated')) {
                 $convert .= '[0] ';
             }
             $convert .= ' -resize '.$new_w.'x'.$new_h.' -quality ';
@@ -504,7 +503,8 @@ class Upload
             }
 
             return false;
-        } elseif ('gd' == kxEnv::Get('kx:images:method')) {
+        }
+        if ('gd' == $this->environment->get('kx:images:method')) {
             $system = explode('.', $destination);
             $system = array_reverse($system);
 

@@ -76,7 +76,7 @@ class manage_core_site_config extends kxCmd
         // die();
 
         foreach ($_POST['config'] as $option => $value) {
-            kxEnv::set('kx:'.$option, $value);
+            $this->environment->set('kx:'.$option, $value);
         }
 
         $new_config = ['all' => current((array) $this->environment->configuration)];

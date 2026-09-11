@@ -36,7 +36,7 @@ class public_core_index_menu extends kxCmd
     {
         // $twigData['boardpath'] = getCLBoardPath();
 
-        $twigData['styles'] = explode(':', kxEnv::Get('kx:css:sitestyles'));
+        $twigData['styles'] = explode(':', $this->environment->get('kx:css:sitestyles'));
 
         if ($savetofile) {
             $file = 'menu.html';

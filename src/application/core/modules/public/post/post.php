@@ -131,7 +131,7 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
     {
         $board = $this->entityManager->find(Board::class, $board_id);
         if (is_null($board)) {
-            kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
+            kxFunc::doRedirect($this->environment->get('kx:paths:main:webpath'));
         }
         $this->board = $board;
     }
@@ -146,7 +146,7 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
         }
         // Module is not a board type module or is isn't properly configured
         else {
-            kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
+            kxFunc::doRedirect($this->environment->get('kx:paths:main:webpath'));
         }
         // Some routine checks...
         $className = 'public_board_'.$board_type.'_'.$board_type;
@@ -157,10 +157,10 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
                 $this->_boardClass = $module_class->newInstance($this->environment);
                 $this->_boardClass->execute($this->environment);
             } else {
-                kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
+                kxFunc::doRedirect($this->environment->get('kx:paths:main:webpath'));
             }
         } else {
-            kxFunc::doRedirect(kxEnv::Get('kx:paths:main:webpath'));
+            kxFunc::doRedirect($this->environment->get('kx:paths:main:webpath'));
         }
     }
 
@@ -254,8 +254,8 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
                 $this->postData['sticky_on_post'] = true;
             }
             if (isset($this->request['usestaffname'])) {
-                $_POST['name'] = kxFunc::md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed'));
-                $post_name = kxFunc::md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed'));
+                $_POST['name'] = kxFunc::md5_decrypt($this->request['modpassword'], $this->environment->get('kx:misc:randomseed'));
+                $post_name = kxFunc::md5_decrypt($this->request['modpassword'], $this->environment->get('kx:misc:randomseed'));
             }
         }
     }
@@ -282,10 +282,10 @@ class public_core_post_post extends kxCmd implements PostingProcessorInterface
 
     private function redirectToBoardOrPost(): void
     {
-        $url = kxEnv::Get('kx:paths:boards:path').'/'.$this->board->directory;
+        $url = $this->environment->get('kx:paths:boards:path').'/'.$this->board->directory;
 
         if (!$this->noko) {
-            $url .= '/'.kxEnv::Get('kx:pages:first');
+            $url .= '/'.$this->environment->get('kx:pages:first');
         } else {
             $url .= '/res/';
             $url .= ($this->post->is_reply) ? $this->parent_post->id : $this->post->id;

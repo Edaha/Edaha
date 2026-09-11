@@ -6,7 +6,6 @@ use kx\kxCmd\kxCmd;
 use kx\kxEnv;
 use kx\kxFunc;
 
-
 /*
  * Base board (that other board types should extend)
  * Last Updated: $Date: 2011-08-14 18:09:42 -0400 (Sun, 14 Aug 2011) $
@@ -72,10 +71,10 @@ abstract class public_board_base_baseboard extends kxCmd
     public function parseData($message)
     {
         $message = trim($message);
-        // $this->parser->cutWord($message, (kxEnv::get('kx:limits:linelength') / 15));
+        // $this->parser->cutWord($message, ($this->environment->get('kx:limits:linelength') / 15));
         // var_dump($message);
-        // $message = htmlspecialchars($message, ENT_QUOTES, kxEnv::get('kx:charset'));
-        if (kxEnv::Get('kx:posts:makelinks')) {
+        // $message = htmlspecialchars($message, ENT_QUOTES, $this->environment->get('kx:charset'));
+        if ($this->environment->get('kx:posts:makelinks')) {
             // $this->environment->get('kx:classes:board:parse:id')->makeClickable($message);
         }
         // $this->environment->get('kx:classes:board:parse:id')->clickableQuote($message);
@@ -168,14 +167,14 @@ abstract class public_board_base_baseboard extends kxCmd
         //         $filetype_info[$type] = kxFunc::getFileTypeInfo($type);
         //       }
 
-        //       $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/public/filetypes/' . $filetype_info[$type][0];
+        //       $post->nonstandard_file[$key] = $this->environment->get('kx:paths:main:path') . '/public/filetypes/' . $filetype_info[$type][0];
         //       if ($post->file_thumb_width[$key] != 0 && $post->file_thumb_height[$key] != 0) {
         //         if (file_exists(KX_BOARD . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg')) {
-        //           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg';
+        //           $post->nonstandard_file[$key] = $this->environment->get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.jpg';
         //         } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.png')) {
-        //           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.png';
+        //           $post->nonstandard_file[$key] = $this->environment->get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.png';
         //         } elseif (file_exists(KX_BOARD . '/' . $this->board['name'] . '/thumb/' . $post['file'] . 's.gif')) {
-        //           $post->nonstandard_file[$key] = kxEnv::Get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.gif';
+        //           $post->nonstandard_file[$key] = $this->environment->get('kx:paths:main:path') . '/' . $this->board->board_name . '/thumb/' . $post->file_name[$key] . 's.gif';
         //         } else {
         //           $post->file_thumb_width[$key] = $filetype_info[$type][1];
         //           $post->file_thumb_height[$key] = $filetype_info[$type][2];
@@ -212,7 +211,7 @@ abstract class public_board_base_baseboard extends kxCmd
     public function formatLongMessage($message, $board, $threadid, $page)
     {
         $output = '';
-        if ((strlen($message) > kxEnv::Get('kx:limits:linelength') || count(explode('<br />', $message)) > 15) && $page) {
+        if ((strlen($message) > $this->environment->get('kx:limits:linelength') || count(explode('<br />', $message)) > 15) && $page) {
             $message_exploded = explode('<br />', $message);
             $message_shortened = '';
             for ($i = 0; $i <= 14; ++$i) {
@@ -220,8 +219,8 @@ abstract class public_board_base_baseboard extends kxCmd
                     $message_shortened .= $message_exploded[$i].'<br />';
                 }
             }
-            if (strlen($message_shortened) > kxEnv::Get('kx:limits:linelength')) {
-                $message_shortened = substr($message_shortened, 0, kxEnv::Get('kx:limits:linelength'));
+            if (strlen($message_shortened) > $this->environment->get('kx:limits:linelength')) {
+                $message_shortened = substr($message_shortened, 0, $this->environment->get('kx:limits:linelength'));
             }
 
             // TODO need to add this
@@ -233,7 +232,7 @@ abstract class public_board_base_baseboard extends kxCmd
             }
 
             $output = $message_shortened.'<div class="abbrev">'."\n"
-            .'  '.sprintf(_('Message too long. Click %shere%s to view the full text.'), '<a href="'.kxEnv::Get('kx:paths:boards:folder').$board.'/res/'.$threadid.'.html">', '</a>')."\n"
+            .'  '.sprintf(_('Message too long. Click %shere%s to view the full text.'), '<a href="'.$this->environment->get('kx:paths:boards:folder').$board.'/res/'.$threadid.'.html">', '</a>')."\n"
               .'</div>'."\n";
         } else {
             $output .= $message."\n";
@@ -254,9 +253,9 @@ abstract class public_board_base_baseboard extends kxCmd
     {
         $return = '  ';
 
-        $reflink_noquote = '<a href="'.kxEnv::Get('kx:paths:boards:folder').'/'.$post_board.'/res/'.$post_thread_start_id.'.html#'.$post_id.'" onclick="return kusaba.highlight(\''.$post_id.'\');">';
+        $reflink_noquote = '<a href="'.$this->environment->get('kx:paths:boards:folder').'/'.$post_board.'/res/'.$post_thread_start_id.'.html#'.$post_id.'" onclick="return kusaba.highlight(\''.$post_id.'\');">';
 
-        $reflink_quote = '<a href="'.kxEnv::Get('kx:paths:boards:folder').'/'.$post_board.'/res/'.$post_thread_start_id.'.html#i'.$post_id.'" onclick="return kusaba.insert(\'>>'.$post_id.'\n\');">';
+        $reflink_quote = '<a href="'.$this->environment->get('kx:paths:boards:folder').'/'.$post_board.'/res/'.$post_thread_start_id.'.html#i'.$post_id.'" onclick="return kusaba.insert(\'>>'.$post_id.'\n\');">';
 
         if ('ja' == $locale) {
             $return .= $reflink_quote.kxFunc::formatJapaneseNumbers($post_id).'</a>'.$reflink_noquote.'?</a>';

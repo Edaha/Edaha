@@ -13,9 +13,6 @@ class kxEnv implements ConfigInterface
 
     public ?kxRequest $request;
 
-    protected static $_coreConfig = [];
-    protected static $_appConfig = [];
-
     private static self $instance;
     private static $cache;
 

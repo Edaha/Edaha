@@ -79,7 +79,7 @@ class manage_core_site_config extends kxCmd
             kxEnv::set('kx:'.$option, $value);
         }
 
-        $new_config = ['all' => current((array) kxEnv::dumpConfig())];
+        $new_config = ['all' => current((array) $this->environment->configuration)];
         // print_r($new_config);
         unset($new_config['all']['kx']['autoload'], $new_config['all']['kx']['classes']);
 

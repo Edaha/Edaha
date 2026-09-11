@@ -4,12 +4,9 @@ namespace kx;
 
 class kxConfig implements \ArrayAccess
 {
-    private $container = [];
-
-    public function __construct(array $data)
-    {
-        $this->container = $data;
-    }
+    public function __construct(
+        private array $container = []
+    ) {}
 
     /**
      * Set the configuration keyed by $path to $value.
@@ -21,48 +18,11 @@ class kxConfig implements \ArrayAccess
     }
 
     /**
-     * Works down the array keyed by $path to set $value.
-     */
-    public function setRecursive(array $path, mixed $value): array|string
-    {
-        if (!count($path)) {
-            return $value;
-        }
-
-        return [array_shift($path) => self::setRecursive($path, $value)];
-    }
-
-    /**
      * Get the config value stored at $path.
      */
     public function get(?string $path = null, mixed $default = null): mixed
     {
         return $this->getRecursive($this->container, strlen($path) ? explode(':', $path) : [], $default);
-    }
-
-    /**
-     * Traverses $root via $path to return the configuration value.
-     */
-    public function getRecursive(array|string $root, array $path = [], mixed $default = null): mixed
-    {
-        if (is_null($root)) {
-            return $default;
-        }
-        if (!count($path)) {
-            return $root;
-        }
-        if (!is_array($root)) {
-            return $default;
-        }
-
-        $node = array_shift($path);
-
-        return array_key_exists($node, $root) ? self::getRecursive($root[$node], $path, $default) : $default;
-    }
-
-    public function getContainer()
-    {
-        return $this->container;
     }
 
     // {{{ ArrayAccess implementation
@@ -103,6 +63,38 @@ class kxConfig implements \ArrayAccess
         }
 
         return new self($configuration);
+    }
+
+    /**
+     * Works down the array keyed by $path to set $value.
+     */
+    private function setRecursive(array $path, mixed $value): array|string
+    {
+        if (!count($path)) {
+            return $value;
+        }
+
+        return [array_shift($path) => self::setRecursive($path, $value)];
+    }
+
+    /**
+     * Traverses $root via $path to return the configuration value.
+     */
+    private function getRecursive(array|string $root, array $path = [], mixed $default = null): mixed
+    {
+        if (is_null($root)) {
+            return $default;
+        }
+        if (!count($path)) {
+            return $root;
+        }
+        if (!is_array($root)) {
+            return $default;
+        }
+
+        $node = array_shift($path);
+
+        return array_key_exists($node, $root) ? self::getRecursive($root[$node], $path, $default) : $default;
     }
 
     /**

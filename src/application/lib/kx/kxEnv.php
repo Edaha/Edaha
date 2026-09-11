@@ -19,12 +19,9 @@ class kxEnv
     private static $cache;
 
     private function __construct(
-        private string $environment_name,
-        private kxConfig $configuration
-    ) {
-        $this->environment_name = $environment_name;
-        $this->configuration = $configuration;
-    }
+        public string $environment_name,
+        public kxConfig $configuration
+    ) {}
 
     /**
      * Get the kxEnv instance if it exists.
@@ -41,18 +38,18 @@ class kxEnv
     /**
      * Set up the environment.
      *
-     * @param string $environment The name of the environment (e.g. 'dev', 'prod')
-     * @param string $config_path The directory storing the configuration YAML
+     * @param string $environment_name The name of the environment (e.g. 'dev', 'prod')
+     * @param string $config_path      The directory storing the configuration YAML
      */
-    public static function initialize(string $environment, string $config_path): self
+    public static function initialize(string $environment_name, string $config_path): self
     {
         if (isset(self::$instance) && self::$instance instanceof self) {
             throw new kxException('Cannot re-initialize kxEnv.');
         }
 
         self::$instance = new self(
-            $environment,
-            kxConfig::loadConfigFromDirectory($environment, $config_path)
+            $environment_name,
+            kxConfig::loadConfigFromDirectory($environment_name, $config_path)
         );
 
         self::$instance->request = kxRequest::getInstance();
@@ -107,18 +104,10 @@ class kxEnv
         // Shortcut for getting stuff from the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {
             // Cache doesn't care about $default
-            return self::getInstance()->getCache()->get($path);
+            return self::getInstance()->cache->get($path);
         }
 
-        return self::getInstance()->getConfig()->get($path, $default);
-    }
-
-    /**
-     * Get the configuration of the environment.
-     */
-    public static function dumpConfig(): kxConfig
-    {
-        return self::getInstance()->getConfig();
+        return self::getInstance()->configuration->get($path, $default);
     }
 
     /**
@@ -131,9 +120,9 @@ class kxEnv
     {
         // Shortcut for setting the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {
-            self::getInstance()->getCache()->set($path, $value);
+            self::getInstance()->cache->set($path, $value);
         }
-        self::getInstance()->getConfig()->set($path, $value);
+        self::getInstance()->configuration->set($path, $value);
     }
 
     // private static function setupAutoloader(): void
@@ -196,21 +185,5 @@ class kxEnv
                 self::$_appConfig[$app]['cachetoload'] = $LOAD;
             }
         }
-    }
-
-    /**
-     * Get the environment's configuration.
-     */
-    private function getConfig(): kxConfig
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * Get the environment's cache object.
-     */
-    private function getCache(): mixed
-    {
-        return self::$cache;
     }
 }

@@ -3,8 +3,9 @@
 namespace kx;
 
 use kx\Exceptions\kxException;
+use kx\Interfaces\ConfigInterface;
 
-class kxEnv
+class kxEnv implements ConfigInterface
 {
     public string $current_application = '';
     public string $current_module = '';
@@ -20,7 +21,7 @@ class kxEnv
 
     private function __construct(
         public string $environment_name,
-        public kxConfig $configuration
+        public ConfigInterface $configuration
     ) {}
 
     /**
@@ -38,10 +39,9 @@ class kxEnv
     /**
      * Set up the environment.
      *
-     * @param string $environment_name The name of the environment (e.g. 'dev', 'prod')
-     * @param string $config_path      The directory storing the configuration YAML
+     * @param string $environment_name e.g. 'dev', 'prod'
      */
-    public static function initialize(string $environment_name, string $config_path): self
+    public static function initialize(string $environment_name, ConfigInterface $configuration): self
     {
         if (isset(self::$instance) && self::$instance instanceof self) {
             throw new kxException('Cannot re-initialize kxEnv.');
@@ -49,7 +49,7 @@ class kxEnv
 
         self::$instance = new self(
             $environment_name,
-            kxConfig::loadConfigFromDirectory($environment_name, $config_path)
+            $configuration
         );
 
         self::$instance->request = kxRequest::getInstance();
@@ -62,35 +62,18 @@ class kxEnv
     }
 
     /**
-     * Loads data from kx core config.
-     */
-    public static function fetchCoreConfig(string $type): coreConfig
-    {
-        if (!isset(self::$_coreConfig[$type]) || !\is_array(self::$_coreConfig[$type])) {
-            self::loadCoreConfig();
-            $return = self::$_coreConfig['core_config_class']->fetchCaches();
-            self::$_coreConfig['cache'] = \is_array($return['caches']) ? $return['caches'] : [];
-            self::$_coreConfig['cachetoload'] = \is_array($return['cachetoload']) ? $return['cachetoload'] : [];
-        }
-
-        return self::$_coreConfig[$type];
-    }
-
-    /**
-     * Fetches apps core variable data.
+     * Set a configuration key to a specific volume.
      *
-     * @param string $app  App dir
-     * @param string $type Type of variable to return ('cache' or 'cachetoload')
-     *
-     * @return array The app configuration
+     * @param string $path  The configuration key to set
+     * @param mixed  $value The value to set the configuration key to
      */
-    public static function fetchAppConfig(string $app, string $type): array
+    public function set(string $path, mixed $value): void
     {
-        if (!isset(self::$_appConfig[$app][$type]) or !\is_array(self::$_appConfig[$app][$type])) {
-            self::loadAppConfig($app);
+        // Shortcut for setting the cache (without having to use the cache object directly)
+        if (0 === strpos($path, 'cache')) {
+            self::getInstance()->cache->set($path, $value);
         }
-
-        return self::$_appConfig[$app][$type] ?? [];
+        self::getInstance()->configuration->set($path, $value);
     }
 
     /**
@@ -99,7 +82,7 @@ class kxEnv
      * @param ?string $path    The path of the configuration value to return
      * @param mixed   $default The value to return if the configuration is not found
      */
-    public static function get(?string $path = null, mixed $default = null): mixed
+    public function get(?string $path = null, mixed $default = null): mixed
     {
         // Shortcut for getting stuff from the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {
@@ -109,31 +92,6 @@ class kxEnv
 
         return self::getInstance()->configuration->get($path, $default);
     }
-
-    /**
-     * Set a configuration key to a specific volume.
-     *
-     * @param string $path  The configuration key to set
-     * @param mixed  $value The value to set the configuration key to
-     */
-    public static function set(string $path, mixed $value): void
-    {
-        // Shortcut for setting the cache (without having to use the cache object directly)
-        if (0 === strpos($path, 'cache')) {
-            self::getInstance()->cache->set($path, $value);
-        }
-        self::getInstance()->configuration->set($path, $value);
-    }
-
-    // private static function setupAutoloader(): void
-    // {
-    //     // Add any classes we want added to the autoloader.
-    //     foreach (self::get('kx:autoload:load') as $repo => $opts) {
-    //         self::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
-    //             'prefix' => $opts['prefix'],
-    //         ]));
-    //     }
-    // }
 
     private function setContextVariables(): void
     {
@@ -154,36 +112,5 @@ class kxEnv
         $this->current_application = KX_CURRENT_APP;
         $this->current_module = $this->request->get('module') ? kxFunc::alphaNum($this->request->get('module')) : '';
         $this->current_section = $this->request->get('section') ? kxFunc::alphaNum($this->request->get('section')) : '';
-    }
-
-    /**
-     * Loads kx core configuration class.
-     */
-    private static function loadCoreConfig(): void
-    {
-        if (!(isset(self::$_coreConfig['core_config_class']) and is_object(self::$_coreConfig['core_config_class']))) {
-            self::$_coreConfig['core_config_class'] = new coreConfig();
-        }
-    }
-
-    /**
-     * Loads the configuration for an application.
-     *
-     * @param string $app The name of the application
-     */
-    private static function loadAppConfig(string $app): void
-    {
-        $CACHE = $LOAD = [];
-
-        if (!isset(self::$_appConfig[$app])) {
-            $file = kxFunc::getAppDir($app).'/appConfig.php';
-
-            if (is_file($file)) {
-                require $file;
-
-                self::$_appConfig[$app]['cache'] = $CACHE;
-                self::$_appConfig[$app]['cachetoload'] = $LOAD;
-            }
-        }
     }
 }

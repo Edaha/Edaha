@@ -2,7 +2,9 @@
 
 namespace kx;
 
-class kxConfig implements \ArrayAccess
+use kx\Interfaces\ConfigInterface;
+
+class kxConfig implements \ArrayAccess, ConfigInterface
 {
     public function __construct(
         private array $container = []
@@ -38,7 +40,7 @@ class kxConfig implements \ArrayAccess
 
     public function offsetExists(mixed $offset): bool
     {
-        return array_key_exists($this->container[$offset]);
+        return \array_key_exists($offset, $this->container);
     }
 
     public function offsetUnset(mixed $offset): void
@@ -165,118 +167,6 @@ class kxConfig implements \ArrayAccess
      */
     private static function loadConfigFile(string $configfile): array
     {
-        if (self::isCached($configfile)) {
-            return self::loadCached($configfile);
-        }
-
         return kxYml::loadFile($configfile);
-    }
-
-    /**
-     * Do nothing lol.
-     *
-     * @param string $configfile The configuration file to get false about
-     *
-     * @return bool Always false
-     */
-    private static function isCached(string $configfile): bool
-    {
-        return false;
-    }
-}
-
-class coreConfig
-{
-    /**
-     * Fetch the cache array.
-     *
-     * @return array caches and caches to load
-     */
-    public function fetchCaches()
-    {
-        // Apps and modules
-        $cache = ['version' => [
-            'force_load' => 1,
-            'recache_file' => kxFunc::getAppDir('core').'/modules/manage/index/index.php',
-            'recache_class' => 'manage_core_index_index',
-            'recache_function' => 'recacheEdahaVersion',
-        ],
-            'test' => [
-                'testing' => [
-                    'force_load' => 0,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheApplications',
-                ],
-            ],
-            'addons' => [
-                'app_cache' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheApplications',
-                ],
-                'app_menu' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheAppMenu',
-                ],
-                'module_cache' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheModules',
-                ],
-                'hooks_cache' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/hooks.php',
-                    'recache_class' => 'manage_core_addons_hooks',
-                    'recache_function' => 'recacheHooks',
-                ],
-            ],
-            'filters' => [
-                'wordfilters' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules_admin/posts/filter.php',
-                    'recache_class' => 'manage_board_posts_filter',
-                    'recache_function' => 'recacheWordFilters',
-                ],
-                'spamfilters' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules_admin/posts/filter.php',
-                    'recache_class' => 'manage_board_posts_filter',
-                    'recache_function' => 'recacheSpamFilters',
-                ],
-            ],
-            'attachments' => [
-                'filetypes' => [
-                    'force_load' => 0,
-                    'recache_file' => kxFunc::getAppDir('board').'/modules/manage/filetypes.php',
-                    'recache_class' => 'manage_board_attachments_filetypes',
-                    'recache_function' => 'recacheFiletypes',
-                ],
-                'embeds' => [
-                    'force_load' => 0,
-                    'recache_file' => kxFunc::getAppDir('board').'/modules/manage/embeds.php',
-                    'recache_class' => 'manage_board_attachments_embeds',
-                    'recache_function' => 'recacheEmbeds',
-                ],
-            ],
-        ];
-        if (isset(kxEnv::$request['board'])) {
-            $cache['boardopts'] = [
-                kxEnv::$request['board'] => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('board').'/modules/manage/boardopts.php',
-                    'recache_class' => 'manage_board_board_boardopts',
-                    'recache_function' => 'recacheBoardOptions',
-                ],
-            ];
-        }
-        $load = [];
-
-        return ['caches' => $cache,
-            'cachetoload' => $load];
     }
 }

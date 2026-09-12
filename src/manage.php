@@ -9,6 +9,11 @@ include 'init.php';
 
 session_start();
 // Load the command resolver
-kxCmdResolv::run(kxEnv::getInstance());
+kxCmdResolv::run(
+    kxEnv::initialize(
+        KX_ENVIRONMENT,
+        KX_ROOT.'/config'
+    )
+);
 
 exit;

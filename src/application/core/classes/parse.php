@@ -1,28 +1,22 @@
 <?php
 
-use kx\kxMb;
-use kx\kxEnv;
+use kx\Interfaces\ConfigInterface;
 use kx\kxFunc;
+use kx\kxMb;
 
 class Parse
 {
-    protected $environment;
-    protected $db;
-    protected $request;
-
-    public function __construct(kxEnv $environment)
-    {
-        $this->environment = $environment;
-        $this->request = kxEnv::$request;
-    }
+    public function __construct(
+        protected ConfigInterface $config
+    ) {}
 
     public function makeClickable(&$txt)
     {
-        $txt = preg_replace('#(script|about|applet|activex|chrome):#is', '\\1:', $txt);
+        $txt = preg_replace('#(script|about|applet|activex|chrome):#is', '\1:', $txt);
         $txt = ' '.$txt;
-        $txt = preg_replace("#(^|[\n ])([\\w]+?://[\\w\\#$%&~/.\\-;:=,?@\\[\\]+]*)#is", '\\1<a href="\\2" target="_blank">\\2</a>', $txt);
-        $txt = preg_replace("#(^|[\n ])((www|ftp)\\.[\\w\\#$%&~/.\\-;:=,?@\\[\\]+]*)#is", '\\1<a href="http://\\2" target="_blank">\\2</a>', $txt);
-        $txt = preg_replace("#(^|[\n ])([a-z0-9&\\-_.]+?)@([\\w\\-]+\\.([\\w\\-\\.]+\\.)*[\\w]+)#i", '\\1<a href="mailto:\\2@\\3">\\2@\\3</a>', $txt);
+        $txt = preg_replace("#(^|[\n ])([\\w]+?://[\\w\\#$%&~/.\\-;:=,?@\\[\\]+]*)#is", '\1<a href="\2" target="_blank">\2</a>', $txt);
+        $txt = preg_replace("#(^|[\n ])((www|ftp)\\.[\\w\\#$%&~/.\\-;:=,?@\\[\\]+]*)#is", '\1<a href="http://\2" target="_blank">\2</a>', $txt);
+        $txt = preg_replace("#(^|[\n ])([a-z0-9&\\-_.]+?)@([\\w\\-]+\\.([\\w\\-\\.]+\\.)*[\\w]+)#i", '\1<a href="mailto:\2@\3">\2@\3</a>', $txt);
         $txt = substr($txt, 1);
     }
 
@@ -94,7 +88,7 @@ class Parse
     {
         // $result = $this->db->select("posts")
         //   ->fields("posts", array("parent_post_id"))
-        //   ->condition("board_id", $this->environment->get('kx:classes:board:id')->board_id)
+        //   ->condition("board_id", $this->config->get('kx:classes:board:id')->board_id)
         //   ->condition("post_id", $matches[1])
         //   ->execute()
         //   ->fetchField();
@@ -107,7 +101,7 @@ class Parse
             $realID = $result;
         }
 
-        return '<a href="'.kxEnv::get('kx:paths:boards:path').'/'.$this->environment->get('kx:classes:board:id')->board_name.'/res/'.$realID.'.html#'.$matches[1].'" id="ref">'.$matches[0].'</a>'.$lastchar;
+        return '<a href="'.$this->config->get('kx:paths:boards:path').'/'.$this->config->get('kx:classes:board:id')->board_name.'/res/'.$realID.'.html#'.$matches[1].'" id="ref">'.$matches[0].'</a>'.$lastchar;
     }
 
     public function doDynamicPostLink($matches)
@@ -123,8 +117,8 @@ class Parse
                 }
             }
             if ('' !== $realid) {
-                $return = '<a href="'.kxEnv::Get('kx:paths:boards:folder').'read.php';
-                if (kxEnv::Get('kx:display:traditionalread')) {
+                $return = '<a href="'.$this->config->get('kx:paths:boards:folder').'read.php';
+                if ($this->config->get('kx:display:traditionalread')) {
                     $return .= '/'.$thread_board_return.'/'.$realid.'/'.$matches[1];
                 } else {
                     $return .= '?b='.$thread_board_return.'&t='.$realid.'&p='.$matches[1];
@@ -162,10 +156,10 @@ class Parse
                 }
 
                 if (1 != $result[0]['type']) {
-                    return '<a href="'.kxEnv::Get('kx:paths:boards:path').'/'.$matches[1].'/res/'.$realid.'.html#'.$matches[2].'" class="ref|'.$matches[1].'|'.$realid.'|'.$matches[2].'">'.$matches[0].'</a>';
+                    return '<a href="'.$this->config->get('kx:paths:boards:path').'/'.$matches[1].'/res/'.$realid.'.html#'.$matches[2].'" class="ref|'.$matches[1].'|'.$realid.'|'.$matches[2].'">'.$matches[0].'</a>';
                 }
 
-                return '<a href="'.kxEnv::Get('kx:paths:boards:path').'/'.$matches[1].'/res/'.$realid.'.html" class="ref|'.$matches[1].'|'.$realid.'|'.$realid.'">'.$matches[0].'</a>';
+                return '<a href="'.$this->config->get('kx:paths:boards:path').'/'.$matches[1].'/res/'.$realid.'.html" class="ref|'.$matches[1].'|'.$realid.'|'.$realid.'">'.$matches[0].'</a>';
             }
         }
 
@@ -175,10 +169,10 @@ class Parse
     public function wordFilter(&$buffer)
     {
         // TODO Revisit filter operation
-        /* $filters = kxEnv::Get("cache:filters:wordfilters");
+        /* $filters = $this->config->get("cache:filters:wordfilters");
 
   foreach ($filters as $filter) {
-  if ( (!$filter->filter_boards || in_array($this->environment->get("kx:classes:board:id")->board_name, $filter->filter_boards)) && (!$filter->filter_regex && kxMb::stripos($buffer, $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $buffer))) {
+  if ( (!$filter->filter_boards || in_array($this->config->get("kx:classes:board:id")->board_name, $filter->filter_boards)) && (!$filter->filter_regex && kxMb::stripos($buffer, $filter->filter_word) !== false) || ($filter->filter_regex && preg_match($filter->filter_word, $buffer))) {
   $buffer = ($filter->filter_regex == 1) ? preg_replace($filter->filter_word, $filter->filter_replacement, $buffer) : str_ireplace($filter->filter_word, $filter->filter_replacement, $buffer);
   }
   }*/

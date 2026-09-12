@@ -43,7 +43,7 @@ class manage_board_filter_filter extends kxCmd
 
     private function _showFilters()
     {
-        $filters = kxEnv::Get('cache:filters:wordfilters');
+        $filters = $this->environment->get('cache:filters:wordfilters');
 
         $this->twigData['filters'] = $filters;
         $this->twigData['sections'] = kxFunc::fullBoardList();
@@ -129,7 +129,7 @@ class manage_board_filter_filter extends kxCmd
             ->check()
         ;
 
-        $filters = kxEnv::get('cache:filters:wordfilters');
+        $filters = $this->environment->get('cache:filters:wordfilters');
 
         // Have to remove the unnecessary filters (aka the ones that aren't what we're editing) from the filters array
         for ($i = 0; $i < count($filters); ++$i) {
@@ -191,6 +191,6 @@ class manage_board_filter_filter extends kxCmd
         //   $filter->filter_boards = $fetch_boards->fetchCol();
         // }
 
-        // kxEnv::set('cache:filters:wordfilters', $filters);
+        // $this->environment->set('cache:filters:wordfilters', $filters);
     }
 }

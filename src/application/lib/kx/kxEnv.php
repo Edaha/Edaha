@@ -2,36 +2,32 @@
 
 namespace kx;
 
-class kxEnv
+use kx\Exceptions\kxException;
+use kx\Interfaces\ConfigInterface;
+
+class kxEnv implements ConfigInterface
 {
-    public static $current_application = '';
-    public static $current_module = '';
-    public static $current_section = '';
+    public string $current_application = '';
+    public string $current_module = '';
+    public string $current_section = '';
 
-    public static ?kxRequest $request;
+    public ?kxRequest $request;
 
-    protected static $_coreConfig = [];
-    protected static $_appConfig = [];
-
-    private static kxEnv $instance;
+    private static self $instance;
     private static $cache;
 
-    private string $environment;
-    private kxConfig $configuration;
-
-    private function __construct(string $environment, kxConfig $configuration)
-    {
-        $this->environment = $environment;
-        $this->configuration = $configuration;
-    }
+    private function __construct(
+        public string $environment_name,
+        public ConfigInterface $configuration
+    ) {}
 
     /**
      * Get the kxEnv instance if it exists.
      */
     public static function getInstance(): ?kxEnv
     {
-        if (!self::$instance instanceof self) {
-            return null;
+        if (!isset(self::$instance) || !self::$instance instanceof self) {
+            throw new kxException('kxEnv has not been instantiated.');
         }
 
         return self::$instance;
@@ -40,79 +36,26 @@ class kxEnv
     /**
      * Set up the environment.
      *
-     * @param string $environment The name of the environment (e.g. 'dev', 'prod')
-     * @param string $configdir   The directory storing the configuration YAML
+     * @param string $environment_name e.g. 'dev', 'prod'
      */
-    public static function initialize(string $environment, string $configdir): void
+    public static function initialize(string $environment_name, ConfigInterface $configuration): self
     {
         if (isset(self::$instance) && self::$instance instanceof self) {
-            return;
+            throw new kxException('Cannot re-initialize kxEnv.');
         }
 
-        self::createInstance($environment, $configdir);
-        self::setupAutoloader();
-        self::$request = kxRequest::getInstance();
-        self::setContextVariables();
+        self::$instance = new self(
+            $environment_name,
+            $configuration
+        );
+
+        self::$instance->request = kxRequest::getInstance();
+        self::$instance->setContextVariables();
 
         // Load the cache
         // self::$cache = kxCache::instance();
-    }
 
-    /**
-     * Loads data from kx core config.
-     */
-    public static function fetchCoreConfig(string $type): coreConfig
-    {
-        if (!isset(self::$_coreConfig[$type]) || !\is_array(self::$_coreConfig[$type])) {
-            self::loadCoreConfig();
-            $return = self::$_coreConfig['core_config_class']->fetchCaches();
-            self::$_coreConfig['cache'] = \is_array($return['caches']) ? $return['caches'] : [];
-            self::$_coreConfig['cachetoload'] = \is_array($return['cachetoload']) ? $return['cachetoload'] : [];
-        }
-
-        return self::$_coreConfig[$type];
-    }
-
-    /**
-     * Fetches apps core variable data.
-     *
-     * @param string $app  App dir
-     * @param string $type Type of variable to return ('cache' or 'cachetoload')
-     *
-     * @return array The app configuration
-     */
-    public static function fetchAppConfig(string $app, string $type): array
-    {
-        if (!isset(self::$_appConfig[$app][$type]) or !\is_array(self::$_appConfig[$app][$type])) {
-            self::loadAppConfig($app);
-        }
-
-        return self::$_appConfig[$app][$type] ?? [];
-    }
-
-    /**
-     * Get a specific configuration value.
-     *
-     * @param ?string $path    The path of the configuration value to return
-     * @param mixed   $default The value to return if the configuration is not found
-     */
-    public static function get(?string $path = null, mixed $default = null): mixed
-    {
-        // Shortcut for getting stuff from the cache (without having to use the cache object directly)
-        if (0 === strpos($path, 'cache')) {
-            // Cache doesn't care about $default
-            return self::getInstance()->getCache()->get($path);
-        }
-
-        return self::getInstance()->getConfig()->get($path, $default);
-    }
-
-    /**
-     * Get the configuration of the environment.
-     */
-    public static function dumpConfig(): kxConfig
-    {
-        return self::getInstance()->getConfig();
+        return self::$instance;
     }
 
     /**
@@ -121,51 +64,39 @@ class kxEnv
      * @param string $path  The configuration key to set
      * @param mixed  $value The value to set the configuration key to
      */
-    public static function set(string $path, mixed $value): void
+    public function set(string $path, mixed $value): void
     {
         // Shortcut for setting the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {
-            self::getInstance()->getCache()->set($path, $value);
+            self::getInstance()->cache->set($path, $value);
         }
-        self::getInstance()->getConfig()->set($path, $value);
+        self::getInstance()->configuration->set($path, $value);
     }
 
-    private static function createInstance(string $environment, string $config_path): void
+    /**
+     * Get a specific configuration value.
+     *
+     * @param ?string $path    The path of the configuration value to return
+     * @param mixed   $default The value to return if the configuration is not found
+     */
+    public function get(?string $path = null, mixed $default = null): mixed
     {
-        $configuration = [];
-
-        // Load config
-        foreach (self::getConfigFiles($config_path) as $configfile) {
-            $configuration = array_merge_recursive(array_reduce(
-                array_intersect_key(
-                    self::loadConfigFile($configfile),
-                    array_flip(['all', $environment])
-                ),
-                [self::class, 'mergeWrapper']
-            ), $configuration);
+        // Shortcut for getting stuff from the cache (without having to use the cache object directly)
+        if (0 === strpos($path, 'cache')) {
+            // Cache doesn't care about $default
+            return self::getInstance()->cache->get($path);
         }
 
-        // Set our instance, load kxConfig
-        self::$instance = new self($environment, new kxConfig($configuration));
+        return self::getInstance()->configuration->get($path, $default);
     }
 
-    private static function setupAutoloader(): void
-    {
-        // Add any classes we want added to the autoloader.
-        foreach (kxEnv::get('kx:autoload:load') as $repo => $opts) {
-            kxEnv::set(sprintf('kx:autoload:repository:%s:id', $repo), kxAutoload::registerRepository(sprintf('%s/%s/%s', KX_ROOT, 'application/lib', $opts['path']), [
-                'prefix' => $opts['prefix'],
-            ]));
-        }
-    }
-
-    private static function setContextVariables(): void
+    private function setContextVariables(): void
     {
         // Grab our app
         $_application = preg_replace(
             '/[^a-zA-Z0-9\-\_]/',
             '',
-            '' != self::$request->get('app') ? self::$request->get('app') : 'core'
+            '' != $this->request->get('app') ? $this->request->get('app') : 'core'
         );
 
         // Make sure we get (hopefully) a string
@@ -175,102 +106,8 @@ class kxEnv
 
         define('KX_CURRENT_APP', $_application);
 
-        self::$current_application = KX_CURRENT_APP;
-        self::$current_module = self::$request->get('module') ? kxFunc::alphaNum(self::$request->get('module')) : '';
-        self::$current_section = self::$request->get('section') ? kxFunc::alphaNum(self::$request->get('section')) : '';
-    }
-
-    /**
-     * Loads kx core configuration class.
-     */
-    private static function loadCoreConfig(): void
-    {
-        if (!(isset(self::$_coreConfig['core_config_class']) and is_object(self::$_coreConfig['core_config_class']))) {
-            self::$_coreConfig['core_config_class'] = new coreConfig();
-        }
-    }
-
-    /**
-     * Loads the configuration for an application.
-     *
-     * @param string $app The name of the application
-     */
-    private static function loadAppConfig(string $app): void
-    {
-        $CACHE = $LOAD = [];
-
-        if (!isset(self::$_appConfig[$app])) {
-            $file = kxFunc::getAppDir($app).'/appConfig.php';
-
-            if (is_file($file)) {
-                require $file;
-
-                self::$_appConfig[$app]['cache'] = $CACHE;
-                self::$_appConfig[$app]['cachetoload'] = $LOAD;
-            }
-        }
-    }
-
-    /**
-     * Get the environment's configuration.
-     */
-    private function getConfig(): kxConfig
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * Get the environment's cache object.
-     */
-    private function getCache(): mixed
-    {
-        return self::$cache;
-    }
-
-    /**
-     * Wrapper for array_merge_recursive that should actually be an anonymous function.
-     *
-     * @param mixed $base
-     * @param mixed $next
-     */
-    private static function mergeWrapper($base, $next): array
-    {
-        return array_merge_recursive(\is_null($base) ? [] : $base, $next);
-    }
-
-    /**
-     * Get an array containing the paths of all config files.
-     *
-     * @return bool|string[]
-     */
-    private static function getConfigFiles(string $configdir): array|bool
-    {
-        return glob($configdir.'/*.yml.php');
-    }
-
-    /**
-     * Load a configuration file into an array.
-     *
-     * @param string $configfile The path of the configuraton file
-     */
-    private static function loadConfigFile(string $configfile): array
-    {
-        if (self::isCached($configfile)) {
-            return self::loadCached($configfile);
-        }
-
-        return kxYml::loadFile($configfile);
-    }
-
-    /**
-     * Do nothing lol.
-     *
-     * @param string $configfile The configuration file to get false about
-     *
-     * @return bool Always false
-     */
-    private static function isCached(string $configfile): bool
-    {
-        return false;
+        $this->current_application = KX_CURRENT_APP;
+        $this->current_module = $this->request->get('module') ? kxFunc::alphaNum($this->request->get('module')) : '';
+        $this->current_section = $this->request->get('section') ? kxFunc::alphaNum($this->request->get('section')) : '';
     }
 }

@@ -8,7 +8,7 @@ class manage_core_index_index extends kxCmd
 {
     public function exec(kxEnv $environment)
     {
-        $twigData['dbtype'] = kxEnv::get('kx:db:adapter');
+        $twigData['dbtype'] = $this->environment->get('kx:db:adapter');
         $twigData['dbsize'] = 'todo';
         $twigData['dbversion'] = 'todo';
         $twigData['stats']['numboards'] = $this->entityManager->getRepository('Edaha\Entities\Board')->count();

@@ -53,12 +53,12 @@ class manage_board_board_boardopts extends kxCmd
         //     ->execute()
         //     ->fetchCol();
         // // And cache them
-        // kxEnv::set('cache:boardopts:' . $this->request['board'], $recache_board_options);
+        // $this->environment->set('cache:boardopts:' . $this->request['board'], $recache_board_options);
     }
 
     private function _edit()
     {
-        // $board_options = kxEnv::Get('cache:boardopts:' . $this->request['board']);
+        // $board_options = $this->environment->get('cache:boardopts:' . $this->request['board']);
         $board = $this->entityManager->find('\Edaha\Entities\Board', $this->request['board_id']);
         if (is_null($board)) {
             $this->twigData['notice']['type'] = 'error';
@@ -74,7 +74,7 @@ class manage_board_board_boardopts extends kxCmd
             $this->twigData['options'][$option->name] = $option->value;
         }
 
-        $this->twigData['filetypes'] = []; // kxEnv::get('cache:attachments:filetypes');
+        $this->twigData['filetypes'] = []; // $this->environment->get('cache:attachments:filetypes');
 
         $board_types = $this->entityManager->getRepository('\Edaha\Entities\Module')->getBoardModules();
         if (empty($board_types)) {

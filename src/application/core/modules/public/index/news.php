@@ -56,7 +56,7 @@ class public_core_index_news extends kxCmd
             // $this->request->get('view') = 'news';
             $type = 0;
         }
-        $this->twigData['styles'] = explode(':', kxEnv::Get('kx:css:sitestyles'));
+        $this->twigData['styles'] = explode(':', $this->environment->get('kx:css:sitestyles'));
 
         $front_board = $this->entityManager->getRepository(Board::class)
             ->findOneBy(['directory' => 'frontpage_'.$this->request->get('view')])

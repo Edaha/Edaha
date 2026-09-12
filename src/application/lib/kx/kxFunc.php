@@ -319,7 +319,7 @@ class kxFunc
     {
         // So far so good, let's check it
         $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
-            'sid' => kxEnv::$request->get('sid'),
+            'sid' => kxEnv::getInstance()->request->get('sid'),
         ]);
 
         if (empty($session_data)) {
@@ -353,7 +353,7 @@ class kxFunc
     {
         if (kxFunc::getManageSession()) {
             $session_data = kxOrm::getEntityManager()->getRepository('\Edaha\Entities\UserSession')->findOneBy([
-                'sid' => kxEnv::$request->get('sid'),
+                'sid' => kxEnv::getInstance()->request->get('sid'),
             ]);
 
             return [

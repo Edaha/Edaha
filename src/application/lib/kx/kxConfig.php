@@ -2,14 +2,13 @@
 
 namespace kx;
 
-class kxConfig implements \ArrayAccess
-{
-    private $container = [];
+use kx\Interfaces\ConfigInterface;
 
-    public function __construct(array $data)
-    {
-        $this->container = $data;
-    }
+class kxConfig implements \ArrayAccess, ConfigInterface
+{
+    public function __construct(
+        private array $container = []
+    ) {}
 
     /**
      * Set the configuration keyed by $path to $value.
@@ -21,15 +20,83 @@ class kxConfig implements \ArrayAccess
     }
 
     /**
+     * Get the config value stored at $path.
+     */
+    public function get(?string $path = null, mixed $default = null): mixed
+    {
+        return $this->getRecursive($this->container, strlen($path) ? explode(':', $path) : [], $default);
+    }
+
+    // {{{ ArrayAccess implementation
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $this->container[$offset] = $value;
+    }
+
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->container[$offset];
+    }
+
+    public function offsetExists(mixed $offset): bool
+    {
+        return \array_key_exists($offset, $this->container);
+    }
+
+    public function offsetUnset(mixed $offset): void
+    {
+        unset($this->container[$offset]);
+    }
+    // }}}
+
+    public static function loadConfigFromDirectory(string $environment, string $config_path): kxConfig
+    {
+        $configuration = [];
+
+        // Load config
+        foreach (self::getConfigFiles($config_path) as $configfile) {
+            $configuration = array_merge_recursive(array_reduce(
+                array_intersect_key(
+                    self::loadConfigFile($configfile),
+                    array_flip(['all', $environment])
+                ),
+                [self::class, 'mergeWrapper']
+            ), $configuration);
+        }
+
+        return new self($configuration);
+    }
+
+    /**
      * Works down the array keyed by $path to set $value.
      */
-    public function setRecursive(array $path, mixed $value): array|string
+    private function setRecursive(array $path, mixed $value): array|string
     {
         if (!count($path)) {
             return $value;
         }
 
         return [array_shift($path) => self::setRecursive($path, $value)];
+    }
+
+    /**
+     * Traverses $root via $path to return the configuration value.
+     */
+    private function getRecursive(array|string $root, array $path = [], mixed $default = null): mixed
+    {
+        if (is_null($root)) {
+            return $default;
+        }
+        if (!count($path)) {
+            return $root;
+        }
+        if (!is_array($root)) {
+            return $default;
+        }
+
+        $node = array_shift($path);
+
+        return array_key_exists($node, $root) ? self::getRecursive($root[$node], $path, $default) : $default;
     }
 
     /**
@@ -55,7 +122,7 @@ class kxConfig implements \ArrayAccess
      *
      * @author daniel@danielsmedegaardbuus.dk
      */
-    public function &mergeRecursive(array &$array1, &$array2 = null): array
+    private static function &mergeRecursive(array &$array1, &$array2 = null): array
     {
         $merged = $array1;
 
@@ -73,153 +140,33 @@ class kxConfig implements \ArrayAccess
     }
 
     /**
-     * Get the config value stored at $path.
-     */
-    public function get(?string $path = null, mixed $default = null): mixed
-    {
-        return $this->getRecursive($this->container, strlen($path) ? explode(':', $path) : [], $default);
-    }
-
-    /**
-     * Traverses $root via $path to return the configuration value.
-     */
-    public function getRecursive(array|string $root, array $path = [], mixed $default = null): mixed
-    {
-        if (is_null($root)) {
-            return $default;
-        }
-        if (!count($path)) {
-            return $root;
-        }
-        if (!is_array($root)) {
-            return $default;
-        }
-
-        $node = array_shift($path);
-
-        return array_key_exists($node, $root) ? self::getRecursive($root[$node], $path, $default) : $default;
-    }
-
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-    // {{{ ArrayAccess implementation
-    public function offsetSet(mixed $offset, mixed $value): void
-    {
-        $this->container[$offset] = $value;
-    }
-
-    public function offsetGet(mixed $offset): mixed
-    {
-        return $this->container[$offset];
-    }
-
-    public function offsetExists(mixed $offset): bool
-    {
-        return array_key_exists($this->container[$offset]);
-    }
-
-    public function offsetUnset(mixed $offset): void
-    {
-        unset($this->container[$offset]);
-    }
-    // }}}
-}
-
-class coreConfig
-{
-    /**
-     * Fetch the cache array.
+     * Wrapper for array_merge_recursive that should actually be an anonymous function.
      *
-     * @return array caches and caches to load
+     * @param mixed $base
+     * @param mixed $next
      */
-    public function fetchCaches()
+    private static function mergeWrapper($base, $next): array
     {
-        // Apps and modules
-        $cache = ['version' => [
-            'force_load' => 1,
-            'recache_file' => kxFunc::getAppDir('core').'/modules/manage/index/index.php',
-            'recache_class' => 'manage_core_index_index',
-            'recache_function' => 'recacheEdahaVersion',
-        ],
-            'test' => [
-                'testing' => [
-                    'force_load' => 0,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheApplications',
-                ],
-            ],
-            'addons' => [
-                'app_cache' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheApplications',
-                ],
-                'app_menu' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheAppMenu',
-                ],
-                'module_cache' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/addons.php',
-                    'recache_class' => 'manage_core_addons_addons',
-                    'recache_function' => 'recacheModules',
-                ],
-                'hooks_cache' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules/manage/addons/hooks.php',
-                    'recache_class' => 'manage_core_addons_hooks',
-                    'recache_function' => 'recacheHooks',
-                ],
-            ],
-            'filters' => [
-                'wordfilters' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules_admin/posts/filter.php',
-                    'recache_class' => 'manage_board_posts_filter',
-                    'recache_function' => 'recacheWordFilters',
-                ],
-                'spamfilters' => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('core').'/modules_admin/posts/filter.php',
-                    'recache_class' => 'manage_board_posts_filter',
-                    'recache_function' => 'recacheSpamFilters',
-                ],
-            ],
-            'attachments' => [
-                'filetypes' => [
-                    'force_load' => 0,
-                    'recache_file' => kxFunc::getAppDir('board').'/modules/manage/filetypes.php',
-                    'recache_class' => 'manage_board_attachments_filetypes',
-                    'recache_function' => 'recacheFiletypes',
-                ],
-                'embeds' => [
-                    'force_load' => 0,
-                    'recache_file' => kxFunc::getAppDir('board').'/modules/manage/embeds.php',
-                    'recache_class' => 'manage_board_attachments_embeds',
-                    'recache_function' => 'recacheEmbeds',
-                ],
-            ],
-        ];
-        if (isset(kxEnv::$request['board'])) {
-            $cache['boardopts'] = [
-                kxEnv::$request['board'] => [
-                    'force_load' => 1,
-                    'recache_file' => kxFunc::getAppDir('board').'/modules/manage/boardopts.php',
-                    'recache_class' => 'manage_board_board_boardopts',
-                    'recache_function' => 'recacheBoardOptions',
-                ],
-            ];
-        }
-        $load = [];
+        return array_merge_recursive(\is_null($base) ? [] : $base, $next);
+    }
 
-        return ['caches' => $cache,
-            'cachetoload' => $load];
+    /**
+     * Get an array containing the paths of all config files.
+     *
+     * @return bool|string[]
+     */
+    private static function getConfigFiles(string $configdir): array|bool
+    {
+        return glob($configdir.'/*.yml.php');
+    }
+
+    /**
+     * Load a configuration file into an array.
+     *
+     * @param string $configfile The path of the configuraton file
+     */
+    private static function loadConfigFile(string $configfile): array
+    {
+        return kxYml::loadFile($configfile);
     }
 }

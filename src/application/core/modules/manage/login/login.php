@@ -60,12 +60,12 @@ class manage_core_login_login extends kxCmd
         // Stub
         /*
   if (isset($_SESSION['manageusername'])) {
-  $results = $kx_db->GetAll("SELECT HIGH_PRIORITY `boards` FROM `" . kxEnv::Get('kx:db:prefix') . "staff` WHERE `username` = " . $kx_db->qstr($_SESSION['manageusername']) . " LIMIT 1");
+  $results = $kx_db->GetAll("SELECT HIGH_PRIORITY `boards` FROM `" . $this->environment->get('kx:db:prefix') . "staff` WHERE `username` = " . $kx_db->qstr($_SESSION['manageusername']) . " LIMIT 1");
   if ($this->CurrentUserIsAdministrator() || $results[0][0] == 'allboards') {
-  setcookie("kumod", "allboards", time() + 3600, kxEnv::Get('kx:paths:boards:folder'), kxEnv::Get('kx:paths:main:domain'));
+  setcookie("kumod", "allboards", time() + 3600, $this->environment->get('kx:paths:boards:folder'), $this->environment->get('kx:paths:main:domain'));
   } else {
   if ($results[0][0] != '') {
-  setcookie("kumod", $results[0][0], time() + 3600, kxEnv::Get('kx:paths:boards:folder'), kxEnv::Get('kx:paths:main:domain'));
+  setcookie("kumod", $results[0][0], time() + 3600, $this->environment->get('kx:paths:boards:folder'), $this->environment->get('kx:paths:main:domain'));
   }
   }
   }*/
@@ -99,7 +99,7 @@ class manage_core_login_login extends kxCmd
             if ($_POST['qstring']) {
                 echo $_POST['qstring'].'<br>';
                 $whereto = stripslashes($_POST['qstring']);
-                $whereto = str_replace(kxEnv::Get('kx:paths:script:path'), '', $whereto);
+                $whereto = str_replace($this->environment->get('kx:paths:script:path'), '', $whereto);
                 $whereto = str_ireplace('?manage.php', '', $whereto);
                 $whereto = ltrim($whereto, '?');
                 $whereto = preg_replace('/sid=(\w){32}/', '', $whereto);
@@ -110,7 +110,7 @@ class manage_core_login_login extends kxCmd
                 $whereto = str_replace('&amp;', '&', $whereto);
                 $whereto = preg_replace('/&{1,}/', '&', $whereto);
             }
-            $url = kxEnv::Get('kx:paths:script:path').kxEnv::Get('kx:paths:script:folder').'/manage.php?sid='.$user_session->sid.'&'.$whereto;
+            $url = $this->environment->get('kx:paths:script:path').$this->environment->get('kx:paths:script:folder').'/manage.php?sid='.$user_session->sid.'&'.$whereto;
 
             kxFunc::doRedirect($url, true);
 

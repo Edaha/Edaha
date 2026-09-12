@@ -48,13 +48,13 @@ class manage_board_attachments_filetypes extends kxCmd
         // ->fetchAll();
 
         // Cache them
-        kxEnv::set('cache:attachments:filetypes', $recache_filetypes);
+        $this->environment->set('cache:attachments:filetypes', $recache_filetypes);
     }
 
     private function _filetypes()
     {
         // Retrieve filetypes from cache
-        $this->twigData['filetypes'] = kxEnv::get('cache:attachments:filetypes');
+        $this->twigData['filetypes'] = $this->environment->get('cache:attachments:filetypes');
 
         kxTemplate::output('manage/filetypes', $this->twigData);
     }

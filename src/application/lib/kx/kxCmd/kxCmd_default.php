@@ -17,6 +17,6 @@ class kxCmd_default extends kxCmd
      */
     protected function exec(kxEnv $environment)
     {
-        @header('Location: '.kxEnv::Get('kx:paths:main:path').kxEnv::Get('kx:paths:main:folder'));
+        @header('Location: '.$this->environment->get('kx:paths:main:path').$this->environment->get('kx:paths:main:folder'));
     }
 }

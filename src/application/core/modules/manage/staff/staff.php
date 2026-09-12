@@ -142,7 +142,7 @@ class manage_core_staff_staff extends kxCmd
             //   ->fetchField();
             $results = [];
             if (0 == $results) {
-                $salt = substr(md5(time().kxEnv::Get('kx:misc:randomseed')), -rand(3, 6)); // $this->_createSalt(); TODO: Decide hashing algorithm, replace current
+                $salt = substr(md5(time().$this->environment->get('kx:misc:randomseed')), -rand(3, 6)); // $this->_createSalt(); TODO: Decide hashing algorithm, replace current
                 // $this->db->insert("staff")
                 //   ->fields(array(
                 //     'user_name' => $this->request['username'],

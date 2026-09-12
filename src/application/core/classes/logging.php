@@ -5,15 +5,9 @@ use kx\kxEnv;
 // Stub
 class logging
 {
-    protected $environment;
-    protected $db;
-    protected $request;
-
-    public function __construct(kxEnv $environment)
-    {
-        $this->environment = $environment;
-        $this->request = kxEnv::$request;
-    }
+    public function __construct(
+        protected kxEnv $environment
+    ) {}
 
     public static function addLogEntry($user_name, $log_entry, $source)
     {

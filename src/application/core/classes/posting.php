@@ -1,22 +1,19 @@
 <?php
 
 use Edaha\Entities\Post;
-use kx\kxOrm;
 use kx\kxEnv;
 use kx\kxFunc;
-
+use kx\kxOrm;
 
 class Posting
 {
-    protected $environment;
-    protected $db;
     protected $request;
     protected $entityManager;
 
-    public function __construct(kxEnv $environment)
-    {
-        $this->environment = $environment;
-        $this->request = kxEnv::$request;
+    public function __construct(
+        protected kxEnv $environment
+    ) {
+        $this->request = $this->environment->request;
         $this->entityManager = kxOrm::getEntityManager();
     }
 
@@ -179,12 +176,12 @@ class Posting
     public function checkEmptyReply(Post $post)
     {
         if ($post->is_reply) {
-            if ('' == $post->message && '' != kxEnv::Get('kx:posts:emptyreply')) {
-                $post->message = kxEnv::Get('kx:posts:emptyreply');
+            if ('' == $post->message && '' != $this->environment->get('kx:posts:emptyreply')) {
+                $post->message = $this->environment->get('kx:posts:emptyreply');
             }
         } else {
-            if ('' == $post->message && '' != kxEnv::Get('kx:posts:emptythread')) {
-                $post->message = kxEnv::Get('kx:posts:emptythread');
+            if ('' == $post->message && '' != $this->environment->get('kx:posts:emptythread')) {
+                $post->message = $this->environment->get('kx:posts:emptythread');
             }
         }
     }
@@ -197,7 +194,7 @@ class Posting
     public function checkIfPostingTooFast($post)
     {
         // Generate the query needed
-        $limit = $post->is_reply ? $this->environment->get('kx:limits:replydelay') : kxEnv::Get('kx:limits:threaddelay');
+        $limit = $post->is_reply ? $this->environment->get('kx:limits:replydelay') : $this->environment->get('kx:limits:threaddelay');
         $cutoff_time = date('Y-m-d H:i:s', time() - $limit);
 
         // TODO Get count of posts from $post->poster in the last $limit seconds
@@ -305,7 +302,7 @@ class Posting
     {
         // If oekaki seems to be in the url...
         if (!empty($this->request['oekaki'])) {
-            $oekpath = kxEnv::Get('kx:paths:boards:folder').$this->request['board'].'/tmp/'.$this->request['oekaki'].'.png';
+            $oekpath = $this->environment->get('kx:paths:boards:folder').$this->request['board'].'/tmp/'.$this->request['oekaki'].'.png';
             // See if it checks out and is a valid oekaki id
             if (is_file($oekpath)) {
                 // Set the variable to tell the script it is handling an oekaki posting, and the oekaki file which will be posted
@@ -319,7 +316,7 @@ class Posting
     public function getPostTag()
     {
         // Check for and parse tags if one was provided, and they are enabled
-        $tags = unserialize(kxEnv::Get('kx:tags'));
+        $tags = unserialize($this->environment->get('kx:tags'));
         if (!empty($tags) && !empty($this->request['tag']) && in_array($this->request['tag'], $tags)) {
             return $this->request['tag'];
         }
@@ -336,14 +333,14 @@ class Posting
     public function modPost($post, $board)
     {
         if ($post['user_authority'] > 0 && 3 != $post['user_authority']) {
-            $modpost_message = 'Modposted #<a href="'.kxEnv::Get('kx:paths:boards:folder').$board->board_name.'/res/';
+            $modpost_message = 'Modposted #<a href="'.$this->environment->get('kx:paths:boards:folder').$board->board_name.'/res/';
             if ($post['is_reply']) {
                 $modpost_message .= $post['thread_info']['parent'];
             } else {
                 $modpost_message .= $post['post_id'];
             }
             $modpost_message .= '.html#'.$post['post_id'].'">'.$post['post_id'].'</a> in /'.$this->board->board_name.'/ with flags: '.$post['flags'].'.';
-            management_addlogentry($modpost_message, 1, md5_decrypt($this->request['modpassword'], kxEnv::Get('kx:misc:randomseed')));
+            management_addlogentry($modpost_message, 1, md5_decrypt($this->request['modpassword'], $this->environment->get('kx:misc:randomseed')));
         }
     }
 
@@ -355,11 +352,11 @@ class Posting
     public function setCookies($post)
     {
         if ($post['name_save'] && isset($this->request['name'])) {
-            setcookie('name', urldecode($this->request['name']), time() + 31556926, '/', kxEnv::Get('kx:paths:main:domain'));
+            setcookie('name', urldecode($this->request['name']), time() + 31556926, '/', $this->environment->get('kx:paths:main:domain'));
         }
 
         if ($post['email_save']) {
-            setcookie('email', urldecode($post['email']), time() + 31556926, '/', kxEnv::Get('kx:paths:main:domain'));
+            setcookie('email', urldecode($post['email']), time() + 31556926, '/', $this->environment->get('kx:paths:main:domain'));
         }
 
         setcookie('postpassword', urldecode($this->request['postpassword']), time() + 31556926, '/');
@@ -374,7 +371,7 @@ class Posting
     public function updateThreadWatch($postData, $board)
     {
         // If the user replied to a thread he is watching, update it so it doesn't count his reply as unread
-        if (kxEnv::Get('ku:extras:watchthreads') && 0 != $postData['thread_info']['parent']) {
+        if ($this->environment->get('ku:extras:watchthreads') && 0 != $postData['thread_info']['parent']) {
             // $viewing_thread_is_watched = $this->db->select("watchedthreads")
             //   ->fields(array("watchedthreads"))
             //   ->countQuery()
@@ -470,7 +467,7 @@ class Posting
         $user_authority = 0;
 
         if (isset($this->request['modpassword'])) {
-            // $results = $kx_db->GetAll("SELECT `type`, `boards` FROM `" . kxEnv::Get('kx:db:prefix') . "staff` WHERE `username` = '" . md5_decrypt($_POST['modpassword'], kxEnv::Get('kx:misc:randomseed')) . "' LIMIT 1");
+            // $results = $kx_db->GetAll("SELECT `type`, `boards` FROM `" . $this->environment->get('kx:db:prefix') . "staff` WHERE `username` = '" . md5_decrypt($_POST['modpassword'], $this->environment->get('kx:misc:randomseed')) . "' LIMIT 1");
 
             $results = [];
             if (count($results) > 0) {

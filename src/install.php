@@ -8,7 +8,12 @@ use Edaha\Entities\Board;
 use Edaha\Entities\Module;
 use Edaha\Entities\User;
 use Edaha\Types\ModuleType;
+use kx\kxConfig;
 use kx\kxOrm;
+
+$config = kxConfig::loadConfigFromDirectory('install', KX_ROOT.'/config');
+
+kxOrm::initialize($config);
 
 $em = kxOrm::getEntityManager();
 

@@ -8,7 +8,6 @@ use kx\kxForm;
 use kx\kxFunc;
 use kx\kxTemplate;
 
-
 class manage_board_board_board extends kxCmd
 {
     public $errorMessage = '';
@@ -24,7 +23,7 @@ class manage_board_board_board extends kxCmd
 
     public function exec(kxEnv $environment)
     {
-        switch ($this->request['action']) {
+        switch ($this->request->post('action')) {
             case 'post':
                 $this->_post();
 
@@ -48,7 +47,7 @@ class manage_board_board_board extends kxCmd
                 break;
         }
 
-        switch ($this->request['do']) {
+        switch ($this->request->post('do')) {
             case 'board':
             default:
                 $this->_board();
@@ -59,9 +58,9 @@ class manage_board_board_board extends kxCmd
 
     private function onRegen()
     {
-        $board = $this->entityManager->find(Board::class, $this->request['board_id']);
+        $board = $this->entityManager->find(Board::class, $this->request->post('board_id'));
         if (is_null($board)) {
-            $this->errorMessage = sprintf(_("Couldn't find board /%s/."), $this->request['board']);
+            $this->errorMessage = sprintf(_("Couldn't find board /%s/."), $this->request->post('board'));
 
             return false;
         }

@@ -7,7 +7,7 @@ use PSR\Http\Message\StreamInterface;
 
 class Message implements MessageInterface
 {
-    private string $protocol_version;
+    private string $protocol_version = 'not implemented';
 
     /**
      * Retrieves the HTTP protocol version as a string.
@@ -18,7 +18,7 @@ class Message implements MessageInterface
      */
     public function getProtocolVersion(): string
     {
-        return 'not implemented';
+        return $this->protocol_version;
     }
 
     /**

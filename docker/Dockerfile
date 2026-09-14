@@ -86,6 +86,8 @@ RUN apt-get update \
 COPY ./src /var/www/html
 COPY ./docker/apache/httpd.conf /etc/apache2/apache2.conf
 RUN chown -R www-data:www-data /var/www
+RUN a2enmod rewrite
+RUN service apache2 restart
 
 FROM base AS development
 COPY ./tests /var/www/html/tests

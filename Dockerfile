@@ -83,8 +83,10 @@ RUN apt-get update \
         libwebp-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_mysql gettext gd
-COPY ./src /var/www/html
-COPY ./docker/apache/httpd.conf /etc/apache2/apache2.conf
+COPY ./src/public/ /var/www/html
+COPY ./src/application /var/www/edaha/application/
+COPY ./config/edaha/ /var/www/edaha/config/
+COPY ./config/apache/httpd.conf /etc/apache2/apache2.conf
 RUN chown -R www-data:www-data /var/www
 RUN a2enmod rewrite
 RUN service apache2 restart
@@ -94,8 +96,8 @@ COPY ./tests /var/www/html/tests
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug
-COPY ./docker/php/conf.d /usr/local/etc/php/conf.d
-COPY --from=dev-deps app/vendor/ /var/www/html/vendor
+COPY ./config/php/conf.d /usr/local/etc/php/conf.d
+COPY --from=dev-deps app/vendor/ /var/www/edaha/vendor
 
 FROM development AS test
 WORKDIR /var/www/html

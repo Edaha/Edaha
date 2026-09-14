@@ -242,8 +242,7 @@ class Posting
                 }
                 unset($_SESSION['security_code']);
             } else {
-                require_once KX_ROOT.'/application/lib/recaptcha/recaptchalib.php';
-                $privatekey = '6LdVg8YSAAAAALayugP2r148EEQAogHPfQOSYow-';
+                $privatekey = '';
 
                 // was there a reCAPTCHA response?
                 $resp = recaptcha_check_answer(

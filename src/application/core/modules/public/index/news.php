@@ -20,12 +20,6 @@ use kx\kxTemplate;
  *
  */
 
-if (!defined('KUSABA_RUNNING')) {
-    echo '<h1>Access denied</h1>You cannot access this file directly.';
-
-    exit;
-}
-
 class public_core_index_news extends kxCmd
 {
     /**

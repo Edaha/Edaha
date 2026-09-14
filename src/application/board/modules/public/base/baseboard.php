@@ -19,12 +19,6 @@ use kx\kxFunc;
  *
  */
 
-if (!defined('KUSABA_RUNNING')) {
-    echo '<h1>Access denied</h1>You cannot access this file directly.';
-
-    exit;
-}
-
 abstract class public_board_base_baseboard extends kxCmd
 {
     /**

@@ -31,12 +31,6 @@ use kx\kxFunc;
  *
  */
 
-if (!defined('KUSABA_RUNNING')) {
-    echo '<h1>Access denied</h1>You cannot access this file directly.';
-
-    exit;
-}
-
 class public_board_oekaki_oekaki extends public_board_base_baseboard
 {
     public function validPost()

@@ -13,13 +13,33 @@ class kxEnv implements ConfigInterface
 
     public ?kxRequest $request;
 
+    public static $configClass = kxConfig::class {
+        set {
+            if (!class_exists($value)) {
+                throw new kxException("Class {$value} is not available.");
+            }
+
+            $reflection = new \ReflectionClass($value);
+
+            if (!\in_array('ConfigInterface', $reflection->getInterfaceNames())) {
+                throw new kxException("Class {$value} does not implement ConfigInterface.");
+            }
+
+            self::$configClass = $value::class;
+        }
+        get => self::$configClass::class;
+    }
+
+    public ConfigInterface $configuration;
+
     private static self $instance;
     private static $cache;
 
     private function __construct(
         public string $environment_name,
-        public ConfigInterface $configuration
-    ) {}
+    ) {
+        $this->configuration = $this->configClass::loadConfigFromDirectory(KX_CONFIG_PATH);
+    }
 
     /**
      * Get the kxEnv instance if it exists.
@@ -45,8 +65,7 @@ class kxEnv implements ConfigInterface
         }
 
         self::$instance = new self(
-            $environment_name,
-            $configuration
+            $environment_name
         );
 
         self::$instance->request = kxRequest::getInstance();

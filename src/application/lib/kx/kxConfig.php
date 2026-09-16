@@ -49,7 +49,7 @@ class kxConfig implements \ArrayAccess, ConfigInterface
     }
     // }}}
 
-    public static function loadConfigFromDirectory(string $environment, string $config_path): kxConfig
+    public static function loadConfigFromDirectory(string $environment, string $config_path): ConfigInterface
     {
         $configuration = [];
 

@@ -6,7 +6,7 @@ use kx\kxEnv;
 
 const IN_MANAGE = false;
 const KX_ENVIRONMENT = 'dev';
-const KX_ROOT = '/var/html/edaha';
+const KX_ROOT = __DIR__;
 const KX_CONFIG_PATH = KX_ROOT.'config/';
 
 const KX_BOARD = KX_ROOT;

@@ -13,6 +13,24 @@ $dispatcher = FastRoute\simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'get_article_handler');
 });
 
+// Routes
+/**
+ * GET:
+ * / --> Default page, classically a news page (news/faq/php)
+ * /boards/{dir} --> Index page for a board. May start with a /boards/ subpath but ideally would get to where it could be /{board}/ instead for tradition.
+ * /boards/{dir}/{id:\d+} --> Thread view
+ * /boards/{dir}/{id:\d}/first50/last100
+ * /manage/{module}/{section}/{action}
+ *
+ * POST:
+ * /boards/{dir} --> New post on the board
+ * /boards/{dir}/{id:\d+} --> New reply to the thread
+ * /manage/{module}/{section}/{action} --> Submit whatever for the action
+ *
+ * OTHERS:
+ * None at this time.
+ */
+
 // Fetch method and URI from somewhere
 $httpMethod = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];

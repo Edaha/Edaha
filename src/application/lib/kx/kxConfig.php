@@ -13,7 +13,7 @@ class kxConfig implements \ArrayAccess, ConfigInterface
     /**
      * Set the configuration keyed by $path to $value.
      */
-    public function set(string $path, mixed &$value): void
+    public function set(string $path, mixed $value): mixed
     {
         $newValue = self::setRecursive(explode(':', $path), $value);
         $this->container = self::mergeRecursive($this->container, $newValue);
@@ -49,7 +49,7 @@ class kxConfig implements \ArrayAccess, ConfigInterface
     }
     // }}}
 
-    public static function loadConfigFromDirectory(string $environment, string $config_path): ConfigInterface
+    public static function loadConfigFromDirectory(string $environment, string $config_path = \KX_CONFIG_PATH): ConfigInterface
     {
         $configuration = [];
 

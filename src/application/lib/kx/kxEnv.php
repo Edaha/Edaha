@@ -4,6 +4,8 @@ namespace kx;
 
 use kx\Exceptions\kxException;
 use kx\Interfaces\ConfigInterface;
+use kx\Message\ServerRequest;
+use Psr\Http\Message\ServerRequestInterface;
 
 class kxEnv implements ConfigInterface
 {
@@ -11,26 +13,13 @@ class kxEnv implements ConfigInterface
     public string $current_module = '';
     public string $current_section = '';
 
-    public ?kxRequest $request;
+    public static ServerRequestInterface $request;
 
-    public static $configClass = kxConfig::class {
-        set {
-            if (!class_exists($value)) {
-                throw new kxException("Class {$value} is not available.");
-            }
+    public static string $requestClass = ServerRequest::class;
 
-            $reflection = new \ReflectionClass($value);
+    public static ConfigInterface $configuration;
 
-            if (!\in_array('ConfigInterface', $reflection->getInterfaceNames())) {
-                throw new kxException("Class {$value} does not implement ConfigInterface.");
-            }
-
-            self::$configClass = $value::class;
-        }
-        get => self::$configClass::class;
-    }
-
-    public ConfigInterface $configuration;
+    public static $configClass = kxConfig::class;
 
     private static self $instance;
     private static $cache;
@@ -38,7 +27,38 @@ class kxEnv implements ConfigInterface
     private function __construct(
         public string $environment_name,
     ) {
-        $this->configuration = $this->configClass::loadConfigFromDirectory(KX_CONFIG_PATH);
+        self::$configuration = self::$configClass::loadConfigFromDirectory($environment_name);
+        self::$request = new self::$requestClass();
+    }
+
+    public static function setRequestClass(string $className): void
+    {
+        if (!class_exists($className::class)) {
+            throw new kxException("Class {$className} is not available.");
+        }
+
+        $reflection = new \ReflectionClass($className);
+
+        if (!\in_array('ServerRequestInterface', $reflection->getInterfaceNames())) {
+            throw new kxException("Class {$className} does not implement ConfigInterface.");
+        }
+
+        self::$requestClass = $className::class;
+    }
+
+    public static function setConfigClass(string $className): void
+    {
+        if (!class_exists($className::class)) {
+            throw new kxException("Class {$className} is not available.");
+        }
+
+        $reflection = new \ReflectionClass($className);
+
+        if (!\in_array('ServerRequestInterface', $reflection->getInterfaceNames())) {
+            throw new kxException("Class {$className} does not implement ConfigInterface.");
+        }
+
+        self::$configClass = $className::class;
     }
 
     /**
@@ -58,8 +78,9 @@ class kxEnv implements ConfigInterface
      *
      * @param string $environment_name e.g. 'dev', 'prod'
      */
-    public static function initialize(string $environment_name, ConfigInterface $configuration): self
-    {
+    public static function initialize(
+        string $environment_name
+    ): self {
         if (isset(self::$instance) && self::$instance instanceof self) {
             throw new kxException('Cannot re-initialize kxEnv.');
         }
@@ -68,7 +89,6 @@ class kxEnv implements ConfigInterface
             $environment_name
         );
 
-        self::$instance->request = kxRequest::getInstance();
         self::$instance->setContextVariables();
 
         // Load the cache
@@ -83,7 +103,7 @@ class kxEnv implements ConfigInterface
      * @param string $path  The configuration key to set
      * @param mixed  $value The value to set the configuration key to
      */
-    public function set(string $path, mixed $value): void
+    public function set(string $path, mixed $value): mixed
     {
         // Shortcut for setting the cache (without having to use the cache object directly)
         if (0 === strpos($path, 'cache')) {

@@ -42,7 +42,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * be implemented such that they retain the internal state of the current
  * message and return an instance that contains the changed state.
  */
-class kxServerRequest extends Request implements ServerRequestInterface
+class ServerRequest extends Request implements ServerRequestInterface
 {
     /**
      * Retrieve server parameters.

@@ -2,8 +2,8 @@
 
 namespace kx\Message;
 
-use PSR\Http\Message\MessageInterface;
-use PSR\Http\Message\StreamInterface;
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\StreamInterface;
 
 class Message implements MessageInterface
 {

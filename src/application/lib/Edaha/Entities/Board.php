@@ -6,6 +6,8 @@ use Edaha\Entities\Post;
 use Edaha\Entities\AttachmentType;
 use Edaha\Entities\Section;
 
+use Edaha\Entities\BoardInterface;
+
 use DateTime;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -15,7 +17,7 @@ use Doctrine\Common\Collections\Criteria;
 
 #[ORM\Entity(repositoryClass: BoardRepository::class)]
 #[ORM\Table(name: 'boards')]
-class Board
+class Board implements BoardInterface
 {
     #[ORM\Id]
     #[ORM\Column]
@@ -83,6 +85,12 @@ class Board
             $this->section = $value;
         }
     }
+
+    public string $type {
+        get {
+            return $this->getOption('type') ?? '';
+        }
+    }
     
     public function addAttachmentType(AttachmentType $attachmentType): void
     {
@@ -142,12 +150,8 @@ class Board
         return $this->posts->matching($criteria);
     }
 
-    public function __get(string $name)
+    private function getOption(string $name): ?string
     {
-        // Doctrine does some magic with properties that end up skipping the setter/getter hooks, so we need to check for those first.
-        if (property_exists($this, $name)) {
-            return $this->$name;
-        }
         $criteria = Criteria::create()
             ->where(Criteria::expr()->eq('name', $name));
         $option = $this->options->matching($criteria)->first();
@@ -155,6 +159,16 @@ class Board
             return $option->value;
         } else {
             return null;
+        }
+    }
+
+    public function __get(string $name)
+    {
+        // Doctrine does some magic with properties that end up skipping the setter/getter hooks, so we need to check for those first.
+        if (property_exists($this, $name)) {
+            return $this->$name;
+        } else {
+            return $this->getOption($name);
         }
     }
 

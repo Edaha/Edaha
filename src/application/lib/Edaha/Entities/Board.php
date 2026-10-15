@@ -1,17 +1,11 @@
 <?php
+
 namespace Edaha\Entities;
 
-use Edaha\Entities\BoardOption;
-use Edaha\Entities\Post;
-use Edaha\Entities\AttachmentType;
-use Edaha\Entities\Section;
-
-use DateTime;
-
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BoardRepository::class)]
 #[ORM\Table(name: 'boards')]
@@ -44,14 +38,14 @@ class Board
     }
 
     #[ORM\Column]
-    public DateTime|null $created_at = null {
+    public ?\DateTime $created_at = null {
         get {
             return $this->created_at;
         }
     }
 
     /** @var Collection<int, BoardOption> */
-    #[ORM\OneToMany(targetEntity: BoardOption::class, mappedBy:'board', cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: BoardOption::class, mappedBy: 'board', cascade: ['persist'])]
     public Collection $options {
         get {
             return $this->options;
@@ -59,7 +53,7 @@ class Board
     }
 
     /** @var Collection<int, Post> */
-    #[ORM\OneToMany(targetEntity: Post::class, mappedBy:'board', fetch: 'EXTRA_LAZY')]
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'board', fetch: 'EXTRA_LAZY')]
     public Collection $posts;
 
     /** @var Collection<int, AttachmentType> */
@@ -83,17 +77,10 @@ class Board
             $this->section = $value;
         }
     }
-    
-    public function addAttachmentType(AttachmentType $attachmentType): void
-    {
-        if (!$this->attachment_types->contains($attachmentType)) {
-            $this->attachment_types[] = $attachmentType;
-        }
-    }
 
     public function __construct(string $name, string $directory)
     {
-        $this->created_at = new DateTime('now');
+        $this->created_at = new \DateTime('now');
         $this->options = new ArrayCollection();
         $this->posts = new ArrayCollection();
         $this->attachment_types = new ArrayCollection();
@@ -102,18 +89,36 @@ class Board
         $this->directory = $directory;
     }
 
-    private function setOption(string $name, ?string $value): void
+    public function __get(string $name)
     {
-        // Check if the option already exists
+        // Doctrine does some magic with properties that end up skipping the setter/getter hooks, so we need to check for those first.
+        if (property_exists($this, $name)) {
+            return $this->{$name};
+        }
         $criteria = Criteria::create()
-            ->where(Criteria::expr()->eq('name', $name));
-        $existingOption = $this->options->matching($criteria)->first();
-        if ($existingOption) {
-            // Update the existing option
-            $existingOption->value = $value;
+            ->where(Criteria::expr()->eq('name', $name))
+        ;
+        $option = $this->options->matching($criteria)->first();
+        if ($option) {
+            return $option->value;
+        }
+
+        return null;
+    }
+
+    public function __set(string $name, $value): void
+    {
+        if (property_exists($this, $name)) {
+            $this->{$name} = $value;
         } else {
-            // Create a new option
-            $this->options[] = new BoardOption($this, $name, $value);
+            $this->setOption($name, $value);
+        }
+    }
+
+    public function addAttachmentType(AttachmentType $attachmentType): void
+    {
+        if (!$this->attachment_types->contains($attachmentType)) {
+            $this->attachment_types[] = $attachmentType;
         }
     }
 
@@ -127,7 +132,9 @@ class Board
         $criteria = Criteria::create()
             ->where(Criteria::expr()->eq('parent', null))
             ->orderBy(['stickied_at' => 'DESC'])
-            ->orderBy(['created_at' => 'DESC']);
+            ->orderBy(['created_at' => 'DESC'])
+        ;
+
         return $this->posts->matching($criteria);
     }
 
@@ -138,31 +145,25 @@ class Board
             ->orderBy(['stickied_at' => 'DESC'])
             ->orderBy(['created_at' => 'DESC'])
             ->setFirstResult(($page - 1) * $perPage)
-            ->setMaxResults($perPage);
+            ->setMaxResults($perPage)
+        ;
+
         return $this->posts->matching($criteria);
     }
 
-    public function __get(string $name)
+    private function setOption(string $name, ?string $value): void
     {
-        // Doctrine does some magic with properties that end up skipping the setter/getter hooks, so we need to check for those first.
-        if (property_exists($this, $name)) {
-            return $this->$name;
-        }
+        // Check if the option already exists
         $criteria = Criteria::create()
-            ->where(Criteria::expr()->eq('name', $name));
-        $option = $this->options->matching($criteria)->first();
-        if ($option) {
-            return $option->value;
+            ->where(Criteria::expr()->eq('name', $name))
+        ;
+        $existingOption = $this->options->matching($criteria)->first();
+        if ($existingOption) {
+            // Update the existing option
+            $existingOption->value = $value;
         } else {
-            return null;
-        }
-    }
-
-    public function __set(string $name, $value): void {
-        if (property_exists($this, $name)) {
-            $this->$name = $value;
-        } else {
-            $this->setOption($name, $value);
+            // Create a new option
+            $this->options[] = new BoardOption($this, $name, $value);
         }
     }
 }

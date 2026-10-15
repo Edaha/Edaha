@@ -1,30 +1,41 @@
 <?php
-DEFINE('IN_MANAGE', false);
-include "init.php";
 
-use Edaha\Entities\Module;
-use Edaha\Types\ModuleType;
+const IN_MANAGE = false;
+
+require 'init.php';
+
 use Edaha\Entities\Board;
-use Edaha\Entities\Section;
+use Edaha\Entities\Module;
+use Edaha\Entities\User;
+use Edaha\Types\ModuleType;
+use kx\kxConfig;
+use kx\kxOrm;
+
+$config = kxConfig::loadConfigFromDirectory('install', KX_ROOT.'/config');
+
+kxOrm::initialize($config);
 
 $em = kxOrm::getEntityManager();
 
 if (isset($_POST['install'])) {
     installModules($em);
     addBoards($em);
-    echo "Installation completed successfully.";
+    addUsers($em);
+    echo 'Installation completed successfully.';
 } else {
-    echo '<form method="post">
+    echo 'fuckin a <form method="post">
             <input type="hidden" name="install" value="1">
             <button type="submit">Install</button>
           </form>';
 }
 
-function installModule($em, $moduleName, $moduleType, $moduleClass, $moduleDescription, $isManage = false) {
+function installModule($em, $moduleName, $moduleType, $moduleClass, $moduleDescription, $isManage = false)
+{
     // Check if the module already exists
     $existingModule = $em->getRepository(Module::class)->findOneBy(['name' => $moduleName]);
     if ($existingModule) {
-        echo "Module '$moduleName' already exists. Skipping installation.<br>";
+        echo "Module '{$moduleName}' already exists. Skipping installation.<br>";
+
         return;
     }
 
@@ -39,13 +50,14 @@ function installModule($em, $moduleName, $moduleType, $moduleClass, $moduleDescr
     try {
         $em->persist($module);
         $em->flush();
-        echo "Module '$moduleName' installed successfully.<br>";
-    } catch (\Exception $e) {
-        echo "Error installing module '$moduleName': " . $e->getMessage() . "<br>";
+        echo "Module '{$moduleName}' installed successfully.<br>";
+    } catch (Exception $e) {
+        echo "Error installing module '{$moduleName}': ".$e->getMessage().'<br>';
     }
 }
 
-function installModules($em) {
+function installModules($em)
+{
     installModule($em, 'Staff', 'core', 'staff', 'Staff Configuration', true);
     installModule($em, 'Image Board', 'board', 'image', 'Generator for an image-type board', false);
     installModule($em, 'Text Board', 'board', 'text', 'Generator for a text board', false);
@@ -58,22 +70,47 @@ function installModules($em) {
     installModule($em, 'Module Management', 'core', 'modules', 'Provides tools for managing modules.', true);
 }
 
-function addBoards($em) {
+function addBoards($em)
+{
     $boards = [
         ['name' => 'Image Board', 'directory' => 'image'],
-        ['name' => 'Text Board', 'directory' => 'text']
+        ['name' => 'Text Board', 'directory' => 'text'],
     ];
 
     foreach ($boards as $boardData) {
         // Check if the board already exists
         $existingBoard = $em->getRepository(Board::class)->findOneBy(['name' => $boardData['name']]);
         if ($existingBoard) {
-            echo "Board '" . $boardData['name'] . "' already exists. Skipping.<br>";
+            echo "Board '".$boardData['name']."' already exists. Skipping.<br>";
+
             continue;
         }
-        echo "Adding board: " . $boardData['name'] . "<br>";
+        echo 'Adding board: '.$boardData['name'].'<br>';
         $board = new Board($boardData['name'], $boardData['directory']);
         $em->persist($board);
+    }
+    $em->flush();
+}
+
+function addUsers($em)
+{
+    $users = [
+        [
+            'username' => 'edaha',
+            'password' => 'edaha',
+        ],
+    ];
+
+    foreach ($users as $user) {
+        $existingUser = $em->getRepository(User::class)->findOneBy(['username' => $user['username']]);
+        if ($existingUser) {
+            echo 'User '.$user['username'].' already exists. Skipping.<br>';
+
+            continue;
+        }
+        echo 'Adding user: '.$user['username'].'<br>';
+        $user = new User($user['username'], $user['password']);
+        $em->persist($user);
     }
     $em->flush();
 }

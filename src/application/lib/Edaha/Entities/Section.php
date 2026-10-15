@@ -1,14 +1,10 @@
 <?php
+
 namespace Edaha\Entities;
 
-use Edaha\Entities\Board;
-
-use DateTime;
-
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'sections')]
@@ -30,8 +26,8 @@ class Section
     public bool $is_hidden;
 
     #[ORM\Column]
-    public DateTime $created_at;
-    
+    public \DateTime $created_at;
+
     #[ORM\OneToMany(targetEntity: Board::class, mappedBy: 'section', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'section_id', referencedColumnName: 'id')]
     public Collection $boards;
@@ -40,7 +36,7 @@ class Section
     {
         $this->name = $name;
         $this->is_hidden = $hidden;
-        $this->created_at = new DateTime();
+        $this->created_at = new \DateTime();
         $this->boards = new ArrayCollection();
     }
 

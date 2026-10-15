@@ -10,7 +10,7 @@ Thank you for your interest in contributing to Edaha! We welcome contributions f
 ## Development Guidelines
 
 - **Coding Standards:**  
-  Follow [PSR-12](https://www.php-fig.org/psr/psr-12/) for PHP code. Please declare return types on methods where possible.
+  The repo is set up to use pre-commit for a shared coding standard.
 
 - **Testing:**  
   All new code must include tests, and these tests must pass before your pull request will be considered.  
@@ -21,7 +21,7 @@ Thank you for your interest in contributing to Edaha! We welcome contributions f
   Or use the helper scripts `test.sh` and `test_from_scratch.sh`.
 
 - **Branching:**  
-  There is no strict branching model. Please fork the repository and submit your pull request from your fork.
+  Please fork the repository and submit your pull request from your fork. Target the `develop` branch.
 
 - **Pull Requests:**  
   - Reference the related issue(s) in your pull request description.

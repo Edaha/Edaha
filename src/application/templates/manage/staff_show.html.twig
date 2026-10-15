@@ -5,17 +5,17 @@
 {% block heading %}{% trans "Manage Staff" %}{% endblock %}
 
 {% block managecontent %}
-<form action="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=show&amp;act={% if _get.act == 'edit' %}edit&amp;id={{user.user_id}}{% else %}add{% endif %}" method="post">
-  {% if _get.act == 'edit' %}{% set formname = "Edit user" %}{% else %}{% set formname = "Add new user" %}{% endif %}
+<form action="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=show&amp;act={% if act == 'edit' %}edit&amp;id={{user.user_id}}{% else %}add{% endif %}" method="post">
+  {% if act == 'edit' %}{% set formname = "Edit user" %}{% else %}{% set formname = "Add new user" %}{% endif %}
   {{ macros.manageform("staff_add", formname, true,
                        { 'Username'            : { 'id' : 'username', 'type' : 'text',  'value' : user.user_name } ,
                          'Password'            : { 'id' : 'pwd1', 'type' : 'password', 'value' : user.user_password } ,
                          'Reenter Password'    : { 'id' : 'pwd2', 'type' : 'password', 'value' : user.user_password } ,
                          'Type'                : { 'id' : 'type', 'type' : 'select',  'value' : 
                           { 
-                            'Administrator' : { 'value' : 1, 'selected' : (_get.act == 'edit' and user.user_type == 1) } ,
-                            'Moderator'     : { 'value' : 2, 'selected' : (_get.act == 'edit' and user.user_type == 2) } ,
-                            'Janitor'       : { 'value' : 3, 'selected' : (_get.act == 'edit' and user.user_type == 3) } ,
+                            'Administrator' : { 'value' : 1, 'selected' : (act == 'edit' and user.user_type == 1) } ,
+                            'Moderator'     : { 'value' : 2, 'selected' : (act == 'edit' and user.user_type == 2) } ,
+                            'Janitor'       : { 'value' : 3, 'selected' : (act == 'edit' and user.user_type == 3) } ,
                           } } 
                        }
                       ) 

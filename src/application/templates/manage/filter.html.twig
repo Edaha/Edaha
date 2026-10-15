@@ -5,7 +5,7 @@
 {% block heading %}{% trans "Filters" %}{% endblock %}
 
 {% block managecontent %}
-  <form action="{{ base_url }}app=board&amp;module=filter&amp;section=filter&amp;do={% if _get.do == 'edit' %}edit-post&amp;id={{ edit_filter.filter_id }}{% else %}add{% endif %}" method="post">
+  <form action="{{ base_url }}app=board&amp;module=filter&amp;section=filter&amp;do={% if do == 'edit' %}edit-post&amp;id={{ edit_filter.filter_id }}{% else %}add{% endif %}" method="post">
     <fieldset id="bans">
       <legend>{% trans "Filters" %}</legend>
       

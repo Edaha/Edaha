@@ -1,11 +1,10 @@
 <?php
+
 namespace Edaha\Entities;
 
-use DateTime;
-
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BanRepository::class)]
 #[ORM\Table(name: 'bans')]
@@ -43,6 +42,7 @@ class Ban
             if (!isset($this->boards)) {
                 $this->boards = new ArrayCollection();
             }
+
             return $this->boards;
         }
     }
@@ -65,14 +65,14 @@ class Ban
     }
 
     #[ORM\Column]
-    public DateTime $created_at {
+    public \DateTime $created_at {
         get {
             return $this->created_at;
         }
     }
 
     #[ORM\Column]
-    public ?DateTime $expires_at {
+    public ?\DateTime $expires_at {
         get {
             return $this->expires_at;
         }
@@ -83,7 +83,7 @@ class Ban
 
     public bool $is_expired {
         get {
-            return $this->expires_at !== null && $this->expires_at < new DateTime();
+            return null !== $this->expires_at && $this->expires_at < new \DateTime();
         }
     }
 
@@ -113,7 +113,7 @@ class Ban
     public function __construct(
         string $ip,
         string $reason,
-        ?DateTime $expires_at = null,
+        ?\DateTime $expires_at = null,
         ?string $staff_note = null,
         ?bool $allow_read = true,
         ?bool $allow_appeal = true,
@@ -125,14 +125,14 @@ class Ban
 
         $this->allow_read = $allow_read;
         $this->allow_appeal = $allow_appeal;
-        
-        $this->created_at = new DateTime();
+
+        $this->created_at = new \DateTime();
         $this->boards = new ArrayCollection();
     }
 
     public function expire(): void
     {
-        $this->expires_at = new DateTime();
+        $this->expires_at = new \DateTime();
     }
 
     public function addBoard(Board $board): void
@@ -179,27 +179,28 @@ class Ban
         }
     }
 
-    public static function banIp(string $ip, string $reason, ?DateTime $expires_at = null, ?string $staff_note = null): Ban
+    public static function banIp(string $ip, string $reason, ?\DateTime $expires_at = null, ?string $staff_note = null): Ban
     {
         return new Ban($ip, $reason, $expires_at, $staff_note);
     }
 
-    public static function banIpGlobally(string $ip, string $reason, ?DateTime $expires_at = null, ?string $staff_note = null): Ban
+    public static function banIpGlobally(string $ip, string $reason, ?\DateTime $expires_at = null, ?string $staff_note = null): Ban
     {
         $ban = new Ban($ip, $reason, $expires_at, $staff_note);
         $ban->banGlobally();
+
         return $ban;
     }
 }
 
 #[ORM\Embeddable]
-class BanAppeal 
+class BanAppeal
 {
     #[ORM\Column(nullable: true)]
     public ?string $message = null;
 
     #[ORM\Column]
-    public DateTime $submitted_at;
+    public \DateTime $submitted_at;
 
     #[ORM\Column]
     public bool $is_approved = false {
@@ -212,6 +213,6 @@ class BanAppeal
         string $message,
     ) {
         $this->message = $message;
-        $this->submitted_at = new DateTime();
+        $this->submitted_at = new \DateTime();
     }
 }

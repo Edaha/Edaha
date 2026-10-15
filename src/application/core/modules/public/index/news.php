@@ -1,7 +1,12 @@
 <?php
+
 use Edaha\Entities\Board;
-use Edaha\Entities\Section;
 use Edaha\Entities\Post;
+use Edaha\Entities\Section;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxTemplate;
+
 /*
  * Section for building the news page
  * Last Updated: $Date$
@@ -15,46 +20,54 @@ use Edaha\Entities\Post;
  *
  */
 
-if (! defined('KUSABA_RUNNING')) {
-    print "<h1>Access denied</h1>You cannot access this file directly.";
-    die();
+if (!defined('KUSABA_RUNNING')) {
+    echo '<h1>Access denied</h1>You cannot access this file directly.';
+
+    exit;
 }
 
 class public_core_index_news extends kxCmd
 {
-
     /**
-     * Arguments eventually being sent to twig
+     * Arguments eventually being sent to twig.
      *
-     * @var Array()
+     * @var array()
      */
     protected $twigData;
 
     public function exec(kxEnv $environment)
     {
-        if (isset($this->request['view'])) {
-            switch ($this->request['view']) {
+        $this->twigData['view'] = $this->request->get('view');
+        $this->twigData['page'] = $this->request->get('page');
+        $this->twigData['p'] = $this->request->get('p');
+        if ('' != $this->request->get('view')) {
+            switch ($this->request->get('view')) {
                 case 'faq':
                     $type = 1;
+
                     break;
+
                 case 'rules':
                     $type = 2;
+
                     break;
             }
         } else {
-            $this->request['view'] = 'news';
-            $type                  = 0;
+            // $this->request->get('view') = 'news';
+            $type = 0;
         }
-        $this->twigData['styles'] = explode(':', kxEnv::Get('kx:css:sitestyles'));
-        
+        $this->twigData['styles'] = explode(':', $this->environment->get('kx:css:sitestyles'));
+
         $front_board = $this->entityManager->getRepository(Board::class)
-            ->findOneBy(['directory' => 'frontpage_' . $this->request['view']]);
+            ->findOneBy(['directory' => 'frontpage_'.$this->request->get('view')])
+        ;
         if (!$front_board) {
-            die();
+            exit;
         }
 
         $posts = $this->entityManager->getRepository(Post::class)
-            ->getBoardAllThreads($front_board->id);
+            ->getBoardAllThreads($front_board->id)
+        ;
         $this->twigData['entries'] = $posts;
         // TODO Order posts depending on the board
         // TODO Paginate
@@ -64,7 +77,8 @@ class public_core_index_news extends kxCmd
         // Get all visible sections
         // TODO Section order
         $sections = $this->entityManager->getRepository(Section::class)
-            ->findBy(['is_hidden' => false]);
+            ->findBy(['is_hidden' => false])
+        ;
         if (!$sections) {
             $sections = [];
         }
@@ -72,7 +86,8 @@ class public_core_index_news extends kxCmd
 
         // Get recent posts
         $recentposts = $this->entityManager->getRepository(Post::class)
-            ->getAllRecentPosts(6);
+            ->getAllRecentPosts(6)
+        ;
         if (!$recentposts) {
             $recentposts = [];
         }
@@ -82,6 +97,6 @@ class public_core_index_news extends kxCmd
         $images = [];
         $this->twigData['recentimages'] = $images;
 
-        kxTemplate::output("index", $this->twigData);
+        kxTemplate::output('index', $this->twigData);
     }
 }

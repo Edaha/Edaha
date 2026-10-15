@@ -1,16 +1,11 @@
 <?php
+
 namespace Edaha\Entities;
 
-use Edaha\Entities\PostAttachment;
-use Edaha\Entities\Board;
-use Edaha\Entities\PostRepository;
-
-use DateTime;
-
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ORM\Table(name: 'posts')]
@@ -47,7 +42,7 @@ class Post
     }
 
     #[ORM\Column]
-    public ?string $message = null  {
+    public ?string $message = null {
         get {
             return $this->message;
         }
@@ -57,14 +52,14 @@ class Post
     }
 
     #[ORM\Column]
-    public ?DateTime $created_at {
+    public ?\DateTime $created_at {
         get {
             return $this->created_at;
         }
     }
 
     #[ORM\Column(nullable: true)]
-    public ?DateTime $locked_at = null {
+    public ?\DateTime $locked_at = null {
         get {
             return $this->locked_at;
         }
@@ -80,7 +75,7 @@ class Post
     }
 
     #[ORM\Column(nullable: true)]
-    public ?DateTime $stickied_at = null {
+    public ?\DateTime $stickied_at = null {
         get {
             return $this->stickied_at;
         }
@@ -105,17 +100,17 @@ class Post
 
     public bool $is_thread {
         get {
-            return $this->parent === null;
+            return null === $this->parent;
         }
     }
     public bool $is_reply {
         get {
-            return $this->parent !== null;
+            return null !== $this->parent;
         }
     }
 
     #[ORM\Column(nullable: true)]
-    public ?DateTime $bumped_at = null {
+    public ?\DateTime $bumped_at = null {
         get {
             return $this->bumped_at;
         }
@@ -134,7 +129,7 @@ class Post
     #[ORM\Column(nullable: true)]
     public ?string $deletion_password = null {
         set {
-            if($value === null || $value === '') {
+            if (null === $value || '' === $value) {
                 $this->deletion_password = null;
             } else {
                 $this->deletion_password = password_hash($value, PASSWORD_DEFAULT);
@@ -149,7 +144,7 @@ class Post
         $this->subject = $subject;
         $this->parent = $parent;
 
-        $this->created_at = new DateTime('now');
+        $this->created_at = new \DateTime('now');
         $this->poster = new Poster();
         $this->replies = new ArrayCollection();
         $this->attachments = new ArrayCollection();
@@ -167,13 +162,14 @@ class Post
     {
         if ($this->is_locked) {
             throw new \Exception('Cannot add reply to a locked post');
-        } elseif (!is_null($this->parent)) {
-            throw new \Exception('Cannot add reply to a reply post');
-        } elseif ($this->replies->contains($reply)) {
-            throw new \Exception('Reply already exists');
-        } else {
-            $this->replies[] = $reply;
         }
+        if (!is_null($this->parent)) {
+            throw new \Exception('Cannot add reply to a reply post');
+        }
+        if ($this->replies->contains($reply)) {
+            throw new \Exception('Reply already exists');
+        }
+        $this->replies[] = $reply;
     }
 
     public function addAttachment(PostAttachment $attachment): void
@@ -191,20 +187,21 @@ class Post
         return $this->replies;
     }
 
-    public function getFirstNReplies(int $n): Array
+    public function getFirstNReplies(int $n): array
     {
         return $this->replies->slice(0, $n);
     }
 
-    public function getLastNReplies(int $n): Array
+    public function getLastNReplies(int $n): array
     {
         $criteria = Criteria::create()
             ->orderBy(['created_at' => 'DESC'])
-            ->setMaxResults($n);
+            ->setMaxResults($n)
+        ;
         $lastReplies = $this->replies->matching($criteria);
         $lastReplies = $lastReplies->toArray();
-        $lastReplies = array_reverse($lastReplies);
-        return $lastReplies;
+
+        return array_reverse($lastReplies);
     }
 
     public function sticky(): void
@@ -215,7 +212,7 @@ class Post
         if ($this->is_reply) {
             throw new \Exception('Cannot sticky a reply post'); // TODO: But what if we could?
         }
-        $this->stickied_at = new DateTime('now');
+        $this->stickied_at = new \DateTime('now');
     }
 
     public function unsticky(): void
@@ -234,7 +231,7 @@ class Post
         if ($this->is_reply) {
             throw new \Exception('Cannot lock a reply post');
         }
-        $this->locked_at = new DateTime('now');
+        $this->locked_at = new \DateTime('now');
     }
 
     public function unlock(): void
@@ -253,16 +250,16 @@ class Post
         if ($this->is_locked) {
             throw new \Exception('Cannot bump a locked post');
         }
-        $this->bumped_at = new DateTime('now');
+        $this->bumped_at = new \DateTime('now');
     }
 
     public function getPosterDisplayName(): string
     {
-        if ($this->poster->name === null || $this->poster->name === '' || $this->board->forced_anonymous) {
+        if (null === $this->poster->name || '' === $this->poster->name || $this->board->forced_anonymous) {
             return (isset($this->board->anonymous)) ? $this->board->anonymous : 'Anonymous';
-        } else {
-            return $this->poster->name;
         }
+
+        return $this->poster->name;
     }
 
     public function delete(): void
@@ -277,7 +274,7 @@ class Post
 }
 
 #[ORM\Embeddable]
-class Poster 
+class Poster
 {
     #[ORM\Column(nullable: true)]
     public ?string $name = null;
@@ -287,7 +284,7 @@ class Poster
 
     #[ORM\Column(nullable: true)]
     public ?string $email = null;
-    
+
     #[ORM\Column]
     public string $ip = '127.0.0.1';
 }

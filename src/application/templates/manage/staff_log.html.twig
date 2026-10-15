@@ -5,7 +5,7 @@
 {% block managecontent %}
 
 <table class="log">
-  <caption>{% trans "Recent moderator actions" %}{% if _get.view %} <a href="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=log">[Return]</a>{%endif%}</caption>
+  <caption>{% trans "Recent moderator actions" %}{% if view %} <a href="{{ base_url }}app=core&amp;module=staff&amp;section=staff&amp;do=log">[Return]</a>{%endif%}</caption>
   <col class="col1" /><col class="col2" /><col class="col3" />
   <thead>
     <tr>
@@ -26,7 +26,7 @@
 </table>
 <br />
 
-{% if not _get.view %}
+{% if not view %}
 <table class="log">
   <col class="col1" /><col class="col2" /><col class="col3" />
   <thead>

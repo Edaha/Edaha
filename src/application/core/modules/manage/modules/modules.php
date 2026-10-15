@@ -1,16 +1,20 @@
 <?php
+
 /**
- * Edaha - Module Management
+ * Edaha - Module Management.
  */
 
 use Edaha\Entities\Module;
+use kx\kxCmd\kxCmd;
+use kx\kxEnv;
+use kx\kxTemplate;
 
 class manage_core_modules_modules extends kxCmd
 {
     /**
-     * Arguments eventually being sent to twig
+     * Arguments eventually being sent to twig.
      *
-     * @var Array()
+     * @var array()
      */
     protected $twigData;
 
@@ -21,13 +25,16 @@ class manage_core_modules_modules extends kxCmd
         switch ($this->request['action']) {
             case 'add':
                 $this->_add();
+
                 break;
+
             case 'del':
                 $this->_del();
+
                 break;
         }
-        
-        kxTemplate::output("manage/modules", $this->twigData);
+
+        kxTemplate::output('manage/modules', $this->twigData);
     }
 
     protected function _add()

@@ -1,6 +1,6 @@
 <?php
+
 namespace Edaha\Entities;
-use Edaha\Entities\Board;
 
 use Doctrine\ORM\Mapping as ORM;
 

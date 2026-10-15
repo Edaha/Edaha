@@ -1,18 +1,18 @@
 {
     "require-dev": {
-        "phpunit/phpunit": "^9.6",
-        "friendsofphp/php-cs-fixer": "^3.95"
+        "phpunit/phpunit": "^9.6.38",
+        "friendsofphp/php-cs-fixer": "^3.95.27"
     },
     "require": {
         "ext-gettext": "*",
-        "twig/twig": "^3.0",
-        "jblond/twig-trans": "^1.1",
-        "twig/string-extra": "^3.19",
-        "james-heinrich/getid3": "^1.9",
+        "twig/twig": "^3.30",
+        "jblond/twig-trans": "^1.2.1",
+        "twig/string-extra": "^3.24",
+        "james-heinrich/getid3": "^1.9.27",
         "mustangostang/spyc": "^0.6.3",
-        "doctrine/orm": "^3",
-        "doctrine/dbal": "^4",
-        "symfony/cache": "^7"
+        "doctrine/orm": "^3.7.5",
+        "doctrine/dbal": "^4.5",
+        "symfony/cache": "^7.4.21"
     },
 
     "autoload": {
@@ -23,7 +23,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.4.0"
+            "php": "8.5.0"
         }
     }
 }
